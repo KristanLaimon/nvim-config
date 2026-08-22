@@ -272,7 +272,7 @@ function M.setup()
 
 	local group = vim.api.nvim_create_augroup("KRSPinnedTabsAuto", { clear = true })
 
-	vim.api.nvim_create_autocmd({ "VimEnter", "DirChanged", "BufReadPost" }, {
+	vim.api.nvim_create_autocmd({ "VimEnter", "DirChanged" }, {
 		group = group,
 		callback = function()
 			vim.schedule(M.restore_pins)

@@ -342,6 +342,8 @@ local function collect_entries()
 	return entries_by_buf
 end
 
+local _saved_cache = {}
+
 --- Writes every breakpoint of the project to disk.
 --- @param root string|nil Project root.
 function M.save_breakpoints(root)
@@ -369,16 +371,22 @@ function M.save_breakpoints(root)
 	end
 
 	store.save(filepath, data)
+	_saved_cache[root] = data.breakpoints
 end
 
 --- Reads the saved breakpoint map for a project.
 --- @param root string Project root.
 --- @return table|nil breakpoints Keyed by stored path, or nil when absent/invalid.
 local function read_saved(root)
+	if _saved_cache[root] ~= nil then
+		return _saved_cache[root]
+	end
 	local data = store.load(M.get_breakpoints_filepath(root), nil)
 	if type(data) ~= "table" or type(data.breakpoints) ~= "table" then
+		_saved_cache[root] = nil
 		return nil
 	end
+	_saved_cache[root] = data.breakpoints
 	return data.breakpoints
 end
 

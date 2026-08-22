@@ -50,11 +50,19 @@ local function strip_json_comments(content)
 	return content
 end
 
+local _settings_cache = {}
+
 --- Resolves the settings.json file for a given project root.
 --- @param root string|nil
+--- @param force_reload boolean|nil
 --- @return string|nil filepath, table|nil decoded_json
-function M.load_settings(root)
+function M.load_settings(root, force_reload)
 	root = path.normalize(root or project.root())
+	if not force_reload and _settings_cache[root] ~= nil then
+		local cached = _settings_cache[root]
+		return cached.filepath, cached.settings
+	end
+
 	for _, rel_path in ipairs(M.settings.config_files) do
 		local full_path = path.join(root, rel_path)
 		if path.is_file(full_path) then
@@ -65,11 +73,13 @@ function M.load_settings(root)
 				local clean = strip_json_comments(raw)
 				local ok, decoded = pcall(vim.json.decode, clean)
 				if ok and type(decoded) == "table" then
+					_settings_cache[root] = { filepath = full_path, settings = decoded }
 					return full_path, decoded
 				end
 			end
 		end
 	end
+	_settings_cache[root] = { filepath = nil, settings = nil }
 	return nil, nil
 end
 

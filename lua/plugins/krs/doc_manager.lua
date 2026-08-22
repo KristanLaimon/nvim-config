@@ -49,7 +49,8 @@ end
 --- @param items any[] Arbitrary entries (strings, tables, whatever `display` handles).
 --- @param display fun(item: any): string Label shown per entry.
 --- @param on_select fun(item: any) Called with the chosen entry.
-local function pick(prompt_title, items, display, on_select)
+--- @param default_index integer|nil Row to pre-select (Telescope only), 1-based.
+local function pick(prompt_title, items, display, on_select, default_index)
 	if #items == 0 then
 		return
 	end
@@ -78,6 +79,7 @@ local function pick(prompt_title, items, display, on_select)
 	pickers
 		.new({}, {
 			prompt_title = prompt_title,
+			default_selection_index = default_index,
 			finder = finders.new_table({
 				results = items,
 				entry_maker = function(item)
@@ -239,8 +241,35 @@ function M.view_docs(lang, version)
 			cwd = target_dir,
 		})
 	else
-		vim.cmd("Neotree " .. vim.fn.fnameescape(target_dir))
+		vim.cmd("Neotree show dir=" .. vim.fn.fnameescape(target_dir))
 	end
+end
+
+--- Command palette entry: pick a downloaded language/lib, then browse its docs.
+--- Current buffer's filetype is pre-selected when it matches a downloaded doc
+--- set; no default row when it doesn't (e.g. Neo-tree, an empty buffer).
+function M.pick_open_docs()
+	local langs = M.list_languages()
+	if #langs == 0 then
+		notify("No offline docs downloaded yet. Use :KrsDocDownload first.", vim.log.levels.WARN)
+		return
+	end
+	table.sort(langs)
+
+	local ft = (vim.bo.filetype or ""):lower()
+	local default_index = nil
+	for i, lang in ipairs(langs) do
+		if lang:lower() == ft then
+			default_index = i
+			break
+		end
+	end
+
+	pick("📚 Open Downloaded Docs", langs, function(lang)
+		return "📘 " .. lang
+	end, function(lang)
+		M.view_docs(lang)
+	end, default_index)
 end
 
 --- Creates a new offline doc file for a language, version, and topic.
@@ -406,9 +435,11 @@ function M.download(slug, callback)
 				while done < limit do
 					done = done + 1
 					local entry = page_list[done]
-					local fname = entry.path:gsub("[^%w_%-]", "_")
-					if fname == "" then fname = "index" end
-					local f = io.open(target_dir .. "/" .. fname .. ".html", "w")
+					local rel = entry.path:gsub("[^%w_%-/%.]", "_")
+					if rel == "" then rel = "index" end
+					local fpath = target_dir .. "/" .. rel .. ".html"
+					vim.fn.mkdir(vim.fn.fnamemodify(fpath, ":h"), "p")
+					local f = io.open(fpath, "w")
 					if f then f:write(entry.html); f:close() end
 				end
 
@@ -432,6 +463,60 @@ function M.download(slug, callback)
 			vim.schedule(write_chunk)
 		end)
 	end)
+end
+
+-- ============================================================================
+-- HTML RENDER -- show downloaded HTML docs as readable markdown in the buffer
+-- ============================================================================
+
+--- Converts a devdocs HTML page into rough markdown, good enough for
+--- render-markdown.nvim to display headings/lists/code/links legibly.
+--- @param html string
+--- @return string[] lines
+local function html_to_md(html)
+	local text = html
+	text = text:gsub("<[Ss][Cc][Rr][Ii][Pp][Tt].->.-</[Ss][Cc][Rr][Ii][Pp][Tt]>", "")
+	text = text:gsub("<[Ss][Tt][Yy][Ll][Ee].->.-</[Ss][Tt][Yy][Ll][Ee]>", "")
+	text = text:gsub("<[Bb][Rr]%s*/?>", "\n")
+	text = text:gsub("<[Hh]([1-6])[^>]*>", function(n) return "\n" .. string.rep("#", tonumber(n) or 1) .. " " end)
+	text = text:gsub("</[Hh][1-6]>", "\n")
+	text = text:gsub("<[Ll][Ii][^>]*>", "\n- ")
+	text = text:gsub("<[Pp][^>]*>", "\n")
+	text = text:gsub("</[Pp]>", "\n")
+	text = text:gsub("<[Dd][Ii][Vv][^>]*>", "\n")
+	text = text:gsub("<[Pp][Rr][Ee][^>]*>", "\n```\n")
+	text = text:gsub("</[Pp][Rr][Ee]>", "\n```\n")
+	text = text:gsub("<[Cc][Oo][Dd][Ee][^>]*>", "`")
+	text = text:gsub("</[Cc][Oo][Dd][Ee]>", "`")
+	text = text:gsub("<[Ss][Tt][Rr][Oo][Nn][Gg][^>]*>", "**"):gsub("</[Ss][Tt][Rr][Oo][Nn][Gg]>", "**")
+	text = text:gsub("<[Bb][^>]*>", "**"):gsub("</[Bb]>", "**")
+	text = text:gsub("<[Ee][Mm][^>]*>", "*"):gsub("</[Ee][Mm]>", "*")
+	text = text:gsub("<[Ii][^>]*>", "*"):gsub("</[Ii]>", "*")
+	text = text:gsub('<[Aa]%s+[^>]-href="(.-)"[^>]*>(.-)</[Aa]>', "[%2](%1)")
+	text = text:gsub("<[^>]+>", "")
+	text = text
+		:gsub("&lt;", "<")
+		:gsub("&gt;", ">")
+		:gsub("&quot;", '"')
+		:gsub("&#39;", "'")
+		:gsub("&nbsp;", " ")
+		:gsub("&amp;", "&")
+	text = text:gsub("\n[ \t]+", "\n"):gsub("\n\n\n+", "\n\n")
+
+	return vim.split(vim.trim(text), "\n")
+end
+
+--- Renders the downloaded-HTML doc buffer as markdown (read-only) so
+--- render-markdown.nvim can display it legibly instead of raw tags.
+local function render_html_buffer(bufnr)
+	local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+	local md = html_to_md(table.concat(lines, "\n"))
+	vim.bo[bufnr].modifiable = true
+	vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, md)
+	vim.bo[bufnr].filetype = "markdown"
+	vim.bo[bufnr].modified = false
+	vim.bo[bufnr].readonly = true
+	vim.bo[bufnr].modifiable = false
 end
 
 --- Fetches the devdocs.io catalog and lets the user pick a doc set to download.
@@ -464,7 +549,7 @@ function M.open_manager()
 		{
 			label = "📂 Open Offline Docs Root Folder in Explorer",
 			action = function()
-				vim.cmd("Neotree " .. vim.fn.fnameescape(M.ensure_dir()))
+				vim.cmd("Neotree show dir=" .. vim.fn.fnameescape(M.ensure_dir()))
 			end,
 		},
 	}
@@ -486,6 +571,10 @@ function M.setup()
 		M.open_manager()
 	end, { desc = "Open KRS Offline Doc Manager" })
 
+	vim.api.nvim_create_user_command("KrsDocOpen", function()
+		M.pick_open_docs()
+	end, { desc = "Open downloaded docs (current buffer's language pre-selected)" })
+
 	vim.api.nvim_create_user_command("KrsDocSearch", function(opts)
 		M.search_docs(opts.args ~= "" and opts.args or nil)
 	end, { nargs = "?", desc = "Search offline documentation" })
@@ -499,6 +588,16 @@ function M.setup()
 		local args = vim.split(opts.args, "%s+", { trimempty = true })
 		M.add_doc(args[1], args[2], args[3])
 	end, { nargs = "*", desc = "Add new offline doc topic" })
+
+	vim.api.nvim_create_autocmd("BufReadPost", {
+		pattern = M.settings.docs_dir .. "/*/*/**",
+		callback = function(ev)
+			if ev.file:match("%.html?$") then
+				render_html_buffer(ev.buf)
+			end
+		end,
+		desc = "Render offline HTML docs as markdown",
+	})
 
 	vim.api.nvim_create_user_command("KrsDocDownload", function(opts)
 		if opts.args ~= "" then

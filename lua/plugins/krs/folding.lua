@@ -253,6 +253,7 @@ function M.apply_fold_options(bufnr)
 
 	vim.wo.foldmethod = "expr"
 	vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+	vim.wo.foldlevel = 99
 	vim.wo.foldenable = true
 	vim.wo.foldcolumn = "1"
 end

@@ -111,6 +111,7 @@ M.commands = {
 	{ name = "➕ Add New Snippet Interactively", cmd = "KrsSnippetAdd", category = "Snippets" },
 	{ name = "🔄 Reload Snippets in Completion Engine", cmd = "KrsSnippetReload", category = "Snippets" },
 	{ name = "📚 Open Offline Documentation Store", cmd = "KrsDocManager", category = "Documentation" },
+	{ name = "📘 Open Downloaded Docs (language picker)", cmd = "KrsDocOpen", category = "Documentation" },
 	{ name = "🔍 Fuzzy Search Offline Language Documentation", cmd = "KrsDocSearch", category = "Documentation" },
 	{ name = "⚙️ Open VSCode Settings Sync (.vscode/settings.json)", cmd = "KrsVSCodeSettings", category = "VSCode / Settings" },
 
@@ -121,6 +122,15 @@ M.commands = {
 	{ name = "🧹 Clear Blade & Laravel Caches (blade-nav)", cmd = "BladeNavClearCache", category = "PHP / Laravel" },
 	{ name = "👁️ Toggle Blade Inline Value Annotations", cmd = "BladeNavToggleShowValues", category = "PHP / Laravel" },
 	{ name = "📦 Install BladeNav Artisan Command", cmd = "BladeNavInstallArtisanCommand", category = "PHP / Laravel" },
+
+	-- --------------------------------------------------------------------------
+	-- 🐍 Python Environment & Interpreter
+	-- --------------------------------------------------------------------------
+	{
+		name = "🐍 Python: Select Interpreter (Virtualenv / Conda / System)",
+		cmd = "PythonSelectInterpreter",
+		category = "Python",
+	},
 
 	-- --------------------------------------------------------------------------
 	-- 🎨 Formatting & Line Endings

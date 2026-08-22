@@ -160,6 +160,36 @@ function M.fileformat_status()
 	return "⏎ " .. (map[fmt] or fmt:upper())
 end
 
+--- Formats active Python interpreter version & env for statusline when editing Python files or when Python LSP is active.
+--- @return string python_info
+function M.python_status()
+	local buf = vim.api.nvim_get_current_buf()
+	if not vim.api.nvim_buf_is_valid(buf) then
+		return ""
+	end
+	local ft = vim.bo[buf].filetype
+	local show = (ft == "python")
+	if not show then
+		local get_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
+		local clients = get_clients and get_clients({ bufnr = buf }) or {}
+		for _, c in ipairs(clients) do
+			if c.name == "basedpyright" or c.name == "pyright" or c.name == "ruff" then
+				show = true
+				break
+			end
+		end
+	end
+	if not show then
+		return ""
+	end
+
+	local ok, py = pcall(require, "krs.langs.python")
+	if ok and py.python_status then
+		return py.python_status()
+	end
+	return ""
+end
+
 --- Retrieves current statusline theme selection.
 --- @return string theme_name
 function M.get_current_theme()
@@ -201,12 +231,12 @@ function M.get_lualine_config(theme_name)
 				section_separators = { left = "", right = "" },
 			},
 			sections = {
-lualine_a = { { "mode", fmt = M.format_mode } },
-			lualine_b = { M.fileformat_status, { "branch", icon = "" }, common_diff, common_diagnostics },
-			lualine_c = { common_filename },
-			lualine_x = { M.lsp_status, "filetype" },
-			lualine_y = { "encoding", "fileformat" },
-			lualine_z = { { "location", icon = "" }, "progress" },
+				lualine_a = { { "mode", fmt = M.format_mode } },
+				lualine_b = { M.fileformat_status, { "branch", icon = "" }, common_diff, common_diagnostics },
+				lualine_c = { common_filename },
+				lualine_x = { M.python_status, M.lsp_status, "filetype" },
+				lualine_y = { "encoding", "fileformat" },
+				lualine_z = { { "location", icon = "" }, "progress" },
 			},
 		}
 	elseif theme_name == "nvchad_round" then
@@ -221,7 +251,7 @@ lualine_a = { { "mode", fmt = M.format_mode } },
 				lualine_a = { { "mode", fmt = M.format_mode } },
 				lualine_b = { M.fileformat_status, { "branch", icon = "" }, common_diff, common_diagnostics },
 				lualine_c = { common_filename },
-				lualine_x = { M.lsp_status, "filetype" },
+				lualine_x = { M.python_status, M.lsp_status, "filetype" },
 				lualine_y = { "encoding" },
 				lualine_z = { { "location", icon = "" }, "progress" },
 			},
@@ -238,7 +268,7 @@ lualine_a = { { "mode", fmt = M.format_mode } },
 				lualine_a = { "mode" },
 				lualine_b = { M.fileformat_status, { "branch", icon = "" }, common_diagnostics },
 				lualine_c = { common_filename },
-				lualine_x = { M.lsp_status, "filetype" },
+				lualine_x = { M.python_status, M.lsp_status, "filetype" },
 				lualine_y = { "progress" },
 				lualine_z = { "location" },
 			},
@@ -255,7 +285,7 @@ lualine_a = { { "mode", fmt = M.format_mode } },
 				lualine_a = { "mode" },
 				lualine_b = { M.fileformat_status, common_filename },
 				lualine_c = {},
-				lualine_x = { { "branch", icon = "" }, M.lsp_status },
+				lualine_x = { M.python_status, { "branch", icon = "" }, M.lsp_status },
 				lualine_y = { "filetype" },
 				lualine_z = { "location" },
 			},
@@ -277,6 +307,7 @@ lualine_a = { { "mode", fmt = M.format_mode } },
 							return "-- " .. str .. " --"
 						end,
 					},
+					M.python_status,
 					"encoding",
 					"fileformat",
 					"filetype",
@@ -299,7 +330,7 @@ lualine_a = { { "mode", fmt = M.format_mode } },
 			lualine_a = { { "mode", fmt = M.format_mode } },
 			lualine_b = { M.fileformat_status, { "branch", icon = "" }, common_diff, common_diagnostics },
 			lualine_c = { common_filename },
-			lualine_x = { M.lsp_status, "filetype" },
+			lualine_x = { M.python_status, M.lsp_status, "filetype" },
 			lualine_y = { "encoding" },
 			lualine_z = { { "location", icon = "" }, "progress" },
 		},

@@ -8,3 +8,5 @@ tests/krsnvimscript/output_tests
 json_out
 output_test
 output_tests
+
+*.log
