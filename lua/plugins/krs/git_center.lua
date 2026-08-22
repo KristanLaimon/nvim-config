@@ -2531,21 +2531,30 @@ function M.open_git_center()
 			return
 		end
 
+		local cur_target = get_active_target()
 		local args = { "commit", "-m", M.commit_data.title }
 		if M.commit_data.description ~= "" then
 			table.insert(args, "-m")
 			table.insert(args, M.commit_data.description)
 		end
 
-		notify("🚀 Commit executed:\n" .. table.concat(git_lines(args), "\n"))
-
-		if M.commit_data.tag ~= "" then
-			git_lines({ "tag", M.commit_data.tag })
-			notify("🏷️ Tag created: " .. M.commit_data.tag)
-		end
-
-		M.commit_data = { title = "", description = "", tag = "" }
-		refresh()
+		git.run(args, function(ok, output)
+			if ok then
+				notify("🚀 Commit successful:\n" .. (output ~= "" and output or "Commit created"), nil, M.settings.control_title)
+				if M.commit_data.tag ~= "" then
+					git_lines({ "tag", M.commit_data.tag })
+					notify("🏷️ Tag created: " .. M.commit_data.tag)
+				end
+				M.commit_data = { title = "", description = "", tag = "" }
+			else
+				notify(
+					"❌ Commit failed:\n" .. (output ~= "" and output or "Unknown error"),
+					vim.log.levels.ERROR,
+					M.settings.control_title
+				)
+			end
+			refresh()
+		end, cur_target.full_path)
 	end, key_opts)
 
 	vim.keymap.set("n", "d", function()
