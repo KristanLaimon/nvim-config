@@ -356,11 +356,9 @@ return {
 			local env_ok, env_mod = pcall(require, "krs.core.environment")
 			if env_ok then
 				local env = env_mod.detect()
-				-- proot Ubuntu = full Linux container, treat like desktop.
-				-- Only restrict to mobile mode on bare native Termux (Android, no proot).
-				is_mobile = (env.is_termux and not env.is_proot) or (env.is_mobile and not env.is_proot)
+				is_mobile = env.is_termux or env.is_proot or env.is_mobile
 			else
-				is_mobile = vim.env.TERMUX_VERSION ~= nil and vim.fn.isdirectory("/data/data/com.termux") == 1
+				is_mobile = vim.env.TERMUX_VERSION ~= nil or vim.fn.isdirectory("/data/data/com.termux") == 1
 			end
 
 			return {
