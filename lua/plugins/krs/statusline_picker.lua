@@ -99,6 +99,7 @@ function M.get_term_title(str)
 	if str then
 		local shell_path = str:match("//%d+:(.*)$") or str:match(".*:(.*)$")
 		if shell_path and shell_path ~= "" then
+			shell_path = shell_path:gsub("\\", "/")
 			local shell_name = vim.fn.fnamemodify(shell_path, ":t"):gsub("%.[eE][xX][eE]$", "")
 			if shell_name ~= "" then
 				return shell_name
