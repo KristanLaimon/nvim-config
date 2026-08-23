@@ -135,6 +135,7 @@ local settings = {
 		unix = function()
 			local home = vim.fn.expand("~")
 			return {
+				"/data/data/com.termux/files/usr/bin",
 				"/opt/homebrew/bin",
 				"/usr/local/bin",
 				home .. "/.local/share/fnm/current/bin",
@@ -177,6 +178,92 @@ for filetype, language in pairs(settings.syntax_aliases) do
 		end,
 	})
 end
+
+-- ============================================================================
+-- CLIPBOARD PROVIDER SETUP
+-- ============================================================================
+
+--- Configures a fallback clipboard provider (OSC 52 + Termux API) for environments
+--- where X11/Wayland display servers are missing or broken (Termux, Ubuntu PRoot, SSH, headless).
+local function setup_clipboard_provider()
+	if vim.g.clipboard ~= nil then
+		return
+	end
+
+	local env_ok, env_mod = pcall(require, "krs.core.environment")
+	local env = env_ok and env_mod.detect() or {}
+	local is_termux_or_proot = env.is_termux or env.is_proot or env.is_mobile
+	local no_display = (vim.env.DISPLAY == nil or vim.env.DISPLAY == "")
+		and (vim.env.WAYLAND_DISPLAY == nil or vim.env.WAYLAND_DISPLAY == "")
+
+	if is_termux_or_proot or no_display then
+		local osc52_ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
+
+		local termux_set = vim.fn.executable("termux-clipboard-set") == 1 and "termux-clipboard-set"
+			or (
+				(vim.uv or vim.loop).fs_stat("/data/data/com.termux/files/usr/bin/termux-clipboard-set")
+				and "/data/data/com.termux/files/usr/bin/termux-clipboard-set"
+			)
+		local termux_get = vim.fn.executable("termux-clipboard-get") == 1 and "termux-clipboard-get"
+			or (
+				(vim.uv or vim.loop).fs_stat("/data/data/com.termux/files/usr/bin/termux-clipboard-get")
+				and "/data/data/com.termux/files/usr/bin/termux-clipboard-get"
+			)
+
+		local has_termux_set = termux_set ~= nil
+		local has_termux_get = termux_get ~= nil
+
+		vim.g.clipboard = {
+			name = "OSC 52 / Termux Clipboard",
+			copy = {
+				["+"] = function(lines, regtype)
+					if has_termux_set then
+						pcall(vim.fn.system, { termux_set }, table.concat(lines, "\n"))
+					end
+					if osc52_ok then
+						osc52.copy("+")(lines, regtype)
+					end
+				end,
+				["*"] = function(lines, regtype)
+					if has_termux_set then
+						pcall(vim.fn.system, { termux_set }, table.concat(lines, "\n"))
+					end
+					if osc52_ok then
+						osc52.copy("*")(lines, regtype)
+					end
+				end,
+			},
+			paste = {
+				["+"] = function()
+					if has_termux_get then
+						local out = vim.fn.systemlist({ termux_get })
+						if vim.v.shell_error == 0 and #out > 0 then
+							return out, vim.fn.getregtype("+")
+						end
+					end
+					if osc52_ok then
+						return osc52.paste("+")()
+					end
+					return {}, "v"
+				end,
+				["*"] = function()
+					if has_termux_get then
+						local out = vim.fn.systemlist({ termux_get })
+						if vim.v.shell_error == 0 and #out > 0 then
+							return out, vim.fn.getregtype("*")
+						end
+					end
+					if osc52_ok then
+						return osc52.paste("*")()
+					end
+					return {}, "v"
+				end,
+			},
+		}
+	end
+end
+
+setup_clipboard_provider()
 
 -- ============================================================================
 -- OPTIONS
