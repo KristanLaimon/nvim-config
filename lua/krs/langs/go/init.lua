@@ -10,6 +10,15 @@
 ---@type KrsLangModule
 local M = {}
 
+local env_ok, env_mod = pcall(require, "krs.core.environment")
+local is_low_resource = false
+if env_ok then
+	local env = env_mod.detect()
+	is_low_resource = env.is_termux or env.is_proot or env.is_mobile
+else
+	is_low_resource = vim.env.TERMUX_VERSION ~= nil or vim.fn.isdirectory("/data/data/com.termux") == 1
+end
+
 --- The lspconfig/mason server name(s) this language owns.
 M.lsp_server = { "gopls" }
 
@@ -17,19 +26,28 @@ M.lsp_server = { "gopls" }
 ---@type table<string, vim.lsp.Config>
 M.lsp_config = {
 	gopls = {
+		cmd_env = is_low_resource and { GOMEMLIMIT = "512MiB" } or nil,
 		settings = {
 			gopls = {
 				codelenses = {
 					gc_details = false,
-					generate = true,
-					regenerate_cgo = true,
-					run_govulncheck = true,
+					generate = not is_low_resource,
+					regenerate_cgo = not is_low_resource,
+					run_govulncheck = not is_low_resource,
 					test = true,
 					tidy = true,
-					upgrade_dependency = true,
+					upgrade_dependency = not is_low_resource,
 					vendor = true,
 				},
-				hints = {
+				hints = is_low_resource and {
+					assignVariableTypes = false,
+					compositeLiteralFields = false,
+					compositeLiteralTypes = false,
+					constantValues = false,
+					functionTypeParameters = false,
+					parameterNames = true,
+					rangeVariableTypes = false,
+				} or {
 					assignVariableTypes = true,
 					compositeLiteralFields = true,
 					compositeLiteralTypes = true,
@@ -40,9 +58,9 @@ M.lsp_config = {
 				},
 				analyses = {
 					unusedparams = true,
-					shadow = true,
+					shadow = not is_low_resource,
 				},
-				staticcheck = true,
+				staticcheck = not is_low_resource,
 				gofumpt = true,
 			},
 		},
@@ -71,7 +89,7 @@ M.bundle_extra_mason_pkgs = { "delve", "golangci-lint" }
 
 --- conform.nvim formatter list per filetype.
 M.formatters_by_ft = {
-	go = { "goimports", "gofumpt" },
+	go = is_low_resource and { "gofmt" } or { "goimports", "gofumpt" },
 }
 
 --- delve is installed via mason-nvim-dap (nvim-dap-go's own concern), not Mason
