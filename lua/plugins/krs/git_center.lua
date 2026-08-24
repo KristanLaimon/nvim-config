@@ -155,6 +155,9 @@ M.commit_data = { title = "", description = "", tag = "" }
 --- @param level integer|nil Defaults to INFO.
 --- @param title string|nil Defaults to `M.settings.notify_title`.
 local function notify(msg, level, title)
+	if type(msg) == "string" and #msg > 1000 then
+		msg = msg:sub(1, 1000) .. "\n... [Truncated for UI]"
+	end
 	vim.notify(msg, level or vim.log.levels.INFO, { title = title or M.settings.notify_title })
 end
 
@@ -172,6 +175,39 @@ local function get_active_target()
 		return { name = "Root", path = ".", is_root = true, full_path = root }
 	end
 	return M.submodules[M.active_submodule_idx] or M.submodules[1]
+end
+
+--- Runs git synchronously in the active repository target.
+--- @param args string[] Arguments after `git`.
+--- @param cwd string|nil
+--- @return string[] output
+local function git_lines(args, cwd)
+	local target = get_active_target()
+	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+	if target and target.is_secondary and target.repo_alias then
+		local sec_ok, sec = pcall(require, "krs.git.secondary")
+		if sec_ok and sec then
+			return sec.lines(target.repo_alias, args, cwd)
+		end
+	end
+	return git.lines(args, cwd)
+end
+
+--- Runs git asynchronously in the active repository target.
+--- @param args string[] Arguments after `git`.
+--- @param on_done function(ok, output)
+--- @param cwd string|nil
+local function git_run(args, on_done, cwd)
+	local target = get_active_target()
+	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+	if target and target.is_secondary and target.repo_alias then
+		local sec_ok, sec = pcall(require, "krs.git.secondary")
+		if sec_ok and sec then
+			sec.run(target.repo_alias, args, on_done, cwd)
+			return
+		end
+	end
+	git.run(args, on_done, cwd)
 end
 
 --- Loads settings from project `.krsnvim/git-center.json` with fallback to global store.
@@ -527,11 +563,27 @@ function M.stage_all_with_modal(cwd)
 		return
 	end
 
+	local target = get_active_target()
+	local args = { "add", "-A" }
+	if target and target.is_secondary then
+		args = { "add", "-u" }
+	end
+
 	local function execute(is_retry)
-		git.run({ "add", "-A" }, function(ok, output)
+		local run_fn = git.run
+		if target and target.is_secondary and target.repo_alias then
+			local sec_ok, sec = pcall(require, "krs.git.secondary")
+			if sec_ok and sec then
+				run_fn = function(cmd_args, cb, dir)
+					sec.run(target.repo_alias, cmd_args, cb, dir)
+				end
+			end
+		end
+
+		run_fn(args, function(ok, output)
 			if ok then
 				notify(
-					string.format("✅ Successfully staged %d file%s!", pending, pending == 1 and "" or "s"),
+					string.format("✅ Successfully staged %d file%s in %s!", pending, pending == 1 and "" or "s", target.name or "repository"),
 					vim.log.levels.INFO,
 					M.settings.control_title
 				)
@@ -2259,38 +2311,7 @@ function M.open_git_center()
 		return M.line_map[vim.api.nvim_win_get_cursor(M.main_win)[1]]
 	end
 
-	--- Runs git synchronously in the active repository target.
-	--- @param args string[] Arguments after `git`.
-	--- @param cwd string|nil
-	--- @return string[] output
-	local function git_lines(args, cwd)
-		local target = get_active_target()
-		cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
-		if target and target.is_secondary and target.repo_alias then
-			local sec_ok, sec = pcall(require, "krs.git.secondary")
-			if sec_ok and sec then
-				return sec.lines(target.repo_alias, args, cwd)
-			end
-		end
-		return git.lines(args, cwd)
-	end
 
-	--- Runs git asynchronously in the active repository target.
-	--- @param args string[] Arguments after `git`.
-	--- @param on_done function(ok, output)
-	--- @param cwd string|nil
-	local function git_run(args, on_done, cwd)
-		local target = get_active_target()
-		cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
-		if target and target.is_secondary and target.repo_alias then
-			local sec_ok, sec = pcall(require, "krs.git.secondary")
-			if sec_ok and sec then
-				sec.run(target.repo_alias, args, on_done, cwd)
-				return
-			end
-		end
-		git.run(args, on_done, cwd)
-	end
 
 	--- Unstaging changed spelling across git versions: `restore --staged` is the
 	--- modern form, `reset HEAD` the fallback for older ones, `rm --cached` for fresh repos without HEAD.
@@ -2550,9 +2571,14 @@ function M.open_git_center()
 	vim.keymap.set("n", "s", function()
 		local item = current_item()
 		if item and (item.type == "unstaged" or item.type == "untracked") then
-			git_lines({ "add", "--", item.file })
-			refresh()
-			notify("🟢 Staged: " .. item.file)
+			git_run({ "add", "--", item.file }, function(ok, output)
+				if not ok and output ~= "" then
+					notify("❌ Error staging " .. item.file .. ": " .. output, vim.log.levels.ERROR)
+				else
+					notify("🟢 Staged: " .. item.file)
+				end
+				refresh()
+			end)
 		elseif item and item.type == "staged" then
 			notify("File is already staged", vim.log.levels.WARN)
 		end
@@ -2566,9 +2592,19 @@ function M.open_git_center()
 		local cur_target = get_active_target()
 		local current = M.get_git_info(cur_target.full_path)
 		if current and (#current.unstaged > 0 or #current.untracked > 0) then
-			git_lines({ "add", "-A" })
-			refresh()
-			notify("🟢 Staged all files in " .. cur_target.name)
+			local args = { "add", "-A" }
+			if cur_target and cur_target.is_secondary then
+				args = { "add", "-u" }
+			end
+			git_run(args, function(ok, output)
+				if not ok and output ~= "" then
+					local out_str = #output > 500 and (output:sub(1, 500) .. "...\n[Truncated]") or output
+					notify("❌ Error staging files: " .. out_str, vim.log.levels.ERROR)
+				else
+					notify("🟢 Staged all tracked files in " .. cur_target.name)
+				end
+				refresh()
+			end)
 		else
 			notify("ℹ️ Nothing to stage: working tree is clean.", vim.log.levels.WARN)
 		end

@@ -266,19 +266,6 @@ function M.build_cmd_args(repo_or_alias, git_args, cwd)
 		vim.list_extend(parsed_args, git_args)
 	end
 
-	-- If subcommand is "add", insert "-f" so files ignored by the main repository's .gitignore can be added
-	if parsed_args[1] == "add" then
-		local has_force = false
-		for i = 2, #parsed_args do
-			if parsed_args[i] == "-f" or parsed_args[i] == "--force" then
-				has_force = true
-				break
-			end
-		end
-		if not has_force then
-			table.insert(parsed_args, 2, "-f")
-		end
-	end
 
 	vim.list_extend(prefix_args, parsed_args)
 	return git.build(prefix_args, cwd)
@@ -297,7 +284,7 @@ function M.lines(repo_or_alias, git_args, cwd)
 	end
 
 	local res = vim.system(argv, { text = true }):wait()
-	local output = ((res.stdout or "") .. (res.stderr or "")):gsub("%s+$", "")
+	local output = vim.trim((res.stdout or "") .. (res.stderr or ""))
 	if output == "" then
 		return {}
 	end
@@ -323,7 +310,7 @@ function M.run(repo_or_alias, git_args, on_done, cwd)
 		argv,
 		{ text = true },
 		vim.schedule_wrap(function(result)
-			local output = ((result.stderr or "") .. (result.stdout or "")):gsub("%s+$", "")
+			local output = vim.trim((result.stderr or "") .. (result.stdout or ""))
 			if result.code ~= 0 and (output:find("could not resolve HEAD") or output:find("ambiguous argument 'HEAD'")) then
 				local parsed = type(git_args) == "table" and vim.deepcopy(git_args) or vim.split(git_args, "%s+")
 				local is_unstage = (parsed[1] == "restore" and parsed[2] == "--staged") or (parsed[1] == "reset")
@@ -341,7 +328,7 @@ function M.run(repo_or_alias, git_args, on_done, cwd)
 					local fallback_argv = M.build_cmd_args(repo_or_alias, fallback_cmd, cwd)
 					if fallback_argv then
 						vim.system(fallback_argv, { text = true }, vim.schedule_wrap(function(res2)
-							local out2 = ((res2.stderr or "") .. (res2.stdout or "")):gsub("%s+$", "")
+							local out2 = vim.trim((res2.stderr or "") .. (res2.stdout or ""))
 							if on_done then
 								on_done(res2.code == 0, out2)
 							end
@@ -500,7 +487,7 @@ function M.generate_alias(repo, shell_type, cwd)
 
 	if shell_type == "ps1" then
 		return string.format(
-			'function %s { if ($args.Count -gt 0 -and $args[0] -eq "add") { git --git-dir="%s" --work-tree="%s" add -f $args[1..($args.Count-1)] } elseif ($args.Count -gt 1 -and $args[0] -eq "restore" -and $args[1] -eq "--staged") { $sub = if ($args.Count -gt 2) { $args[2..($args.Count-1)] } else { "." }; git --git-dir="%s" --work-tree="%s" restore --staged $sub 2>$null; if ($LASTEXITCODE -ne 0) { git --git-dir="%s" --work-tree="%s" rm --cached -r -- $sub } } elseif ($args.Count -gt 0 -and $args[0] -eq "reset") { $sub = if ($args.Count -gt 1) { $args[1..($args.Count-1)] } else { "." }; git --git-dir="%s" --work-tree="%s" reset $sub 2>$null; if ($LASTEXITCODE -ne 0) { git --git-dir="%s" --work-tree="%s" rm --cached -r -- $sub } } else { git --git-dir="%s" --work-tree="%s" $args } }',
+			'function %s { if ($args.Count -gt 0 -and $args[0] -eq "add") { git --git-dir="%s" --work-tree="%s" add $args[1..($args.Count-1)] } elseif ($args.Count -gt 1 -and $args[0] -eq "restore" -and $args[1] -eq "--staged") { $sub = if ($args.Count -gt 2) { $args[2..($args.Count-1)] } else { "." }; git --git-dir="%s" --work-tree="%s" restore --staged $sub 2>$null; if ($LASTEXITCODE -ne 0) { git --git-dir="%s" --work-tree="%s" rm --cached -r -- $sub } } elseif ($args.Count -gt 0 -and $args[0] -eq "reset") { $sub = if ($args.Count -gt 1) { $args[1..($args.Count-1)] } else { "." }; git --git-dir="%s" --work-tree="%s" reset $sub 2>$null; if ($LASTEXITCODE -ne 0) { git --git-dir="%s" --work-tree="%s" rm --cached -r -- $sub } } else { git --git-dir="%s" --work-tree="%s" $args } }',
 			alias_name,
 			resolved_git_dir,
 			resolved_work_tree,
@@ -517,7 +504,7 @@ function M.generate_alias(repo, shell_type, cwd)
 		)
 	else
 		return string.format(
-			'%s() { if [ "$1" = "add" ]; then shift; git --git-dir="%s" --work-tree="%s" add -f "$@"; elif [ "$1" = "restore" ] && [ "$2" = "--staged" ]; then shift 2; git --git-dir="%s" --work-tree="%s" restore --staged "$@" 2>/dev/null || git --git-dir="%s" --work-tree="%s" rm --cached -r -- "${@:-.}"; elif [ "$1" = "reset" ]; then shift; git --git-dir="%s" --work-tree="%s" reset "$@" 2>/dev/null || git --git-dir="%s" --work-tree="%s" rm --cached -r -- "${@:-.}"; else git --git-dir="%s" --work-tree="%s" "$@"; fi; }',
+			'%s() { if [ "$1" = "add" ]; then shift; git --git-dir="%s" --work-tree="%s" add "$@"; elif [ "$1" = "restore" ] && [ "$2" = "--staged" ]; then shift 2; git --git-dir="%s" --work-tree="%s" restore --staged "$@" 2>/dev/null || git --git-dir="%s" --work-tree="%s" rm --cached -r -- "${@:-.}"; elif [ "$1" = "reset" ]; then shift; git --git-dir="%s" --work-tree="%s" reset "$@" 2>/dev/null || git --git-dir="%s" --work-tree="%s" rm --cached -r -- "${@:-.}"; else git --git-dir="%s" --work-tree="%s" "$@"; fi; }',
 			alias_name,
 			resolved_git_dir,
 			resolved_work_tree,

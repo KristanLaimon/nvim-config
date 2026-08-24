@@ -36,7 +36,7 @@ describe("krs.git.secondary path resolution", function()
 end)
 
 describe("krs.git.secondary alias generation", function()
-	it("generates PowerShell function syntax for ps1 with force add support", function()
+	it("generates PowerShell function syntax for ps1", function()
 		local repo = {
 			alias = "secgit",
 			git_dir = "$HOME/.secrets-repo.git",
@@ -46,11 +46,11 @@ describe("krs.git.secondary alias generation", function()
 		local ps1 = sec_git.generate_alias(repo, "ps1", cwd)
 
 		expect(ps1).toContain("function secgit {")
-		expect(ps1).toContain("add -f")
+		expect(ps1).toContain("add $args")
 		expect(ps1).toContain("--git-dir=")
 	end)
 
-	it("generates POSIX function syntax for sh with force add support", function()
+	it("generates POSIX function syntax for sh", function()
 		local repo = {
 			alias = "secgit",
 			git_dir = "$HOME/.secrets-repo.git",
@@ -60,7 +60,7 @@ describe("krs.git.secondary alias generation", function()
 		local sh = sec_git.generate_alias(repo, "sh", cwd)
 
 		expect(sh).toContain("secgit() {")
-		expect(sh).toContain("add -f")
+		expect(sh).toContain("add \"$@\"")
 		expect(sh).toContain("--git-dir=")
 	end)
 end)
@@ -132,7 +132,7 @@ describe("krs.git.secondary config management", function()
 		expect(argv_str).toContain("status")
 	end)
 
-	it("automatically inserts -f flag for git add commands", function()
+	it("builds standard git add commands without forced -f flag", function()
 		sec_git.add_repo({
 			alias = "secgit",
 			git_dir = "$HOME/.secrets-repo.git",
@@ -142,7 +142,8 @@ describe("krs.git.secondary config management", function()
 		local argv = sec_git.build_cmd_args("secgit", { "add", ".env.local" }, test_dir)
 		expect(argv).not_.toBeNil()
 		local argv_str = table.concat(argv, " ")
-		expect(argv_str).toContain("add -f .env.local")
+		expect(argv_str).toContain("add .env.local")
+		expect(argv_str).not_.toContain("add -f .env.local")
 	end)
 
 	it("cleans up stray bare git repository files in a temporary directory", function()

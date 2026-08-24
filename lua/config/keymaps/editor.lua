@@ -53,10 +53,10 @@ M.settings = {
 		explorer = { "<C-S-Space>", "<C-e>", "<C-E>", "<leader>e", "<leader>fe" },
 		--- Netrw-style directory listing, kept as an escape hatch.
 		netrw = nil,
-		--- Pin active code buffer tab (<C-p> on Desktop, <A-p> on Mobile).
+		--- Pin active code buffer tab (<C-A-p> / <C-p> on Desktop, <A-p> on Mobile).
 		pin_tab = is_mobile_ed
-			and { "<A-p>", "<M-p>", "<leader>pin", "<leader>bp" }
-			or { "<C-p>", "<C-P>", "<A-p>", "<M-p>", "<leader>pin", "<leader>bp" },
+			and { "<C-A-p>", "<C-A-P>", "<C-M-p>", "<C-M-P>", "<A-p>", "<M-p>", "<leader>pin", "<leader>bp" }
+			or { "<C-A-p>", "<C-A-P>", "<C-M-p>", "<C-M-P>", "<C-p>", "<C-P>", "<A-p>", "<M-p>", "<leader>pin", "<leader>bp" },
 		--- Toggle fold at cursor / selection (HTML tags, functions, scopes via Alt+Y).
 		fold_toggle = { "<A-y>", "<A-Y>", "<M-y>", "<M-Y>" },
 	},

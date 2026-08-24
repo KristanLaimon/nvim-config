@@ -228,6 +228,20 @@ M.commands = {
 	},
 	{ name = "🔄 Transpile Active / Neo-tree .krsnvim File", cmd = "KrsTranspile", category = "Transpiler" },
 	{ name = "🚀 Open Launch Profiles Manager (<C-S-q>)", cmd = "LaunchProfiles", category = "Transpiler" },
+
+	-- --------------------------------------------------------------------------
+	-- 📝 Markdown & Preview
+	-- --------------------------------------------------------------------------
+	{
+		name = "📝 Toggle In-Editor Rendered Markdown (Ctrl+Shift+V)",
+		cmd = "MarkdownToggleRender",
+		category = "Markdown",
+	},
+	{
+		name = "🌐 Toggle Live Markdown Browser Preview (<leader>mp / Ctrl+Alt+M)",
+		cmd = "MarkdownPreviewToggle",
+		category = "Markdown",
+	},
 }
 
 -- ============================================================================

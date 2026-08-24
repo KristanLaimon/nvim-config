@@ -116,7 +116,7 @@ function M.run(args, on_done, cwd)
 		M.build(args, cwd),
 		{ text = true },
 		vim.schedule_wrap(function(result)
-			local output = ((result.stderr or "") .. (result.stdout or "")):gsub("%s+$", "")
+			local output = vim.trim((result.stderr or "") .. (result.stdout or ""))
 			on_done(result.code == 0, output)
 		end)
 	)
