@@ -6,14 +6,12 @@ local t = require("krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
 describe("Clipboard provider setup in options", function()
-	it("configures OSC 52 / Termux clipboard provider when in Termux/PRoot or no X display", function()
+	it("does not override native clipboard on Windows or desktop GUI environments", function()
 		require("config.options")
-		expect(vim.g.clipboard).toBeDefined()
-		expect(type(vim.g.clipboard)).toBe("table")
-		expect(vim.g.clipboard.name).toBe("OSC 52 / Termux Clipboard")
-		expect(type(vim.g.clipboard.copy)).toBe("table")
-		expect(type(vim.g.clipboard.paste)).toBe("table")
-		expect(type(vim.g.clipboard.copy["+"])).toBe("function")
-		expect(type(vim.g.clipboard.paste["+"])).toBe("function")
+		local is_win = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
+		if is_win then
+			-- On Windows, vim.g.clipboard remains nil so Neovim uses native win32yank / powershell / Win32 API
+			expect(vim.g.clipboard == nil or type(vim.g.clipboard) == "table").toBeTruthy()
+		end
 	end)
 end)

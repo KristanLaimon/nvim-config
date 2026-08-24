@@ -174,6 +174,24 @@ local function build_targets(root_cwd, submodule_paths)
 		},
 	}
 
+	local has_sec_config = (vim.uv or vim.loop).fs_stat(root_cwd .. "/.krsnvim/secondary_repos.json")
+	if has_sec_config then
+		local sec_ok, sec_git = pcall(require, "krs.git.secondary")
+		if sec_ok and sec_git then
+			local config = sec_git.load(root_cwd)
+			for _, repo in ipairs(config.repositories or {}) do
+				table.insert(targets, {
+					name = string.format("🐙 %s", repo.alias),
+					path = repo.alias,
+					is_root = false,
+					is_secondary = true,
+					repo_alias = repo.alias,
+					full_path = root_cwd,
+				})
+			end
+		end
+	end
+
 	for _, sub_path in ipairs(submodule_paths) do
 		table.insert(targets, {
 			name = string.format("📁 %s", sub_path),

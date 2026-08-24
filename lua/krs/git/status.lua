@@ -110,14 +110,27 @@ end
 -- ---------------------------------------------------------------------------
 
 --- Starts the three git calls a snapshot needs, without waiting for them.
---- Pass the handle to `info_finish` once other work (e.g. another module's own
---- git spawns) has also been started, so every process runs concurrently
---- instead of one round trip waiting for the previous one to finish.
----
 --- @param cwd string|nil Repository directory. Defaults to the working directory.
+--- @param secondary_alias string|nil Optional secondary repository alias.
 --- @return table|nil handle nil when `cwd` is not a git repository.
-function M.info_start(cwd)
+function M.info_start(cwd, secondary_alias)
 	cwd = cwd or vim.fn.getcwd()
+	if secondary_alias then
+		local ok_sec, sec = pcall(require, "krs.git.secondary")
+		if ok_sec and sec then
+			local argv_status = sec.build_cmd_args(secondary_alias, { "status", "--porcelain=v1", "-b" }, cwd)
+			local argv_numstat = sec.build_cmd_args(secondary_alias, { "diff", "--numstat" }, cwd)
+			local argv_numstat_cached = sec.build_cmd_args(secondary_alias, { "diff", "--cached", "--numstat" }, cwd)
+			if argv_status then
+				return {
+					status_proc = vim.system(argv_status, { text = true }),
+					numstat_proc = vim.system(argv_numstat, { text = true }),
+					numstat_cached_proc = vim.system(argv_numstat_cached, { text = true }),
+				}
+			end
+		end
+	end
+
 	if not git.is_repository(cwd) then
 		return nil
 	end
@@ -169,9 +182,10 @@ end
 --- Snapshot of the repository at `cwd`. Blocking convenience wrapper around
 --- `info_start` + `info_finish` for callers with no other work to overlap.
 --- @param cwd string|nil Repository directory. Defaults to the working directory.
+--- @param secondary_alias string|nil Optional secondary repository alias.
 --- @return table|nil info nil when `cwd` is not a git repository.
-function M.info(cwd)
-	return M.info_finish(M.info_start(cwd))
+function M.info(cwd, secondary_alias)
+	return M.info_finish(M.info_start(cwd, secondary_alias))
 end
 
 return M

@@ -57,7 +57,9 @@ If you have just installed or launched KrsVim for the first time, follow these s
 | 🧰 [**Command Palette**](command-palette.md) | `<C-S-p>` launcher, command registration & fuzzy action runner |
 | 🗂️ [**Workspaces & Sessions**](workspaces.md) | Per-project session slots (`<C-S-w>`), tab persistence & buffer cleanups |
 | 🐙 [**Git Control Center**](git-center.md) | Interactive Git staging, restore, commit form & submodules (`<C-S-g>`) |
+| 🐙 [**Secondary Git Repos**](secondary-git.md) | Decoupled secondary Git repositories with Dotfiles pattern (`:SecondaryGitManager`) |
 | 📁 [**File Explorers**](file-explorer.md) | Desktop & WSL explorers (`<C-S-f>`), project pickers & Neo-tree integration |
+| 🙈 [**Neo-tree Custom Hidden**](neo-tree-hidden.md) | Visual file & folder hiding in Neo-tree (`H`/`gh`), theme-derived highlights & Command Palette |
 | 🖥️ [**Multi-Terminal Manager**](terminals.md) | 9 independent terminal buffers (`<A-1>`..`<A-9>`), height memory & auto-WSL |
 | 🎛️ [**Editor Quality of Life**](editor-qol.md) | Smart quit, context help (`?`/`<F1>`), colorscheme preview, image viewer (`:ImageViewer`), font sizing & PHP diagnostics |
 | 🎨 [**Color Palette & Themes**](color-palette.md) | HSL palette architecture and live theme swapping (`:KrsThemePicker`) |

@@ -540,6 +540,15 @@ function M.setup()
 					if vim.api.nvim_get_current_buf() == args.buf then
 						enter_terminal_mode(args.buf)
 					end
+					pcall(function()
+						local cwd = vim.fn.getcwd()
+						local stat_fn = (vim.uv or vim.loop).fs_stat
+						if stat_fn(cwd .. "/.krsnvim/secondary_repos.json")
+							or stat_fn(cwd .. "/.krsnvim/secondary_aliases.sh")
+							or stat_fn(cwd .. "/.krsnvim/secondary_aliases.ps1") then
+							require("krs.git.secondary").inject_terminal_aliases(args.buf)
+						end
+					end)
 				end)
 			end
 		end,

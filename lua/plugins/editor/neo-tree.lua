@@ -64,6 +64,8 @@ local settings = {
 		["<C-?>"] = "search_all_files",
 		["<C-S-CR>"] = "open_with_system_app",
 		["<C-S-Enter>"] = "open_with_system_app",
+		["H"] = "toggle_custom_hidden",
+		["gh"] = "toggle_custom_hidden",
 	},
 
 	--- Keys that toggle the sidebar.
@@ -419,6 +421,9 @@ return {
 				})
 			end
 
+			local neotree_hidden = require("plugins.krs.neotree_hidden")
+			neotree_hidden.setup()
+
 			local user_cmds = {
 				NeotreeCreateFile = { function() add_file_prompt() end, "Create new file in Neo-tree target directory" },
 				NeotreeAddFile = { function() add_file_prompt() end, "Create new file in Neo-tree target directory" },
@@ -426,6 +431,8 @@ return {
 				NeotreeAddFolder = { function() add_folder_prompt() end, "Create new folder in Neo-tree target directory" },
 				NeotreeRefresh = { function() refresh_neotree_with_notify() end, "Rescan and refresh Neo-tree files" },
 				NeotreeRescan = { function() refresh_neotree_with_notify() end, "Rescan and refresh Neo-tree files" },
+				NeotreeToggleCustomHiddenVisibility = { function() neotree_hidden.toggle_visibility() end, "Toggle visibility of custom hidden items in Neo-tree" },
+				NeotreeClearCustomHidden = { function() neotree_hidden.clear_all() end, "Clear all marked custom hidden items in Neo-tree" },
 			}
 			for name, spec in pairs(user_cmds) do
 				if vim.fn.exists(":" .. name) == 0 then
@@ -446,6 +453,9 @@ return {
 					refresh_neotree = function()
 						refresh_neotree_with_notify()
 					end,
+					toggle_custom_hidden = with_node(function(node)
+						neotree_hidden.toggle_path(node.path)
+					end, true),
 					open_with_system_app = with_node(function(node)
 						require("plugins.krs.image_viewer").open_with_system_app(node.path)
 					end, true),

@@ -22,6 +22,7 @@ See [Module Architecture](module-architecture.md) for how the custom ones are wi
 | **Task & Script Manager** | `tasks.lua` | Per-project tasks in `.krsnvim/tasks.json`; run, chain, set a default detected from `Makefile`/`package.json`/etc. Up to 4 background slots. | `<C-S-t>`, `<C-S-a>`, `<C-1>`..`<C-4>` |
 | **Multi-Terminal Manager** | `terminal.lua` | 9 lazily-spawned terminals, toggled independently. A `cwd` inside a WSL distro path launches `wsl.exe` there instead of the Windows shell. | `<A-1>`..`<A-9>`, `<C-;>` |
 | **Desktop File Explorer** | `file_explorer.lua` | Pure-Lua floating file browser rooted at `~/Desktop`. Create/rename/delete, drill in/out, set folder as active project. | `<C-S-f>`, `:TelescopeFileBrowserDesktop` |
+| **Neo-tree Custom Hidden** | `neotree_hidden.lua` | Visually hides files and folders in Neo-tree UI, highlights hidden items with active theme colors, persists hidden paths. | `H`, `gh` (in Neo-tree), `:NeotreeToggleCustomHiddenVisibility` |
 | **WSL File Explorer** | `file_explorer.lua` | Same explorer rooted at `\\wsl.localhost\<Distro>\`; lists distros when more than one is installed. Windows-only. | `<leader>fw`, `:TelescopeFileBrowserWSL` |
 | **Type Injector** | `type_injector.lua` | Per-project Lua/TS type schemas + `@types` package installer, applied live to `lua_ls` and `vtsls`. | `:KrsTypes`, `:TypeInjector` |
 | **Tailwind Organizer** | `tailwind_organizer.lua` | Sorts and multi-rows `class` / `className` attributes on save. | `<leader>tw`, `<leader>tt`, `:TailwindOrganize` |

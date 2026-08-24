@@ -15,6 +15,11 @@ KRS Neovim includes native floating file explorers for Desktop, WSL, folder pick
 5. **Gitignore vs All Files Search in Neo-tree**:
    - `<C-k>` / `<C-K>` / `<C-/>` / `<C-_>`: Find files **respecting `.gitignore`**.
    - `<C-A-k>` / `<C-S-/>` / `<C-?>`: Find **all files ignoring `.gitignore`**.
+6. **Visually Hide Files & Folders (`H` / `gh`)**:
+   - Press `H` or `gh` on any file or folder in Neo-tree to mark/unmark it as hidden.
+   - Hidden items are visually excluded from the Neo-tree sidebar UI.
+   - Toggle visibility of all marked hidden items via Command Palette (`<C-S-p>` -> `NeotreeToggleCustomHiddenVisibility`) or `:NeotreeToggleCustomHiddenVisibility`.
+   - When marked items are set to visible, they are rendered using a theme-derived color (`NeoTreeCustomHidden`, linked to active theme's `Comment` group).
 
 ---
 
@@ -27,5 +32,6 @@ KRS Neovim includes native floating file explorers for Desktop, WSL, folder pick
 - `O` / `o` (in Move Picker): Confirm target folder to move file into
 - `r` (in Neo-tree): Rename file/folder via `input_modal`
 - `a` (in Neo-tree): Create new file or folder via `input_modal`
+- `H` / `gh` (in Neo-tree): Mark selected file/folder as visually hidden
 - `<C-k>` / `<C-/>`: Search files respecting `.gitignore`
 - `<C-A-k>` / `<C-S-/>`: Search all files ignoring `.gitignore`

@@ -78,6 +78,8 @@ M.commands = {
 	{ name = "🔄 Rescan & Refresh File Explorer (Neo-tree)", cmd = "NeotreeRefresh", category = "Explorer" },
 	{ name = "➕ Create New File in Neo-tree (a / <C-n>)", cmd = "NeotreeCreateFile", category = "Explorer" },
 	{ name = "📁 Create New Folder in Neo-tree (A / <C-S-n>)", cmd = "NeotreeCreateFolder", category = "Explorer" },
+	{ name = "🙈 Toggle Custom Hidden Items Visibility (Show/Hide Marked Files)", cmd = "NeotreeToggleCustomHiddenVisibility", category = "Explorer" },
+	{ name = "🧹 Clear All Custom Hidden Files & Folders (Neo-tree)", cmd = "NeotreeClearCustomHidden", category = "Explorer" },
 	{ name = "🐙 Toggle Git Center (Ctrl+Shift+G)", cmd = "GitCenterToggle", category = "Git" },
 	{
 		name = "🎨 Toggle Git Center Colored Tab Indicators (Default: Plain Text)",

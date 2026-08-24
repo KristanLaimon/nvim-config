@@ -451,7 +451,11 @@ end
 --- @param cwd string|nil Target repository directory.
 --- @return table|nil info nil when the working directory is not a repository.
 function M.get_git_info(cwd)
-	cwd = cwd or (get_active_target() and get_active_target().full_path) or vim.fn.getcwd()
+	local target = get_active_target()
+	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+	if target and target.is_secondary and target.repo_alias then
+		return status.info(cwd, target.repo_alias)
+	end
 	return status.info(cwd)
 end
 
@@ -462,7 +466,21 @@ end
 --- @return string[] lines
 --- @return boolean is_untracked
 local function raw_diff_for(file, file_type, cwd)
-	cwd = cwd or (get_active_target() and get_active_target().full_path) or vim.fn.getcwd()
+	local target = get_active_target()
+	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+
+	if target and target.is_secondary and target.repo_alias then
+		local sec_ok, sec = pcall(require, "krs.git.secondary")
+		if sec_ok and sec then
+			if file_type == "staged" then
+				return sec.lines(target.repo_alias, { "diff", "--cached", "--color=never", "--", file }, cwd), false
+			end
+			if file_type == "unstaged" then
+				return sec.lines(target.repo_alias, { "diff", "--color=never", "--", file }, cwd), false
+			end
+		end
+	end
+
 	if file_type == "staged" then
 		return git.lines({ "diff", "--cached", "--color=never", "--", file }, cwd), false
 	end
@@ -2239,6 +2257,13 @@ function M.open_git_center()
 	--- @param args string[] Arguments after `git`.
 	--- @return string[] output
 	local function git_lines(args)
+		local target = get_active_target()
+		if target and target.is_secondary and target.repo_alias then
+			local sec_ok, sec = pcall(require, "krs.git.secondary")
+			if sec_ok and sec then
+				return sec.lines(target.repo_alias, args, target.full_path)
+			end
+		end
 		return git.lines(args, get_active_target().full_path)
 	end
 
