@@ -37,6 +37,10 @@ local project = lazy_req("krs.core.project")
 local path_util = lazy_req("krs.core.path")
 local icons = lazy_req("krs.core.icons")
 
+local env_ok, env_mod = pcall(require, "krs.core.environment")
+local env = env_ok and env_mod.detect() or {}
+local is_mobile_or_proot = env.is_termux or env.is_proot or env.is_mobile or (vim.env.TERMUX_VERSION ~= nil)
+
 local M = {}
 
 -- ============================================================================
@@ -60,7 +64,7 @@ M.settings = {
 
 	--- Preview refresh delay after the cursor moves, in milliseconds. Enough to
 	--- coalesce held-down `j`, short enough to feel immediate.
-	preview_debounce_ms = 40,
+	preview_debounce_ms = is_mobile_or_proot and 130 or 40,
 
 	--- Notification titles.
 	notify_title = "Git Center",
@@ -468,6 +472,9 @@ local function raw_diff_for(file, file_type, cwd)
 
 	local full_path = cwd and (cwd .. "/" .. file) or file
 	if vim.fn.filereadable(full_path) == 1 then
+		if is_mobile_or_proot then
+			return vim.fn.readfile(full_path, "", 500), true
+		end
 		return vim.fn.readfile(full_path), true
 	end
 	return { "[ Empty or New File ]" }, true
@@ -582,7 +589,9 @@ local function get_target_status(target)
 	if M.submodule_statuses[target.path] then
 		return M.submodule_statuses[target.path]
 	end
-	fetch_target_status_async(target)
+	if not is_mobile_or_proot then
+		fetch_target_status_async(target)
+	end
 	return { has_changes = false, behind = 0, ahead = 0 }
 end
 

@@ -46,18 +46,25 @@ return {
 			pcall(ts.install, core_parsers)
 		end
 
-		-- main branch dropped the old highlight.enable config; highlighting
-		-- must be started manually per buffer. Parser names don't always
-		-- match filetype names (tsx -> typescriptreact, vimdoc -> help), so
-		-- match any filetype and let pcall skip ones without a parser.
+		local is_mobile_or_proot = false
+		if env_ok then
+			local env = env_mod.detect()
+			is_mobile_or_proot = env.is_termux or env.is_proot or env.is_mobile
+		else
+			is_mobile_or_proot = vim.env.TERMUX_VERSION ~= nil
+		end
+
 		vim.api.nvim_create_autocmd("FileType", {
 			pattern = "*",
 			callback = function(args)
 				local buf = args.buf
-				pcall(vim.treesitter.start, buf)
+				local line_count = vim.api.nvim_buf_line_count(buf)
+				if line_count <= 3500 then
+					pcall(vim.treesitter.start, buf)
+				end
 
 				local ft = vim.bo[buf].filetype
-				if ft and ft ~= "" then
+				if not is_mobile_or_proot and ft and ft ~= "" and line_count <= 3500 then
 					local lang = vim.treesitter.language.get_lang(ft) or ft
 					local has_parser = pcall(vim.treesitter.get_parser, buf, lang)
 					if has_parser then

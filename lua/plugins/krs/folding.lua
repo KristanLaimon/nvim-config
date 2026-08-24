@@ -275,9 +275,19 @@ function M.setup()
 	vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile", "FileType" }, {
 		group = group,
 		callback = function(args)
-			vim.schedule(function()
-				M.apply_fold_options(args.buf)
-			end)
+			local env_ok, env_mod = pcall(require, "krs.core.environment")
+			local is_mobile_or_proot = false
+			if env_ok then
+				local env = env_mod.detect()
+				is_mobile_or_proot = env.is_termux or env.is_proot or env.is_mobile
+			else
+				is_mobile_or_proot = vim.env.TERMUX_VERSION ~= nil
+			end
+			if not is_mobile_or_proot then
+				vim.schedule(function()
+					M.apply_fold_options(args.buf)
+				end)
+			end
 		end,
 	})
 

@@ -59,8 +59,10 @@ function M.reposition_wins()
 					end
 
 					if step >= steps then
-						timer:stop()
-						timer:close()
+						if not timer:is_closing() then
+							pcall(function() timer:stop() end)
+							pcall(function() timer:close() end)
+						end
 					end
 				end))
 			end
@@ -231,8 +233,10 @@ function M.notify(msg, level, opts)
 		end
 
 		if anim_step >= anim_steps then
-			anim_timer:stop()
-			anim_timer:close()
+			if not anim_timer:is_closing() then
+				pcall(function() anim_timer:stop() end)
+				pcall(function() anim_timer:close() end)
+			end
 		end
 	end))
 
@@ -265,8 +269,10 @@ function M.notify(msg, level, opts)
 			end
 
 			if exit_step >= exit_steps then
-				exit_timer:stop()
-				exit_timer:close()
+				if not exit_timer:is_closing() then
+					pcall(function() exit_timer:stop() end)
+					pcall(function() exit_timer:close() end)
+				end
 
 				-- Close window and buffer
 				if win and vim.api.nvim_win_is_valid(win) then

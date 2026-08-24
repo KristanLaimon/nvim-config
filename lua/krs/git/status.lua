@@ -146,7 +146,10 @@ function M.info_finish(handle)
 		files = M.parse_files(status_lines)
 	end
 
-	local added, deleted = M.sum_numstat(git.collect(handle.numstat_proc), git.collect(handle.numstat_cached_proc))
+	local added, deleted = 0, 0
+	if #files.staged > 0 or #files.unstaged > 0 then
+		added, deleted = M.sum_numstat(git.collect(handle.numstat_proc), git.collect(handle.numstat_cached_proc))
+	end
 	local has_changes = (#files.staged + #files.unstaged + #files.untracked > 0)
 
 	return {

@@ -193,7 +193,11 @@ return {
 						end
 					end
 
-					if client and client.supports_method and client:supports_method("textDocument/inlayHint") then
+					local env_ok, env_mod = pcall(require, "krs.core.environment")
+					local env = env_ok and env_mod.detect() or {}
+					local is_mobile_or_proot = env.is_termux or env.is_proot or env.is_mobile or (vim.env.TERMUX_VERSION ~= nil)
+
+					if not is_mobile_or_proot and client and client.supports_method and client:supports_method("textDocument/inlayHint") then
 						if vim.lsp.inlay_hint then
 							pcall(vim.lsp.inlay_hint.enable, true, { bufnr = args.buf })
 						end
@@ -439,7 +443,7 @@ return {
 					},
 				},
 				signature = {
-					enabled = true,
+					enabled = not is_mobile,
 					window = { border = "rounded" },
 				},
 				sources = {

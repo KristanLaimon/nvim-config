@@ -61,7 +61,7 @@ local settings = {
 		-- Behaviour and performance
 		mouse = "a",
 		autoread = true, -- Pick up files changed outside the editor.
-		clipboard = "unnamedplus", -- Yank straight to the system clipboard.
+		clipboard = "", -- Only copy to system clipboard explicitly (e.g. <C-c>, "+y).
 		updatetime = 250, -- Faster CursorHold and diagnostics.
 		timeoutlen = 300, -- Snappier multi-key mappings.
 		redrawtime = 1500, -- Do not freeze redrawing huge files.
@@ -235,26 +235,32 @@ local function setup_clipboard_provider()
 			},
 			paste = {
 				["+"] = function()
+					if osc52_ok then
+						local osc_val = osc52.paste("+")()
+						if type(osc_val) == "table" and #osc_val > 0 and osc_val[1] ~= "" then
+							return osc_val
+						end
+					end
 					if has_termux_get then
 						local out = vim.fn.systemlist({ termux_get })
 						if vim.v.shell_error == 0 and #out > 0 then
 							return out, vim.fn.getregtype("+")
 						end
 					end
-					if osc52_ok then
-						return osc52.paste("+")()
-					end
 					return {}, "v"
 				end,
 				["*"] = function()
+					if osc52_ok then
+						local osc_val = osc52.paste("*")()
+						if type(osc_val) == "table" and #osc_val > 0 and osc_val[1] ~= "" then
+							return osc_val
+						end
+					end
 					if has_termux_get then
 						local out = vim.fn.systemlist({ termux_get })
 						if vim.v.shell_error == 0 and #out > 0 then
 							return out, vim.fn.getregtype("*")
 						end
-					end
-					if osc52_ok then
-						return osc52.paste("*")()
 					end
 					return {}, "v"
 				end,
@@ -271,6 +277,32 @@ setup_clipboard_provider()
 
 for name, value in pairs(settings.options) do
 	vim.opt[name] = value
+end
+
+local env_ok_opt, env_mod_opt = pcall(require, "krs.core.environment")
+if env_ok_opt then
+	local env = env_mod_opt.detect()
+	if env.is_mobile or env.is_termux or env.is_proot then
+		-- ARM64 Tablet / Termux / PRoot MAXIMUM PERFORMANCE BOOST:
+		-- 1. Disable Treesitter expr folding to eliminate keystroke latency & typing lag
+		vim.opt.foldmethod = "manual"
+		vim.opt.foldenable = false
+		vim.opt.foldcolumn = "0"
+
+		-- 2. Disable relative line number calculations on every cursor move
+		vim.opt.relativenumber = false
+
+		-- 3. Restrict cursorline to line number margin (prevents redrawing 80+ columns on j/k)
+		pcall(function()
+			vim.opt.cursorlineopt = "number"
+		end)
+
+		-- 4. Fast ShaDa history & regex max column limit
+		vim.opt.synmaxcol = 200
+		vim.opt.updatetime = 300
+		vim.opt.timeoutlen = 300
+		vim.opt.shada = "!,'50,<50,s10,h"
+	end
 end
 
 for name, value in pairs(settings.optional_options) do

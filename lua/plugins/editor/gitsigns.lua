@@ -2,6 +2,15 @@
 -- PLUGINS: GitSigns -- git signs in signcolumn, hunk previews & stage/reset.
 -- ============================================================================
 
+local env_ok, env_mod = pcall(require, "krs.core.environment")
+local is_mobile_or_proot = false
+if env_ok then
+	local env = env_mod.detect()
+	is_mobile_or_proot = env.is_termux or env.is_proot or env.is_mobile
+else
+	is_mobile_or_proot = vim.env.TERMUX_VERSION ~= nil
+end
+
 return {
 	"lewis6991/gitsigns.nvim",
 	event = { "BufReadPre", "BufNewFile" },
@@ -19,7 +28,8 @@ return {
 		linehl = false,
 		word_diff = false,
 		watch_gitdir = {
-			interval = 1000,
+			enable = not is_mobile_or_proot,
+			interval = 1500,
 			follow_files = true,
 		},
 		attach_to_untracked = true,

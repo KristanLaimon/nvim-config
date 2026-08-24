@@ -86,10 +86,10 @@ return {
 	"ahmedkhalf/project.nvim",
 	cmd = { "Telescope projects", "ProjectRoot", "RecentProjects" },
 	keys = {
-		{ "<C-S-r>", "<cmd>Telescope projects<CR>", desc = "Open Recent Projects UI" },
-		{ "<C-S-R>", "<cmd>Telescope projects<CR>", desc = "Open Recent Projects UI" },
-		{ "<C-r>", "<cmd>Telescope projects<CR>", desc = "Open Recent Projects UI" },
-		{ "<leader>fp", "<cmd>Telescope projects<CR>", desc = "Open Recent Projects UI" },
+		{ "<C-S-r>", "<cmd>Telescope projects<CR>", mode = { "n", "i", "v", "t" }, desc = "Open Recent Projects UI" },
+		{ "<C-S-R>", "<cmd>Telescope projects<CR>", mode = { "n", "i", "v", "t" }, desc = "Open Recent Projects UI" },
+		{ "<C-r>", "<cmd>Telescope projects<CR>", mode = { "n", "i", "v", "t" }, desc = "Open Recent Projects UI" },
+		{ "<leader>fp", "<cmd>Telescope projects<CR>", mode = { "n", "i", "v", "t" }, desc = "Open Recent Projects UI" },
 	},
 	dependencies = {
 		"nvim-telescope/telescope.nvim",

@@ -181,6 +181,14 @@ map_all_modes(M.settings.keys.sneak_peek, function()
 	require("plugins.krs.sneak_peek").toggle_or_pick()
 end, "Sneak-Peek Project Modal (90% Window)")
 
+map_all_modes({ "<C-r>", "<C-R>", "<C-S-r>", "<C-S-R>", "<leader>fp" }, function()
+	if _G.OpenRecentProjects then
+		_G.OpenRecentProjects()
+	else
+		pcall(vim.cmd, "Telescope projects")
+	end
+end, "Open Recent Projects UI")
+
 -- ============================================================================
 -- KRSNVIMSCRIPT
 -- ============================================================================

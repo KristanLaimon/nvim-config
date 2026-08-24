@@ -24,6 +24,10 @@
 local lazy_req = require("krs.core.lazy_require")
 local store = lazy_req("krs.core.store")
 
+local env_ok, env_mod = pcall(require, "krs.core.environment")
+local env = env_ok and env_mod.detect() or {}
+local is_mobile_or_proot = env.is_termux or env.is_proot or env.is_mobile or (vim.env.TERMUX_VERSION ~= nil)
+
 -- ============================================================================
 -- CONFIGURATION
 -- ============================================================================
@@ -50,6 +54,8 @@ local settings = {
 		["a"] = "add_file_with_modal",
 		["A"] = "add_folder_with_modal",
 		["<C-n>"] = "add_file_with_modal",
+		["<C-f>"] = "add_folder_with_modal",
+		["<C-F>"] = "add_folder_with_modal",
 		["<C-S-n>"] = "add_folder_with_modal",
 		["<C-S-N>"] = "add_folder_with_modal",
 		["<C-/>"] = "search_respect_gitignore",
@@ -196,17 +202,20 @@ vim.api.nvim_create_autocmd("WinResized", {
 -- ============================================================================
 
 --- Redraws the tree after a filesystem change.
-local function refresh_tree()
+--- @param full_reset boolean|nil Perform a complete state reset (heavy scan).
+local function refresh_tree(full_reset)
 	pcall(function()
 		require("neo-tree.sources.manager").refresh("filesystem")
 	end)
-	pcall(function()
-		require("neo-tree.sources.filesystem").reset()
-	end)
+	if full_reset then
+		pcall(function()
+			require("neo-tree.sources.filesystem").reset()
+		end)
+	end
 end
 
 local function refresh_neotree_with_notify()
-	refresh_tree()
+	refresh_tree(true)
 	vim.notify("🔄 Rescanned & refreshed Neo-tree files!", vim.log.levels.INFO, { title = "Neo-tree" })
 end
 
@@ -338,7 +347,9 @@ local function create_entry(parent_dir, kind)
 				end
 			end
 
-			refresh_tree()
+			vim.schedule(function()
+				refresh_tree(false)
+			end)
 		end,
 	})
 end
@@ -561,7 +572,7 @@ return {
 						enabled = true,
 						leave_dirs_open = false,
 					},
-					use_libuv_file_watcher = true,
+					use_libuv_file_watcher = not is_mobile_or_proot,
 					-- Nothing is hidden: this config edits dotfiles and ignored
 					-- build output often enough that hiding them costs more.
 					filtered_items = {
