@@ -156,6 +156,16 @@ function M.check_all_buffers(force)
 	end
 end
 
+--- Returns true if running on a desktop platform (Windows, macOS, Linux, WSL).
+local function is_desktop_env()
+	local env_ok, env_mod = pcall(require, "krs.core.environment")
+	if env_ok and env_mod.detect then
+		local env = env_mod.detect()
+		return not (env.is_mobile or env.is_termux or env.is_proot)
+	end
+	return true
+end
+
 -- ============================================================================
 -- TIMER LIFECYCLE
 -- ============================================================================
@@ -166,9 +176,10 @@ local function stop_timer()
 	end
 end
 
---- Starts (or restarts) the polling timer. No-op while unfocused.
+--- Starts (or restarts) the polling timer. Keeps running on desktop for live side-by-side edits.
 local function start_timer()
-	if not is_focused then
+	local is_desktop = is_desktop_env()
+	if not is_focused and not is_desktop then
 		return
 	end
 
@@ -178,7 +189,7 @@ local function start_timer()
 		M.settings.poll_interval_ms,
 		M.settings.poll_interval_ms,
 		vim.schedule_wrap(function()
-			if not is_focused then
+			if not is_focused and not is_desktop_env() then
 				stop_timer()
 				return
 			end
@@ -212,25 +223,64 @@ function M.setup()
 		group = group,
 		callback = function()
 			is_focused = false
-			stop_timer()
+			if not is_desktop_env() then
+				stop_timer()
+			end
 		end,
 	})
 
 	vim.api.nvim_create_autocmd(M.settings.check_events, {
 		group = group,
-		callback = function()
-			if is_focused and not in_blocking_mode() then
-				M.check_all_buffers(false)
+		callback = function(ev)
+			if not in_blocking_mode() then
+				local force = (ev.event == "BufEnter" or ev.event == "WinEnter")
+				M.check_all_buffers(force)
 			end
 		end,
 	})
 
 	vim.api.nvim_create_autocmd("FileChangedShellPost", {
 		group = group,
-		callback = function()
+		callback = function(ev)
 			pcall(vim.cmd, "redrawtabline")
+			if ev and ev.buf and vim.api.nvim_buf_is_valid(ev.buf) then
+				local name = vim.api.nvim_buf_get_name(ev.buf)
+				if name ~= "" then
+					local filename = vim.fn.fnamemodify(name, ":t")
+					vim.notify("🔄 Reloaded externally modified file: " .. filename, vim.log.levels.INFO, {
+						title = "External File Change",
+					})
+				end
+			end
 		end,
 	})
+
+	vim.api.nvim_create_autocmd("FileChangedShell", {
+		group = group,
+		callback = function(ev)
+			if ev and ev.buf and vim.api.nvim_buf_is_valid(ev.buf) then
+				if vim.bo[ev.buf].modified then
+					local name = vim.api.nvim_buf_get_name(ev.buf)
+					local filename = vim.fn.fnamemodify(name, ":t")
+					vim.notify(
+						"⚠️ File changed on disk (" .. filename .. "), but you have unsaved changes in Neovim!",
+						vim.log.levels.WARN,
+						{ title = "External Edit Conflict" }
+					)
+				end
+			end
+		end,
+	})
+
+	local function run_manual_check()
+		M.check_all_buffers(true)
+		vim.notify("🔄 Checked for external file changes across all open buffers.", vim.log.levels.INFO, {
+			title = "Smart File Check",
+		})
+	end
+
+	vim.api.nvim_create_user_command("SmartCheck", run_manual_check, { desc = "Check for external file changes across open buffers" })
+	vim.api.nvim_create_user_command("KrsSmartCheck", run_manual_check, { desc = "Check for external file changes across open buffers" })
 
 	M.check_all_buffers(true)
 	start_timer()
@@ -246,7 +296,7 @@ _G.SmartCheck = M
 return setmetatable({
 	name = "krs_smart_check",
 	dir = require("krs.core.lazyspec").for_module(),
-	cmd = "SmartCheck",
-	keys = {},
+	lazy = false,
+	cmd = { "SmartCheck", "KrsSmartCheck" },
 	config = M.setup,
 }, { __index = M })

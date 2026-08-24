@@ -63,6 +63,7 @@ M.commands = {
 	{ name = "📂 Open Project Root in File Explorer", cmd = "OpenRootInExplorer", category = "Files" },
 	{ name = "📁 Select Recent Project (Ctrl+Shift+R)", cmd = "RecentProjects", category = "Files" },
 	{ name = "🐧 Browse WSL Files", cmd = "TelescopeFileBrowserWSL", category = "Files" },
+	{ name = "🔄 Check & Reload External File Changes (SmartCheck)", cmd = "SmartCheck", category = "Files" },
 
 	-- --------------------------------------------------------------------------
 	-- 🦊 Workspaces & Sessions

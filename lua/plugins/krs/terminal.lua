@@ -248,6 +248,15 @@ local function fill_window(t, n, win)
 		return
 	end
 
+	local cwd = vim.fn.getcwd()
+	local stat_fn = (vim.uv or vim.loop).fs_stat
+	if stat_fn(cwd .. "/.krsnvim/secondary_repos.json") then
+		local ok_sec, sec = pcall(require, "krs.git.secondary")
+		if ok_sec and sec then
+			sec.setup_environment(cwd)
+		end
+	end
+
 	vim.cmd(terminal_open_cmd())
 	t.buf = vim.api.nvim_get_current_buf()
 	vim.bo[t.buf].buflisted = false
@@ -540,15 +549,6 @@ function M.setup()
 					if vim.api.nvim_get_current_buf() == args.buf then
 						enter_terminal_mode(args.buf)
 					end
-					pcall(function()
-						local cwd = vim.fn.getcwd()
-						local stat_fn = (vim.uv or vim.loop).fs_stat
-						if stat_fn(cwd .. "/.krsnvim/secondary_repos.json")
-							or stat_fn(cwd .. "/.krsnvim/secondary_aliases.sh")
-							or stat_fn(cwd .. "/.krsnvim/secondary_aliases.ps1") then
-							require("krs.git.secondary").inject_terminal_aliases(args.buf)
-						end
-					end)
 				end)
 			end
 		end,

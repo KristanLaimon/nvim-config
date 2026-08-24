@@ -297,11 +297,11 @@ function M.lines(repo_or_alias, git_args, cwd)
 	end
 
 	local res = vim.system(argv, { text = true }):wait()
-	local stdout = res.stdout or ""
-	if stdout == "" then
+	local output = ((res.stdout or "") .. (res.stderr or "")):gsub("%s+$", "")
+	if output == "" then
 		return {}
 	end
-	return vim.split(stdout, "[\r\n]+", { trimempty = true })
+	return vim.split(output, "[\r\n]+", { trimempty = true })
 end
 
 --- Runs git asynchronously on a secondary repository.
@@ -324,6 +324,33 @@ function M.run(repo_or_alias, git_args, on_done, cwd)
 		{ text = true },
 		vim.schedule_wrap(function(result)
 			local output = ((result.stderr or "") .. (result.stdout or "")):gsub("%s+$", "")
+			if result.code ~= 0 and (output:find("could not resolve HEAD") or output:find("ambiguous argument 'HEAD'")) then
+				local parsed = type(git_args) == "table" and vim.deepcopy(git_args) or vim.split(git_args, "%s+")
+				local is_unstage = (parsed[1] == "restore" and parsed[2] == "--staged") or (parsed[1] == "reset")
+				if is_unstage then
+					local sub_files = {}
+					local start_idx = (parsed[1] == "restore") and 3 or 2
+					for i = start_idx, #parsed do
+						table.insert(sub_files, parsed[i])
+					end
+					if #sub_files == 0 then
+						table.insert(sub_files, ".")
+					end
+					local fallback_cmd = { "rm", "--cached", "-r", "--" }
+					vim.list_extend(fallback_cmd, sub_files)
+					local fallback_argv = M.build_cmd_args(repo_or_alias, fallback_cmd, cwd)
+					if fallback_argv then
+						vim.system(fallback_argv, { text = true }, vim.schedule_wrap(function(res2)
+							local out2 = ((res2.stderr or "") .. (res2.stdout or "")):gsub("%s+$", "")
+							if on_done then
+								on_done(res2.code == 0, out2)
+							end
+						end))
+						return
+					end
+				end
+			end
+
 			if on_done then
 				on_done(result.code == 0, output)
 			end
@@ -351,29 +378,28 @@ function M.init_repo(opts, on_done, cwd)
 		return
 	end
 
+	opts.git_dir = M.normalize_git_dir(opts.git_dir)
 	local resolved_git_dir = M.resolve_path(opts.git_dir, cwd)
 	local resolved_work_tree = M.resolve_path(opts.work_tree or ".", cwd)
+	local custom_gitignore_name = ".gitignore." .. opts.alias
+	local custom_gitignore_path = path_util.normalize(cwd .. "/" .. custom_gitignore_name)
 
-	if resolved_git_dir == resolved_work_tree then
+	-- Prevent setting git_dir equal to project root
+	if resolved_git_dir == path_util.normalize(cwd) then
 		if on_done then
-			on_done(false, "Error: git_dir cannot be the same as project root directory. Use a subfolder like './git-krs' or '$HOME/.secrets-repo.git'")
+			on_done(false, "Error: Bare git directory cannot be the project root directory.")
 		end
 		return
 	end
 
-	-- Clean any stray bare files created in project root by accident
 	M.cleanup_stray_bare_files(cwd)
 
-	-- Ensure target bare repo directory exists
-	vim.fn.mkdir(resolved_git_dir, "p")
-
-	-- Ensure dedicated .gitignore.<alias> exists in work tree
-	local custom_gitignore_path = resolved_work_tree .. "/.gitignore." .. opts.alias
+	-- Ensure custom .gitignore.<alias> file exists
 	if vim.fn.filereadable(custom_gitignore_path) == 0 then
-		store.write_file(custom_gitignore_path, "# Custom .gitignore for secondary repository: " .. opts.alias .. "\n# Add patterns to ignore specifically for this repository\nnode_modules/\n")
+		store.write_file(custom_gitignore_path, "# Ignore rules for secondary repository: " .. opts.alias .. "\nnode_modules/\n.tmp/\n")
 	end
 
-	-- 1. Run git init --bare
+	-- Create bare repository if missing
 	local init_argv = git.build({ "init", "--bare", resolved_git_dir }, cwd)
 	vim.system(init_argv, { text = true }, vim.schedule_wrap(function(res_init)
 		if res_init.code ~= 0 then
@@ -432,7 +458,7 @@ function M.init_repo(opts, on_done, cwd)
 				if step_idx > #steps then
 					-- Register in config
 					local ok_save = M.add_repo(opts, cwd)
-					M.inject_terminal_aliases(nil, cwd)
+					M.setup_environment(cwd)
 
 					if on_done then
 						if ok_save then
@@ -474,8 +500,16 @@ function M.generate_alias(repo, shell_type, cwd)
 
 	if shell_type == "ps1" then
 		return string.format(
-			'function %s { if ($args.Count -gt 0 -and $args[0] -eq "add") { git --git-dir="%s" --work-tree="%s" add -f $args[1..($args.Count-1)] } else { git --git-dir="%s" --work-tree="%s" $args } }',
+			'function %s { if ($args.Count -gt 0 -and $args[0] -eq "add") { git --git-dir="%s" --work-tree="%s" add -f $args[1..($args.Count-1)] } elseif ($args.Count -gt 1 -and $args[0] -eq "restore" -and $args[1] -eq "--staged") { $sub = if ($args.Count -gt 2) { $args[2..($args.Count-1)] } else { "." }; git --git-dir="%s" --work-tree="%s" restore --staged $sub 2>$null; if ($LASTEXITCODE -ne 0) { git --git-dir="%s" --work-tree="%s" rm --cached -r -- $sub } } elseif ($args.Count -gt 0 -and $args[0] -eq "reset") { $sub = if ($args.Count -gt 1) { $args[1..($args.Count-1)] } else { "." }; git --git-dir="%s" --work-tree="%s" reset $sub 2>$null; if ($LASTEXITCODE -ne 0) { git --git-dir="%s" --work-tree="%s" rm --cached -r -- $sub } } else { git --git-dir="%s" --work-tree="%s" $args } }',
 			alias_name,
+			resolved_git_dir,
+			resolved_work_tree,
+			resolved_git_dir,
+			resolved_work_tree,
+			resolved_git_dir,
+			resolved_work_tree,
+			resolved_git_dir,
+			resolved_work_tree,
 			resolved_git_dir,
 			resolved_work_tree,
 			resolved_git_dir,
@@ -483,8 +517,16 @@ function M.generate_alias(repo, shell_type, cwd)
 		)
 	else
 		return string.format(
-			'%s() { if [ "$1" = "add" ]; then shift; git --git-dir="%s" --work-tree="%s" add -f "$@"; else git --git-dir="%s" --work-tree="%s" "$@"; fi; }',
+			'%s() { if [ "$1" = "add" ]; then shift; git --git-dir="%s" --work-tree="%s" add -f "$@"; elif [ "$1" = "restore" ] && [ "$2" = "--staged" ]; then shift 2; git --git-dir="%s" --work-tree="%s" restore --staged "$@" 2>/dev/null || git --git-dir="%s" --work-tree="%s" rm --cached -r -- "${@:-.}"; elif [ "$1" = "reset" ]; then shift; git --git-dir="%s" --work-tree="%s" reset "$@" 2>/dev/null || git --git-dir="%s" --work-tree="%s" rm --cached -r -- "${@:-.}"; else git --git-dir="%s" --work-tree="%s" "$@"; fi; }',
 			alias_name,
+			resolved_git_dir,
+			resolved_work_tree,
+			resolved_git_dir,
+			resolved_work_tree,
+			resolved_git_dir,
+			resolved_work_tree,
+			resolved_git_dir,
+			resolved_work_tree,
 			resolved_git_dir,
 			resolved_work_tree,
 			resolved_git_dir,
@@ -543,32 +585,82 @@ local function detect_shell_type(buf)
 	return "sh"
 end
 
---- Injects alias definitions into Neovim terminal buffer(s).
---- @param bufnr integer|nil Specific terminal buffer, or nil for all active terminals.
+--- Ensures main repo .gitignore contains .git-*/ rules and unstages secondary git bare files if staged in main repo.
 --- @param cwd string|nil
-function M.inject_terminal_aliases(bufnr, cwd)
+function M.ignore_in_main_repo(cwd)
+	cwd = cwd or vim.fn.getcwd()
+	local main_ignore = cwd .. "/.gitignore"
+	local rules = { ".git-*/", ".gitignore.*" }
+	local content = ""
+	if vim.fn.filereadable(main_ignore) == 1 then
+		local f = io.open(main_ignore, "r")
+		if f then
+			content = f:read("*a") or ""
+			f:close()
+		end
+	end
+
+	local to_append = {}
+	for _, rule in ipairs(rules) do
+		if not content:find(rule, 1, true) then
+			table.insert(to_append, rule)
+		end
+	end
+
+	if #to_append > 0 then
+		local f = io.open(main_ignore, "a")
+		if f then
+			if #content > 0 and not content:match("\n$") then
+				f:write("\n")
+			end
+			f:write("# Secondary Git Repositories (Dotfiles Pattern)\n")
+			for _, rule in ipairs(to_append) do
+				f:write(rule .. "\n")
+			end
+			f:close()
+		end
+	end
+
+	-- Unstage any secondary bare repo files if accidentally staged in main repo
+	pcall(function()
+		local sec_files = git.lines({ "ls-files", "--stage", ".git-*" }, cwd)
+		if #sec_files > 0 then
+			git.run({ "rm", "--cached", "-r", "--", ".git-*" }, nil, cwd)
+		end
+	end)
+end
+
+--- Sets process environment variables (PROMPT_COMMAND/BASH_ENV/ENV) so new shells load secondary git aliases silently.
+--- @param cwd string|nil
+function M.setup_environment(cwd)
 	cwd = cwd or vim.fn.getcwd()
 	local config = M.load(cwd)
 	if #config.repositories == 0 then
 		return
 	end
 
-	local bufs = bufnr and { bufnr } or vim.api.nvim_list_bufs()
+	M.generate_scripts(cwd)
+	M.ignore_in_main_repo(cwd)
 
-	for _, buf in ipairs(bufs) do
-		if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buftype == "terminal" then
-			local job_id = vim.b[buf].terminal_job_id
-			if job_id and job_id > 0 then
-				local shell_type = detect_shell_type(buf)
-				local eol = (shell_type == "ps1") and "\r\n" or "\n"
+	local project_dir = project.config_dir(cwd)
+	local sh_script = path_util.normalize(project_dir .. "/secondary_aliases.sh"):gsub("\\", "/")
 
-				for _, repo in ipairs(config.repositories) do
-					local cmd = M.generate_alias(repo, shell_type, cwd)
-					pcall(vim.api.nvim_chan_send, job_id, cmd .. eol)
-				end
-			end
+	if vim.fn.filereadable(sh_script) == 1 then
+		vim.env.BASH_ENV = sh_script
+		vim.env.ENV = sh_script
+		local src_cmd = '[ -f "' .. sh_script .. '" ] && source "' .. sh_script .. '"'
+		local cur_prompt = vim.env.PROMPT_COMMAND or ""
+		if not cur_prompt:find(sh_script, 1, true) then
+			vim.env.PROMPT_COMMAND = src_cmd .. (cur_prompt ~= "" and ("; " .. cur_prompt) or "")
 		end
 	end
+end
+
+--- Injects alias definitions into Neovim terminal buffer(s).
+--- @param bufnr integer|nil Specific terminal buffer, or nil for all active terminals.
+--- @param cwd string|nil
+function M.inject_terminal_aliases(bufnr, cwd)
+	M.setup_environment(cwd)
 end
 
 return M

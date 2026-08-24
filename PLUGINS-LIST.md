@@ -54,6 +54,7 @@ Self-authored plugins under `lua/plugins/krs/`, registered as lazy.nvim specs (`
 - `font.lua`
 - `image_viewer.lua`
 - `input_modal.lua`
+- `smart_check.lua`
 
 ### Non-core
 
@@ -75,7 +76,6 @@ Self-authored plugins under `lua/plugins/krs/`, registered as lazy.nvim specs (`
 - `nuget.lua`
 - `php_tools_modal.lua`
 - `pinned_tabs.lua`
-- `smart_check.lua`
 - `sneak_peek.lua`
 - `statusline_picker.lua`
 - `tailwind_organizer.lua`

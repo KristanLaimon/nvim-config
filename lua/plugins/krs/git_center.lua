@@ -935,7 +935,7 @@ function M.open_branch_modal(target_cwd)
 		return
 	end
 
-	local raw_branches = git.lines({ "branch", "-a", "--sort=-committerdate" }, active_cwd)
+	local raw_branches = git_lines({ "branch", "-a", "--sort=-committerdate" }, active_cwd)
 	local branches = {}
 	local current_branch = info.branch or "main"
 
@@ -1024,11 +1024,11 @@ function M.open_branch_modal(target_cwd)
 			cmd_args = { "checkout", "-b", target_b.name, target_b.raw }
 		end
 
-		git.run(cmd_args, function(ok, output)
+		git_run(cmd_args, function(ok, output)
 			if ok then
 				notify("✅ Checked out branch: " .. target_b.name)
 			else
-				git.run({ "switch", target_b.name }, function(ok2, output2)
+				git_run({ "switch", target_b.name }, function(ok2, output2)
 					if ok2 then
 						notify("✅ Switched to branch: " .. target_b.name)
 					else
@@ -1055,7 +1055,7 @@ function M.open_branch_modal(target_cwd)
 			callback = function(ok, new_name)
 				if ok and new_name and new_name ~= "" then
 					new_name = new_name:gsub("%s+", "-"):gsub("[^%w%-_/.]", "")
-					git.run({ "checkout", "-b", new_name }, function(ok2, output)
+					git_run({ "checkout", "-b", new_name }, function(ok2, output)
 						if ok2 then
 							notify("🌿 Created and switched to branch: " .. new_name)
 						else
@@ -1088,7 +1088,7 @@ function M.open_branch_modal(target_cwd)
 		end
 
 		close_modal()
-		git.run({ "branch", flag, target_b.name }, function(ok, output)
+		git_run({ "branch", flag, target_b.name }, function(ok, output)
 			if ok then
 				notify("🗑️ Deleted branch: " .. target_b.name)
 			elseif not force and output:match("not fully merged") then
@@ -1099,7 +1099,7 @@ function M.open_branch_modal(target_cwd)
 						2
 					) == 1
 				then
-					git.run({ "branch", "-D", target_b.name }, function(ok2, output2)
+					git_run({ "branch", "-D", target_b.name }, function(ok2, output2)
 						if ok2 then
 							notify("🗑️ Force deleted branch: " .. target_b.name)
 						else
@@ -1134,7 +1134,7 @@ function M.open_branch_modal(target_cwd)
 			callback = function(ok, new_name)
 				if ok and new_name and new_name ~= "" and new_name ~= target_b.name then
 					new_name = new_name:gsub("%s+", "-"):gsub("[^%w%-_/.]", "")
-					git.run({ "branch", "-m", target_b.name, new_name }, function(ok2, output)
+					git_run({ "branch", "-m", target_b.name, new_name }, function(ok2, output)
 						if ok2 then
 							notify("✏️ Renamed branch to: " .. new_name)
 						else
@@ -1320,7 +1320,7 @@ function M.open_commit_log_modal(target_cwd)
 			return
 		end
 
-		local raw_stat = git.lines({ "show", "--name-status", "--pretty=format:", commit.hash }, active_cwd)
+		local raw_stat = git_lines({ "show", "--name-status", "--pretty=format:", commit.hash }, active_cwd)
 		local edited_files = {}
 		for _, line in ipairs(raw_stat) do
 			local status_char, filepath = line:match("^([A-Z%d]+)%s+(.+)$")
@@ -1338,9 +1338,9 @@ function M.open_commit_log_modal(target_cwd)
 
 		local raw_diff = {}
 		if current_target_file then
-			raw_diff = git.lines({ "show", "--color=never", commit.hash, "--", current_target_file }, active_cwd)
+			raw_diff = git_lines({ "show", "--color=never", commit.hash, "--", current_target_file }, active_cwd)
 		else
-			raw_diff = git.lines({ "show", "--color=never", commit.hash }, active_cwd)
+			raw_diff = git_lines({ "show", "--color=never", commit.hash }, active_cwd)
 		end
 		local combined_diff_lines, l_kinds, r_kinds, col_w = diff.format_side_by_side_single(raw_diff, false, right_w)
 
@@ -1490,7 +1490,7 @@ function M.open_commit_log_modal(target_cwd)
 			return
 		end
 		close_log_modal()
-		git.run({ "checkout", commit.hash }, function(ok, output)
+		git_run({ "checkout", commit.hash }, function(ok, output)
 			if ok then
 				notify("✅ Checked out commit: " .. commit.hash)
 			else
@@ -1967,8 +1967,14 @@ function M.open_git_center()
 	end
 
 	local active_target = get_active_target()
-	local info = (active_target.full_path == root) and status.info_finish(root_status_handle)
-		or M.get_git_info(active_target.full_path)
+	local info
+	if active_target and active_target.is_secondary then
+		info = M.get_git_info()
+	elseif active_target and active_target.full_path == root then
+		info = status.info_finish(root_status_handle)
+	else
+		info = M.get_git_info(active_target and active_target.full_path)
+	end
 	if not info then
 		notify("Cannot read Git status for " .. active_target.name, vim.log.levels.WARN, "Git Center (KRS)")
 		return
@@ -2255,30 +2261,63 @@ function M.open_git_center()
 
 	--- Runs git synchronously in the active repository target.
 	--- @param args string[] Arguments after `git`.
+	--- @param cwd string|nil
 	--- @return string[] output
-	local function git_lines(args)
+	local function git_lines(args, cwd)
 		local target = get_active_target()
+		cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
 		if target and target.is_secondary and target.repo_alias then
 			local sec_ok, sec = pcall(require, "krs.git.secondary")
 			if sec_ok and sec then
-				return sec.lines(target.repo_alias, args, target.full_path)
+				return sec.lines(target.repo_alias, args, cwd)
 			end
 		end
-		return git.lines(args, get_active_target().full_path)
+		return git.lines(args, cwd)
+	end
+
+	--- Runs git asynchronously in the active repository target.
+	--- @param args string[] Arguments after `git`.
+	--- @param on_done function(ok, output)
+	--- @param cwd string|nil
+	local function git_run(args, on_done, cwd)
+		local target = get_active_target()
+		cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+		if target and target.is_secondary and target.repo_alias then
+			local sec_ok, sec = pcall(require, "krs.git.secondary")
+			if sec_ok and sec then
+				sec.run(target.repo_alias, args, on_done, cwd)
+				return
+			end
+		end
+		git.run(args, on_done, cwd)
 	end
 
 	--- Unstaging changed spelling across git versions: `restore --staged` is the
-	--- modern form, `reset HEAD` the fallback for older ones.
+	--- modern form, `reset HEAD` the fallback for older ones, `rm --cached` for fresh repos without HEAD.
 	--- @param paths string[] Paths, or `{ "." }` for everything.
 	local function unstage(paths)
+		local cur_target = get_active_target()
+		if cur_target and cur_target.is_secondary then
+			local rm_args = { "rm", "--cached", "-r", "--" }
+			vim.list_extend(rm_args, paths)
+			git_lines(rm_args)
+			return
+		end
+
 		local args = { "restore", "--staged", "--" }
 		vim.list_extend(args, paths)
 		local result = git_lines(args)
 
-		if #result > 0 and result[1]:match("fatal") then
-			local fallback = { "reset", "HEAD", "--" }
-			vim.list_extend(fallback, paths)
-			git_lines(fallback)
+		local is_err = (#result > 0 and (result[1]:match("fatal") or result[1]:match("error")))
+		if is_err then
+			local fallback1 = { "reset", "HEAD", "--" }
+			vim.list_extend(fallback1, paths)
+			local res2 = git_lines(fallback1)
+			if #res2 > 0 and (res2[1]:match("fatal") or res2[1]:match("error")) then
+				local fallback2 = { "rm", "--cached", "-r", "--" }
+				vim.list_extend(fallback2, paths)
+				git_lines(fallback2)
+			end
 		end
 	end
 
@@ -2572,7 +2611,7 @@ function M.open_git_center()
 			table.insert(args, M.commit_data.description)
 		end
 
-		git.run(args, function(ok, output)
+		git_run(args, function(ok, output)
 			if ok then
 				notify("🚀 Commit successful:\n" .. (output ~= "" and output or "Commit created"), nil, M.settings.control_title)
 				if M.commit_data.tag ~= "" then
@@ -2676,7 +2715,7 @@ function M.open_git_center()
 			table.insert(args, remote)
 			table.insert(args, branch .. ":" .. target)
 
-			git.run(args, function(ok, output)
+			git_run(args, function(ok, output)
 				if ok then
 					notify("✅ Push successful to " .. remote .. "/" .. target .. "!", nil, M.settings.control_title)
 				else
@@ -2713,7 +2752,7 @@ function M.open_git_center()
 
 		if has_upstream then
 			notify("🚀 Pushing to upstream...")
-			git.run({ "push" }, function(ok, output)
+			git_run({ "push" }, function(ok, output)
 				if ok then
 					notify("✅ Push successful to remote repository!", nil, M.settings.control_title)
 				else
