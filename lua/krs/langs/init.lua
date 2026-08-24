@@ -126,6 +126,7 @@ M.langs = {
 	lua = require("krs.langs.lua"),
 	bash = require("krs.langs.bash"),
 	docker_proto = require("krs.langs.docker_proto"),
+	mermaid = require("krs.langs.mermaid"),
 }
 
 --- Display order for `M.langs` in the Language Tooling Manager (`:LanguageManager`)
@@ -133,7 +134,7 @@ M.langs = {
 --- language-agnostic thing left to declare once; everything else per bundle
 --- (name, requires, Mason packages, Treesitter parsers) comes from the module
 --- itself, see lua/krs/core/installer.lua's `M.language_bundles`.
-M.lang_order = { "lua", "php", "typescript", "go", "python", "csharp", "web", "angular", "docker_proto", "bash" }
+M.lang_order = { "lua", "php", "typescript", "go", "python", "csharp", "web", "angular", "docker_proto", "bash", "mermaid" }
 
 --- Initialize all per-language configuration submodules.
 function M.setup()

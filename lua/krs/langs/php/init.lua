@@ -9,11 +9,18 @@
 --     formatters: settings, Mason package names, and filetype assignment.
 -- ============================================================================
 
----@type KrsLangModule
-local M = {}
+--- @class PHPLangModule : KrsLangModule
+--- @field composer table
+--- @field modal table
 
-M.composer = require("krs.langs.php.composer")
-M.modal = require("plugins.krs.php_tools_modal")
+---@type PHPLangModule
+local M = {
+	composer = require("krs.langs.php.composer"),
+	modal = require("plugins.krs.php_tools_modal"),
+}
+
+-- M.composer = require("krs.langs.php.composer")
+-- M.modal = require("plugins.krs.php_tools_modal")
 
 --- The lspconfig/mason server name(s) this language owns.
 M.lsp_server = { "intelephense" }
@@ -162,15 +169,12 @@ local function has_php_tool(executable, filename)
 	if vim.fn.executable(executable) == 1 then
 		return true
 	end
-	return vim.fs.find(
-		{
-			"vendor/bin/" .. executable,
-			"vendor/bin/" .. executable .. ".bat",
-			"vendor/bin/" .. executable .. ".cmd",
-			"vendor/bin/" .. executable .. ".exe",
-		},
-		{ path = filename, upward = true }
-	)[1] ~= nil
+	return vim.fs.find({
+		"vendor/bin/" .. executable,
+		"vendor/bin/" .. executable .. ".bat",
+		"vendor/bin/" .. executable .. ".cmd",
+		"vendor/bin/" .. executable .. ".exe",
+	}, { path = filename, upward = true })[1] ~= nil
 end
 
 --- conform.nvim formatter list per filetype. `stop_after_first`: preference order.

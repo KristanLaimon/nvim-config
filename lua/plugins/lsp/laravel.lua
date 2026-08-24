@@ -59,6 +59,7 @@ return {
 		ft = { "php", "blade" },
 		cmd = "PHPCheckTools",
 		config = function()
+			local php = require("krs.langs.php")
 			local modal = php.modal
 
 			vim.api.nvim_create_user_command("PHPCheckTools", function()

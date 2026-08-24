@@ -1,4 +1,4 @@
-# 🤖 AGENTS.md — KrsVim AI Assistant Guidelines & Compact Wiki Reference
+j 🤖 AGENTS.md — KrsVim AI Assistant Guidelines & Compact Wiki Reference
 
 This file defines mandatory guidelines and reference links for AI coding assistants working in or customizing this Neovim distribution (**KrsVim**).
 

@@ -230,7 +230,7 @@ M.commands = {
 	{ name = "🚀 Open Launch Profiles Manager (<C-S-q>)", cmd = "LaunchProfiles", category = "Transpiler" },
 
 	-- --------------------------------------------------------------------------
-	-- 📝 Markdown & Preview
+	-- 📝 Markdown & Mermaid Preview
 	-- --------------------------------------------------------------------------
 	{
 		name = "📝 Toggle In-Editor Rendered Markdown (Ctrl+Shift+V)",
@@ -242,6 +242,11 @@ M.commands = {
 		cmd = "MarkdownPreviewToggle",
 		category = "Markdown",
 	},
+	{ name = "🧜 Mermaid: Open Live Browser Preview", cmd = "MermaidPreview", category = "Markdown / Mermaid" },
+	{ name = "🧜 Mermaid: Stop Live Browser Preview", cmd = "MermaidPreviewStop", category = "Markdown / Mermaid" },
+	{ name = "🧜 Mermaid: Auto-Format Diagram", cmd = "MermaidFormat", category = "Markdown / Mermaid" },
+	{ name = "🧜 Mermaid: Render Inline (Kitty/chafa)", cmd = "MermaidRender", category = "Markdown / Mermaid" },
+	{ name = "🧜 Mermaid: Copy Preview URL", cmd = "MermaidCopyURL", category = "Markdown / Mermaid" },
 }
 
 -- ============================================================================
