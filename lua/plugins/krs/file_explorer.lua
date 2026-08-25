@@ -570,8 +570,8 @@ function M.open_move_picker(opts)
 
 	pickers
 		.new(picker_options({
-			prompt_title = " 🚚 Move '" .. source_name .. "' ➜ Navigate & press [O] to confirm target folder ",
-			results_title = " Folders / Files | Press [O] to Move File Here | [l] Open Folder | [h] Parent ",
+			prompt_title = " 🚚 Move '" .. source_name .. "' ➜ Navigate & press [O] or [m] to confirm target folder ",
+			results_title = " Folders / Files | [O] Move into selected | [m] Move Here | [l] Open Folder | [h] Parent ",
 			entries = list_directory(curr_dir, nil),
 			attach_mappings = function(prompt_bufnr, map)
 				--- Reopens this picker somewhere else, keeping the source file.
@@ -593,16 +593,7 @@ function M.open_move_picker(opts)
 					return (value and value.is_dir) and value.path or nil
 				end
 
-				actions.select_default:replace(function()
-					local dir = selected_dir()
-					if dir then
-						actions.close(prompt_bufnr)
-						reopen(dir)
-					end
-				end)
-
-				map_all({ { "n", "O" }, { "n", "o" }, { "i", "<C-o>" } }, function()
-					local target_dir = selected_dir() or curr_dir
+				local function perform_move(target_dir)
 					actions.close(prompt_bufnr)
 
 					local dest_path = path.join(target_dir, source_name)
@@ -629,6 +620,23 @@ function M.open_move_picker(opts)
 					else
 						vim.notify("Error moving file: " .. tostring(err), vim.log.levels.ERROR, { title = "Move File" })
 					end
+				end
+
+				actions.select_default:replace(function()
+					local dir = selected_dir()
+					if dir then
+						actions.close(prompt_bufnr)
+						reopen(dir)
+					end
+				end)
+
+				map_all({ { "n", "O" }, { "n", "o" }, { "i", "<C-o>" } }, function()
+					local target_dir = selected_dir() or curr_dir
+					perform_move(target_dir)
+				end)
+
+				map_all({ { "n", "m" }, { "n", "M" }, { "i", "<C-m>" } }, function()
+					perform_move(curr_dir)
 				end)
 
 				map_all({ { "n", "a" }, { "i", "<C-a>" } }, function()
