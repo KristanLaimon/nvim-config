@@ -195,6 +195,13 @@ M.commands = {
 		category = "UI",
 	},
 	{ name = "🎨 Toggle UI Icons Mode (Nerd Font Symbols vs Emojis)", cmd = "ToggleIconsMode", category = "UI" },
+	{
+		name = "📌 Toggle Pin Current Tab (Code Buffer)",
+		fn = function()
+			require("plugins.krs.pinned_tabs").toggle_pin()
+		end,
+		category = "UI",
+	},
 	{ name = "🔍 Increase Font Size", cmd = "FontSizeIncrease", category = "UI" },
 	{ name = "🔍 Decrease Font Size", cmd = "FontSizeDecrease", category = "UI" },
 	{ name = "🔍 Reset Font Size", cmd = "FontSizeReset", category = "UI" },

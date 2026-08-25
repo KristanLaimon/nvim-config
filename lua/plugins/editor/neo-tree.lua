@@ -54,8 +54,8 @@ local settings = {
 		["a"] = "add_file_with_modal",
 		["A"] = "add_folder_with_modal",
 		["<C-n>"] = "add_file_with_modal",
-		["<C-f>"] = "add_folder_with_modal",
-		["<C-F>"] = "add_folder_with_modal",
+		["<C-f>"] = "open_file_browser_desktop",
+		["<C-F>"] = "open_file_browser_desktop",
 		["<C-S-n>"] = "add_folder_with_modal",
 		["<C-S-N>"] = "add_folder_with_modal",
 		["<C-/>"] = "search_respect_gitignore",
@@ -492,6 +492,9 @@ return {
 				commands = {
 					refresh_neotree = function()
 						refresh_neotree_with_notify()
+					end,
+					open_file_browser_desktop = function()
+						vim.cmd("TelescopeFileBrowserDesktop")
 					end,
 					toggle_custom_hidden = with_node(function(node)
 						neotree_hidden.toggle_path(node.path)

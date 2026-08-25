@@ -64,9 +64,9 @@ function M.detect()
 		end
 	end
 
-	-- Check mobile terminal dimensions
+	-- Check mobile terminal dimensions (only if not on a clear desktop OS or GUI)
 	local cols = vim.o.columns or 80
-	if cols < 72 then
+	if cols < 72 and not (env.is_windows or env.is_mac or env.is_wsl or vim.g.neovide) then
 		env.is_mobile = true
 	end
 
