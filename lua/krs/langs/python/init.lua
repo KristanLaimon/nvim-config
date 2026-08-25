@@ -230,7 +230,11 @@ end
 --- @param new_path string
 function M.set_interpreter(new_path)
 	if not new_path or new_path == "" or vim.fn.executable(new_path) ~= 1 then
-		vim.notify("Invalid or non-executable Python path: " .. tostring(new_path), vim.log.levels.ERROR, { title = "Python Interpreter" })
+		vim.notify(
+			"Invalid or non-executable Python path: " .. tostring(new_path),
+			vim.log.levels.ERROR,
+			{ title = "Python Interpreter" }
+		)
 		return
 	end
 
@@ -282,7 +286,11 @@ function M.set_interpreter(new_path)
 	-- 3. Redraw statusline
 	vim.cmd("redrawstatus")
 	local ver = M.get_python_version(new_path)
-	vim.notify("Python interpreter set to: " .. new_path .. " (" .. ver .. ")", vim.log.levels.INFO, { title = "Python Interpreter" })
+	vim.notify(
+		"Python interpreter set to: " .. new_path .. " (" .. ver .. ")",
+		vim.log.levels.INFO,
+		{ title = "Python Interpreter" }
+	)
 end
 
 --- Interactive UI picker for selecting Python interpreter (like VSCode "Python: Select Interpreter").

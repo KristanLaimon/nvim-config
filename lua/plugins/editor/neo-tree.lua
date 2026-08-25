@@ -425,14 +425,54 @@ return {
 			neotree_hidden.setup()
 
 			local user_cmds = {
-				NeotreeCreateFile = { function() add_file_prompt() end, "Create new file in Neo-tree target directory" },
-				NeotreeAddFile = { function() add_file_prompt() end, "Create new file in Neo-tree target directory" },
-				NeotreeCreateFolder = { function() add_folder_prompt() end, "Create new folder in Neo-tree target directory" },
-				NeotreeAddFolder = { function() add_folder_prompt() end, "Create new folder in Neo-tree target directory" },
-				NeotreeRefresh = { function() refresh_neotree_with_notify() end, "Rescan and refresh Neo-tree files" },
-				NeotreeRescan = { function() refresh_neotree_with_notify() end, "Rescan and refresh Neo-tree files" },
-				NeotreeToggleCustomHiddenVisibility = { function() neotree_hidden.toggle_visibility() end, "Toggle visibility of custom hidden items in Neo-tree" },
-				NeotreeClearCustomHidden = { function() neotree_hidden.clear_all() end, "Clear all marked custom hidden items in Neo-tree" },
+				NeotreeCreateFile = {
+					function()
+						add_file_prompt()
+					end,
+					"Create new file in Neo-tree target directory",
+				},
+				NeotreeAddFile = {
+					function()
+						add_file_prompt()
+					end,
+					"Create new file in Neo-tree target directory",
+				},
+				NeotreeCreateFolder = {
+					function()
+						add_folder_prompt()
+					end,
+					"Create new folder in Neo-tree target directory",
+				},
+				NeotreeAddFolder = {
+					function()
+						add_folder_prompt()
+					end,
+					"Create new folder in Neo-tree target directory",
+				},
+				NeotreeRefresh = {
+					function()
+						refresh_neotree_with_notify()
+					end,
+					"Rescan and refresh Neo-tree files",
+				},
+				NeotreeRescan = {
+					function()
+						refresh_neotree_with_notify()
+					end,
+					"Rescan and refresh Neo-tree files",
+				},
+				NeotreeToggleCustomHiddenVisibility = {
+					function()
+						neotree_hidden.toggle_visibility()
+					end,
+					"Toggle visibility of custom hidden items in Neo-tree",
+				},
+				NeotreeClearCustomHidden = {
+					function()
+						neotree_hidden.clear_all()
+					end,
+					"Clear all marked custom hidden items in Neo-tree",
+				},
 			}
 			for name, spec in pairs(user_cmds) do
 				if vim.fn.exists(":" .. name) == 0 then
@@ -538,7 +578,11 @@ return {
 								vim.notify("Deleted: " .. name, vim.log.levels.INFO, { title = "Neo-tree" })
 								refresh_tree()
 							else
-								vim.notify("Failed to delete '" .. name .. "': " .. tostring(err), vim.log.levels.ERROR, { title = "Neo-tree" })
+								vim.notify(
+									"Failed to delete '" .. name .. "': " .. tostring(err),
+									vim.log.levels.ERROR,
+									{ title = "Neo-tree" }
+								)
 							end
 						end)
 					end, true),

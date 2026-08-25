@@ -434,103 +434,106 @@ return {
 			local themes = require("telescope.themes")
 
 			pickers
-				.new(themes.get_dropdown({
-					prompt_title = " 📁 Recent Projects | [f] Favorite | [r] Rename | [d] Delete ",
-					width = settings.picker.width,
-					layout_config = settings.picker,
-					finder = finders.new_table({
-						results = build_entries(),
-						entry_maker = function(entry)
-							return {
-								value = entry,
-								display = entry.icon .. "  " .. entry.path .. (entry.is_favorite and " ⭐ [Favorite]" or ""),
-								ordinal = (entry.is_favorite and "0_" or "1_") .. entry.path,
-							}
+				.new(
+					themes.get_dropdown({
+						prompt_title = " 📁 Recent Projects | [f] Favorite | [r] Rename | [d] Delete ",
+						width = settings.picker.width,
+						layout_config = settings.picker,
+						finder = finders.new_table({
+							results = build_entries(),
+							entry_maker = function(entry)
+								return {
+									value = entry,
+									display = entry.icon .. "  " .. entry.path .. (entry.is_favorite and " ⭐ [Favorite]" or ""),
+									ordinal = (entry.is_favorite and "0_" or "1_") .. entry.path,
+								}
+							end,
+						}),
+						sorter = conf.generic_sorter({}),
+						attach_mappings = function(prompt_bufnr, map)
+							--- Selected entry, or nil.
+							local function selected()
+								local selection = action_state.get_selected_entry()
+								return selection and selection.value or nil
+							end
+
+							--- Reopens the picker so it reflects a change.
+							local function reopen()
+								vim.schedule(function()
+									open_projects_picker(opts)
+								end)
+							end
+
+							actions.select_default:replace(function()
+								local entry = selected()
+								actions.close(prompt_bufnr)
+								if entry then
+									open_project(entry.path)
+								end
+							end)
+
+							map("n", "f", function()
+								local entry = selected()
+								if not entry then
+									return
+								end
+
+								if favorites.toggle(entry.path) then
+									vim.notify("⭐ Project saved as favorite (top first)", vim.log.levels.INFO, {
+										title = "Recent Projects",
+									})
+								else
+									vim.notify("Removed project from favorites", vim.log.levels.INFO, {
+										title = "Recent Projects",
+									})
+								end
+
+								actions.close(prompt_bufnr)
+								reopen()
+							end)
+
+							map("n", "r", function()
+								local entry = selected()
+								if not entry then
+									return
+								end
+								local old_name = vim.fn.fnamemodify(entry.path, ":t")
+								actions.close(prompt_bufnr)
+
+								vim.schedule(function()
+									require("plugins.krs.input_modal").open({
+										label = "Rename Project (" .. old_name .. ")",
+										default_value = old_name,
+										relative = "editor",
+										callback = function(ok, new_name)
+											if ok and new_name and new_name ~= "" and new_name ~= old_name then
+												rename_project(entry, new_name)
+											end
+											open_projects_picker(opts)
+										end,
+									})
+								end)
+							end)
+
+							map("n", "d", function()
+								local entry = selected()
+								if not entry then
+									return
+								end
+								if vim.fn.confirm("Delete '" .. entry.path .. "' from project list?", "&Yes\n&No", 2) ~= 1 then
+									return
+								end
+
+								forget_project(entry)
+								actions.close(prompt_bufnr)
+								reopen()
+							end)
+
+							return true
 						end,
 					}),
-					sorter = conf.generic_sorter({}),
-					attach_mappings = function(prompt_bufnr, map)
-						--- Selected entry, or nil.
-						local function selected()
-							local selection = action_state.get_selected_entry()
-							return selection and selection.value or nil
-						end
-
-						--- Reopens the picker so it reflects a change.
-						local function reopen()
-							vim.schedule(function()
-								open_projects_picker(opts)
-							end)
-						end
-
-						actions.select_default:replace(function()
-							local entry = selected()
-							actions.close(prompt_bufnr)
-							if entry then
-								open_project(entry.path)
-							end
-						end)
-
-						map("n", "f", function()
-							local entry = selected()
-							if not entry then
-								return
-							end
-
-							if favorites.toggle(entry.path) then
-								vim.notify("⭐ Project saved as favorite (top first)", vim.log.levels.INFO, {
-									title = "Recent Projects",
-								})
-							else
-								vim.notify("Removed project from favorites", vim.log.levels.INFO, {
-									title = "Recent Projects",
-								})
-							end
-
-							actions.close(prompt_bufnr)
-							reopen()
-						end)
-
-						map("n", "r", function()
-							local entry = selected()
-							if not entry then
-								return
-							end
-							local old_name = vim.fn.fnamemodify(entry.path, ":t")
-							actions.close(prompt_bufnr)
-
-							vim.schedule(function()
-								require("plugins.krs.input_modal").open({
-									label = "Rename Project (" .. old_name .. ")",
-									default_value = old_name,
-									relative = "editor",
-									callback = function(ok, new_name)
-										if ok and new_name and new_name ~= "" and new_name ~= old_name then
-											rename_project(entry, new_name)
-										end
-										open_projects_picker(opts)
-									end,
-								})
-							end)
-						end)
-
-						map("n", "d", function()
-							local entry = selected()
-							if not entry then
-								return
-							end
-							if vim.fn.confirm("Delete '" .. entry.path .. "' from project list?", "&Yes\n&No", 2) ~= 1 then
-								return
-							end
-
-							forget_project(entry)
-							actions.close(prompt_bufnr)
-							reopen()
-						end)
-
-						return true
-					end,
-				}), {})
+					{}
+				)
 				:find()
 		end
 

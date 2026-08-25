@@ -279,8 +279,16 @@ function M.setup()
 		})
 	end
 
-	vim.api.nvim_create_user_command("SmartCheck", run_manual_check, { desc = "Check for external file changes across open buffers" })
-	vim.api.nvim_create_user_command("KrsSmartCheck", run_manual_check, { desc = "Check for external file changes across open buffers" })
+	vim.api.nvim_create_user_command(
+		"SmartCheck",
+		run_manual_check,
+		{ desc = "Check for external file changes across open buffers" }
+	)
+	vim.api.nvim_create_user_command(
+		"KrsSmartCheck",
+		run_manual_check,
+		{ desc = "Check for external file changes across open buffers" }
+	)
 
 	M.check_all_buffers(true)
 	start_timer()

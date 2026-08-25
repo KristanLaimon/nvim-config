@@ -181,7 +181,9 @@ function M.open_settings_menu()
 				path.ensure_dir(path.join(root, ".vscode"))
 				local f = io.open(default_path, "w")
 				if f then
-					f:write("{\n  \"editor.tabSize\": 4,\n  \"editor.insertSpaces\": true,\n  \"files.eol\": \"\\n\",\n  \"editor.formatOnSave\": true\n}\n")
+					f:write(
+						'{\n  "editor.tabSize": 4,\n  "editor.insertSpaces": true,\n  "files.eol": "\\n",\n  "editor.formatOnSave": true\n}\n'
+					)
 					f:close()
 				end
 				vim.cmd("edit " .. vim.fn.fnameescape(default_path))

@@ -123,13 +123,11 @@ if not vim.g.neovide and vim.fn.has("gui_running") == 0 then
 
 	-- CSI-u (Kitty Keyboard Protocol) — sent by Kitty, foot, WezTerm, and
 	-- newer xterm / Termux when the protocol is active: ESC [ 46 ; 5 u
-	vim.keymap.set({ "n", "i", "v" }, "\x1b[46;5u", code_action_fn,
-		opts("Quick Fix / Code Actions (TUI CSI-u alias)"))
+	vim.keymap.set({ "n", "i", "v" }, "\x1b[46;5u", code_action_fn, opts("Quick Fix / Code Actions (TUI CSI-u alias)"))
 
 	-- Legacy xterm / Termux fallback: ESC followed by literal '.'
 	-- (many xterm-256color builds send this for Ctrl+.)
-	vim.keymap.set({ "n", "i", "v" }, "\x1b.", code_action_fn,
-		opts("Quick Fix / Code Actions (TUI xterm alias)"))
+	vim.keymap.set({ "n", "i", "v" }, "\x1b.", code_action_fn, opts("Quick Fix / Code Actions (TUI xterm alias)"))
 end
 
 -- ============================================================================

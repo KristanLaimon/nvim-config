@@ -133,7 +133,10 @@ function M.check(force)
 			local ctx = M.get_current_context_name()
 			local msg = M.settings.notification_msg
 			if ctx and ctx ~= "" and ctx ~= "Editor" then
-				msg = string.format("⚠️ Bloq Mayús (Caps Lock) está activado en %s. Los atajos de teclado pueden fallar.", ctx)
+				msg = string.format(
+					"⚠️ Bloq Mayús (Caps Lock) está activado en %s. Los atajos de teclado pueden fallar.",
+					ctx
+				)
 			end
 
 			vim.schedule(function()

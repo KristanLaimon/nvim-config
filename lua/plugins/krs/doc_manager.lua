@@ -326,20 +326,26 @@ Offline documentation reference for %s version %s.
 			if not v or v == "" then
 				return
 			end
-			vim.ui.input({ prompt = "Doc Topic Name (e.g. string_functions, arrays, async): ", default = "overview" }, function(t)
+			vim.ui.input(
+				{ prompt = "Doc Topic Name (e.g. string_functions, arrays, async): ", default = "overview" },
+				function(t)
+					if not t or t == "" then
+						return
+					end
+					do_create(lang, v, t)
+				end
+			)
+		end)
+	elseif not topic or topic == "" then
+		vim.ui.input(
+			{ prompt = "Doc Topic Name (e.g. string_functions, arrays, async): ", default = "overview" },
+			function(t)
 				if not t or t == "" then
 					return
 				end
-				do_create(lang, v, t)
-			end)
-		end)
-	elseif not topic or topic == "" then
-		vim.ui.input({ prompt = "Doc Topic Name (e.g. string_functions, arrays, async): ", default = "overview" }, function(t)
-			if not t or t == "" then
-				return
+				do_create(lang, version, t)
 			end
-			do_create(lang, version, t)
-		end)
+		)
 	else
 		do_create(lang, version, topic)
 	end
@@ -383,39 +389,58 @@ end
 --- @param callback fun(ok: boolean, lang: string|nil, version: string|nil)|nil
 function M.download(slug, callback)
 	slug = vim.trim(slug or "")
-	if slug == "" then return end
+	if slug == "" then
+		return
+	end
 
 	local krs_notify = require("krs.core.notify")
-	local toast_id   = "doc_download_" .. slug
-	local toast_opts  = { title = "📥 DocManager" }
+	local toast_id = "doc_download_" .. slug
+	local toast_opts = { title = "📥 DocManager" }
 
-	krs_notify.notify_progress(toast_id, "⬇️  " .. slug .. "\nFetching from devdocs.io…", vim.log.levels.INFO, toast_opts)
+	krs_notify.notify_progress(
+		toast_id,
+		"⬇️  " .. slug .. "\nFetching from devdocs.io…",
+		vim.log.levels.INFO,
+		toast_opts
+	)
 
 	local db_url = M.settings.devdocs_documents_base .. "/" .. slug .. "/db.json"
 
 	vim.system({ "curl", "-sL", db_url }, { text = true }, function(obj)
 		vim.schedule(function()
 			if obj.code ~= 0 or not obj.stdout or obj.stdout == "" then
-				krs_notify.notify_progress(toast_id,
+				krs_notify.notify_progress(
+					toast_id,
 					"❌  " .. slug .. "\nFailed: " .. (obj.stderr or "unknown error"),
-					vim.log.levels.ERROR, toast_opts)
+					vim.log.levels.ERROR,
+					toast_opts
+				)
 				krs_notify.finish_progress(toast_id)
-				if callback then callback(false) end
+				if callback then
+					callback(false)
+				end
 				return
 			end
 
 			local ok, pages = pcall(vim.json.decode, obj.stdout)
 			if not ok or type(pages) ~= "table" then
-				krs_notify.notify_progress(toast_id,
+				krs_notify.notify_progress(
+					toast_id,
 					"❌  " .. slug .. "\nFailed to parse response.",
-					vim.log.levels.ERROR, toast_opts)
+					vim.log.levels.ERROR,
+					toast_opts
+				)
 				krs_notify.finish_progress(toast_id)
-				if callback then callback(false) end
+				if callback then
+					callback(false)
+				end
 				return
 			end
 
 			local lang, version = slug:match("^([^~]+)~?(.*)$")
-			if not version or version == "" then version = "latest" end
+			if not version or version == "" then
+				version = "latest"
+			end
 
 			local target_dir = M.settings.docs_dir .. "/" .. lang .. "/" .. version
 			vim.fn.mkdir(target_dir, "p")
@@ -427,8 +452,8 @@ function M.download(slug, callback)
 			end
 
 			local total = #page_list
-			local done  = 0
-			local CHUNK = 20  -- files per scheduler tick
+			local done = 0
+			local CHUNK = 20 -- files per scheduler tick
 
 			local function write_chunk()
 				local limit = math.min(done + CHUNK, total)
@@ -436,27 +461,40 @@ function M.download(slug, callback)
 					done = done + 1
 					local entry = page_list[done]
 					local rel = entry.path:gsub("[^%w_%-/%.]", "_")
-					if rel == "" then rel = "index" end
+					if rel == "" then
+						rel = "index"
+					end
 					local fpath = target_dir .. "/" .. rel .. ".html"
 					vim.fn.mkdir(vim.fn.fnamemodify(fpath, ":h"), "p")
 					local f = io.open(fpath, "w")
-					if f then f:write(entry.html); f:close() end
+					if f then
+						f:write(entry.html)
+						f:close()
+					end
 				end
 
 				local frac = total > 0 and (done / total) or 0
-				local pct  = math.floor(frac * 100)
-				krs_notify.notify_progress(toast_id,
+				local pct = math.floor(frac * 100)
+				krs_notify.notify_progress(
+					toast_id,
 					string.format("⬇️  %s\n%s  %d%%  (%d / %d)", slug, make_bar(frac), pct, done, total),
-					vim.log.levels.INFO, toast_opts)
+					vim.log.levels.INFO,
+					toast_opts
+				)
 
 				if done < total then
 					vim.schedule(write_chunk)
 				else
-					krs_notify.notify_progress(toast_id,
+					krs_notify.notify_progress(
+						toast_id,
 						string.format("✅  %s\n%d pages saved → %s", slug, done, target_dir),
-						vim.log.levels.INFO, toast_opts)
+						vim.log.levels.INFO,
+						toast_opts
+					)
 					krs_notify.finish_progress(toast_id)
-					if callback then callback(true, lang, version) end
+					if callback then
+						callback(true, lang, version)
+					end
 				end
 			end
 
@@ -478,7 +516,9 @@ local function html_to_md(html)
 	text = text:gsub("<[Ss][Cc][Rr][Ii][Pp][Tt].->.-</[Ss][Cc][Rr][Ii][Pp][Tt]>", "")
 	text = text:gsub("<[Ss][Tt][Yy][Ll][Ee].->.-</[Ss][Tt][Yy][Ll][Ee]>", "")
 	text = text:gsub("<[Bb][Rr]%s*/?>", "\n")
-	text = text:gsub("<[Hh]([1-6])[^>]*>", function(n) return "\n" .. string.rep("#", tonumber(n) or 1) .. " " end)
+	text = text:gsub("<[Hh]([1-6])[^>]*>", function(n)
+		return "\n" .. string.rep("#", tonumber(n) or 1) .. " "
+	end)
 	text = text:gsub("</[Hh][1-6]>", "\n")
 	text = text:gsub("<[Ll][Ii][^>]*>", "\n- ")
 	text = text:gsub("<[Pp][^>]*>", "\n")
@@ -527,7 +567,12 @@ function M.browse_and_download()
 		end)
 
 		pick("📥 Download DevDocs Documentation (Offline)", list, function(entry)
-			return "📘 " .. entry.name .. ((entry.version or "") ~= "" and (" " .. entry.version) or "") .. "  [" .. entry.slug .. "]"
+			return "📘 "
+				.. entry.name
+				.. ((entry.version or "") ~= "" and (" " .. entry.version) or "")
+				.. "  ["
+				.. entry.slug
+				.. "]"
 		end, function(entry)
 			M.download(entry.slug)
 		end)
@@ -540,12 +585,18 @@ function M.open_manager()
 	local options = {
 		{ label = "⬇️ Download Docs from DevDocs.io (Offline)", action = M.browse_and_download },
 		{ label = "🔍 Search All Offline Docs (Telescope Grep)", action = M.search_docs },
-		{ label = "📖 View Docs for Current Language (" .. ft .. ")", action = function()
-			M.view_docs(ft)
-		end },
-		{ label = "➕ Create New Offline Doc (Add Topic)", action = function()
-			M.add_doc(ft)
-		end },
+		{
+			label = "📖 View Docs for Current Language (" .. ft .. ")",
+			action = function()
+				M.view_docs(ft)
+			end,
+		},
+		{
+			label = "➕ Create New Offline Doc (Add Topic)",
+			action = function()
+				M.add_doc(ft)
+			end,
+		},
 		{
 			label = "📂 Open Offline Docs Root Folder in Explorer",
 			action = function()

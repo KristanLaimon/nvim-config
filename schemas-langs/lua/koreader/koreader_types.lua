@@ -159,10 +159,14 @@ Event = Event or {}
 logger = logger or {}
 
 ---@type fun(msg: string): string
-_ = _ or function(msg) return msg end
+_ = _ or function(msg)
+	return msg
+end
 
 ---@type fun(msg: string): string
-T = T or function(msg) return msg end
+T = T or function(msg)
+	return msg
+end
 
 ---@class LuaSettings
 ---@field readSetting fun(self: LuaSettings, key: string, default?: any): any Read a stored value, or `default` when absent

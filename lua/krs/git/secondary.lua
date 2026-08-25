@@ -36,8 +36,14 @@ end
 --- @param git_dir string|nil
 --- @return string normalized_dir
 function M.normalize_git_dir(git_dir)
-	if not git_dir or git_dir == "" then return git_dir end
-	local is_abs = git_dir:match("^/") or git_dir:match("^%a:") or git_dir:match("^%~") or git_dir:match("^%$HOME") or git_dir:match("^%%USERPROFILE%%")
+	if not git_dir or git_dir == "" then
+		return git_dir
+	end
+	local is_abs = git_dir:match("^/")
+		or git_dir:match("^%a:")
+		or git_dir:match("^%~")
+		or git_dir:match("^%$HOME")
+		or git_dir:match("^%%USERPROFILE%%")
 	if not is_abs then
 		local clean = git_dir:gsub("\\", "/")
 		if clean:sub(1, 2) == "./" then
@@ -266,7 +272,6 @@ function M.build_cmd_args(repo_or_alias, git_args, cwd)
 		vim.list_extend(parsed_args, git_args)
 	end
 
-
 	vim.list_extend(prefix_args, parsed_args)
 	return git.build(prefix_args, cwd)
 end
@@ -327,12 +332,16 @@ function M.run(repo_or_alias, git_args, on_done, cwd)
 					vim.list_extend(fallback_cmd, sub_files)
 					local fallback_argv = M.build_cmd_args(repo_or_alias, fallback_cmd, cwd)
 					if fallback_argv then
-						vim.system(fallback_argv, { text = true }, vim.schedule_wrap(function(res2)
-							local out2 = vim.trim((res2.stderr or "") .. (res2.stdout or ""))
-							if on_done then
-								on_done(res2.code == 0, out2)
-							end
-						end))
+						vim.system(
+							fallback_argv,
+							{ text = true },
+							vim.schedule_wrap(function(res2)
+								local out2 = vim.trim((res2.stderr or "") .. (res2.stdout or ""))
+								if on_done then
+									on_done(res2.code == 0, out2)
+								end
+							end)
+						)
 						return
 					end
 				end
@@ -383,91 +392,108 @@ function M.init_repo(opts, on_done, cwd)
 
 	-- Ensure custom .gitignore.<alias> file exists
 	if vim.fn.filereadable(custom_gitignore_path) == 0 then
-		store.write_file(custom_gitignore_path, "# Ignore rules for secondary repository: " .. opts.alias .. "\nnode_modules/\n.tmp/\n")
+		store.write_file(
+			custom_gitignore_path,
+			"# Ignore rules for secondary repository: " .. opts.alias .. "\nnode_modules/\n.tmp/\n"
+		)
 	end
 
 	-- Create bare repository if missing
 	local init_argv = git.build({ "init", "--bare", resolved_git_dir }, cwd)
-	vim.system(init_argv, { text = true }, vim.schedule_wrap(function(res_init)
-		if res_init.code ~= 0 then
-			if on_done then
-				on_done(false, "Failed to initialize bare repository at " .. resolved_git_dir .. ": " .. (res_init.stderr or ""))
+	vim.system(
+		init_argv,
+		{ text = true },
+		vim.schedule_wrap(function(res_init)
+			if res_init.code ~= 0 then
+				if on_done then
+					on_done(
+						false,
+						"Failed to initialize bare repository at " .. resolved_git_dir .. ": " .. (res_init.stderr or "")
+					)
+				end
+				return
 			end
-			return
-		end
 
-		-- Function to configure untracked, custom excludes file and remote
-		local function finish_setup()
-			local steps = {}
+			-- Function to configure untracked, custom excludes file and remote
+			local function finish_setup()
+				local steps = {}
 
-			-- Hide untracked files by default if requested (dotfiles pattern standard)
-			if opts.show_untracked == false or opts.show_untracked == nil then
+				-- Hide untracked files by default if requested (dotfiles pattern standard)
+				if opts.show_untracked == false or opts.show_untracked == nil then
+					table.insert(steps, {
+						"--git-dir=" .. resolved_git_dir,
+						"--work-tree=" .. resolved_work_tree,
+						"config",
+						"status.showUntrackedFiles",
+						"no",
+					})
+				end
+
+				-- Configure custom excludes file (.gitignore.<alias>)
 				table.insert(steps, {
 					"--git-dir=" .. resolved_git_dir,
 					"--work-tree=" .. resolved_work_tree,
 					"config",
-					"status.showUntrackedFiles",
-					"no",
+					"core.excludesFile",
+					custom_gitignore_path,
 				})
-			end
 
-			-- Configure custom excludes file (.gitignore.<alias>)
-			table.insert(steps, {
-				"--git-dir=" .. resolved_git_dir,
-				"--work-tree=" .. resolved_work_tree,
-				"config",
-				"core.excludesFile",
-				custom_gitignore_path,
-			})
-
-			-- Disable advice about addIgnoredFile
-			table.insert(steps, {
-				"--git-dir=" .. resolved_git_dir,
-				"--work-tree=" .. resolved_work_tree,
-				"config",
-				"advice.addIgnoredFile",
-				"false",
-			})
-
-			-- Add remote if provided
-			if opts.remote and opts.remote ~= "" then
+				-- Disable advice about addIgnoredFile
 				table.insert(steps, {
 					"--git-dir=" .. resolved_git_dir,
 					"--work-tree=" .. resolved_work_tree,
-					"remote",
-					"add",
-					"origin",
-					opts.remote,
+					"config",
+					"advice.addIgnoredFile",
+					"false",
 				})
-			end
 
-			local function run_next(step_idx)
-				if step_idx > #steps then
-					-- Register in config
-					local ok_save = M.add_repo(opts, cwd)
-					M.setup_environment(cwd)
-
-					if on_done then
-						if ok_save then
-							on_done(true, "Successfully initialized secondary repository '" .. opts.alias .. "' at " .. resolved_git_dir)
-						else
-							on_done(false, "Initialized bare repo but failed to save configuration.")
-						end
-					end
-					return
+				-- Add remote if provided
+				if opts.remote and opts.remote ~= "" then
+					table.insert(steps, {
+						"--git-dir=" .. resolved_git_dir,
+						"--work-tree=" .. resolved_work_tree,
+						"remote",
+						"add",
+						"origin",
+						opts.remote,
+					})
 				end
 
-				local argv = git.build(steps[step_idx], cwd)
-				vim.system(argv, { text = true }, vim.schedule_wrap(function()
-					run_next(step_idx + 1)
-				end))
+				local function run_next(step_idx)
+					if step_idx > #steps then
+						-- Register in config
+						local ok_save = M.add_repo(opts, cwd)
+						M.setup_environment(cwd)
+
+						if on_done then
+							if ok_save then
+								on_done(
+									true,
+									"Successfully initialized secondary repository '" .. opts.alias .. "' at " .. resolved_git_dir
+								)
+							else
+								on_done(false, "Initialized bare repo but failed to save configuration.")
+							end
+						end
+						return
+					end
+
+					local argv = git.build(steps[step_idx], cwd)
+					vim.system(
+						argv,
+						{ text = true },
+						vim.schedule_wrap(function()
+							run_next(step_idx + 1)
+						end)
+					)
+				end
+
+				run_next(1)
 			end
 
-			run_next(1)
-		end
-
-		finish_setup()
-	end))
+			finish_setup()
+		end)
+	)
 end
 
 -- ---------------------------------------------------------------------------
@@ -550,7 +576,13 @@ local function detect_shell_type(buf)
 	end
 
 	local bufname = (vim.api.nvim_buf_get_name(buf) or ""):lower()
-	if bufname:find("bash") or bufname:find("zsh") or bufname:find("msys") or bufname:find("mingw") or bufname:find("git") then
+	if
+		bufname:find("bash")
+		or bufname:find("zsh")
+		or bufname:find("msys")
+		or bufname:find("mingw")
+		or bufname:find("git")
+	then
 		return "sh"
 	end
 	if bufname:find("powershell") or bufname:find("pwsh") or bufname:find("cmd.exe") then
@@ -558,7 +590,14 @@ local function detect_shell_type(buf)
 	end
 
 	local shell = (vim.o.shell or ""):lower()
-	if shell:find("bash") or shell:find("zsh") or shell:find("sh") or shell:find("msys") or shell:find("mingw") or shell:find("git") then
+	if
+		shell:find("bash")
+		or shell:find("zsh")
+		or shell:find("sh")
+		or shell:find("msys")
+		or shell:find("mingw")
+		or shell:find("git")
+	then
 		return "sh"
 	end
 	if shell:find("powershell") or shell:find("pwsh") or shell:find("cmd") then

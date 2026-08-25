@@ -35,8 +35,12 @@ describe("KrsTranspile commands and file resolution", function()
 
 		-- Cleanup
 		os.remove(tmp)
-		if fs.exists(sh_path) then os.remove(sh_path) end
-		if fs.exists(ps1_path) then os.remove(ps1_path) end
+		if fs.exists(sh_path) then
+			os.remove(sh_path)
+		end
+		if fs.exists(ps1_path) then
+			os.remove(ps1_path)
+		end
 		vim.api.nvim_buf_delete(buf, { force = true })
 	end)
 

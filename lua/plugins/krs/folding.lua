@@ -299,8 +299,20 @@ function M.setup()
 		FoldFunctions = { M.fold_functions, "Fold all functions & methods" },
 		FoldHTML = { M.fold_html, "Fold HTML tags & elements" },
 		FoldScopes = { M.fold_scopes, "Fold code scope blocks" },
-		FoldSave = { function() M.save_fold_view(); vim.notify("💾 Fold state saved to .krsnvim", vim.log.levels.INFO, { title = "Folding" }) end, "Save fold state for file to .krsnvim" },
-		FoldRestore = { function() M.restore_fold_view(); vim.notify("📂 Fold state restored from .krsnvim", vim.log.levels.INFO, { title = "Folding" }) end, "Restore fold state for file from .krsnvim" },
+		FoldSave = {
+			function()
+				M.save_fold_view()
+				vim.notify("💾 Fold state saved to .krsnvim", vim.log.levels.INFO, { title = "Folding" })
+			end,
+			"Save fold state for file to .krsnvim",
+		},
+		FoldRestore = {
+			function()
+				M.restore_fold_view()
+				vim.notify("📂 Fold state restored from .krsnvim", vim.log.levels.INFO, { title = "Folding" })
+			end,
+			"Restore fold state for file from .krsnvim",
+		},
 		FoldClearViews = { M.clear_stored_folds, "Clear stored fold states in .krsnvim" },
 	}
 
@@ -314,7 +326,12 @@ function M.setup()
 
 	-- Bind Alt+Y keymaps across normal, visual, insert, and terminal modes
 	for _, key in ipairs(M.settings.keys.toggle) do
-		vim.keymap.set({ "n", "v", "i", "t" }, key, M.toggle_fold, { noremap = true, silent = true, desc = "Toggle fold (HTML, functions, scopes)" })
+		vim.keymap.set(
+			{ "n", "v", "i", "t" },
+			key,
+			M.toggle_fold,
+			{ noremap = true, silent = true, desc = "Toggle fold (HTML, functions, scopes)" }
+		)
 	end
 
 	-- Mouse double-click on fold line to toggle fold
@@ -338,15 +355,33 @@ function M.setup()
 		palette.add_command({ name = "󰊕 Fold All Functions & Methods", cmd = "FoldFunctions", category = "Folding" })
 		palette.add_command({ name = "📦 Fold All Scope Blocks", cmd = "FoldScopes", category = "Folding" })
 		palette.add_command({ name = "💾 Save Stored Fold View to .krsnvim", cmd = "FoldSave", category = "Folding" })
-		palette.add_command({ name = "📂 Restore Stored Fold View from .krsnvim", cmd = "FoldRestore", category = "Folding" })
-		palette.add_command({ name = "🗑️ Clear Stored Fold Views in .krsnvim", cmd = "FoldClearViews", category = "Folding" })
+		palette.add_command({
+			name = "📂 Restore Stored Fold View from .krsnvim",
+			cmd = "FoldRestore",
+			category = "Folding",
+		})
+		palette.add_command({
+			name = "🗑️ Clear Stored Fold Views in .krsnvim",
+			cmd = "FoldClearViews",
+			category = "Folding",
+		})
 	end
 end
 
 return setmetatable({
 	name = "krs_folding",
 	dir = require("krs.core.lazyspec").for_module(),
-	cmd = { "FoldToggle", "FoldOpenAll", "FoldCloseAll", "FoldFunctions", "FoldHTML", "FoldScopes", "FoldSave", "FoldRestore", "FoldClearViews" },
+	cmd = {
+		"FoldToggle",
+		"FoldOpenAll",
+		"FoldCloseAll",
+		"FoldFunctions",
+		"FoldHTML",
+		"FoldScopes",
+		"FoldSave",
+		"FoldRestore",
+		"FoldClearViews",
+	},
 	event = { "BufReadPost", "BufNewFile" },
 	keys = {
 		{ "<A-y>", mode = { "n", "v", "i", "t" }, desc = "Toggle fold" },

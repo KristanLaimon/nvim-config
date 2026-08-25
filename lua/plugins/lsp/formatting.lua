@@ -100,18 +100,19 @@ return {
 			local ok, installer = pcall(require, "krs.core.installer")
 			local ignore_list = {}
 
-			local base_list = (ok and type(installer.mason_packages) == "table") and installer.mason_packages or {
-				"stylua",
-				"gofumpt",
-				"goimports",
-				"prettierd",
-				"prettier",
-				"blade-formatter",
-				"beautysh",
-				"protolint",
-				"biome",
-				"eslint",
-			}
+			local base_list = (ok and type(installer.mason_packages) == "table") and installer.mason_packages
+				or {
+					"stylua",
+					"gofumpt",
+					"goimports",
+					"prettierd",
+					"prettier",
+					"blade-formatter",
+					"beautysh",
+					"protolint",
+					"biome",
+					"eslint",
+				}
 
 			for _, pkg in ipairs(base_list) do
 				table.insert(ignore_list, pkg)

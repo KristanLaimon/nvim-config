@@ -81,12 +81,10 @@ local function validate_buffer(bufnr)
 						col = line:find("=") or 0,
 						end_col = #line,
 						severity = vim.diagnostic.severity.ERROR,
-						message = "Invalid value '"
-							.. value
-							.. "' for '"
-							.. key
-							.. "'. Allowed values: "
-							.. table.concat(allowed, ", "),
+						message = "Invalid value '" .. value .. "' for '" .. key .. "'. Allowed values: " .. table.concat(
+							allowed,
+							", "
+						),
 						source = "EditorConfig",
 					})
 				end

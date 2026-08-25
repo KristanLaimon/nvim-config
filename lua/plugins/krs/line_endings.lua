@@ -109,8 +109,6 @@ function M.change_repo(target_fmt, root_dir)
 	local project_mod_ok, project_mod = pcall(require, "krs.core.project")
 	root_dir = root_dir or (project_mod_ok and project_mod.root() or vim.fn.getcwd())
 
-
-
 	local function process_conversion(fmt)
 		if not fmt or (fmt ~= "unix" and fmt ~= "dos") then
 			return
@@ -165,7 +163,6 @@ function M.change_repo(target_fmt, root_dir)
 		end
 
 		scan_dir(root_dir)
-
 
 		local converted_count = 0
 

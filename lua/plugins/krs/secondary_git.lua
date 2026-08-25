@@ -72,7 +72,11 @@ function M.cmd_run(args)
 
 	local repo = sec_git.find_repo(alias_name)
 	if not repo then
-		vim.notify("Secondary repository alias '" .. alias_name .. "' not found.", vim.log.levels.WARN, { title = "Secondary Git" })
+		vim.notify(
+			"Secondary repository alias '" .. alias_name .. "' not found.",
+			vim.log.levels.WARN,
+			{ title = "Secondary Git" }
+		)
 		return
 	end
 
@@ -94,7 +98,11 @@ end
 function M.cmd_init(alias_arg, git_dir_arg, remote_arg)
 	local function do_init(alias, git_dir, remote)
 		if not alias or alias == "" or not git_dir or git_dir == "" then
-			vim.notify("Initialization cancelled: Alias and Git Directory are required.", vim.log.levels.WARN, { title = "Secondary Git" })
+			vim.notify(
+				"Initialization cancelled: Alias and Git Directory are required.",
+				vim.log.levels.WARN,
+				{ title = "Secondary Git" }
+			)
 			return
 		end
 
@@ -121,12 +129,22 @@ function M.cmd_init(alias_arg, git_dir_arg, remote_arg)
 	end
 
 	vim.ui.input({ prompt = "Secondary Repo Alias (e.g. krsgit): ", default = alias_arg or "krsgit" }, function(alias)
-		if not alias or alias == "" then return end
-		vim.ui.input({ prompt = "Bare Git Directory (e.g. ./.git-krs or $HOME/.secrets-repo.git): ", default = git_dir_arg or ("./.git-" .. alias) }, function(git_dir)
-			if not git_dir or git_dir == "" then return end
-			vim.ui.input({ prompt = "Optional Remote URL (e.g. git@github.com:user/repo.git): ", default = remote_arg or "" }, function(remote)
-				do_init(alias, git_dir, remote)
-			end)
+		if not alias or alias == "" then
+			return
+		end
+		vim.ui.input({
+			prompt = "Bare Git Directory (e.g. ./.git-krs or $HOME/.secrets-repo.git): ",
+			default = git_dir_arg or ("./.git-" .. alias),
+		}, function(git_dir)
+			if not git_dir or git_dir == "" then
+				return
+			end
+			vim.ui.input(
+				{ prompt = "Optional Remote URL (e.g. git@github.com:user/repo.git): ", default = remote_arg or "" },
+				function(remote)
+					do_init(alias, git_dir, remote)
+				end
+			)
 		end)
 	end)
 end
@@ -136,10 +154,16 @@ end
 --- @param new_alias string|nil
 function M.cmd_rename(old_alias, new_alias)
 	local function do_rename(old_name, new_name)
-		if not old_name or old_name == "" or not new_name or new_name == "" then return end
+		if not old_name or old_name == "" or not new_name or new_name == "" then
+			return
+		end
 		local repo = sec_git.find_repo(old_name)
 		if not repo then
-			vim.notify("Secondary repository alias '" .. old_name .. "' not found.", vim.log.levels.WARN, { title = "Secondary Git" })
+			vim.notify(
+				"Secondary repository alias '" .. old_name .. "' not found.",
+				vim.log.levels.WARN,
+				{ title = "Secondary Git" }
+			)
 			return
 		end
 
@@ -153,7 +177,11 @@ function M.cmd_rename(old_alias, new_alias)
 		end
 
 		sec_git.inject_terminal_aliases()
-		vim.notify("Renamed secondary repository '" .. old_name .. "' -> '" .. new_name .. "'", vim.log.levels.INFO, { title = "Secondary Git" })
+		vim.notify(
+			"Renamed secondary repository '" .. old_name .. "' -> '" .. new_name .. "'",
+			vim.log.levels.INFO,
+			{ title = "Secondary Git" }
+		)
 		if M.manager_win and vim.api.nvim_win_is_valid(M.manager_win) then
 			M.refresh_manager()
 		end
@@ -165,7 +193,9 @@ function M.cmd_rename(old_alias, new_alias)
 	end
 
 	vim.ui.input({ prompt = "Current Repo Alias to Rename: ", default = old_alias or "" }, function(old_name)
-		if not old_name or old_name == "" then return end
+		if not old_name or old_name == "" then
+			return
+		end
 		vim.ui.input({ prompt = "New Alias Name: ", default = new_alias or old_name }, function(new_name)
 			do_rename(old_name, new_name)
 		end)
@@ -176,16 +206,26 @@ end
 --- @param alias string|nil
 function M.cmd_delete(alias)
 	local function do_delete(alias_name)
-		if not alias_name or alias_name == "" then return end
+		if not alias_name or alias_name == "" then
+			return
+		end
 		local ok = sec_git.remove_repo(alias_name)
 		if ok then
 			sec_git.inject_terminal_aliases()
-			vim.notify("Removed secondary repository '" .. alias_name .. "' from configuration.", vim.log.levels.INFO, { title = "Secondary Git" })
+			vim.notify(
+				"Removed secondary repository '" .. alias_name .. "' from configuration.",
+				vim.log.levels.INFO,
+				{ title = "Secondary Git" }
+			)
 			if M.manager_win and vim.api.nvim_win_is_valid(M.manager_win) then
 				M.refresh_manager()
 			end
 		else
-			vim.notify("Secondary repository '" .. alias_name .. "' not found.", vim.log.levels.WARN, { title = "Secondary Git" })
+			vim.notify(
+				"Secondary repository '" .. alias_name .. "' not found.",
+				vim.log.levels.WARN,
+				{ title = "Secondary Git" }
+			)
 		end
 	end
 
@@ -202,12 +242,18 @@ end
 --- Updates fields of an existing secondary repository entry.
 --- @param repo table
 function M.update_repo_fields(repo)
-	if not repo or not repo.alias then return end
+	if not repo or not repo.alias then
+		return
+	end
 
 	vim.ui.input({ prompt = "Alias: ", default = repo.alias }, function(alias)
-		if not alias or alias == "" then return end
+		if not alias or alias == "" then
+			return
+		end
 		vim.ui.input({ prompt = "Bare Git Directory: ", default = repo.git_dir }, function(git_dir)
-			if not git_dir or git_dir == "" then return end
+			if not git_dir or git_dir == "" then
+				return
+			end
 			vim.ui.input({ prompt = "Remote URL: ", default = repo.remote or "" }, function(remote)
 				vim.ui.input({ prompt = "Description: ", default = repo.description or "" }, function(desc)
 					local old_alias = repo.alias
@@ -249,13 +295,19 @@ function M.switch_secondary_repo()
 	local repos = config.repositories or {}
 
 	if #repos == 0 then
-		vim.notify("No secondary git repositories configured. Run :SecondaryGitInit to create one.", vim.log.levels.WARN, { title = "Secondary Git" })
+		vim.notify(
+			"No secondary git repositories configured. Run :SecondaryGitInit to create one.",
+			vim.log.levels.WARN,
+			{ title = "Secondary Git" }
+		)
 		return
 	end
 
 	local function activate_target_in_git_center(repo_alias)
 		local ok_gc, gc = pcall(require, "plugins.krs.git_center")
-		if not ok_gc or not gc then return end
+		if not ok_gc or not gc then
+			return
+		end
 
 		local function find_and_select()
 			local found_idx = nil
@@ -267,8 +319,14 @@ function M.switch_secondary_repo()
 			end
 			if found_idx then
 				gc.active_submodule_idx = found_idx
-				if gc.refresh then gc.refresh() end
-				vim.notify("Switched Git Center to repository: " .. repo_alias, vim.log.levels.INFO, { title = "Secondary Git" })
+				if gc.refresh then
+					gc.refresh()
+				end
+				vim.notify(
+					"Switched Git Center to repository: " .. repo_alias,
+					vim.log.levels.INFO,
+					{ title = "Secondary Git" }
+				)
 			end
 		end
 
@@ -302,7 +360,9 @@ function M.switch_secondary_repo()
 			table.insert(items, "🐙 " .. r.alias .. " (" .. r.git_dir .. ")")
 		end
 		vim.ui.select(items, { prompt = "Select Secondary Git Repository:" }, function(choice, idx)
-			if not choice or not idx then return end
+			if not choice or not idx then
+				return
+			end
 			if idx == 1 then
 				activate_target_in_git_center("root")
 			else
@@ -313,41 +373,48 @@ function M.switch_secondary_repo()
 	end
 
 	local entries = {
-		{ alias = "root", display = "📦 Main Root Repository", dir = cwd, description = "Primary git repository" }
+		{ alias = "root", display = "📦 Main Root Repository", dir = cwd, description = "Primary git repository" },
 	}
 	for _, r in ipairs(repos) do
 		table.insert(entries, {
 			alias = r.alias,
-			display = string.format("🐙 %-12s | Bare: %-28s | Remote: %s", r.alias, r.git_dir, (r.remote and r.remote ~= "") and r.remote or "None"),
+			display = string.format(
+				"🐙 %-12s | Bare: %-28s | Remote: %s",
+				r.alias,
+				r.git_dir,
+				(r.remote and r.remote ~= "") and r.remote or "None"
+			),
 			dir = r.git_dir,
 			description = r.description or "",
 		})
 	end
 
-	pickers.new({}, {
-		prompt_title = " 🐙 Select Active Secondary Git Repository ",
-		finder = finders.new_table({
-			results = entries,
-			entry_maker = function(entry)
-				return {
-					value = entry,
-					display = entry.display,
-					ordinal = entry.alias .. " " .. entry.dir .. " " .. entry.description,
-				}
+	pickers
+		.new({}, {
+			prompt_title = " 🐙 Select Active Secondary Git Repository ",
+			finder = finders.new_table({
+				results = entries,
+				entry_maker = function(entry)
+					return {
+						value = entry,
+						display = entry.display,
+						ordinal = entry.alias .. " " .. entry.dir .. " " .. entry.description,
+					}
+				end,
+			}),
+			sorter = conf.values.generic_sorter({}),
+			attach_mappings = function(prompt_bufnr, map)
+				actions.select_default:replace(function()
+					actions.close(prompt_bufnr)
+					local selection = action_state.get_selected_entry()
+					if selection and selection.value then
+						activate_target_in_git_center(selection.value.alias)
+					end
+				end)
+				return true
 			end,
-		}),
-		sorter = conf.values.generic_sorter({}),
-		attach_mappings = function(prompt_bufnr, map)
-			actions.select_default:replace(function()
-				actions.close(prompt_bufnr)
-				local selection = action_state.get_selected_entry()
-				if selection and selection.value then
-					activate_target_in_git_center(selection.value.alias)
-				end
-			end)
-			return true
-		end,
-	}):find()
+		})
+		:find()
 end
 
 -- ---------------------------------------------------------------------------
@@ -427,9 +494,15 @@ function M.open_manager()
 
 	local opts = { buffer = buf, noremap = true, silent = true }
 
-	vim.keymap.set("n", "c", function() M.cmd_init() end, opts)
-	vim.keymap.set("n", "i", function() M.cmd_init() end, opts)
-	vim.keymap.set("n", "a", function() M.cmd_init() end, opts)
+	vim.keymap.set("n", "c", function()
+		M.cmd_init()
+	end, opts)
+	vim.keymap.set("n", "i", function()
+		M.cmd_init()
+	end, opts)
+	vim.keymap.set("n", "a", function()
+		M.cmd_init()
+	end, opts)
 
 	vim.keymap.set("n", "r", function()
 		local repo = get_selected_repo()
@@ -452,26 +525,38 @@ function M.open_manager()
 
 	vim.keymap.set("n", "s", function()
 		local repo = get_selected_repo()
-		if repo then M.cmd_run(repo.alias .. " status") end
+		if repo then
+			M.cmd_run(repo.alias .. " status")
+		end
 	end, opts)
 
 	vim.keymap.set("n", "p", function()
 		local repo = get_selected_repo()
 		if repo then
 			sec_git.run(repo.alias, { "push" }, function(ok, output)
-				vim.notify((ok and "✅ Push successful:\n" or "❌ Push failed:\n") .. output, ok and vim.log.levels.INFO or vim.log.levels.ERROR, { title = "Secondary Git Push" })
+				vim.notify(
+					(ok and "✅ Push successful:\n" or "❌ Push failed:\n") .. output,
+					ok and vim.log.levels.INFO or vim.log.levels.ERROR,
+					{ title = "Secondary Git Push" }
+				)
 			end)
 		end
 	end, opts)
 
 	vim.keymap.set("n", "l", function()
 		local repo = get_selected_repo()
-		if repo then M.cmd_run(repo.alias .. " log -n 10 --oneline") end
+		if repo then
+			M.cmd_run(repo.alias .. " log -n 10 --oneline")
+		end
 	end, opts)
 
 	vim.keymap.set("n", "t", function()
 		sec_git.inject_terminal_aliases()
-		vim.notify("🖥️ Secondary Git aliases injected into active terminals.", vim.log.levels.INFO, { title = "Secondary Git" })
+		vim.notify(
+			"🖥️ Secondary Git aliases injected into active terminals.",
+			vim.log.levels.INFO,
+			{ title = "Secondary Git" }
+		)
 	end, opts)
 
 	vim.keymap.set("n", "e", function()
@@ -502,7 +587,9 @@ end
 -- ---------------------------------------------------------------------------
 
 function M.setup()
-	if M._did_setup then return end
+	if M._did_setup then
+		return
+	end
 	M._did_setup = true
 
 	vim.api.nvim_create_user_command("SecondaryGit", function(opts)
@@ -553,12 +640,28 @@ function M.setup()
 	-- Register command palette commands if palette module exists
 	local ok_cp, cp = pcall(require, "plugins.krs.command_palette")
 	if ok_cp and cp and cp.add_command then
-		cp.add_command({ name = "🐙 Secondary Git Repositories Manager (Create / Rename / Delete)", cmd = "SecondaryGitManager", category = "Git" })
-		cp.add_command({ name = "🐙 Switch Active Secondary Git Repository (Telescope / Git Center)", cmd = "SecondaryGitSwitch", category = "Git" })
-		cp.add_command({ name = "🐙 Initialize Secondary Git Repository (Dotfiles)", cmd = "SecondaryGitInit", category = "Git" })
+		cp.add_command({
+			name = "🐙 Secondary Git Repositories Manager (Create / Rename / Delete)",
+			cmd = "SecondaryGitManager",
+			category = "Git",
+		})
+		cp.add_command({
+			name = "🐙 Switch Active Secondary Git Repository (Telescope / Git Center)",
+			cmd = "SecondaryGitSwitch",
+			category = "Git",
+		})
+		cp.add_command({
+			name = "🐙 Initialize Secondary Git Repository (Dotfiles)",
+			cmd = "SecondaryGitInit",
+			category = "Git",
+		})
 		cp.add_command({ name = "🐙 Rename Secondary Git Repository", cmd = "SecondaryGitRename", category = "Git" })
 		cp.add_command({ name = "🐙 Delete Secondary Git Repository", cmd = "SecondaryGitDelete", category = "Git" })
-		cp.add_command({ name = "🐙 Sync Secondary Git Aliases to Terminals", cmd = "SecondaryGitSyncTerminal", category = "Git" })
+		cp.add_command({
+			name = "🐙 Sync Secondary Git Aliases to Terminals",
+			cmd = "SecondaryGitSyncTerminal",
+			category = "Git",
+		})
 	end
 end
 

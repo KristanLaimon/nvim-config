@@ -121,6 +121,40 @@ Detailed setup, Ex commands, DAP debug profiles, and plugin integrations for eac
 
 ---
 
+## 🧪 5. Headless Quality Checks (CI / CLI)
+
+Run all quality gates from the command line without opening the UI:
+
+### All checks at once (lint + syntax + tests)
+
+```bash
+nvim --headless -c "lua _G.arg = {'--all'}; dofile(vim.fn.stdpath('config') .. '/run_me.lua')" -c "qa!"
+```
+
+### Individual checks
+
+```bash
+# Lint & format (stylua + luacheck)
+nvim --headless -c "lua _G.arg = {'--lint'}; dofile(vim.fn.stdpath('config') .. '/run_me.lua')" -c "qa!"
+
+# Syntax check (parse all Lua files)
+nvim --headless -c "lua _G.arg = {'--syntax'}; dofile(vim.fn.stdpath('config') .. '/run_me.lua')" -c "qa!"
+
+# Test suite
+nvim --headless -c "lua _G.arg = {'--tests'}; dofile(vim.fn.stdpath('config') .. '/run_me.lua')" -c "qa!"
+```
+
+### Required tools
+
+| Tool | Install | Purpose |
+|------|---------|---------|
+| `stylua` | `cargo install stylua or scoop install stylua on windows (preferred)` | Auto-format Lua code |
+| `luacheck` | `luarocks install luacheck or scoop install luacheck on windows (prefferred)` | Static analysis / linting |
+
+Both must be on `PATH`. The scripts exit 1 with an install hint if either is missing.
+
+---
+
 ## ⚡ Quick Rule Summary for AI Assistants
 
 > [!IMPORTANT]

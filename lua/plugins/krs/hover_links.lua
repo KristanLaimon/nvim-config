@@ -77,7 +77,8 @@ local function resolve_file_target(target, buf_dir)
 	end
 
 	clean_path = path.normalize(clean_path)
-	local is_abs = (path.is_absolute and path.is_absolute(clean_path)) or (clean_path:sub(1, 1) == "/" or clean_path:match("^%a:") ~= nil)
+	local is_abs = (path.is_absolute and path.is_absolute(clean_path))
+		or (clean_path:sub(1, 1) == "/" or clean_path:match("^%a:") ~= nil)
 
 	local candidate = clean_path
 	if not is_abs then
@@ -224,7 +225,11 @@ local function open_local_file_link(target, current_win, buf_dir)
 	-- Open in current main window
 	vim.cmd("edit " .. vim.fn.fnameescape(clean_path))
 	pcall(vim.api.nvim_win_set_cursor, 0, { target_line, math.max(0, target_col - 1) })
-	vim.notify("📂 Jumped to " .. vim.fn.fnamemodify(clean_path, ":t") .. ":" .. target_line .. ":" .. target_col, vim.log.levels.INFO, { title = "Link Navigator" })
+	vim.notify(
+		"📂 Jumped to " .. vim.fn.fnamemodify(clean_path, ":t") .. ":" .. target_line .. ":" .. target_col,
+		vim.log.levels.INFO,
+		{ title = "Link Navigator" }
+	)
 	return true
 end
 

@@ -73,7 +73,6 @@ local settings = {
 		fileformats = "unix,dos", -- Preserve LF (\n) and CRLF (\r\n) line endings automatically on open/save.
 	},
 
-
 	--- Options set through pcall because a build may not support them.
 	optional_options = { fileencoding = "utf-8" },
 
@@ -332,7 +331,6 @@ vim.api.nvim_create_autocmd({ "FileType", "BufReadPost", "BufNewFile" }, {
 		vim.bo[args.buf].autoindent = true
 	end,
 })
-
 
 if vim.g.neovide then
 	for name, value in pairs(settings.neovide) do

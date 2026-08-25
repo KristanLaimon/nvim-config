@@ -19,10 +19,12 @@ describe("krsnvim.cli mini-framework", function()
 	end)
 
 	it("supports color and subtitle parameters in ascii_title", function()
+		cli.force_color = true
 		local banner = cli.ascii_title("TEST", {
 			color = cli.colors.green,
 			subtitle = "Automation Suite",
 		})
+		cli.force_color = false
 		expect(banner:find("Automation Suite")).toBeTruthy()
 		expect(banner:find("\27%[%d+m")).toBeTruthy()
 	end)
@@ -38,13 +40,10 @@ describe("krsnvim.cli mini-framework", function()
 	end)
 
 	it("formats tabular data with aligned headers and rows", function()
-		local tbl = cli.table(
-			{ "ID", "Name", "Role" },
-			{
-				{ "1", "Alice", "Admin" },
-				{ "2", "Bob", "User" },
-			}
-		)
+		local tbl = cli.table({ "ID", "Name", "Role" }, {
+			{ "1", "Alice", "Admin" },
+			{ "2", "Bob", "User" },
+		})
 		expect(tbl:find("ID")).toBeTruthy()
 		expect(tbl:find("Name")).toBeTruthy()
 		expect(tbl:find("Alice")).toBeTruthy()
@@ -52,7 +51,9 @@ describe("krsnvim.cli mini-framework", function()
 	end)
 
 	it("colorize wraps strings with ANSI escape sequences", function()
+		cli.force_color = true
 		local colored = cli.colorize("Hello", cli.colors.red)
+		cli.force_color = false
 		expect(colored:sub(1, #cli.colors.red)).toBe(cli.colors.red)
 		expect(colored:sub(-#cli.colors.reset)).toBe(cli.colors.reset)
 	end)

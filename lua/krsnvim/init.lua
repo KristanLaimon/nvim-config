@@ -92,7 +92,12 @@ function M.import(target)
 		return M.async
 	elseif target == "krsnvim.test" or target == "test" or target == "tests" then
 		return M.test
-	elseif target == "krsnvim.krsnvimtranspiler" or target == "krsnvimtranspiler" or target == "krsnvim.exporter" or target == "exporter" then
+	elseif
+		target == "krsnvim.krsnvimtranspiler"
+		or target == "krsnvimtranspiler"
+		or target == "krsnvim.exporter"
+		or target == "exporter"
+	then
 		return M.krsnvimtranspiler
 	end
 
@@ -110,9 +115,15 @@ function M.import(target)
 	end
 
 	if M.fs and M.fs.exists and M.fs.exists(target) then
-		if target:match("%.json$") then return M.json.load(target) end
-		if target:match("%.yaml$") or target:match("%.yml$") then return M.yaml.load(target) end
-		if target:match("%.toml$") then return M.toml.load(target) end
+		if target:match("%.json$") then
+			return M.json.load(target)
+		end
+		if target:match("%.yaml$") or target:match("%.yml$") then
+			return M.yaml.load(target)
+		end
+		if target:match("%.toml$") then
+			return M.toml.load(target)
+		end
 	end
 
 	error("import(): Cannot import target: " .. tostring(target))

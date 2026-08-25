@@ -48,7 +48,18 @@ describe("keymap collisions after a real startup", function()
 		local registry = require("krs.core.keymap_registry")
 		local summary = {}
 		for _, c in ipairs(registry.collisions) do
-			table.insert(summary, string.format("%s (%s): %s (%s) <-> %s (%s)", c.lhs, c.mode, c.first_source, c.first_desc or "no desc", c.second_source, c.second_desc or "no desc"))
+			table.insert(
+				summary,
+				string.format(
+					"%s (%s): %s (%s) <-> %s (%s)",
+					c.lhs,
+					c.mode,
+					c.first_source,
+					c.first_desc or "no desc",
+					c.second_source,
+					c.second_desc or "no desc"
+				)
+			)
 		end
 
 		expect(summary).toEqual({})

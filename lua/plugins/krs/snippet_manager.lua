@@ -322,11 +322,14 @@ function M.open_manager()
 		elseif idx == 3 then
 			M.list_snippets(ft)
 		elseif idx == 4 then
-			vim.ui.input({ prompt = "Enter language (e.g. lua, typescript, php, python, go, cs): ", default = ft }, function(l)
-				if l and l ~= "" then
-					M.edit_snippets(l)
+			vim.ui.input(
+				{ prompt = "Enter language (e.g. lua, typescript, php, python, go, cs): ", default = ft },
+				function(l)
+					if l and l ~= "" then
+						M.edit_snippets(l)
+					end
 				end
-			end)
+			)
 		elseif idx == 5 then
 			local dir = M.ensure_dir()
 			vim.cmd("Neotree " .. vim.fn.fnameescape(dir))

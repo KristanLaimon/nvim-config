@@ -127,4 +127,3 @@ vim.api.nvim_create_autocmd("VimEnter", {
 
 -- Initialize KRS Automated Incremental System Setup
 require("krs.core.installer").init()
-

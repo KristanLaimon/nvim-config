@@ -92,15 +92,16 @@ describe("tailwind organize_full_text", function()
 	end)
 
 	it("rewrites single-quoted and JSX template attributes", function()
-		expect(tw.organize_full_text("<div class='text-red-500 flex'></div>"))
-			.toBe("<div class='flex text-red-500'></div>")
-		expect(tw.organize_full_text("<div className={`text-red-500 flex`}></div>"))
-			.toBe("<div className={`flex text-red-500`}></div>")
+		expect(tw.organize_full_text("<div class='text-red-500 flex'></div>")).toBe("<div class='flex text-red-500'></div>")
+		expect(tw.organize_full_text("<div className={`text-red-500 flex`}></div>")).toBe(
+			"<div className={`flex text-red-500`}></div>"
+		)
 	end)
 
 	it("handles the framework :class binding form", function()
-		expect(tw.organize_full_text('<div :class="text-red-500 flex"></div>'))
-			.toBe('<div :class="flex text-red-500"></div>')
+		expect(tw.organize_full_text('<div :class="text-red-500 flex"></div>')).toBe(
+			'<div :class="flex text-red-500"></div>'
+		)
 	end)
 
 	it("leaves class:list alone -- the attribute pattern stops at the colon", function()

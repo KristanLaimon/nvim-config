@@ -108,25 +108,35 @@ M.Response = Response
 --- print(fetch.url_encode("hello world & foo=bar"))
 --- -- Output: "hello%20world%20%26%20foo%3Dbar"
 function M.url_encode(str)
-	if str == nil then return "" end
-	if type(str) ~= "string" then str = tostring(str) end
+	if str == nil then
+		return ""
+	end
+	if type(str) ~= "string" then
+		str = tostring(str)
+	end
 	return (str:gsub("([^%w%-%_%.%~])", function(c)
 		return string.format("%%%02X", string.byte(c))
 	end))
 end
 
 local function build_query(params)
-	if not params then return "" end
+	if not params then
+		return ""
+	end
 	if type(params) == "string" then
 		return params:sub(1, 1) == "?" and params or ("?" .. params)
 	end
-	if type(params) ~= "table" then return "" end
+	if type(params) ~= "table" then
+		return ""
+	end
 
 	local parts = {}
 	for k, v in pairs(params) do
 		table.insert(parts, M.url_encode(k) .. "=" .. M.url_encode(v))
 	end
-	if #parts == 0 then return "" end
+	if #parts == 0 then
+		return ""
+	end
 	return "?" .. table.concat(parts, "&")
 end
 
@@ -170,11 +180,17 @@ local function decode_chunked_body(body)
 	local len = #body
 	while pos <= len do
 		local line_end = body:find("\r\n", pos, true)
-		if not line_end then break end
+		if not line_end then
+			break
+		end
 		local hex = body:sub(pos, line_end - 1):match("^%x+")
-		if not hex then break end
+		if not hex then
+			break
+		end
 		local chunk_len = tonumber(hex, 16)
-		if not chunk_len or chunk_len == 0 then break end
+		if not chunk_len or chunk_len == 0 then
+			break
+		end
 		pos = line_end + 2
 		table.insert(result, body:sub(pos, pos + chunk_len - 1))
 		pos = pos + chunk_len + 2
@@ -237,14 +253,20 @@ local function http_tcp_request(parsed_url, req_method, req_headers, req_body, t
 		local closed = false
 
 		local function cleanup()
-			if closed then return end
+			if closed then
+				return
+			end
 			closed = true
 			if timer then
 				timer:stop()
 				timer:close()
 			end
-			pcall(function() client:read_stop() end)
-			pcall(function() client:close() end)
+			pcall(function()
+				client:read_stop()
+			end)
+			pcall(function()
+				client:close()
+			end)
 		end
 
 		if timeout_ms and timeout_ms > 0 then
@@ -480,7 +502,12 @@ end
 --- @see krsnvim.fetch.get
 function M.post(url, body_or_opts, opts)
 	opts = opts or {}
-	if type(body_or_opts) == "table" and not body_or_opts.method and not body_or_opts.headers and not body_or_opts.body then
+	if
+		type(body_or_opts) == "table"
+		and not body_or_opts.method
+		and not body_or_opts.headers
+		and not body_or_opts.body
+	then
 		opts.body = body_or_opts
 	elseif type(body_or_opts) == "string" then
 		opts.body = body_or_opts
@@ -498,7 +525,12 @@ end
 --- @return FetchResponse
 function M.put(url, body_or_opts, opts)
 	opts = opts or {}
-	if type(body_or_opts) == "table" and not body_or_opts.method and not body_or_opts.headers and not body_or_opts.body then
+	if
+		type(body_or_opts) == "table"
+		and not body_or_opts.method
+		and not body_or_opts.headers
+		and not body_or_opts.body
+	then
 		opts.body = body_or_opts
 	elseif type(body_or_opts) == "string" then
 		opts.body = body_or_opts
@@ -526,7 +558,12 @@ end
 --- @return FetchResponse
 function M.patch(url, body_or_opts, opts)
 	opts = opts or {}
-	if type(body_or_opts) == "table" and not body_or_opts.method and not body_or_opts.headers and not body_or_opts.body then
+	if
+		type(body_or_opts) == "table"
+		and not body_or_opts.method
+		and not body_or_opts.headers
+		and not body_or_opts.body
+	then
 		opts.body = body_or_opts
 	elseif type(body_or_opts) == "string" then
 		opts.body = body_or_opts

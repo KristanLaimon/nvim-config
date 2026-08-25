@@ -239,32 +239,35 @@ describe("plugins.krs.git_center", function()
 		git_center.close_git_center()
 	end)
 
-	it("opens side-by-side diff modal with left (before) and right (after) float windows with elevated zindex and Ctrl+h/l keymaps", function()
-		local z_index = require("krs.core.z_index")
-		git_center.open_git_center()
-		git_center.open_diff_modal(nil, nil, vim.fn.getcwd())
+	it(
+		"opens side-by-side diff modal with left (before) and right (after) float windows with elevated zindex and Ctrl+h/l keymaps",
+		function()
+			local z_index = require("krs.core.z_index")
+			git_center.open_git_center()
+			git_center.open_diff_modal(nil, nil, vim.fn.getcwd())
 
-		if git_center.diff_modal_win then
-			expect(vim.api.nvim_win_is_valid(git_center.diff_modal_win)).toBeTruthy()
-			local cfg = vim.api.nvim_win_get_config(git_center.diff_modal_win)
-			local expected_z = z_index.get_zindex("git_center_diff", 40)
-			expect(cfg.zindex).toBe(expected_z)
+			if git_center.diff_modal_win then
+				expect(vim.api.nvim_win_is_valid(git_center.diff_modal_win)).toBeTruthy()
+				local cfg = vim.api.nvim_win_get_config(git_center.diff_modal_win)
+				local expected_z = z_index.get_zindex("git_center_diff", 40)
+				expect(cfg.zindex).toBe(expected_z)
 
-			-- Verify Ctrl+h and Ctrl+l keymaps are bound in the diff modal buffer
-			local buf = git_center.diff_modal_buf
-			local map_h = vim.api.nvim_buf_call(buf, function()
-				return vim.fn.maparg("<C-h>", "n", false, true)
-			end)
-			local map_l = vim.api.nvim_buf_call(buf, function()
-				return vim.fn.maparg("<C-l>", "n", false, true)
-			end)
+				-- Verify Ctrl+h and Ctrl+l keymaps are bound in the diff modal buffer
+				local buf = git_center.diff_modal_buf
+				local map_h = vim.api.nvim_buf_call(buf, function()
+					return vim.fn.maparg("<C-h>", "n", false, true)
+				end)
+				local map_l = vim.api.nvim_buf_call(buf, function()
+					return vim.fn.maparg("<C-l>", "n", false, true)
+				end)
 
-			expect(map_h.buffer == 1 or map_h.callback ~= nil).toBeTruthy()
-			expect(map_l.buffer == 1 or map_l.callback ~= nil).toBeTruthy()
+				expect(map_h.buffer == 1 or map_h.callback ~= nil).toBeTruthy()
+				expect(map_l.buffer == 1 or map_l.callback ~= nil).toBeTruthy()
+			end
+
+			git_center.close_git_center()
 		end
-
-		git_center.close_git_center()
-	end)
+	)
 
 	it("opens commit log modal with configured left ratio, dynamic zindex and correct keymaps", function()
 		local z_index = require("krs.core.z_index")
@@ -385,4 +388,3 @@ describe("plugins.krs.git_center", function()
 		vim.fn.delete(temp_file)
 	end)
 end)
-

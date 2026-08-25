@@ -46,8 +46,7 @@ describe("runtimes.build_command", function()
 	end)
 
 	it("routes TypeScript entry points through npx tsx", function()
-		expect(runtimes.build_command(profile("node", { entry_point = "src/main.ts" }), ROOT))
-			.toBe("npx tsx src/main.ts")
+		expect(runtimes.build_command(profile("node", { entry_point = "src/main.ts" }), ROOT)).toBe("npx tsx src/main.ts")
 	end)
 
 	it("runs the entry point as-is for the custom runtime", function()

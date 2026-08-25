@@ -60,7 +60,7 @@ describe("krs.git.secondary alias generation", function()
 		local sh = sec_git.generate_alias(repo, "sh", cwd)
 
 		expect(sh).toContain("secgit() {")
-		expect(sh).toContain("add \"$@\"")
+		expect(sh).toContain('add "$@"')
 		expect(sh).toContain("--git-dir=")
 	end)
 end)

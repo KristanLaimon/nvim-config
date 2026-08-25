@@ -106,12 +106,15 @@ function M.run(root, filter)
 	return result.failed > 0 and 1 or 0
 end
 
--- Only self-execute under `nvim -l tests/run.lua`; `require` returns the module.
-if vim.v.argv and vim.list_contains(vim.v.argv, "-l") then
-	local script = debug.getinfo(1, "S").source:sub(2)
-	local root = vim.fn.fnamemodify(script, ":p:h:h")
-	bootstrap_paths(root)
-	os.exit(M.run(root, _G.arg and _G.arg[1] or nil))
+-- Only self-execute when THIS file is the `-l` entry script (not when dofile'd by run_me.lua).
+local script_source = debug.getinfo(1, "S").source:sub(2)
+if vim.v.argv and #vim.v.argv >= 3 then
+	local entry = vim.fn.fnamemodify(vim.v.argv[#vim.v.argv], ":p")
+	if vim.fn.fnamemodify(script_source, ":p") == entry then
+		local root = vim.fn.fnamemodify(script_source, ":p:h:h")
+		bootstrap_paths(root)
+		os.exit(M.run(root, _G.arg and _G.arg[1] or nil))
+	end
 end
 
 return M

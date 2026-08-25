@@ -123,8 +123,16 @@ M.health_categories = {
 		tools = {
 			{ cmd = "curl", name = "curl", note = "lua/plugins/krs/doc_manager.lua DevDocs downloader" },
 			{ cmd = "npm", name = "npm", note = "lua/plugins/krs/type_injector.lua schema package installer" },
-			{ cmd = "pnpm", name = "pnpm", note = "lua/plugins/krs/dev_server.lua alt JS runner (optional, only needed for pnpm-lock.yaml projects)" },
-			{ cmd = "yarn", name = "yarn", note = "lua/plugins/krs/dev_server.lua alt JS runner (optional, only needed for yarn.lock projects)" },
+			{
+				cmd = "pnpm",
+				name = "pnpm",
+				note = "lua/plugins/krs/dev_server.lua alt JS runner (optional, only needed for pnpm-lock.yaml projects)",
+			},
+			{
+				cmd = "yarn",
+				name = "yarn",
+				note = "lua/plugins/krs/dev_server.lua alt JS runner (optional, only needed for yarn.lock projects)",
+			},
 		},
 	},
 }
@@ -347,7 +355,10 @@ M.cached_sudo_pass = M.cached_sudo_pass or nil
 function M.is_mobile_or_termux()
 	return vim.env.TERMUX_VERSION ~= nil
 		or vim.fn.isdirectory("/data/data/com.termux") == 1
-		or (vim.fn.filereadable("/proc/version") == 1 and (vim.fn.readfile("/proc/version")[1] or ""):lower():match("android") ~= nil)
+		or (
+			vim.fn.filereadable("/proc/version") == 1
+			and (vim.fn.readfile("/proc/version")[1] or ""):lower():match("android") ~= nil
+		)
 end
 
 --- Checks if running as a non-root user on Linux/macOS/Termux requiring sudo password authentication.
@@ -499,8 +510,7 @@ function M.scan_status()
 	-- 2. Check essential CLI tools
 	for _, tool in ipairs(M.essential_tools) do
 		report.total_count = report.total_count + 1
-		local exists = (vim.fn.executable(tool.cmd) == 1)
-			or (tool.alt and vim.fn.executable(tool.alt) == 1)
+		local exists = (vim.fn.executable(tool.cmd) == 1) or (tool.alt and vim.fn.executable(tool.alt) == 1)
 		if exists then
 			report.installed_count = report.installed_count + 1
 			table.insert(report.installed_items, tool.cmd)
@@ -592,7 +602,9 @@ local function render_health_check_buffer()
 		{ "mason.nvim (LSP/tool installer)", mason_ok },
 	}) do
 		total_count = total_count + 1
-		if row[2] then total_found = total_found + 1 end
+		if row[2] then
+			total_found = total_found + 1
+		end
 		table.insert(lines, string.format("     %s %s", row[2] and "✅" or "❌", row[1]))
 	end
 	table.insert(lines, "")
@@ -603,9 +615,14 @@ local function render_health_check_buffer()
 		for _, tool in ipairs(category.tools) do
 			local found = vim.fn.executable(tool.cmd) == 1 or (tool.alt and vim.fn.executable(tool.alt) == 1)
 			total_n = total_n + 1
-			if found then found_n = found_n + 1 end
+			if found then
+				found_n = found_n + 1
+			end
 			local note = tool.note and ("  -- " .. tool.note) or ""
-			table.insert(rows, string.format("     %s %-14s %s", found and "✅" or "❌", tool.cmd, (tool.name or "") .. note))
+			table.insert(
+				rows,
+				string.format("     %s %-14s %s", found and "✅" or "❌", tool.cmd, (tool.name or "") .. note)
+			)
 		end
 		total_found = total_found + found_n
 		total_count = total_count + total_n
@@ -669,62 +686,66 @@ function M.install_all()
 
 		update_ui_buffer("Syncing lazy.nvim plugins...", installed_list, missing_lsps, math.max(15, scan.percentage))
 
-	vim.schedule(function()
-		-- Step 1: Ensure Lazy plugins and Mason are loaded (15% -> 25%)
-		add_log("Ensuring plugin manager and Mason packages are initialized...")
-		local has_lazy, lazy = pcall(require, "lazy")
-		if has_lazy then
-			pcall(function()
-				lazy.load({ plugins = { "mason.nvim", "mason-lspconfig.nvim", "nvim-treesitter" } })
-			end)
-		end
-
-		pcall(function()
-			require("mason").setup()
-		end)
-
-		-- Step 2: Mason LSPs & Tools (25% - 75%)
-		if missing_count > 0 then
-			add_log(string.format("Found %d missing Mason LSP packages to download...", missing_count))
-			add_log("Triggering Mason package installer...")
-
-			local missing_mason_names = {}
-			for _, item in ipairs(missing_lsps) do
-				table.insert(missing_mason_names, M.get_mason_package_name(item))
+		vim.schedule(function()
+			-- Step 1: Ensure Lazy plugins and Mason are loaded (15% -> 25%)
+			add_log("Ensuring plugin manager and Mason packages are initialized...")
+			local has_lazy, lazy = pcall(require, "lazy")
+			if has_lazy then
+				pcall(function()
+					lazy.load({ plugins = { "mason.nvim", "mason-lspconfig.nvim", "nvim-treesitter" } })
+				end)
 			end
 
-			-- Trigger Mason batch installer
-			pcall(vim.cmd, "MasonInstall " .. table.concat(missing_mason_names, " "))
+			pcall(function()
+				require("mason").setup()
+			end)
 
-			-- Track progress by checking installed directories on disk periodically
-			local mason_share = vim.fn.stdpath("data") .. "/mason/packages"
-			local start_time = (vim.uv or vim.loop).now()
-			local max_wait_ms = 90000 -- 90 second maximum safety timeout
-			local timer = (vim.uv or vim.loop).new_timer()
+			-- Step 2: Mason LSPs & Tools (25% - 75%)
+			if missing_count > 0 then
+				add_log(string.format("Found %d missing Mason LSP packages to download...", missing_count))
+				add_log("Triggering Mason package installer...")
 
-			timer:start(500, 500, vim.schedule_wrap(function()
-				local scan_now = M.scan_status()
-				local remaining_queued = scan_now.missing_lsps
-
-				local active_pkg = remaining_queued[1] or "Treesitter & final validation"
-				update_ui_buffer(active_pkg, scan_now.installed_items, remaining_queued, scan_now.percentage)
-
-				local elapsed = (vim.uv or vim.loop).now() - start_time
-				if #remaining_queued == 0 or elapsed >= max_wait_ms then
-					timer:stop()
-					timer:close()
-					if elapsed >= max_wait_ms and #remaining_queued > 0 then
-						add_log("⌛ Installation timeout reached. Remaining packages will finish in background.")
-					end
-					M.finish_setup(scan_now.installed_items)
+				local missing_mason_names = {}
+				for _, item in ipairs(missing_lsps) do
+					table.insert(missing_mason_names, M.get_mason_package_name(item))
 				end
-			end))
-		else
-			add_log("All Mason LSP packages are already installed.")
-			M.finish_setup(installed_list)
-		end
+
+				-- Trigger Mason batch installer
+				pcall(vim.cmd, "MasonInstall " .. table.concat(missing_mason_names, " "))
+
+				-- Track progress by checking installed directories on disk periodically
+				local mason_share = vim.fn.stdpath("data") .. "/mason/packages"
+				local start_time = (vim.uv or vim.loop).now()
+				local max_wait_ms = 90000 -- 90 second maximum safety timeout
+				local timer = (vim.uv or vim.loop).new_timer()
+
+				timer:start(
+					500,
+					500,
+					vim.schedule_wrap(function()
+						local scan_now = M.scan_status()
+						local remaining_queued = scan_now.missing_lsps
+
+						local active_pkg = remaining_queued[1] or "Treesitter & final validation"
+						update_ui_buffer(active_pkg, scan_now.installed_items, remaining_queued, scan_now.percentage)
+
+						local elapsed = (vim.uv or vim.loop).now() - start_time
+						if #remaining_queued == 0 or elapsed >= max_wait_ms then
+							timer:stop()
+							timer:close()
+							if elapsed >= max_wait_ms and #remaining_queued > 0 then
+								add_log("⌛ Installation timeout reached. Remaining packages will finish in background.")
+							end
+							M.finish_setup(scan_now.installed_items)
+						end
+					end)
+				)
+			else
+				add_log("All Mason LSP packages are already installed.")
+				M.finish_setup(installed_list)
+			end
+		end)
 	end)
-end)
 end
 
 --- Finalizes setup execution and persists state.
@@ -766,17 +787,35 @@ function M.run_install_agy(sudo_pass)
 
 	local cmd = {}
 	if vim.fn.has("win32") == 1 then
-		cmd = { "powershell.exe", "-ExecutionPolicy", "Bypass", "-Command", "irm https://antigravity.google/cli/install.ps1 | iex" }
+		cmd = {
+			"powershell.exe",
+			"-ExecutionPolicy",
+			"Bypass",
+			"-Command",
+			"irm https://antigravity.google/cli/install.ps1 | iex",
+		}
 	else
 		if sudo_pass and sudo_pass ~= "" then
-			cmd = { "bash", "-c", string.format("echo %s | sudo -S bash -c 'curl -fsSL https://antigravity.google/cli/install.sh | bash'", vim.fn.shellescape(sudo_pass)) }
+			cmd = {
+				"bash",
+				"-c",
+				string.format(
+					"echo %s | sudo -S bash -c 'curl -fsSL https://antigravity.google/cli/install.sh | bash'",
+					vim.fn.shellescape(sudo_pass)
+				),
+			}
 		else
 			cmd = { "bash", "-c", "curl -fsSL https://antigravity.google/cli/install.sh | bash" }
 		end
 	end
 
 	local scan = M.scan_status()
-	update_ui_buffer("Downloading Google Antigravity CLI (agy)...", scan.installed_items, { "google-antigravity-cli" }, 40)
+	update_ui_buffer(
+		"Downloading Google Antigravity CLI (agy)...",
+		scan.installed_items,
+		{ "google-antigravity-cli" },
+		40
+	)
 
 	vim.fn.jobstart(cmd, {
 		stdout_buffered = false,
@@ -786,7 +825,11 @@ function M.run_install_agy(sudo_pass)
 				for _, line in ipairs(data) do
 					if line and line ~= "" then
 						local clean = line:gsub("\27%[[0-9;]*[mK]", ""):gsub("^%s*", "")
-						if clean ~= "" and not clean:lower():match("password") and not (sudo_pass and clean:find(sudo_pass, 1, true)) then
+						if
+							clean ~= ""
+							and not clean:lower():match("password")
+							and not (sudo_pass and clean:find(sudo_pass, 1, true))
+						then
 							add_log(clean)
 						end
 					end
@@ -798,7 +841,11 @@ function M.run_install_agy(sudo_pass)
 				for _, line in ipairs(data) do
 					if line and line ~= "" then
 						local clean = line:gsub("\27%[[0-9;]*[mK]", ""):gsub("^%s*", "")
-						if clean ~= "" and not clean:lower():match("password") and not (sudo_pass and clean:find(sudo_pass, 1, true)) then
+						if
+							clean ~= ""
+							and not clean:lower():match("password")
+							and not (sudo_pass and clean:find(sudo_pass, 1, true))
+						then
 							add_log("⚠️ " .. clean)
 						end
 					end
@@ -809,14 +856,22 @@ function M.run_install_agy(sudo_pass)
 			if exit_code == 0 then
 				add_log("🎉 Google Antigravity CLI (agy) installed successfully!")
 				update_ui_buffer(nil, M.scan_status().installed_items, {}, 100)
-				vim.notify("🎉 Google Antigravity CLI (agy) installed successfully! Run 'agy' in terminal to start.", vim.log.levels.INFO, {
-					title = "Google Antigravity CLI",
-				})
+				vim.notify(
+					"🎉 Google Antigravity CLI (agy) installed successfully! Run 'agy' in terminal to start.",
+					vim.log.levels.INFO,
+					{
+						title = "Google Antigravity CLI",
+					}
+				)
 			else
 				add_log(string.format("❌ Google Antigravity CLI installation failed with exit code %d.", exit_code))
-				vim.notify(string.format("❌ Google Antigravity CLI installation failed (exit code %d).", exit_code), vim.log.levels.ERROR, {
-					title = "Installation Failed",
-				})
+				vim.notify(
+					string.format("❌ Google Antigravity CLI installation failed (exit code %d).", exit_code),
+					vim.log.levels.ERROR,
+					{
+						title = "Installation Failed",
+					}
+				)
 			end
 		end),
 	})
@@ -841,9 +896,17 @@ function M.run_install_claude(sudo_pass)
 		cmd = { "powershell.exe", "-ExecutionPolicy", "Bypass", "-Command", "irm https://claude.ai/install.ps1 | iex" }
 	else
 		if sudo_pass and sudo_pass ~= "" then
-			cmd = { "bash", "-c", string.format("echo %s | sudo -S bash -c 'curl -fsSL https://claude.ai/install.sh | bash || npm install -g @anthropic-ai/claude-code'", vim.fn.shellescape(sudo_pass)) }
+			cmd = {
+				"bash",
+				"-c",
+				string.format(
+					"echo %s | sudo -S bash -c 'curl -fsSL https://claude.ai/install.sh | bash || npm install -g @anthropic-ai/claude-code'",
+					vim.fn.shellescape(sudo_pass)
+				),
+			}
 		else
-			cmd = { "bash", "-c", "curl -fsSL https://claude.ai/install.sh | bash || npm install -g @anthropic-ai/claude-code" }
+			cmd =
+				{ "bash", "-c", "curl -fsSL https://claude.ai/install.sh | bash || npm install -g @anthropic-ai/claude-code" }
 		end
 	end
 
@@ -858,7 +921,11 @@ function M.run_install_claude(sudo_pass)
 				for _, line in ipairs(data) do
 					if line and line ~= "" then
 						local clean = line:gsub("\27%[[0-9;]*[mK]", ""):gsub("^%s*", "")
-						if clean ~= "" and not clean:lower():match("password") and not (sudo_pass and clean:find(sudo_pass, 1, true)) then
+						if
+							clean ~= ""
+							and not clean:lower():match("password")
+							and not (sudo_pass and clean:find(sudo_pass, 1, true))
+						then
 							add_log(clean)
 						end
 					end
@@ -870,7 +937,11 @@ function M.run_install_claude(sudo_pass)
 				for _, line in ipairs(data) do
 					if line and line ~= "" then
 						local clean = line:gsub("\27%[[0-9;]*[mK]", ""):gsub("^%s*", "")
-						if clean ~= "" and not clean:lower():match("password") and not (sudo_pass and clean:find(sudo_pass, 1, true)) then
+						if
+							clean ~= ""
+							and not clean:lower():match("password")
+							and not (sudo_pass and clean:find(sudo_pass, 1, true))
+						then
 							add_log("⚠️ " .. clean)
 						end
 					end
@@ -881,14 +952,22 @@ function M.run_install_claude(sudo_pass)
 			if exit_code == 0 then
 				add_log("🎉 Claude Code CLI (claude) installed successfully!")
 				update_ui_buffer(nil, M.scan_status().installed_items, {}, 100)
-				vim.notify("🎉 Claude Code CLI (claude) installed successfully! Run 'claude' in terminal to authenticate.", vim.log.levels.INFO, {
-					title = "Claude Code CLI",
-				})
+				vim.notify(
+					"🎉 Claude Code CLI (claude) installed successfully! Run 'claude' in terminal to authenticate.",
+					vim.log.levels.INFO,
+					{
+						title = "Claude Code CLI",
+					}
+				)
 			else
 				add_log(string.format("❌ Claude Code CLI installation failed with exit code %d.", exit_code))
-				vim.notify(string.format("❌ Claude Code CLI installation failed (exit code %d).", exit_code), vim.log.levels.ERROR, {
-					title = "Installation Failed",
-				})
+				vim.notify(
+					string.format("❌ Claude Code CLI installation failed (exit code %d).", exit_code),
+					vim.log.levels.ERROR,
+					{
+						title = "Installation Failed",
+					}
+				)
 			end
 		end),
 	})
@@ -1023,8 +1102,7 @@ function M.get_bundle_status(bundle)
 	-- 1. Check required system runtimes
 	local missing_runtimes = {}
 	for _, req in ipairs(bundle.requires or {}) do
-		local ok = vim.fn.executable(req.cmd) == 1
-			or (req.alt and vim.fn.executable(req.alt) == 1)
+		local ok = vim.fn.executable(req.cmd) == 1 or (req.alt and vim.fn.executable(req.alt) == 1)
 		if not ok then
 			table.insert(missing_runtimes, req.name)
 		end
@@ -1106,8 +1184,7 @@ local function run_batch(jobs, action)
 		local missing = {}
 		if installing then
 			for _, req in ipairs(job.bundle.requires or {}) do
-				local ok = vim.fn.executable(req.cmd) == 1
-					or (req.alt and vim.fn.executable(req.alt) == 1)
+				local ok = vim.fn.executable(req.cmd) == 1 or (req.alt and vim.fn.executable(req.alt) == 1)
 				if not ok then
 					table.insert(missing, req.name)
 				end
@@ -1241,13 +1318,19 @@ end
 --- Installs every package, parser, and dotnet tool in a language bundle.
 --- @param bundle table
 function M.install_language_bundle(bundle)
-	run_batch({ { bundle = bundle, sel = { mason = bundle.mason_pkgs, ts = bundle.treesitter, dotnet = bundle.dotnet_tools } } }, "install")
+	run_batch(
+		{ { bundle = bundle, sel = { mason = bundle.mason_pkgs, ts = bundle.treesitter, dotnet = bundle.dotnet_tools } } },
+		"install"
+	)
 end
 
 --- Uninstalls every package, parser, and dotnet tool in a language bundle.
 --- @param bundle table
 function M.uninstall_language_bundle(bundle)
-	run_batch({ { bundle = bundle, sel = { mason = bundle.mason_pkgs, ts = bundle.treesitter, dotnet = bundle.dotnet_tools } } }, "uninstall")
+	run_batch(
+		{ { bundle = bundle, sel = { mason = bundle.mason_pkgs, ts = bundle.treesitter, dotnet = bundle.dotnet_tools } } },
+		"uninstall"
+	)
 end
 
 --- Installs only the given component subset of a language bundle.
@@ -1283,15 +1366,21 @@ local function count_selected_components(item)
 	local sel, tot = 0, 0
 	for _, v in pairs(item.comp.mason) do
 		tot = tot + 1
-		if v then sel = sel + 1 end
+		if v then
+			sel = sel + 1
+		end
 	end
 	for _, v in pairs(item.comp.ts) do
 		tot = tot + 1
-		if v then sel = sel + 1 end
+		if v then
+			sel = sel + 1
+		end
 	end
 	for _, v in pairs(item.comp.dotnet) do
 		tot = tot + 1
-		if v then sel = sel + 1 end
+		if v then
+			sel = sel + 1
+		end
 	end
 	return sel, tot
 end
@@ -1329,7 +1418,10 @@ function M.render_language_manager_buffer()
 	table.insert(lines, "  ==========================================================================")
 	table.insert(lines, "   📦 KRS INSTALL DEPENDENCIES & TOOLCHAINS -- PER-LANGUAGE SETUP & TEARDOWN")
 	table.insert(lines, "  ==========================================================================")
-	table.insert(lines, "   Fresh setup defaults to Minimal Core (Lua only). [Enter] a row to pick individual components.")
+	table.insert(
+		lines,
+		"   Fresh setup defaults to Minimal Core (Lua only). [Enter] a row to pick individual components."
+	)
 	table.insert(lines, "")
 
 	local selected_count = 0
@@ -1399,9 +1491,15 @@ function M.render_language_manager_buffer()
 
 	table.insert(lines, "")
 	table.insert(lines, "  " .. string.rep("─", width - 4))
-	table.insert(lines, string.format("  👉 [ PRESS 'i' OR ENTER TO INSTALL SELECTED COMPONENTS (%d BUNDLES) ]", selected_count))
+	table.insert(
+		lines,
+		string.format("  👉 [ PRESS 'i' OR ENTER TO INSTALL SELECTED COMPONENTS (%d BUNDLES) ]", selected_count)
+	)
 	table.insert(lines, "  [Enter] Expand/Toggle Row            |  [Space] Toggle Checkbox  |  [d] Show Details")
-	table.insert(lines, string.format("  [a] Select All    [n] Select None   |  [p] Select All Pending (%d bundles)", pending_count))
+	table.insert(
+		lines,
+		string.format("  [a] Select All    [n] Select None   |  [p] Select All Pending (%d bundles)", pending_count)
+	)
 	table.insert(lines, "  [i] Install Selected                |  [u] Uninstall Selected  |  [q/Esc] Close")
 
 	table.insert(lines, "")
@@ -1441,8 +1539,7 @@ function M.open_language_manager()
 		local status = M.get_bundle_status(bundle)
 		-- Only pre-select: minimal core (always on) or fully installed bundles.
 		-- Partial or missing bundles start deselected — user must opt-in.
-		local auto_select = bundle.is_minimal
-			or (status.installed_count == status.total_count and status.total_count > 0)
+		local auto_select = bundle.is_minimal or (status.installed_count == status.total_count and status.total_count > 0)
 
 		local comp = { mason = {}, ts = {}, dotnet = {} }
 		for _, c in ipairs(bundle.mason_components or {}) do
@@ -1536,13 +1633,19 @@ function M.open_language_manager()
 	local function collect_selection(item)
 		local mason, ts, dotnet = {}, {}, {}
 		for pkg, v in pairs(item.comp.mason) do
-			if v then table.insert(mason, pkg) end
+			if v then
+				table.insert(mason, pkg)
+			end
 		end
 		for parser, v in pairs(item.comp.ts) do
-			if v then table.insert(ts, parser) end
+			if v then
+				table.insert(ts, parser)
+			end
 		end
 		for tool, v in pairs(item.comp.dotnet) do
-			if v then table.insert(dotnet, tool) end
+			if v then
+				table.insert(dotnet, tool)
+			end
 		end
 		return { mason = mason, ts = ts, dotnet = dotnet }
 	end
@@ -1571,7 +1674,10 @@ function M.open_language_manager()
 		elseif entry and entry.item then
 			M.install_language_bundle(entry.item.bundle)
 		else
-			vim.notify("⚠️ Move cursor to a language row or select checkboxes with <Space> to install.", vim.log.levels.WARN)
+			vim.notify(
+				"⚠️ Move cursor to a language row or select checkboxes with <Space> to install.",
+				vim.log.levels.WARN
+			)
 			return
 		end
 
@@ -1602,7 +1708,10 @@ function M.open_language_manager()
 		elseif entry and entry.item then
 			M.uninstall_language_bundle(entry.item.bundle)
 		else
-			vim.notify("⚠️ Move cursor to a language row or select checkboxes with <Space> to uninstall.", vim.log.levels.WARN)
+			vim.notify(
+				"⚠️ Move cursor to a language row or select checkboxes with <Space> to uninstall.",
+				vim.log.levels.WARN
+			)
 			return
 		end
 
@@ -1663,10 +1772,7 @@ function M.open_language_manager()
 	vim.keymap.set("n", "p", function()
 		for _, item in ipairs(lang_items) do
 			local status = item.status or M.get_bundle_status(item.bundle)
-			if not item.bundle.is_minimal
-				and not status.blocked
-				and status.installed_count < status.total_count
-			then
+			if not item.bundle.is_minimal and not status.blocked and status.installed_count < status.total_count then
 				set_item_components(item, true)
 			end
 		end

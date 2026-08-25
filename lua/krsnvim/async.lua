@@ -46,7 +46,9 @@ function Task.new(executor)
 	}, Task)
 
 	local function resolve(val)
-		if self.status ~= "pending" then return end
+		if self.status ~= "pending" then
+			return
+		end
 		self.status = "fulfilled"
 		self.value = val
 		for _, cb in ipairs(self.callbacks) do
@@ -54,9 +56,13 @@ function Task.new(executor)
 				vim.schedule(function()
 					local ok, res = pcall(cb.on_fulfilled, val)
 					if ok then
-						if cb.resolve then cb.resolve(res) end
+						if cb.resolve then
+							cb.resolve(res)
+						end
 					else
-						if cb.reject then cb.reject(res) end
+						if cb.reject then
+							cb.reject(res)
+						end
 					end
 				end)
 			elseif cb.resolve then
@@ -67,7 +73,9 @@ function Task.new(executor)
 	end
 
 	local function reject(err)
-		if self.status ~= "pending" then return end
+		if self.status ~= "pending" then
+			return
+		end
 		self.status = "rejected"
 		self.value = err
 		for _, cb in ipairs(self.callbacks) do
@@ -75,9 +83,13 @@ function Task.new(executor)
 				vim.schedule(function()
 					local ok, res = pcall(cb.on_rejected, err)
 					if ok then
-						if cb.resolve then cb.resolve(res) end
+						if cb.resolve then
+							cb.resolve(res)
+						end
 					else
-						if cb.reject then cb.reject(res) end
+						if cb.reject then
+							cb.reject(res)
+						end
 					end
 				end)
 			elseif cb.reject then
@@ -106,14 +118,22 @@ Task["then"] = function(self, on_fulfilled, on_rejected)
 		if self.status == "fulfilled" then
 			if on_fulfilled then
 				local ok, res = pcall(on_fulfilled, self.value)
-				if ok then resolve(res) else reject(res) end
+				if ok then
+					resolve(res)
+				else
+					reject(res)
+				end
 			else
 				resolve(self.value)
 			end
 		elseif self.status == "rejected" then
 			if on_rejected then
 				local ok, res = pcall(on_rejected, self.value)
-				if ok then resolve(res) else reject(res) end
+				if ok then
+					resolve(res)
+				else
+					reject(res)
+				end
 			else
 				reject(self.value)
 			end
@@ -159,7 +179,9 @@ function Task:await()
 		if coroutine.status(co) == "suspended" then
 			vim.schedule(function()
 				local ok, err = coroutine.resume(co, nil, res)
-				if not ok then error(err) end
+				if not ok then
+					error(err)
+				end
 			end)
 		end
 	end, function(err)
@@ -168,17 +190,23 @@ function Task:await()
 		if coroutine.status(co) == "suspended" then
 			vim.schedule(function()
 				local ok, resume_err = coroutine.resume(co, err, nil)
-				if not ok then error(resume_err) end
+				if not ok then
+					error(resume_err)
+				end
 			end)
 		end
 	end)
 
 	if not done then
 		local err, res = coroutine.yield()
-		if err then error(err) end
+		if err then
+			error(err)
+		end
 		return res
 	else
-		if err_out then error(err_out) end
+		if err_out then
+			error(err_out)
+		end
 		return res_out
 	end
 end
@@ -205,7 +233,9 @@ function M.sleep(ms, cb)
 		timer:start(ms, 0, function()
 			timer:stop()
 			timer:close()
-			vim.schedule(function() cb(nil) end)
+			vim.schedule(function()
+				cb(nil)
+			end)
 		end)
 		return
 	end
@@ -219,7 +249,9 @@ function M.sleep(ms, cb)
 			vim.schedule(function()
 				if coroutine.status(co) == "suspended" then
 					local ok, err = coroutine.resume(co)
-					if not ok then error(err) end
+					if not ok then
+						error(err)
+					end
 				end
 			end)
 		end)
@@ -296,7 +328,9 @@ function M.parallel(tasks, callback)
 
 		for i, task_def in ipairs(tasks) do
 			local function on_complete(err, res)
-				if has_errored then return end
+				if has_errored then
+					return
+				end
 				if err then
 					has_errored = true
 					reject(err)
@@ -309,7 +343,9 @@ function M.parallel(tasks, callback)
 				end
 			end
 
-			if has_errored then break end
+			if has_errored then
+				break
+			end
 			if type(task_def) == "function" then
 				local co = coroutine.create(function()
 					local ok, res = pcall(task_def)
@@ -326,7 +362,11 @@ function M.parallel(tasks, callback)
 			elseif type(task_def) == "table" and task_def.thread then
 				M.thread(task_def.fn, task_def.args or {}, on_complete)
 			elseif type(task_def) == "table" and type(task_def["then"]) == "function" then
-				task_def["then"](task_def, function(res) on_complete(nil, res) end, function(err) on_complete(err, nil) end)
+				task_def["then"](task_def, function(res)
+					on_complete(nil, res)
+				end, function(err)
+					on_complete(err, nil)
+				end)
 			else
 				on_complete(nil, task_def)
 			end
@@ -334,7 +374,11 @@ function M.parallel(tasks, callback)
 	end)
 
 	if callback and type(callback) == "function" then
-		task_obj["then"](task_obj, function(res) callback(nil, res) end, function(err) callback(err, nil) end)
+		task_obj["then"](task_obj, function(res)
+			callback(nil, res)
+		end, function(err)
+			callback(err, nil)
+		end)
 	end
 
 	local co, is_main = coroutine.running()
@@ -359,19 +403,35 @@ function M.race(tasks, callback)
 		local finished = false
 		for _, task_def in ipairs(tasks) do
 			local function on_complete(err, res)
-				if finished then return end
+				if finished then
+					return
+				end
 				finished = true
-				if err then reject(err) else resolve(res) end
+				if err then
+					reject(err)
+				else
+					resolve(res)
+				end
 			end
 
-			if finished then break end
+			if finished then
+				break
+			end
 			if type(task_def) == "function" then
 				local ok, res = pcall(task_def)
-				if ok then on_complete(nil, res) else on_complete(res, nil) end
+				if ok then
+					on_complete(nil, res)
+				else
+					on_complete(res, nil)
+				end
 			elseif type(task_def) == "table" and task_def.thread then
 				M.thread(task_def.fn, task_def.args or {}, on_complete)
 			elseif type(task_def) == "table" and type(task_def["then"]) == "function" then
-				task_def["then"](task_def, function(res) on_complete(nil, res) end, function(err) on_complete(err, nil) end)
+				task_def["then"](task_def, function(res)
+					on_complete(nil, res)
+				end, function(err)
+					on_complete(err, nil)
+				end)
 			else
 				on_complete(nil, task_def)
 			end
@@ -379,7 +439,11 @@ function M.race(tasks, callback)
 	end)
 
 	if callback and type(callback) == "function" then
-		task_obj["then"](task_obj, function(res) callback(nil, res) end, function(err) callback(err, nil) end)
+		task_obj["then"](task_obj, function(res)
+			callback(nil, res)
+		end, function(err)
+			callback(err, nil)
+		end)
 	end
 
 	local co, is_main = coroutine.running()
@@ -423,7 +487,11 @@ function M.thread(fn, args, callback)
 	end)
 
 	if callback and type(callback) == "function" then
-		task_obj["then"](task_obj, function(...) callback(nil, ...) end, function(err) callback(err, nil) end)
+		task_obj["then"](task_obj, function(...)
+			callback(nil, ...)
+		end, function(err)
+			callback(err, nil)
+		end)
 	end
 
 	local co, is_main = coroutine.running()
@@ -447,7 +515,9 @@ function M.map(items, worker_fn, opts, callback)
 	end
 	opts = opts or {}
 	local concurrency = opts.concurrency or #items
-	if concurrency <= 0 then concurrency = 1 end
+	if concurrency <= 0 then
+		concurrency = 1
+	end
 
 	local tasks = {}
 	for idx, item in ipairs(items) do
@@ -469,8 +539,12 @@ function M.map(items, worker_fn, opts, callback)
 		local has_errored = false
 
 		local function launch_next()
-			if has_errored then return end
-			if index > total then return end
+			if has_errored then
+				return
+			end
+			if index > total then
+				return
+			end
 
 			local cur_idx = index
 			local cur_task = tasks[cur_idx]
@@ -501,7 +575,11 @@ function M.map(items, worker_fn, opts, callback)
 	end)
 
 	if callback and type(callback) == "function" then
-		task_obj["then"](task_obj, function(res) callback(nil, res) end, function(err) callback(err, nil) end)
+		task_obj["then"](task_obj, function(res)
+			callback(nil, res)
+		end, function(err)
+			callback(err, nil)
+		end)
 	end
 
 	local co, is_main = coroutine.running()
@@ -548,7 +626,11 @@ function M.series(tasks, callback)
 	end)
 
 	if callback and type(callback) == "function" then
-		task_obj["then"](task_obj, function(res) callback(nil, res) end, function(err) callback(err, nil) end)
+		task_obj["then"](task_obj, function(res)
+			callback(nil, res)
+		end, function(err)
+			callback(err, nil)
+		end)
 	end
 
 	local co, is_main = coroutine.running()
@@ -581,7 +663,11 @@ function M.waterfall(tasks, callback)
 				local ok, res = pcall(cur_task, unpack(current_args))
 				if ok then
 					if type(res) == "table" and type(res["then"]) == "function" then
-						res["then"](res, function(val) step(val) end, function(err) reject(err) end)
+						res["then"](res, function(val)
+							step(val)
+						end, function(err)
+							reject(err)
+						end)
 					else
 						step(res)
 					end
@@ -596,7 +682,11 @@ function M.waterfall(tasks, callback)
 	end)
 
 	if callback and type(callback) == "function" then
-		task_obj["then"](task_obj, function(...) callback(nil, ...) end, function(err) callback(err, nil) end)
+		task_obj["then"](task_obj, function(...)
+			callback(nil, ...)
+		end, function(err)
+			callback(err, nil)
+		end)
 	end
 
 	local co, is_main = coroutine.running()
@@ -674,11 +764,15 @@ function Channel:receive(cb)
 		table.insert(self.waiters, function(err, val)
 			if coroutine.status(co) == "suspended" then
 				local ok, resume_err = coroutine.resume(co, err, val)
-				if not ok then error(resume_err) end
+				if not ok then
+					error(resume_err)
+				end
 			end
 		end)
 		local err, val = coroutine.yield()
-		if err then error(err) end
+		if err then
+			error(err)
+		end
 		return val
 	else
 		error("Channel:receive() requires callback or must be called inside async.run()")
@@ -713,7 +807,9 @@ function M.setTimeout(callback, ms, ...)
 		error("setTimeout: first argument must be a function")
 	end
 	ms = tonumber(ms) or 0
-	if ms < 0 then ms = 0 end
+	if ms < 0 then
+		ms = 0
+	end
 	local args = { ... }
 	local timer = uv.new_timer()
 	local id = next_timer_id
@@ -721,14 +817,18 @@ function M.setTimeout(callback, ms, ...)
 
 	active_timers[id] = timer
 
-	timer:start(ms, 0, vim.schedule_wrap(function()
-		active_timers[id] = nil
-		if timer and not timer:is_closing() then
-			timer:stop()
-			timer:close()
-		end
-		callback(unpack(args))
-	end))
+	timer:start(
+		ms,
+		0,
+		vim.schedule_wrap(function()
+			active_timers[id] = nil
+			if timer and not timer:is_closing() then
+				timer:stop()
+				timer:close()
+			end
+			callback(unpack(args))
+		end)
+	)
 
 	return id
 end
@@ -736,7 +836,9 @@ end
 --- Cancels a timer created by `setTimeout`.
 --- @param id number|table|nil Timer ID returned by `setTimeout`
 function M.clearTimeout(id)
-	if not id then return end
+	if not id then
+		return
+	end
 	local timer = active_timers[id]
 	if timer then
 		active_timers[id] = nil
@@ -764,7 +866,9 @@ function M.setInterval(callback, ms, ...)
 		error("setInterval: first argument must be a function")
 	end
 	ms = tonumber(ms) or 1
-	if ms < 1 then ms = 1 end
+	if ms < 1 then
+		ms = 1
+	end
 	local args = { ... }
 	local timer = uv.new_timer()
 	local id = next_timer_id
@@ -772,11 +876,15 @@ function M.setInterval(callback, ms, ...)
 
 	active_timers[id] = timer
 
-	timer:start(ms, ms, vim.schedule_wrap(function()
-		if active_timers[id] then
-			callback(unpack(args))
-		end
-	end))
+	timer:start(
+		ms,
+		ms,
+		vim.schedule_wrap(function()
+			if active_timers[id] then
+				callback(unpack(args))
+			end
+		end)
+	)
 
 	return id
 end

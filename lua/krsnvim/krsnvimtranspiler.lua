@@ -26,15 +26,19 @@ local LUA_KEYWORDS = {
 --- @param text string
 --- @return string masked, string[] strings
 local function mask_strings(text)
-	if not text then return "", {} end
+	if not text then
+		return "", {}
+	end
 	local strings = {}
-	local masked = text:gsub('"[^"]*"', function(s)
-		table.insert(strings, s)
-		return "___STR_" .. #strings .. "___"
-	end):gsub("'[^']*'", function(s)
-		table.insert(strings, s)
-		return "___STR_" .. #strings .. "___"
-	end)
+	local masked = text
+		:gsub('"[^"]*"', function(s)
+			table.insert(strings, s)
+			return "___STR_" .. #strings .. "___"
+		end)
+		:gsub("'[^']*'", function(s)
+			table.insert(strings, s)
+			return "___STR_" .. #strings .. "___"
+		end)
 	return masked, strings
 end
 
@@ -43,7 +47,9 @@ end
 --- @param strings string[]
 --- @return string
 local function unmask_strings(text, strings)
-	if not text then return "" end
+	if not text then
+		return ""
+	end
 	local res = text:gsub("___STR_(%d+)___", function(idx)
 		return strings[tonumber(idx)] or ""
 	end)
@@ -55,13 +61,18 @@ end
 --- @param args string
 --- @return string[]
 local function split_args(args)
-	if not args or args == "" then return {} end
+	if not args or args == "" then
+		return {}
+	end
 	local masked, strings = mask_strings(args)
 	local parts, depth, current = {}, 0, ""
 	for i = 1, #masked do
 		local c = masked:sub(i, i)
-		if c == "{" or c == "(" then depth = depth + 1
-		elseif c == "}" or c == ")" then depth = depth - 1 end
+		if c == "{" or c == "(" then
+			depth = depth + 1
+		elseif c == "}" or c == ")" then
+			depth = depth - 1
+		end
 		if c == "," and depth == 0 then
 			table.insert(parts, (unmask_strings(current, strings)):match("^%s*(.-)%s*$"))
 			current = ""
@@ -122,7 +133,9 @@ end
 --- @param expr string
 --- @return string
 local function to_ps1_expr(expr)
-	if not expr or expr == "" then return "" end
+	if not expr or expr == "" then
+		return ""
+	end
 	local masked, strings = mask_strings(expr)
 
 	-- Method calls: obj:method( -> obj.method(
@@ -133,14 +146,28 @@ local function to_ps1_expr(expr)
 
 	-- Replace identifiers with $identifier FIRST (skipping Lua reserved keywords, function calls, and masked strings)
 	masked = masked:gsub("()([%a_][%w_]*)()", function(s_pos, word, e_pos)
-		if word == "true" then return "$true" end
-		if word == "false" then return "$false" end
-		if word == "nil" then return "$null" end
-		if LUA_KEYWORDS[word] then return word end
-		if word:match("^___STR_%d+___$") then return word end
-		if word:sub(1, 1) == "$" then return word end
+		if word == "true" then
+			return "$true"
+		end
+		if word == "false" then
+			return "$false"
+		end
+		if word == "nil" then
+			return "$null"
+		end
+		if LUA_KEYWORDS[word] then
+			return word
+		end
+		if word:match("^___STR_%d+___$") then
+			return word
+		end
+		if word:sub(1, 1) == "$" then
+			return word
+		end
 		local is_fn = masked:sub(e_pos):match("^%s*%(") ~= nil
-		if is_fn then return word end
+		if is_fn then
+			return word
+		end
 		return "$" .. word
 	end)
 
@@ -168,7 +195,9 @@ end
 --- @param val string
 --- @return string
 local function format_ps1_val(val)
-	if not val or val == "" then return '""' end
+	if not val or val == "" then
+		return '""'
+	end
 	val = val:match("^%s*(.-)%s*$")
 	if val:match('^"[^"]*"$') or val:match("^'[^']*'$") then
 		return val
@@ -176,9 +205,15 @@ local function format_ps1_val(val)
 	if tonumber(val) then
 		return val
 	end
-	if val == "true" then return "$true" end
-	if val == "false" then return "$false" end
-	if val == "nil" then return "$null" end
+	if val == "true" then
+		return "$true"
+	end
+	if val == "false" then
+		return "$false"
+	end
+	if val == "nil" then
+		return "$null"
+	end
 
 	-- Multi-part string concatenation: "a" .. b .. "c"
 	if val:find("%.%.") then
@@ -212,9 +247,13 @@ end
 --- @param lua_tbl_str string
 --- @return string
 local function lua_tbl_to_ps1(lua_tbl_str)
-	if not lua_tbl_str then return "@()" end
+	if not lua_tbl_str then
+		return "@()"
+	end
 	local s = lua_tbl_str:match("^%s*{?(.-)}?%s*$")
-	if not s or s == "" then return "@()" end
+	if not s or s == "" then
+		return "@()"
+	end
 
 	local args = split_args(s)
 	local is_kv = false
@@ -249,7 +288,9 @@ end
 --- @param val string
 --- @return string
 local function format_sh_val(val)
-	if not val or val == "" then return '""' end
+	if not val or val == "" then
+		return '""'
+	end
 	val = val:match("^%s*(.-)%s*$")
 	if val:match('^"[^"]*"$') or val:match("^'[^']*'$") then
 		return val
@@ -301,9 +342,13 @@ end
 --- @param lua_tbl_str string
 --- @return string
 local function lua_tbl_to_json(lua_tbl_str)
-	if not lua_tbl_str then return '\'{}\'' end
+	if not lua_tbl_str then
+		return "'{}'"
+	end
 	local s = lua_tbl_str:match("^%s*{?(.-)}?%s*$")
-	if not s or s == "" then return '\'{}\'' end
+	if not s or s == "" then
+		return "'{}'"
+	end
 	local args = split_args(s)
 	local items = {}
 	for _, kv in ipairs(args) do
@@ -322,7 +367,7 @@ local function lua_tbl_to_json(lua_tbl_str)
 			table.insert(items, kv)
 		end
 	end
-	return '\'{' .. table.concat(items, ", ") .. '}\''
+	return "'{" .. table.concat(items, ", ") .. "}'"
 end
 
 --- Formats a condition for Bash `[[ ... ]]` or `(( ... ))`.
@@ -357,9 +402,15 @@ local function format_sh_cond(cond)
 
 	-- Wrap variables with ${var} skipping Lua keywords
 	masked = masked:gsub("[%a_][%w_]*", function(w)
-		if LUA_KEYWORDS[w] then return w end
-		if w:match("^___STR_%d+___$") then return w end
-		if w:sub(1, 1) == "$" then return w end
+		if LUA_KEYWORDS[w] then
+			return w
+		end
+		if w:match("^___STR_%d+___$") then
+			return w
+		end
+		if w:sub(1, 1) == "$" then
+			return w
+		end
 		return "${" .. w .. "}"
 	end)
 
@@ -407,9 +458,14 @@ function M.to_sh(code)
 		local indent = line:match("^(%s*)") or ""
 
 		-- Skip or comment out require/import lines
-		if trimmed:match("^local%s+[%w_]+%s*=%s*require%(") or trimmed:match("^local%s+[%w_]+%s*=%s*import%(") or trimmed:match("^require%(") or trimmed:match("^import%(") then
+		if
+			trimmed:match("^local%s+[%w_]+%s*=%s*require%(")
+			or trimmed:match("^local%s+[%w_]+%s*=%s*import%(")
+			or trimmed:match("^require%(")
+			or trimmed:match("^import%(")
+		then
 			table.insert(lines, indent .. "# [krsnvim] " .. trimmed .. " (mapped to native CLI tools)")
-		
+
 		-- Comments: -- comment -> # comment
 		elseif trimmed:sub(1, 2) == "--" then
 			local comment_text = trimmed:sub(3):match("^%s*(.-)%s*$")
@@ -420,12 +476,19 @@ function M.to_sh(code)
 			table.insert(lines, "")
 
 		-- Testing Framework Hooks: test.beforeAll, test.afterAll, test.beforeEach, test.afterEach, etc.
-		elseif trimmed:match("^[%w_]*%.?beforeAll%s*%(") or trimmed:match("^[%w_]*%.?afterAll%s*%(") or trimmed:match("^[%w_]*%.?beforeEach%s*%(") or trimmed:match("^[%w_]*%.?afterEach%s*%(") then
+		elseif
+			trimmed:match("^[%w_]*%.?beforeAll%s*%(")
+			or trimmed:match("^[%w_]*%.?afterAll%s*%(")
+			or trimmed:match("^[%w_]*%.?beforeEach%s*%(")
+			or trimmed:match("^[%w_]*%.?afterEach%s*%(")
+		then
 			table.insert(block_stack, "noop")
 
 		-- Testing Framework Suites: describe("suite", function() ...) or test.describe(...)
 		elseif trimmed:match("^describe%s*%(") or trimmed:match("^[%w_]+%.describe%s*%(") then
-			local suite_name = trimmed:match('describe%s*%("%s*(.-)%s*"') or trimmed:match("describe%s*%('%s*(.-)%s*'") or "Test Suite"
+			local suite_name = trimmed:match('describe%s*%("%s*(.-)%s*"')
+				or trimmed:match("describe%s*%('%s*(.-)%s*'")
+				or "Test Suite"
 			table.insert(block_stack, "noop")
 			table.insert(lines, indent .. 'echo "📦 Suite: ' .. suite_name .. '"')
 
@@ -434,109 +497,261 @@ function M.to_sh(code)
 			table.insert(lines, indent .. "# [krsnvim] " .. trimmed)
 
 		-- Testing Framework Tests: it("test", function() ...) or test("test", function() ...) or test.test(...)
-		elseif trimmed:match("^it%s*%(") or trimmed:match("^test%s*%(") or trimmed:match("^[%w_]+%.it%s*%(") or trimmed:match("^[%w_]+%.test%s*%(") then
-			local test_name = trimmed:match('it%s*%("%s*(.-)%s*"') or trimmed:match('test%s*%("%s*(.-)%s*"') or trimmed:match("it%s*%('%s*(.-)%s*'") or trimmed:match("test%s*%('%s*(.-)%s*'") or "Test"
+		elseif
+			trimmed:match("^it%s*%(")
+			or trimmed:match("^test%s*%(")
+			or trimmed:match("^[%w_]+%.it%s*%(")
+			or trimmed:match("^[%w_]+%.test%s*%(")
+		then
+			local test_name = trimmed:match('it%s*%("%s*(.-)%s*"')
+				or trimmed:match('test%s*%("%s*(.-)%s*"')
+				or trimmed:match("it%s*%('%s*(.-)%s*'")
+				or trimmed:match("test%s*%('%s*(.-)%s*'")
+				or "Test"
 			table.insert(block_stack, "noop")
 			table.insert(lines, indent .. 'echo "  ✓ ' .. test_name .. '"')
 
 		-- Testing Framework Assertions: expect(val)...
 		elseif trimmed:match("^expect%s*%(") then
-			local is_inv = trimmed:find("%.isNot%.") or trimmed:find('%["not"%]') or trimmed:find("%.not%.") or trimmed:find("%.not_%.")
+			local is_inv = trimmed:find("%.isNot%.")
+				or trimmed:find('%["not"%]')
+				or trimmed:find("%.not%.")
+				or trimmed:find("%.not_%.")
 
 			if trimmed:find("%.toBe%s*%(") or trimmed:find("%.toEqual%s*%(") then
 				local act, exp = trimmed:match("expect%s*%((.-)%)%..-toBe%s*%((.-)%)")
-				if not act then act, exp = trimmed:match("expect%s*%((.-)%)%..-toEqual%s*%((.-)%)") end
+				if not act then
+					act, exp = trimmed:match("expect%s*%((.-)%)%..-toEqual%s*%((.-)%)")
+				end
 				if act and exp then
 					if is_inv then
-						table.insert(lines, indent .. 'if [ ' .. format_sh_val(act) .. ' == ' .. format_sh_val(exp) .. ' ]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent
+								.. "if [ "
+								.. format_sh_val(act)
+								.. " == "
+								.. format_sh_val(exp)
+								.. ' ]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					else
-						table.insert(lines, indent .. 'if [ ' .. format_sh_val(act) .. ' != ' .. format_sh_val(exp) .. ' ]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent
+								.. "if [ "
+								.. format_sh_val(act)
+								.. " != "
+								.. format_sh_val(exp)
+								.. ' ]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					end
 				end
 			elseif trimmed:find("%.toBeTruthy%s*%(") then
 				local act = trimmed:match("expect%s*%((.-)%)%.")
 				if act then
 					if is_inv then
-						table.insert(lines, indent .. 'if [ -n ' .. format_sh_val(act) .. ' ] && [ ' .. format_sh_val(act) .. ' != "false" ]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent
+								.. "if [ -n "
+								.. format_sh_val(act)
+								.. " ] && [ "
+								.. format_sh_val(act)
+								.. ' != "false" ]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					else
-						table.insert(lines, indent .. 'if [ -z ' .. format_sh_val(act) .. ' ] || [ ' .. format_sh_val(act) .. ' == "false" ]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent
+								.. "if [ -z "
+								.. format_sh_val(act)
+								.. " ] || [ "
+								.. format_sh_val(act)
+								.. ' == "false" ]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					end
 				end
 			elseif trimmed:find("%.toBeFalsy%s*%(") then
 				local act = trimmed:match("expect%s*%((.-)%)%.")
 				if act then
 					if is_inv then
-						table.insert(lines, indent .. 'if [ -z ' .. format_sh_val(act) .. ' ] || [ ' .. format_sh_val(act) .. ' == "false" ]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent
+								.. "if [ -z "
+								.. format_sh_val(act)
+								.. " ] || [ "
+								.. format_sh_val(act)
+								.. ' == "false" ]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					else
-						table.insert(lines, indent .. 'if [ -n ' .. format_sh_val(act) .. ' ] && [ ' .. format_sh_val(act) .. ' != "false" ]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent
+								.. "if [ -n "
+								.. format_sh_val(act)
+								.. " ] && [ "
+								.. format_sh_val(act)
+								.. ' != "false" ]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					end
 				end
-			elseif trimmed:find("%.toBeNil%s*%(") or trimmed:find("%.toBeNull%s*%(") or trimmed:find("%.toBeUndefined%s*%(") then
+			elseif
+				trimmed:find("%.toBeNil%s*%(")
+				or trimmed:find("%.toBeNull%s*%(")
+				or trimmed:find("%.toBeUndefined%s*%(")
+			then
 				local act = trimmed:match("expect%s*%((.-)%)%.")
 				if act then
 					if is_inv then
-						table.insert(lines, indent .. 'if [ -z ' .. format_sh_val(act) .. ' ]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent .. "if [ -z " .. format_sh_val(act) .. ' ]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					else
-						table.insert(lines, indent .. 'if [ -n ' .. format_sh_val(act) .. ' ]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent .. "if [ -n " .. format_sh_val(act) .. ' ]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					end
 				end
 			elseif trimmed:find("%.toBeDefined%s*%(") then
 				local act = trimmed:match("expect%s*%((.-)%)%.")
 				if act then
 					if is_inv then
-						table.insert(lines, indent .. 'if [ -n ' .. format_sh_val(act) .. ' ]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent .. "if [ -n " .. format_sh_val(act) .. ' ]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					else
-						table.insert(lines, indent .. 'if [ -z ' .. format_sh_val(act) .. ' ]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent .. "if [ -z " .. format_sh_val(act) .. ' ]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					end
 				end
 			elseif trimmed:find("%.toContain%s*%(") then
 				local act, item = trimmed:match("expect%s*%((.-)%)%..-toContain%s*%((.-)%)")
 				if act and item then
-					local clean_item = item:gsub('^"', ''):gsub('"$', ''):gsub("^'", ''):gsub("'$", '')
+					local clean_item = item:gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 					if is_inv then
-						table.insert(lines, indent .. 'if [[ ' .. format_sh_val(act) .. ' == *' .. clean_item .. '* ]]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent
+								.. "if [[ "
+								.. format_sh_val(act)
+								.. " == *"
+								.. clean_item
+								.. '* ]]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					else
-						table.insert(lines, indent .. 'if [[ ' .. format_sh_val(act) .. ' != *' .. clean_item .. '* ]]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent
+								.. "if [[ "
+								.. format_sh_val(act)
+								.. " != *"
+								.. clean_item
+								.. '* ]]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					end
 				end
 			elseif trimmed:find("%.toHaveLength%s*%(") then
 				local act, len = trimmed:match("expect%s*%((.-)%)%..-toHaveLength%s*%((.-)%)")
 				if act and len then
 					if is_inv then
-						table.insert(lines, indent .. 'if [ ${#' .. act .. '} -eq ' .. format_sh_val(len) .. ' ]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent
+								.. "if [ ${#"
+								.. act
+								.. "} -eq "
+								.. format_sh_val(len)
+								.. ' ]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					else
-						table.insert(lines, indent .. 'if [ ${#' .. act .. '} -ne ' .. format_sh_val(len) .. ' ]; then echo "❌ Expect failed"; exit 1; fi')
+						table.insert(
+							lines,
+							indent
+								.. "if [ ${#"
+								.. act
+								.. "} -ne "
+								.. format_sh_val(len)
+								.. ' ]; then echo "❌ Expect failed"; exit 1; fi'
+						)
 					end
 				end
 			elseif trimmed:find("%.toBeGreaterThan%s*%(") then
 				local act, num = trimmed:match("expect%s*%((.-)%)%..-toBeGreaterThan%s*%((.-)%)")
 				if act and num then
-					table.insert(lines, indent .. 'if [ ' .. format_sh_val(act) .. ' -le ' .. format_sh_val(num) .. ' ]; then echo "❌ Expect failed"; exit 1; fi')
+					table.insert(
+						lines,
+						indent
+							.. "if [ "
+							.. format_sh_val(act)
+							.. " -le "
+							.. format_sh_val(num)
+							.. ' ]; then echo "❌ Expect failed"; exit 1; fi'
+					)
 				end
 			elseif trimmed:find("%.toBeGreaterThanOrEqual%s*%(") then
 				local act, num = trimmed:match("expect%s*%((.-)%)%..-toBeGreaterThanOrEqual%s*%((.-)%)")
 				if act and num then
-					table.insert(lines, indent .. 'if [ ' .. format_sh_val(act) .. ' -lt ' .. format_sh_val(num) .. ' ]; then echo "❌ Expect failed"; exit 1; fi')
+					table.insert(
+						lines,
+						indent
+							.. "if [ "
+							.. format_sh_val(act)
+							.. " -lt "
+							.. format_sh_val(num)
+							.. ' ]; then echo "❌ Expect failed"; exit 1; fi'
+					)
 				end
 			elseif trimmed:find("%.toBeLessThan%s*%(") then
 				local act, num = trimmed:match("expect%s*%((.-)%)%..-toBeLessThan%s*%((.-)%)")
 				if act and num then
-					table.insert(lines, indent .. 'if [ ' .. format_sh_val(act) .. ' -ge ' .. format_sh_val(num) .. ' ]; then echo "❌ Expect failed"; exit 1; fi')
+					table.insert(
+						lines,
+						indent
+							.. "if [ "
+							.. format_sh_val(act)
+							.. " -ge "
+							.. format_sh_val(num)
+							.. ' ]; then echo "❌ Expect failed"; exit 1; fi'
+					)
 				end
 			elseif trimmed:find("%.toBeLessThanOrEqual%s*%(") then
 				local act, num = trimmed:match("expect%s*%((.-)%)%..-toBeLessThanOrEqual%s*%((.-)%)")
 				if act and num then
-					table.insert(lines, indent .. 'if [ ' .. format_sh_val(act) .. ' -gt ' .. format_sh_val(num) .. ' ]; then echo "❌ Expect failed"; exit 1; fi')
+					table.insert(
+						lines,
+						indent
+							.. "if [ "
+							.. format_sh_val(act)
+							.. " -gt "
+							.. format_sh_val(num)
+							.. ' ]; then echo "❌ Expect failed"; exit 1; fi'
+					)
 				end
 			elseif trimmed:find("%.toThrow") then
 				local fn = trimmed:match("expect%s*%((.-)%)%..-toThrow")
 				if fn then
-					table.insert(lines, indent .. 'if ' .. format_sh_val(fn) .. ' 2>/dev/null; then echo "❌ Expect failed: expected error"; exit 1; fi')
+					table.insert(
+						lines,
+						indent
+							.. "if "
+							.. format_sh_val(fn)
+							.. ' 2>/dev/null; then echo "❌ Expect failed: expected error"; exit 1; fi'
+					)
 				end
 			end
 
 		-- Function definitions or Coroutine creation: function fn_name(arg1, arg2)
-		elseif trimmed:match("^function%s+([%w_]+)%s*%((.*)%)") or trimmed:match("^local%s+function%s+([%w_]+)%s*%((.*)%)") or trimmed:match("coroutine%..-%(%s*function%s*%((.*)%)") then
+		elseif
+			trimmed:match("^function%s+([%w_]+)%s*%((.*)%)")
+			or trimmed:match("^local%s+function%s+([%w_]+)%s*%((.*)%)")
+			or trimmed:match("coroutine%..-%(%s*function%s*%((.*)%)")
+		then
 			local fn_name, params_str
 			if trimmed:match("coroutine%..-%(%s*function%s*%((.*)%)") then
 				fn_name = trimmed:match("^local%s+([%a_][%w_]*)%s*=") or trimmed:match("^([%a_][%w_]*)%s*=") or "co_fn"
@@ -561,9 +776,27 @@ function M.to_sh(code)
 			if ret_expr ~= "" then
 				local fn1, a1, op, fn2, a2 = ret_expr:match("^([%a_][%w_]*)%((.*)%)%s*([+%*%/%-])%s*([%a_][%w_]*)%((.*)%)$")
 				if fn1 and a1 and op and fn2 and a2 then
-					local arith1 = a1:gsub("([%a_][%w_]*)", function(w) return w end)
-					local arith2 = a2:gsub("([%a_][%w_]*)", function(w) return w end)
-					table.insert(lines, indent .. 'echo $(( $(' .. fn1 .. ' $(( ' .. arith1 .. ' ))) ' .. op .. ' $(' .. fn2 .. ' $(( ' .. arith2 .. ' ))) ))')
+					local arith1 = a1:gsub("([%a_][%w_]*)", function(w)
+						return w
+					end)
+					local arith2 = a2:gsub("([%a_][%w_]*)", function(w)
+						return w
+					end)
+					table.insert(
+						lines,
+						indent
+							.. "echo $(( $("
+							.. fn1
+							.. " $(( "
+							.. arith1
+							.. " ))) "
+							.. op
+							.. " $("
+							.. fn2
+							.. " $(( "
+							.. arith2
+							.. " ))) ))"
+					)
 				else
 					table.insert(lines, indent .. "echo " .. format_sh_val(ret_expr))
 				end
@@ -577,11 +810,12 @@ function M.to_sh(code)
 			for _, arg in ipairs(split_args(args)) do
 				table.insert(echoed, format_sh_val(arg))
 			end
-			table.insert(lines, indent .. 'echo ' .. table.concat(echoed, " "))
+			table.insert(lines, indent .. "echo " .. table.concat(echoed, " "))
 
 		-- Multiple variable assignment: local ok, val = coroutine.resume(co, arg) OR pcall(fn, arg)
 		elseif trimmed:match("^local%s+([%a_][%w_]*)%s*,%s*([%a_][%w_]*)%s*=%s*(.-)%((.*)%)") then
-			local var_ok, var_res, fn_call, fn_args = trimmed:match("^local%s+([%a_][%w_]*)%s*,%s*([%a_][%w_]*)%s*=%s*(.-)%((.*)%)")
+			local var_ok, var_res, fn_call, fn_args =
+				trimmed:match("^local%s+([%a_][%w_]*)%s*,%s*([%a_][%w_]*)%s*=%s*(.-)%((.*)%)")
 			fn_call = fn_call:match("^%s*(.-)%s*$")
 			if fn_call == "coroutine.resume" then
 				local args_parts = split_args(fn_args)
@@ -599,11 +833,21 @@ function M.to_sh(code)
 				for i = 2, #args_parts do
 					table.insert(extra_args, format_sh_val(args_parts[i]))
 				end
-				table.insert(lines, indent .. 'if ' .. var_res .. '=$(' .. target_fn .. ' ' .. table.concat(extra_args, " ") .. ' 2>/dev/null); then')
-				table.insert(lines, indent .. '  ' .. var_ok .. '="true"')
-				table.insert(lines, indent .. 'else')
-				table.insert(lines, indent .. '  ' .. var_ok .. '="false"')
-				table.insert(lines, indent .. 'fi')
+				table.insert(
+					lines,
+					indent
+						.. "if "
+						.. var_res
+						.. "=$("
+						.. target_fn
+						.. " "
+						.. table.concat(extra_args, " ")
+						.. " 2>/dev/null); then"
+				)
+				table.insert(lines, indent .. "  " .. var_ok .. '="true"')
+				table.insert(lines, indent .. "else")
+				table.insert(lines, indent .. "  " .. var_ok .. '="false"')
+				table.insert(lines, indent .. "fi")
 			end
 
 		-- print(...) -> echo ...
@@ -613,7 +857,7 @@ function M.to_sh(code)
 			for _, arg in ipairs(split_args(args)) do
 				table.insert(echoed, format_sh_val(arg))
 			end
-			table.insert(lines, indent .. 'echo ' .. table.concat(echoed, " "))
+			table.insert(lines, indent .. "echo " .. table.concat(echoed, " "))
 
 		-- console.log(...) / console.info(...) -> echo ...
 		elseif trimmed:match("^console%.[%w_]+%((.*)%)%s*$") then
@@ -626,13 +870,13 @@ function M.to_sh(code)
 					table.insert(echoed, format_sh_val(raw))
 				end
 			end
-			table.insert(lines, indent .. 'echo ' .. table.concat(echoed, " "))
+			table.insert(lines, indent .. "echo " .. table.concat(echoed, " "))
 
 		-- error(msg) -> echo "msg" >&2; exit 1
 		elseif trimmed:match("^error%((.*)%)") then
 			local err_msg = trimmed:match("^error%((.*)%)")
-			table.insert(lines, indent .. 'echo ' .. format_sh_val(err_msg) .. ' >&2')
-			table.insert(lines, indent .. 'exit 1')
+			table.insert(lines, indent .. "echo " .. format_sh_val(err_msg) .. " >&2")
+			table.insert(lines, indent .. "exit 1")
 
 		-- assert(cond, msg) -> [[ cond ]] || { echo "msg" >&2; exit 1; }
 		elseif trimmed:match("^assert%((.*)%)") then
@@ -641,9 +885,9 @@ function M.to_sh(code)
 			local msg = args[2] or '"Assertion failed"'
 			local mode, cond_str = format_sh_cond(cond)
 			if mode == "arithmetic" then
-				table.insert(lines, indent .. '(( ' .. cond_str .. ' )) || { echo ' .. format_sh_val(msg) .. ' >&2; exit 1; }')
+				table.insert(lines, indent .. "(( " .. cond_str .. " )) || { echo " .. format_sh_val(msg) .. " >&2; exit 1; }")
 			else
-				table.insert(lines, indent .. '[[ ' .. cond_str .. ' ]] || { echo ' .. format_sh_val(msg) .. ' >&2; exit 1; }')
+				table.insert(lines, indent .. "[[ " .. cond_str .. " ]] || { echo " .. format_sh_val(msg) .. " >&2; exit 1; }")
 			end
 
 		-- fs.mkdir(path) -> mkdir -p path
@@ -656,7 +900,7 @@ function M.to_sh(code)
 			local args = split_args(trimmed:match("^fs%.write%((.*)%)"))
 			local path_arg = args[1]
 			local content_arg = args[2] or '""'
-			table.insert(lines, indent .. 'echo ' .. format_sh_val(content_arg) .. ' > ' .. format_sh_val(path_arg))
+			table.insert(lines, indent .. "echo " .. format_sh_val(content_arg) .. " > " .. format_sh_val(path_arg))
 
 		-- fs.remove(path) / fs.delete(path) -> rm -rf path
 		elseif trimmed:match("^fs%.remove%((.*)%)") or trimmed:match("^fs%.delete%((.*)%)") then
@@ -664,9 +908,13 @@ function M.to_sh(code)
 			table.insert(lines, indent .. "rm -rf " .. format_sh_val(path_arg))
 
 		-- $ "cmd" or terminal.exec("cmd") -> cmd
-		elseif trimmed:match("^%s*%$%s*%((.*)%)") or trimmed:match("^%s*terminal%.exec%((.*)%)") or trimmed:match("^%s*terminal%.run%((.*)%)") then
+		elseif
+			trimmed:match("^%s*%$%s*%((.*)%)")
+			or trimmed:match("^%s*terminal%.exec%((.*)%)")
+			or trimmed:match("^%s*terminal%.run%((.*)%)")
+		then
 			local cmd_arg = trimmed:match("%((.*)%)")
-			cmd_arg = cmd_arg:gsub('^"', ''):gsub('"$', ''):gsub("^'", ''):gsub("'$", '')
+			cmd_arg = cmd_arg:gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 			table.insert(lines, indent .. cmd_arg)
 
 		-- Variable assignments: local var = val OR var = val
@@ -700,7 +948,16 @@ function M.to_sh(code)
 				if obj_arg:sub(1, 1) == "{" then
 					table.insert(lines, indent .. var .. "=" .. lua_tbl_to_json(obj_arg))
 				else
-					table.insert(lines, indent .. var .. '=$(python3 -c "import json, sys; print(json.dumps(' .. format_sh_val(obj_arg) .. '))" 2>/dev/null || echo "${' .. obj_arg .. '}")')
+					table.insert(
+						lines,
+						indent
+							.. var
+							.. '=$(python3 -c "import json, sys; print(json.dumps('
+							.. format_sh_val(obj_arg)
+							.. '))" 2>/dev/null || echo "${'
+							.. obj_arg
+							.. '}")'
+					)
 				end
 
 			-- Builtin: json.load(path) -> cat path
@@ -715,13 +972,18 @@ function M.to_sh(code)
 
 			-- Builtin: terminal execution -> $(cmd)
 			elseif val:match("^terminal%..-%((.*)%)") or val:match("^%s*%$%s*%((.*)%)") then
-				local cmd_arg = val:match("%((.*)%)"):gsub('^"', ''):gsub('"$', ''):gsub("^'", ''):gsub("'$", '')
+				local cmd_arg = val:match("%((.*)%)"):gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 				table.insert(lines, indent .. var .. "=$(" .. cmd_arg .. ")")
 
 			-- Custom function call: var = fn(a, b)
 			elseif val:match("^[%a_][%w_]*%s*%((.*)%)") then
 				local fn_name, fn_args = val:match("^([%a_][%w_]*)%s*%((.*)%)")
-				if fn_name == "setTimeout" or fn_name == "setInterval" or fn_name == "clearTimeout" or fn_name == "clearInterval" then
+				if
+					fn_name == "setTimeout"
+					or fn_name == "setInterval"
+					or fn_name == "clearTimeout"
+					or fn_name == "clearInterval"
+				then
 					table.insert(lines, indent .. var .. '="timer_id"')
 				else
 					local sh_args = {}
@@ -735,12 +997,25 @@ function M.to_sh(code)
 			elseif val:match("[+%*%/%-]") and not val:find('"') and not val:find("'") then
 				if val:match("%.") then
 					local py_expr = val:gsub("([%a_][%w_]*)", function(w)
-						if LUA_KEYWORDS[w] or tonumber(w) then return w end
+						if LUA_KEYWORDS[w] or tonumber(w) then
+							return w
+						end
 						return "${" .. w .. "}"
 					end)
-					table.insert(lines, indent .. var .. '=$(python3 -c "print(' .. py_expr .. ')" 2>/dev/null || python -c "print(' .. py_expr .. ')")')
+					table.insert(
+						lines,
+						indent
+							.. var
+							.. '=$(python3 -c "print('
+							.. py_expr
+							.. ')" 2>/dev/null || python -c "print('
+							.. py_expr
+							.. ')")'
+					)
 				else
-					local arith = val:gsub("([%a_][%w_]*)", function(w) return w end)
+					local arith = val:gsub("([%a_][%w_]*)", function(w)
+						return w
+					end)
 					table.insert(lines, indent .. var .. "=$(( " .. arith .. " ))")
 				end
 
@@ -754,10 +1029,18 @@ function M.to_sh(code)
 		elseif trimmed:match("^async%.sleep%s*%((.*)%)") or trimmed:match("^sleep%s*%((.*)%)") then
 			local ms_arg = trimmed:match("^async%.sleep%s*%((.*)%)") or trimmed:match("^sleep%s*%((.*)%)")
 			local ms_val = format_sh_val(ms_arg)
-			table.insert(lines, indent .. 'python3 -c "import time; time.sleep(' .. ms_val .. '/1000)" 2>/dev/null || sleep 1')
+			table.insert(
+				lines,
+				indent .. 'python3 -c "import time; time.sleep(' .. ms_val .. '/1000)" 2>/dev/null || sleep 1'
+			)
 
 		-- Builtin: JS-style Timers (setTimeout, setInterval, clearTimeout, clearInterval)
-		elseif trimmed:match("^setTimeout%s*%(") or trimmed:match("^setInterval%s*%(") or trimmed:match("^clearTimeout%s*%(") or trimmed:match("^clearInterval%s*%(") then
+		elseif
+			trimmed:match("^setTimeout%s*%(")
+			or trimmed:match("^setInterval%s*%(")
+			or trimmed:match("^clearTimeout%s*%(")
+			or trimmed:match("^clearInterval%s*%(")
+		then
 			table.insert(lines, indent .. "# " .. trimmed)
 
 		-- Builtin: async channel & coroutine / task calls
@@ -767,7 +1050,7 @@ function M.to_sh(code)
 		-- Builtin: dofile(path) / loadfile(path) -> nvim -l path or bash path.sh
 		elseif trimmed:match("^dofile%s*%((.*)%)") or trimmed:match("^loadfile%s*%((.*)%)") then
 			local file_arg = trimmed:match("^dofile%s*%((.*)%)") or trimmed:match("^loadfile%s*%((.*)%)")
-			local clean_arg = file_arg:gsub('^"', ''):gsub('"$', ''):gsub("^'", ''):gsub("'$", '')
+			local clean_arg = file_arg:gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 			if clean_arg:match("%.krsnvim$") then
 				local sh_target = clean_arg:gsub("%.krsnvim$", ".sh")
 				table.insert(lines, indent .. 'bash "' .. sh_target .. '" 2>/dev/null || nvim -l "' .. clean_arg .. '"')
@@ -783,7 +1066,7 @@ function M.to_sh(code)
 		-- Builtin: os.execute(cmd)
 		elseif trimmed:match("^os%.execute%s*%((.*)%)") then
 			local cmd_arg = trimmed:match("^os%.execute%s*%((.*)%)")
-			local clean_cmd = cmd_arg:gsub('^"', ''):gsub('"$', ''):gsub("^'", ''):gsub("'$", '')
+			local clean_cmd = cmd_arg:gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 			table.insert(lines, indent .. clean_cmd)
 
 		-- Builtin: os.remove(path)
@@ -794,7 +1077,12 @@ function M.to_sh(code)
 		-- Custom standalone function calls or method calls: fn(arg1, arg2) or obj.fn(arg1, arg2) or obj:fn(arg1, arg2)
 		elseif trimmed:match("^[%a_][%w_%.%:]*%s*%((.*)%)%s*$") then
 			local fn_name, fn_args = trimmed:match("^([%a_][%w_%.%:]*)%s*%((.*)%)%s*$")
-			if fn_name == "setTimeout" or fn_name == "setInterval" or fn_name == "clearTimeout" or fn_name == "clearInterval" then
+			if
+				fn_name == "setTimeout"
+				or fn_name == "setInterval"
+				or fn_name == "clearTimeout"
+				or fn_name == "clearInterval"
+			then
 				table.insert(lines, indent .. "# " .. trimmed)
 			elseif fn_name:sub(1, 6) == "async." or fn_name:sub(1, 8) == "coroutine" then
 				table.insert(lines, indent .. "# " .. trimmed)
@@ -808,22 +1096,42 @@ function M.to_sh(code)
 			end
 
 		-- Loops: for i = start, stop do OR for i = start, stop, step do
-		elseif trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s+do$") or trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s*,%s*(.-)%s+do$") then
+		elseif
+			trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s+do$")
+			or trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s*,%s*(.-)%s+do$")
+		then
 			local var, start_val, stop_val, step_val
 			if trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s*,%s*(.-)%s+do$") then
-				var, start_val, stop_val, step_val = trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s*,%s*(.-)%s+do$")
+				var, start_val, stop_val, step_val =
+					trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s*,%s*(.-)%s+do$")
 			else
 				var, start_val, stop_val = trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s+do$")
 				step_val = "1"
 			end
 			table.insert(block_stack, "loop")
-			table.insert(lines, indent .. "for ((" .. var .. "=" .. start_val .. "; " .. var .. "<=" .. stop_val .. "; " .. var .. "+=" .. step_val .. ")); do")
+			table.insert(
+				lines,
+				indent
+					.. "for (("
+					.. var
+					.. "="
+					.. start_val
+					.. "; "
+					.. var
+					.. "<="
+					.. stop_val
+					.. "; "
+					.. var
+					.. "+="
+					.. step_val
+					.. ")); do"
+			)
 
 		-- Loops: for _, item in ipairs(list) do
 		elseif trimmed:match("^for%s+[%w_]+%s*,%s*([%a_][%w_]*)%s+in%s+ipairs%(([%a_][%w_]*)%)%s+do$") then
 			local item_var, list_var = trimmed:match("^for%s+[%w_]+%s*,%s*([%a_][%w_]*)%s+in%s+ipairs%(([%a_][%w_]*)%)%s+do$")
 			table.insert(block_stack, "loop")
-			table.insert(lines, indent .. 'for ' .. item_var .. ' in "${' .. list_var .. '[@]}"; do')
+			table.insert(lines, indent .. "for " .. item_var .. ' in "${' .. list_var .. '[@]}"; do')
 
 		-- Loops: while cond do
 		elseif trimmed:match("^while%s+(.-)%s+do$") then
@@ -874,7 +1182,6 @@ function M.to_sh(code)
 			elseif last_block then
 				table.insert(lines, indent .. "}")
 			end
-
 		else
 			-- Fallback: pass line with -- turned to #
 			table.insert(lines, (line:gsub("^%s*%-%-", indent .. "#")))
@@ -902,7 +1209,12 @@ function M.to_ps1(code)
 		local indent = line:match("^(%s*)") or ""
 
 		-- Skip or comment out require/import lines
-		if trimmed:match("^local%s+[%w_]+%s*=%s*require%(") or trimmed:match("^local%s+[%w_]+%s*=%s*import%(") or trimmed:match("^require%(") or trimmed:match("^import%(") then
+		if
+			trimmed:match("^local%s+[%w_]+%s*=%s*require%(")
+			or trimmed:match("^local%s+[%w_]+%s*=%s*import%(")
+			or trimmed:match("^require%(")
+			or trimmed:match("^import%(")
+		then
 			table.insert(lines, indent .. "# [krsnvim] " .. trimmed .. " (mapped to native PowerShell cmdlets)")
 
 		-- Comments: -- comment -> # comment
@@ -915,12 +1227,19 @@ function M.to_ps1(code)
 			table.insert(lines, "")
 
 		-- Testing Framework Hooks: test.beforeAll, test.afterAll, test.beforeEach, test.afterEach, etc.
-		elseif trimmed:match("^[%w_]*%.?beforeAll%s*%(") or trimmed:match("^[%w_]*%.?afterAll%s*%(") or trimmed:match("^[%w_]*%.?beforeEach%s*%(") or trimmed:match("^[%w_]*%.?afterEach%s*%(") then
+		elseif
+			trimmed:match("^[%w_]*%.?beforeAll%s*%(")
+			or trimmed:match("^[%w_]*%.?afterAll%s*%(")
+			or trimmed:match("^[%w_]*%.?beforeEach%s*%(")
+			or trimmed:match("^[%w_]*%.?afterEach%s*%(")
+		then
 			table.insert(block_stack, "noop")
 
 		-- Testing Framework Suites: describe("suite", function() ...) or test.describe(...)
 		elseif trimmed:match("^describe%s*%(") or trimmed:match("^[%w_]+%.describe%s*%(") then
-			local suite_name = trimmed:match('describe%s*%("%s*(.-)%s*"') or trimmed:match("describe%s*%('%s*(.-)%s*'") or "Test Suite"
+			local suite_name = trimmed:match('describe%s*%("%s*(.-)%s*"')
+				or trimmed:match("describe%s*%('%s*(.-)%s*'")
+				or "Test Suite"
 			table.insert(block_stack, "noop")
 			table.insert(lines, indent .. 'Write-Host "📦 Suite: ' .. suite_name .. '"')
 
@@ -929,109 +1248,235 @@ function M.to_ps1(code)
 			table.insert(lines, indent .. "# [krsnvim] " .. trimmed)
 
 		-- Testing Framework Tests: it("test", function() ...) or test("test", function() ...) or test.test(...)
-		elseif trimmed:match("^it%s*%(") or trimmed:match("^test%s*%(") or trimmed:match("^[%w_]+%.it%s*%(") or trimmed:match("^[%w_]+%.test%s*%(") then
-			local test_name = trimmed:match('it%s*%("%s*(.-)%s*"') or trimmed:match('test%s*%("%s*(.-)%s*"') or trimmed:match("it%s*%('%s*(.-)%s*'") or trimmed:match("test%s*%('%s*(.-)%s*'") or "Test"
+		elseif
+			trimmed:match("^it%s*%(")
+			or trimmed:match("^test%s*%(")
+			or trimmed:match("^[%w_]+%.it%s*%(")
+			or trimmed:match("^[%w_]+%.test%s*%(")
+		then
+			local test_name = trimmed:match('it%s*%("%s*(.-)%s*"')
+				or trimmed:match('test%s*%("%s*(.-)%s*"')
+				or trimmed:match("it%s*%('%s*(.-)%s*'")
+				or trimmed:match("test%s*%('%s*(.-)%s*'")
+				or "Test"
 			table.insert(block_stack, "noop")
 			table.insert(lines, indent .. 'Write-Host "  ✓ ' .. test_name .. '"')
 
 		-- Testing Framework Assertions: expect(val)...
 		elseif trimmed:match("^expect%s*%(") then
-			local is_inv = trimmed:find("%.isNot%.") or trimmed:find('%["not"%]') or trimmed:find("%.not%.") or trimmed:find("%.not_%.")
+			local is_inv = trimmed:find("%.isNot%.")
+				or trimmed:find('%["not"%]')
+				or trimmed:find("%.not%.")
+				or trimmed:find("%.not_%.")
 
 			if trimmed:find("%.toBe%s*%(") or trimmed:find("%.toEqual%s*%(") then
 				local act, exp = trimmed:match("expect%s*%((.-)%)%..-toBe%s*%((.-)%)")
-				if not act then act, exp = trimmed:match("expect%s*%((.-)%)%..-toEqual%s*%((.-)%)") end
+				if not act then
+					act, exp = trimmed:match("expect%s*%((.-)%)%..-toEqual%s*%((.-)%)")
+				end
 				if act and exp then
 					if is_inv then
-						table.insert(lines, indent .. 'if (' .. format_ps1_val(act) .. ' -eq ' .. format_ps1_val(exp) .. ') { Write-Error "Expect failed"; exit 1 }')
+						table.insert(
+							lines,
+							indent
+								.. "if ("
+								.. format_ps1_val(act)
+								.. " -eq "
+								.. format_ps1_val(exp)
+								.. ') { Write-Error "Expect failed"; exit 1 }'
+						)
 					else
-						table.insert(lines, indent .. 'if (' .. format_ps1_val(act) .. ' -ne ' .. format_ps1_val(exp) .. ') { Write-Error "Expect failed"; exit 1 }')
+						table.insert(
+							lines,
+							indent
+								.. "if ("
+								.. format_ps1_val(act)
+								.. " -ne "
+								.. format_ps1_val(exp)
+								.. ') { Write-Error "Expect failed"; exit 1 }'
+						)
 					end
 				end
 			elseif trimmed:find("%.toBeTruthy%s*%(") then
 				local act = trimmed:match("expect%s*%((.-)%)%.")
 				if act then
 					if is_inv then
-						table.insert(lines, indent .. 'if (' .. format_ps1_val(act) .. ') { Write-Error "Expect failed"; exit 1 }')
+						table.insert(lines, indent .. "if (" .. format_ps1_val(act) .. ') { Write-Error "Expect failed"; exit 1 }')
 					else
-						table.insert(lines, indent .. 'if (-not (' .. format_ps1_val(act) .. ')) { Write-Error "Expect failed"; exit 1 }')
+						table.insert(
+							lines,
+							indent .. "if (-not (" .. format_ps1_val(act) .. ')) { Write-Error "Expect failed"; exit 1 }'
+						)
 					end
 				end
 			elseif trimmed:find("%.toBeFalsy%s*%(") then
 				local act = trimmed:match("expect%s*%((.-)%)%.")
 				if act then
 					if is_inv then
-						table.insert(lines, indent .. 'if (-not (' .. format_ps1_val(act) .. ')) { Write-Error "Expect failed"; exit 1 }')
+						table.insert(
+							lines,
+							indent .. "if (-not (" .. format_ps1_val(act) .. ')) { Write-Error "Expect failed"; exit 1 }'
+						)
 					else
-						table.insert(lines, indent .. 'if (' .. format_ps1_val(act) .. ') { Write-Error "Expect failed"; exit 1 }')
+						table.insert(lines, indent .. "if (" .. format_ps1_val(act) .. ') { Write-Error "Expect failed"; exit 1 }')
 					end
 				end
-			elseif trimmed:find("%.toBeNil%s*%(") or trimmed:find("%.toBeNull%s*%(") or trimmed:find("%.toBeUndefined%s*%(") then
+			elseif
+				trimmed:find("%.toBeNil%s*%(")
+				or trimmed:find("%.toBeNull%s*%(")
+				or trimmed:find("%.toBeUndefined%s*%(")
+			then
 				local act = trimmed:match("expect%s*%((.-)%)%.")
 				if act then
 					if is_inv then
-						table.insert(lines, indent .. 'if ($null -eq (' .. format_ps1_val(act) .. ')) { Write-Error "Expect failed"; exit 1 }')
+						table.insert(
+							lines,
+							indent .. "if ($null -eq (" .. format_ps1_val(act) .. ')) { Write-Error "Expect failed"; exit 1 }'
+						)
 					else
-						table.insert(lines, indent .. 'if ($null -ne (' .. format_ps1_val(act) .. ')) { Write-Error "Expect failed"; exit 1 }')
+						table.insert(
+							lines,
+							indent .. "if ($null -ne (" .. format_ps1_val(act) .. ')) { Write-Error "Expect failed"; exit 1 }'
+						)
 					end
 				end
 			elseif trimmed:find("%.toBeDefined%s*%(") then
 				local act = trimmed:match("expect%s*%((.-)%)%.")
 				if act then
 					if is_inv then
-						table.insert(lines, indent .. 'if ($null -ne (' .. format_ps1_val(act) .. ')) { Write-Error "Expect failed"; exit 1 }')
+						table.insert(
+							lines,
+							indent .. "if ($null -ne (" .. format_ps1_val(act) .. ')) { Write-Error "Expect failed"; exit 1 }'
+						)
 					else
-						table.insert(lines, indent .. 'if ($null -eq (' .. format_ps1_val(act) .. ')) { Write-Error "Expect failed"; exit 1 }')
+						table.insert(
+							lines,
+							indent .. "if ($null -eq (" .. format_ps1_val(act) .. ')) { Write-Error "Expect failed"; exit 1 }'
+						)
 					end
 				end
 			elseif trimmed:find("%.toContain%s*%(") then
 				local act, item = trimmed:match("expect%s*%((.-)%)%..-toContain%s*%((.-)%)")
 				if act and item then
-					local clean_item = item:gsub('^"', ''):gsub('"$', ''):gsub("^'", ''):gsub("'$", '')
+					local clean_item = item:gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 					if is_inv then
-						table.insert(lines, indent .. 'if (' .. format_ps1_val(act) .. ' -like "*' .. clean_item .. '*") { Write-Error "Expect failed"; exit 1 }')
+						table.insert(
+							lines,
+							indent
+								.. "if ("
+								.. format_ps1_val(act)
+								.. ' -like "*'
+								.. clean_item
+								.. '*") { Write-Error "Expect failed"; exit 1 }'
+						)
 					else
-						table.insert(lines, indent .. 'if (' .. format_ps1_val(act) .. ' -notlike "*' .. clean_item .. '*") { Write-Error "Expect failed"; exit 1 }')
+						table.insert(
+							lines,
+							indent
+								.. "if ("
+								.. format_ps1_val(act)
+								.. ' -notlike "*'
+								.. clean_item
+								.. '*") { Write-Error "Expect failed"; exit 1 }'
+						)
 					end
 				end
 			elseif trimmed:find("%.toHaveLength%s*%(") then
 				local act, len = trimmed:match("expect%s*%((.-)%)%..-toHaveLength%s*%((.-)%)")
 				if act and len then
 					if is_inv then
-						table.insert(lines, indent .. 'if ((' .. format_ps1_val(act) .. ').Count -eq ' .. format_ps1_val(len) .. ') { Write-Error "Expect failed"; exit 1 }')
+						table.insert(
+							lines,
+							indent
+								.. "if (("
+								.. format_ps1_val(act)
+								.. ").Count -eq "
+								.. format_ps1_val(len)
+								.. ') { Write-Error "Expect failed"; exit 1 }'
+						)
 					else
-						table.insert(lines, indent .. 'if ((' .. format_ps1_val(act) .. ').Count -ne ' .. format_ps1_val(len) .. ') { Write-Error "Expect failed"; exit 1 }')
+						table.insert(
+							lines,
+							indent
+								.. "if (("
+								.. format_ps1_val(act)
+								.. ").Count -ne "
+								.. format_ps1_val(len)
+								.. ') { Write-Error "Expect failed"; exit 1 }'
+						)
 					end
 				end
 			elseif trimmed:find("%.toBeGreaterThan%s*%(") then
 				local act, num = trimmed:match("expect%s*%((.-)%)%..-toBeGreaterThan%s*%((.-)%)")
 				if act and num then
-					table.insert(lines, indent .. 'if (' .. format_ps1_val(act) .. ' -le ' .. format_ps1_val(num) .. ') { Write-Error "Expect failed"; exit 1 }')
+					table.insert(
+						lines,
+						indent
+							.. "if ("
+							.. format_ps1_val(act)
+							.. " -le "
+							.. format_ps1_val(num)
+							.. ') { Write-Error "Expect failed"; exit 1 }'
+					)
 				end
 			elseif trimmed:find("%.toBeGreaterThanOrEqual%s*%(") then
 				local act, num = trimmed:match("expect%s*%((.-)%)%..-toBeGreaterThanOrEqual%s*%((.-)%)")
 				if act and num then
-					table.insert(lines, indent .. 'if (' .. format_ps1_val(act) .. ' -lt ' .. format_ps1_val(num) .. ') { Write-Error "Expect failed"; exit 1 }')
+					table.insert(
+						lines,
+						indent
+							.. "if ("
+							.. format_ps1_val(act)
+							.. " -lt "
+							.. format_ps1_val(num)
+							.. ') { Write-Error "Expect failed"; exit 1 }'
+					)
 				end
 			elseif trimmed:find("%.toBeLessThan%s*%(") then
 				local act, num = trimmed:match("expect%s*%((.-)%)%..-toBeLessThan%s*%((.-)%)")
 				if act and num then
-					table.insert(lines, indent .. 'if (' .. format_ps1_val(act) .. ' -ge ' .. format_ps1_val(num) .. ') { Write-Error "Expect failed"; exit 1 }')
+					table.insert(
+						lines,
+						indent
+							.. "if ("
+							.. format_ps1_val(act)
+							.. " -ge "
+							.. format_ps1_val(num)
+							.. ') { Write-Error "Expect failed"; exit 1 }'
+					)
 				end
 			elseif trimmed:find("%.toBeLessThanOrEqual%s*%(") then
 				local act, num = trimmed:match("expect%s*%((.-)%)%..-toBeLessThanOrEqual%s*%((.-)%)")
 				if act and num then
-					table.insert(lines, indent .. 'if (' .. format_ps1_val(act) .. ' -gt ' .. format_ps1_val(num) .. ') { Write-Error "Expect failed"; exit 1 }')
+					table.insert(
+						lines,
+						indent
+							.. "if ("
+							.. format_ps1_val(act)
+							.. " -gt "
+							.. format_ps1_val(num)
+							.. ') { Write-Error "Expect failed"; exit 1 }'
+					)
 				end
 			elseif trimmed:find("%.toThrow") then
 				local fn = trimmed:match("expect%s*%((.-)%)%..-toThrow")
 				if fn then
-					table.insert(lines, indent .. 'try { ' .. format_ps1_val(fn) .. '; Write-Error "Expect failed: expected error"; exit 1 } catch {}')
+					table.insert(
+						lines,
+						indent
+							.. "try { "
+							.. format_ps1_val(fn)
+							.. '; Write-Error "Expect failed: expected error"; exit 1 } catch {}'
+					)
 				end
 			end
 
 		-- Function definitions or Coroutine creation: function fn_name(arg1, arg2)
-		elseif trimmed:match("^function%s+([%w_]+)%s*%((.*)%)") or trimmed:match("^local%s+function%s+([%w_]+)%s*%((.*)%)") or trimmed:match("coroutine%..-%(%s*function%s*%((.*)%)") then
+		elseif
+			trimmed:match("^function%s+([%w_]+)%s*%((.*)%)")
+			or trimmed:match("^local%s+function%s+([%w_]+)%s*%((.*)%)")
+			or trimmed:match("coroutine%..-%(%s*function%s*%((.*)%)")
+		then
 			local fn_name, params_str
 			if trimmed:match("coroutine%..-%(%s*function%s*%((.*)%)") then
 				fn_name = trimmed:match("^local%s+([%a_][%w_]*)%s*=") or trimmed:match("^([%a_][%w_]*)%s*=") or "co_fn"
@@ -1054,7 +1499,21 @@ function M.to_ps1(code)
 			if ret_expr ~= "" then
 				local fn1, a1, op, fn2, a2 = ret_expr:match("^([%a_][%w_]*)%((.*)%)%s*([+%*%/%-])%s*([%a_][%w_]*)%((.*)%)$")
 				if fn1 and a1 and op and fn2 and a2 then
-					table.insert(lines, indent .. "return (" .. fn1 .. " (" .. to_ps1_expr(a1) .. ")) " .. op .. " (" .. fn2 .. " (" .. to_ps1_expr(a2) .. "))")
+					table.insert(
+						lines,
+						indent
+							.. "return ("
+							.. fn1
+							.. " ("
+							.. to_ps1_expr(a1)
+							.. ")) "
+							.. op
+							.. " ("
+							.. fn2
+							.. " ("
+							.. to_ps1_expr(a2)
+							.. "))"
+					)
 				else
 					table.insert(lines, indent .. "return " .. format_ps1_val(ret_expr))
 				end
@@ -1073,7 +1532,8 @@ function M.to_ps1(code)
 
 		-- Multiple variable assignment: local ok, val = coroutine.resume(co, arg) OR pcall(fn, arg)
 		elseif trimmed:match("^local%s+([%a_][%w_]*)%s*,%s*([%a_][%w_]*)%s*=%s*(.-)%((.*)%)") then
-			local var_ok, var_res, fn_call, fn_args = trimmed:match("^local%s+([%a_][%w_]*)%s*,%s*([%a_][%w_]*)%s*=%s*(.-)%((.*)%)")
+			local var_ok, var_res, fn_call, fn_args =
+				trimmed:match("^local%s+([%a_][%w_]*)%s*,%s*([%a_][%w_]*)%s*=%s*(.-)%((.*)%)")
 			fn_call = fn_call:match("^%s*(.-)%s*$")
 			if fn_call == "coroutine.resume" then
 				local args_parts = split_args(fn_args)
@@ -1082,7 +1542,10 @@ function M.to_ps1(code)
 				for i = 2, #args_parts do
 					table.insert(extra_args, format_ps1_val(args_parts[i]))
 				end
-				table.insert(lines, indent .. "$" .. var_res .. " = (" .. co_name .. " " .. table.concat(extra_args, " ") .. ")")
+				table.insert(
+					lines,
+					indent .. "$" .. var_res .. " = (" .. co_name .. " " .. table.concat(extra_args, " ") .. ")"
+				)
 				table.insert(lines, indent .. "$" .. var_ok .. " = $true")
 			elseif fn_call == "pcall" then
 				local args_parts = split_args(fn_args)
@@ -1136,14 +1599,20 @@ function M.to_ps1(code)
 		-- fs.mkdir(path) -> New-Item -ItemType Directory -Force -Path path | Out-Null
 		elseif trimmed:match("^fs%.mkdir%((.*)%)") then
 			local path_arg = trimmed:match("^fs%.mkdir%((.*)%)")
-			table.insert(lines, indent .. "New-Item -ItemType Directory -Force -Path " .. format_ps1_val(path_arg) .. " | Out-Null")
+			table.insert(
+				lines,
+				indent .. "New-Item -ItemType Directory -Force -Path " .. format_ps1_val(path_arg) .. " | Out-Null"
+			)
 
 		-- fs.write(path, content) -> Set-Content -Path path -Value content
 		elseif trimmed:match("^fs%.write%((.*)%)") then
 			local args = split_args(trimmed:match("^fs%.write%((.*)%)"))
 			local path_arg = args[1]
 			local content_arg = args[2] or '""'
-			table.insert(lines, indent .. "Set-Content -Path " .. format_ps1_val(path_arg) .. " -Value " .. format_ps1_val(content_arg))
+			table.insert(
+				lines,
+				indent .. "Set-Content -Path " .. format_ps1_val(path_arg) .. " -Value " .. format_ps1_val(content_arg)
+			)
 
 		-- fs.remove(path) / fs.delete(path) -> Remove-Item -Recurse -Force path
 		elseif trimmed:match("^fs%.remove%((.*)%)") or trimmed:match("^fs%.delete%((.*)%)") then
@@ -1151,9 +1620,13 @@ function M.to_ps1(code)
 			table.insert(lines, indent .. "Remove-Item -Recurse -Force -Path " .. format_ps1_val(path_arg))
 
 		-- $ "cmd" or terminal.exec("cmd") -> cmd
-		elseif trimmed:match("^%s*%$%s*%((.*)%)") or trimmed:match("^%s*terminal%.exec%((.*)%)") or trimmed:match("^%s*terminal%.run%((.*)%)") then
+		elseif
+			trimmed:match("^%s*%$%s*%((.*)%)")
+			or trimmed:match("^%s*terminal%.exec%((.*)%)")
+			or trimmed:match("^%s*terminal%.run%((.*)%)")
+		then
 			local cmd_arg = trimmed:match("%((.*)%)")
-			cmd_arg = cmd_arg:gsub('^"', ''):gsub('"$', ''):gsub("^'", ''):gsub("'$", '')
+			cmd_arg = cmd_arg:gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 			table.insert(lines, indent .. cmd_arg)
 
 		-- Variable assignments: local var = val OR var = val
@@ -1185,12 +1658,23 @@ function M.to_ps1(code)
 			-- Builtin: json.load(path) -> Get-Content -Raw path | ConvertFrom-Json
 			elseif val:match("^json%.load%((.*)%)") then
 				local path_arg = val:match("^json%.load%((.*)%)")
-				table.insert(lines, indent .. "$" .. var .. " = (Get-Content -Raw " .. format_ps1_val(path_arg) .. " | ConvertFrom-Json)")
+				table.insert(
+					lines,
+					indent .. "$" .. var .. " = (Get-Content -Raw " .. format_ps1_val(path_arg) .. " | ConvertFrom-Json)"
+				)
 
 			-- Builtin: fetch.get(url) -> Invoke-WebRequest
 			elseif val:match("^fetch%.get%((.*)%)") then
 				local url_arg = val:match("^fetch%.get%((.*)%)")
-				table.insert(lines, indent .. "$" .. var .. " = (Invoke-WebRequest -Uri " .. format_ps1_val(url_arg) .. " -UseBasicParsing).Content")
+				table.insert(
+					lines,
+					indent
+						.. "$"
+						.. var
+						.. " = (Invoke-WebRequest -Uri "
+						.. format_ps1_val(url_arg)
+						.. " -UseBasicParsing).Content"
+				)
 
 			-- Builtin: fetch.json(url) -> Invoke-RestMethod
 			elseif val:match("^fetch%.json%((.*)%)") then
@@ -1199,13 +1683,18 @@ function M.to_ps1(code)
 
 			-- Builtin: terminal execution
 			elseif val:match("^terminal%..-%((.*)%)") or val:match("^%s*%$%s*%((.*)%)") then
-				local cmd_arg = val:match("%((.*)%)"):gsub('^"', ''):gsub('"$', ''):gsub("^'", ''):gsub("'$", '')
+				local cmd_arg = val:match("%((.*)%)"):gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 				table.insert(lines, indent .. "$" .. var .. " = (" .. cmd_arg .. ")")
 
 			-- Custom function call: var = fn(a, b)
 			elseif val:match("^[%a_][%w_]*%s*%((.*)%)") then
 				local fn_name, fn_args = val:match("^([%a_][%w_]*)%s*%((.*)%)")
-				if fn_name == "setTimeout" or fn_name == "setInterval" or fn_name == "clearTimeout" or fn_name == "clearInterval" then
+				if
+					fn_name == "setTimeout"
+					or fn_name == "setInterval"
+					or fn_name == "clearTimeout"
+					or fn_name == "clearInterval"
+				then
 					table.insert(lines, indent .. "$" .. var .. ' = "timer_id"')
 				else
 					local ps_args = {}
@@ -1227,7 +1716,12 @@ function M.to_ps1(code)
 			table.insert(lines, indent .. "Start-Sleep -Milliseconds " .. ms_val)
 
 		-- Builtin: JS-style Timers (setTimeout, setInterval, clearTimeout, clearInterval)
-		elseif trimmed:match("^setTimeout%s*%(") or trimmed:match("^setInterval%s*%(") or trimmed:match("^clearTimeout%s*%(") or trimmed:match("^clearInterval%s*%(") then
+		elseif
+			trimmed:match("^setTimeout%s*%(")
+			or trimmed:match("^setInterval%s*%(")
+			or trimmed:match("^clearTimeout%s*%(")
+			or trimmed:match("^clearInterval%s*%(")
+		then
 			table.insert(lines, indent .. "# " .. trimmed)
 
 		-- Builtin: async channel & coroutine / task calls
@@ -1237,10 +1731,20 @@ function M.to_ps1(code)
 		-- Builtin: dofile(path) / loadfile(path) -> nvim -l path or pwsh path.ps1
 		elseif trimmed:match("^dofile%s*%((.*)%)") or trimmed:match("^loadfile%s*%((.*)%)") then
 			local file_arg = trimmed:match("^dofile%s*%((.*)%)") or trimmed:match("^loadfile%s*%((.*)%)")
-			local clean_arg = file_arg:gsub('^"', ''):gsub('"$', ''):gsub("^'", ''):gsub("'$", '')
+			local clean_arg = file_arg:gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 			if clean_arg:match("%.krsnvim$") then
 				local ps_target = clean_arg:gsub("%.krsnvim$", ".ps1")
-				table.insert(lines, indent .. 'if (Test-Path "' .. ps_target .. '") { pwsh -NoProfile -File "' .. ps_target .. '" } else { nvim -l "' .. clean_arg .. '" }')
+				table.insert(
+					lines,
+					indent
+						.. 'if (Test-Path "'
+						.. ps_target
+						.. '") { pwsh -NoProfile -File "'
+						.. ps_target
+						.. '" } else { nvim -l "'
+						.. clean_arg
+						.. '" }'
+				)
 			else
 				table.insert(lines, indent .. 'nvim -l "' .. clean_arg .. '"')
 			end
@@ -1253,7 +1757,7 @@ function M.to_ps1(code)
 		-- Builtin: os.execute(cmd)
 		elseif trimmed:match("^os%.execute%s*%((.*)%)") then
 			local cmd_arg = trimmed:match("^os%.execute%s*%((.*)%)")
-			local clean_cmd = cmd_arg:gsub('^"', ''):gsub('"$', ''):gsub("^'", ''):gsub("'$", '')
+			local clean_cmd = cmd_arg:gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 			table.insert(lines, indent .. clean_cmd)
 
 		-- Builtin: os.remove(path)
@@ -1264,7 +1768,12 @@ function M.to_ps1(code)
 		-- Custom standalone function calls or method calls: fn(arg1, arg2) or obj.fn(arg1, arg2) or obj:fn(arg1, arg2)
 		elseif trimmed:match("^[%a_][%w_%.%:]*%s*%((.*)%)%s*$") then
 			local fn_name, fn_args = trimmed:match("^([%a_][%w_%.%:]*)%s*%((.*)%)%s*$")
-			if fn_name == "setTimeout" or fn_name == "setInterval" or fn_name == "clearTimeout" or fn_name == "clearInterval" then
+			if
+				fn_name == "setTimeout"
+				or fn_name == "setInterval"
+				or fn_name == "clearTimeout"
+				or fn_name == "clearInterval"
+			then
 				table.insert(lines, indent .. "# " .. trimmed)
 			elseif fn_name:sub(1, 6) == "async." or fn_name:sub(1, 8) == "coroutine" then
 				table.insert(lines, indent .. "# " .. trimmed)
@@ -1282,15 +1791,35 @@ function M.to_ps1(code)
 			end
 
 		-- Loops: for i = start, stop do OR for i = start, stop, step do
-		elseif trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s+do$") or trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s*,%s*(.-)%s+do$") then
+		elseif
+			trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s+do$")
+			or trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s*,%s*(.-)%s+do$")
+		then
 			local var, start_val, stop_val, step_val
 			if trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s*,%s*(.-)%s+do$") then
-				var, start_val, stop_val, step_val = trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s*,%s*(.-)%s+do$")
+				var, start_val, stop_val, step_val =
+					trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s*,%s*(.-)%s+do$")
 			else
 				var, start_val, stop_val = trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s+do$")
 				step_val = "1"
 			end
-			table.insert(lines, indent .. "for ($" .. var .. " = " .. format_ps1_val(start_val) .. "; $" .. var .. " -le " .. format_ps1_val(stop_val) .. "; $" .. var .. " += " .. format_ps1_val(step_val) .. ") {")
+			table.insert(
+				lines,
+				indent
+					.. "for ($"
+					.. var
+					.. " = "
+					.. format_ps1_val(start_val)
+					.. "; $"
+					.. var
+					.. " -le "
+					.. format_ps1_val(stop_val)
+					.. "; $"
+					.. var
+					.. " += "
+					.. format_ps1_val(step_val)
+					.. ") {"
+			)
 
 		-- Loops: for _, item in ipairs(list) do
 		elseif trimmed:match("^for%s+[%w_]+%s*,%s*([%a_][%w_]*)%s+in%s+ipairs%(([%a_][%w_]*)%)%s+do$") then
@@ -1338,7 +1867,6 @@ function M.to_ps1(code)
 			if last_block ~= "noop" then
 				table.insert(lines, indent .. "}")
 			end
-
 		else
 			-- Fallback: convert local variable names to $var and comments to #
 			local l = line:gsub("^%s*%-%-", indent .. "#")
@@ -1375,7 +1903,10 @@ function M.export_sh(filepath, outpath)
 
 	fs.write(outpath, sh_code)
 	if vim and vim.notify then
-		vim.notify("🦊 Exported " .. vim.fn.fnamemodify(filepath, ":t") .. " -> " .. vim.fn.fnamemodify(outpath, ":t"), vim.log.levels.INFO)
+		vim.notify(
+			"🦊 Exported " .. vim.fn.fnamemodify(filepath, ":t") .. " -> " .. vim.fn.fnamemodify(outpath, ":t"),
+			vim.log.levels.INFO
+		)
 	end
 	return outpath
 end
@@ -1406,7 +1937,10 @@ function M.export_ps1(filepath, outpath)
 
 	fs.write(outpath, ps1_code)
 	if vim and vim.notify then
-		vim.notify("🦊 Exported " .. vim.fn.fnamemodify(filepath, ":t") .. " -> " .. vim.fn.fnamemodify(outpath, ":t"), vim.log.levels.INFO)
+		vim.notify(
+			"🦊 Exported " .. vim.fn.fnamemodify(filepath, ":t") .. " -> " .. vim.fn.fnamemodify(outpath, ":t"),
+			vim.log.levels.INFO
+		)
 	end
 	return outpath
 end

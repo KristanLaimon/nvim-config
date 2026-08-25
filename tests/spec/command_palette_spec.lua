@@ -40,7 +40,9 @@ describe("plugins.krs.command_palette MRU history", function()
 	it("sorts commands with most recent at top while preserving unvisited order", function()
 		-- Setup dummy commands for testing order
 		local saved_commands = vim.deepcopy(cp.commands)
-		while #cp.commands > 0 do table.remove(cp.commands) end
+		while #cp.commands > 0 do
+			table.remove(cp.commands)
+		end
 		table.insert(cp.commands, { name = "Cmd 1", cmd = "Cmd1" })
 		table.insert(cp.commands, { name = "Cmd 2", cmd = "Cmd2" })
 		table.insert(cp.commands, { name = "Cmd 3", cmd = "Cmd3" })
@@ -65,8 +67,12 @@ describe("plugins.krs.command_palette MRU history", function()
 		expect(names).toEqual({ "Cmd 2", "Cmd 3", "Cmd 1", "Cmd 4" })
 
 		-- Clean up
-		while #cp.commands > 0 do table.remove(cp.commands) end
-		for _, cmd in ipairs(saved_commands) do table.insert(cp.commands, cmd) end
+		while #cp.commands > 0 do
+			table.remove(cp.commands)
+		end
+		for _, cmd in ipairs(saved_commands) do
+			table.insert(cp.commands, cmd)
+		end
 	end)
 
 	it("clears history cleanly", function()

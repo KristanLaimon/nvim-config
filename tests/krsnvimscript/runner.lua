@@ -22,7 +22,9 @@ end
 
 local function run_shell(cmd)
 	local handle = io.popen(cmd .. " 2>&1")
-	if not handle then return 1, "" end
+	if not handle then
+		return 1, ""
+	end
 	local output = handle:read("*a")
 	local success, _, code = handle:close()
 	local exit_code = (success and 0) or (type(code) == "number" and code or 1)
@@ -30,7 +32,9 @@ local function run_shell(cmd)
 end
 
 local function normalize_output(str)
-	if not str then return "" end
+	if not str then
+		return ""
+	end
 	str = str:gsub("\r\n", "\n"):gsub("\r", "\n")
 	str = str:match("^%s*(.-)%s*$") or ""
 	return str
@@ -44,7 +48,9 @@ print("=========================================================================
 print("  krsnvimscript E2E Transpiler Test Suite")
 print("===========================================================================")
 print("  Found " .. #files .. " test script(s)")
-print("  Cleanup mode: " .. (should_keep and "KEEP generated .sh/.ps1" or "DELETE generated .sh/.ps1 (default)") .. "\n")
+print(
+	"  Cleanup mode: " .. (should_keep and "KEEP generated .sh/.ps1" or "DELETE generated .sh/.ps1 (default)") .. "\n"
+)
 
 local total_passed = 0
 local total_failed = 0
@@ -97,8 +103,12 @@ for _, file in ipairs(files) do
 
 		-- 4. Clean up generated files unless --keep is passed
 		if not should_keep then
-			if fs.exists(sh_file) then os.remove(sh_file) end
-			if fs.exists(ps1_file) then os.remove(ps1_file) end
+			if fs.exists(sh_file) then
+				os.remove(sh_file)
+			end
+			if fs.exists(ps1_file) then
+				os.remove(ps1_file)
+			end
 		end
 	end
 end
@@ -108,7 +118,7 @@ if not should_keep then
 	local test_dirs = {
 		script_dir .. "/output_test",
 		script_dir .. "/json_out",
-		script_dir .. "/test_cond.tmp"
+		script_dir .. "/test_cond.tmp",
 	}
 	for _, d in ipairs(test_dirs) do
 		if fs.exists(d) then

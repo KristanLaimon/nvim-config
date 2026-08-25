@@ -10,13 +10,23 @@
 local M = {}
 
 local function parse_scalar(val)
-	if not val then return nil end
+	if not val then
+		return nil
+	end
 	val = val:match("^%s*(.-)%s*$")
-	if val == "" or val == "~" or val:lower() == "null" then return nil end
-	if val:lower() == "true" or val:lower() == "yes" then return true end
-	if val:lower() == "false" or val:lower() == "no" then return false end
+	if val == "" or val == "~" or val:lower() == "null" then
+		return nil
+	end
+	if val:lower() == "true" or val:lower() == "yes" then
+		return true
+	end
+	if val:lower() == "false" or val:lower() == "no" then
+		return false
+	end
 	local num = tonumber(val)
-	if num then return num end
+	if num then
+		return num
+	end
 	if (val:sub(1, 1) == '"' and val:sub(-1) == '"') or (val:sub(1, 1) == "'" and val:sub(-1) == "'") then
 		return val:sub(2, -2)
 	end
@@ -46,7 +56,9 @@ end
 --- ]])
 --- print(data.name, data.features[1])
 function M.decode(str)
-	if not str or str == "" then return {} end
+	if not str or str == "" then
+		return {}
+	end
 	local lines = {}
 	for line in str:gmatch("[^\r\n]+") do
 		local uncommented = line:match("^([^#]*)")
@@ -142,7 +154,9 @@ end
 --- local text = yaml.encode({ app = "KrsNvim", ports = { 8080, 3000 } })
 --- print(text)
 function M.encode(obj)
-	if not obj then return "" end
+	if not obj then
+		return ""
+	end
 	return dump_val(obj, 0)
 end
 

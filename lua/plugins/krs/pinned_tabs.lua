@@ -103,7 +103,11 @@ end
 function M.toggle_pin()
 	local bufnr = vim.api.nvim_get_current_buf()
 	if not M.is_code_buffer(bufnr) then
-		vim.notify("Pin tab (<Ctrl+P>) is only available in code buffer tabs", vim.log.levels.WARN, { title = "Pinned Tabs" })
+		vim.notify(
+			"Pin tab (<Ctrl+P>) is only available in code buffer tabs",
+			vim.log.levels.WARN,
+			{ title = "Pinned Tabs" }
+		)
 		return
 	end
 
@@ -166,7 +170,15 @@ function M.focus_buffer(bufnr)
 			local b = vim.api.nvim_win_get_buf(win)
 			local ft = vim.bo[b].filetype
 			local bt = vim.bo[b].buftype
-			if bt == "" and ft ~= "neo-tree" and ft ~= "qf" and ft ~= "toggleterm" and ft ~= "TaskRunner" and ft ~= "alpha" and ft ~= "dashboard" then
+			if
+				bt == ""
+				and ft ~= "neo-tree"
+				and ft ~= "qf"
+				and ft ~= "toggleterm"
+				and ft ~= "TaskRunner"
+				and ft ~= "alpha"
+				and ft ~= "dashboard"
+			then
 				target_win = win
 				break
 			end

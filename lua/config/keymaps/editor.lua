@@ -44,7 +44,16 @@ M.settings = {
 		--- Move focus between windows.
 		window_left = "<C-h>",
 		window_right = "<C-l>",
-		window_up = { "<C-S-A-k>", "<C-A-S-k>", "<C-S-M-k>", "<C-M-S-k>", "<C-S-A-K>", "<C-A-S-K>", "<C-S-M-K>", "<C-M-S-K>" },
+		window_up = {
+			"<C-S-A-k>",
+			"<C-A-S-k>",
+			"<C-S-M-k>",
+			"<C-M-S-k>",
+			"<C-S-A-K>",
+			"<C-A-S-K>",
+			"<C-S-M-K>",
+			"<C-M-S-K>",
+		},
 		window_down = "<C-j>",
 		--- Cycle buffers.
 		buffer_prev = { "<A-h>", "<M-h>", "<A-Left>", "<M-Left>" },
@@ -55,7 +64,7 @@ M.settings = {
 		netrw = nil,
 		--- Pin active code buffer tab (<C-A-p> / <C-p> on Desktop, <A-p> on Mobile).
 		pin_tab = is_mobile_ed
-			and { "<C-A-p>", "<C-A-P>", "<C-M-p>", "<C-M-P>", "<A-p>", "<M-p>", "<leader>pin", "<leader>bp" }
+				and { "<C-A-p>", "<C-A-P>", "<C-M-p>", "<C-M-P>", "<A-p>", "<M-p>", "<leader>pin", "<leader>bp" }
 			or { "<C-A-p>", "<C-A-P>", "<C-M-p>", "<C-M-P>", "<C-p>", "<C-P>", "<A-p>", "<M-p>", "<leader>pin", "<leader>bp" },
 		--- Toggle fold at cursor / selection (HTML tags, functions, scopes via Alt+Y).
 		fold_toggle = { "<A-y>", "<A-Y>", "<M-y>", "<M-Y>" },
@@ -145,7 +154,6 @@ for _, key in ipairs(M.settings.keys.fold_toggle or {}) do
 	end, opts("Toggle fold at cursor (HTML, functions, scopes)"))
 end
 
-
 -- Clipboard: the OS clipboard, not vim registers, because that is what the rest
 -- of the desktop means by copy and paste.
 for _, key in ipairs(M.settings.keys.copy) do
@@ -192,7 +200,12 @@ local function focus_window_right()
 	local is_neotree = vim.bo[buf].filetype == "neo-tree"
 
 	local target_win = _G._krs_last_win_before_neotree
-	if is_neotree and target_win and vim.api.nvim_win_is_valid(target_win) and vim.api.nvim_win_get_tabpage(target_win) == vim.api.nvim_get_current_tabpage() then
+	if
+		is_neotree
+		and target_win
+		and vim.api.nvim_win_is_valid(target_win)
+		and vim.api.nvim_win_get_tabpage(target_win) == vim.api.nvim_get_current_tabpage()
+	then
 		_G._krs_last_win_before_neotree = nil
 		vim.api.nvim_set_current_win(target_win)
 		if is_terminal_win(target_win) and vim.api.nvim_get_mode().mode ~= "t" then

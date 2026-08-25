@@ -41,30 +41,38 @@ function M.reposition_wins()
 				local steps = 5
 				local step = 0
 				local timer = uv.new_timer()
-				timer:start(0, 25, vim.schedule_wrap(function()
-					step = step + 1
-					local t = math.min(1.0, step / steps)
-					local factor = ease_in_out(t)
-					local animated_row = math.floor(start_row + (target_row - start_row) * factor + 0.5)
-					item.current_row = animated_row
+				timer:start(
+					0,
+					25,
+					vim.schedule_wrap(function()
+						step = step + 1
+						local t = math.min(1.0, step / steps)
+						local factor = ease_in_out(t)
+						local animated_row = math.floor(start_row + (target_row - start_row) * factor + 0.5)
+						item.current_row = animated_row
 
-					if item.win and vim.api.nvim_win_is_valid(item.win) then
-						pcall(vim.api.nvim_win_set_config, item.win, {
-							relative = "editor",
-							row = math.max(0, animated_row),
-							col = math.max(0, item.current_col or (vim.o.columns - item.width - 2)),
-							focusable = false,
-							noautocmd = true,
-						})
-					end
-
-					if step >= steps then
-						if not timer:is_closing() then
-							pcall(function() timer:stop() end)
-							pcall(function() timer:close() end)
+						if item.win and vim.api.nvim_win_is_valid(item.win) then
+							pcall(vim.api.nvim_win_set_config, item.win, {
+								relative = "editor",
+								row = math.max(0, animated_row),
+								col = math.max(0, item.current_col or (vim.o.columns - item.width - 2)),
+								focusable = false,
+								noautocmd = true,
+							})
 						end
-					end
-				end))
+
+						if step >= steps then
+							if not timer:is_closing() then
+								pcall(function()
+									timer:stop()
+								end)
+								pcall(function()
+									timer:close()
+								end)
+							end
+						end
+					end)
+				)
 			end
 		end
 	end
@@ -146,7 +154,9 @@ function M.notify(msg, level, opts)
 		local env = env_mod.detect()
 		is_mobile = env.is_mobile or env.is_termux or env.is_proot
 	else
-		is_mobile = vim.env.TERMUX_VERSION ~= nil or vim.fn.isdirectory("/data/data/com.termux") == 1 or (vim.o.columns or 80) < 72
+		is_mobile = vim.env.TERMUX_VERSION ~= nil
+			or vim.fn.isdirectory("/data/data/com.termux") == 1
+			or (vim.o.columns or 80) < 72
 	end
 
 	local max_w = is_mobile and math.max(25, math.min(45, math.floor((vim.o.columns or 80) * 0.7)))
@@ -212,33 +222,41 @@ function M.notify(msg, level, opts)
 	local anim_steps = 6
 	local anim_step = 0
 	local anim_timer = uv.new_timer()
-	anim_timer:start(0, 25, vim.schedule_wrap(function()
-		anim_step = anim_step + 1
-		local t = math.min(1.0, anim_step / anim_steps)
-		local factor = ease_in_out(t)
-		local animated_col = math.floor(start_col - (start_col - target_col) * factor + 0.5)
-		local blend = math.floor(80 - (80 - 15) * factor + 0.5)
+	anim_timer:start(
+		0,
+		25,
+		vim.schedule_wrap(function()
+			anim_step = anim_step + 1
+			local t = math.min(1.0, anim_step / anim_steps)
+			local factor = ease_in_out(t)
+			local animated_col = math.floor(start_col - (start_col - target_col) * factor + 0.5)
+			local blend = math.floor(80 - (80 - 15) * factor + 0.5)
 
-		win_item.current_col = animated_col
+			win_item.current_col = animated_col
 
-		if win and vim.api.nvim_win_is_valid(win) then
-			pcall(vim.api.nvim_win_set_config, win, {
-				relative = "editor",
-				row = math.max(0, win_item.current_row),
-				col = math.max(0, animated_col),
-				focusable = false,
-				noautocmd = true,
-			})
-			pcall(vim.api.nvim_win_set_option, win, "winblend", math.max(0, blend))
-		end
-
-		if anim_step >= anim_steps then
-			if not anim_timer:is_closing() then
-				pcall(function() anim_timer:stop() end)
-				pcall(function() anim_timer:close() end)
+			if win and vim.api.nvim_win_is_valid(win) then
+				pcall(vim.api.nvim_win_set_config, win, {
+					relative = "editor",
+					row = math.max(0, win_item.current_row),
+					col = math.max(0, animated_col),
+					focusable = false,
+					noautocmd = true,
+				})
+				pcall(vim.api.nvim_win_set_option, win, "winblend", math.max(0, blend))
 			end
-		end
-	end))
+
+			if anim_step >= anim_steps then
+				if not anim_timer:is_closing() then
+					pcall(function()
+						anim_timer:stop()
+					end)
+					pcall(function()
+						anim_timer:close()
+					end)
+				end
+			end
+		end)
+	)
 
 	-- 2. Auto-dismiss & Exit Animation (Slide out right + Slide remaining up)
 	local timeout = opts.timeout or (is_mobile and 1800 or 2500)
@@ -250,50 +268,58 @@ function M.notify(msg, level, opts)
 		local exit_start_col = win_item.current_col or target_col
 		local exit_end_col = vim.o.columns
 
-		exit_timer:start(0, 25, vim.schedule_wrap(function()
-			exit_step = exit_step + 1
-			local t = math.min(1.0, exit_step / exit_steps)
-			local factor = ease_in_out(t)
-			local animated_col = math.floor(exit_start_col + (exit_end_col - exit_start_col) * factor + 0.5)
-			local blend = math.floor(15 + (90 - 15) * factor + 0.5)
+		exit_timer:start(
+			0,
+			25,
+			vim.schedule_wrap(function()
+				exit_step = exit_step + 1
+				local t = math.min(1.0, exit_step / exit_steps)
+				local factor = ease_in_out(t)
+				local animated_col = math.floor(exit_start_col + (exit_end_col - exit_start_col) * factor + 0.5)
+				local blend = math.floor(15 + (90 - 15) * factor + 0.5)
 
-			if win and vim.api.nvim_win_is_valid(win) then
-				pcall(vim.api.nvim_win_set_config, win, {
-					relative = "editor",
-					row = math.max(0, win_item.current_row),
-					col = animated_col,
-					focusable = false,
-					noautocmd = true,
-				})
-				pcall(vim.api.nvim_win_set_option, win, "winblend", math.min(100, blend))
-			end
-
-			if exit_step >= exit_steps then
-				if not exit_timer:is_closing() then
-					pcall(function() exit_timer:stop() end)
-					pcall(function() exit_timer:close() end)
-				end
-
-				-- Close window and buffer
 				if win and vim.api.nvim_win_is_valid(win) then
-					pcall(vim.api.nvim_win_close, win, true)
-				end
-				if buf and vim.api.nvim_buf_is_valid(buf) then
-					pcall(vim.api.nvim_buf_delete, buf, { force = true })
+					pcall(vim.api.nvim_win_set_config, win, {
+						relative = "editor",
+						row = math.max(0, win_item.current_row),
+						col = animated_col,
+						focusable = false,
+						noautocmd = true,
+					})
+					pcall(vim.api.nvim_win_set_option, win, "winblend", math.min(100, blend))
 				end
 
-				-- Remove item from active_wins
-				for idx, item in ipairs(M.active_wins) do
-					if item.win == win then
-						table.remove(M.active_wins, idx)
-						break
+				if exit_step >= exit_steps then
+					if not exit_timer:is_closing() then
+						pcall(function()
+							exit_timer:stop()
+						end)
+						pcall(function()
+							exit_timer:close()
+						end)
 					end
-				end
 
-				-- Trigger slide-UP queue repositioning for all remaining toasts!
-				M.reposition_wins()
-			end
-		end))
+					-- Close window and buffer
+					if win and vim.api.nvim_win_is_valid(win) then
+						pcall(vim.api.nvim_win_close, win, true)
+					end
+					if buf and vim.api.nvim_buf_is_valid(buf) then
+						pcall(vim.api.nvim_buf_delete, buf, { force = true })
+					end
+
+					-- Remove item from active_wins
+					for idx, item in ipairs(M.active_wins) do
+						if item.win == win then
+							table.remove(M.active_wins, idx)
+							break
+						end
+					end
+
+					-- Trigger slide-UP queue repositioning for all remaining toasts!
+					M.reposition_wins()
+				end
+			end)
+		)
 	end, timeout)
 end
 
@@ -308,17 +334,20 @@ end
 M._progress_toasts = {}
 
 function M.notify_progress(id, msg, level, opts)
-	opts  = opts or {}
+	opts = opts or {}
 	level = level or vim.log.levels.INFO
 	local msg_str = tostring(msg or "")
 
 	local icon = "ℹ️ "
-	if level == vim.log.levels.WARN  then icon = "⚠️ "  end
-	if level == vim.log.levels.ERROR then icon = "❌ " end
+	if level == vim.log.levels.WARN then
+		icon = "⚠️ "
+	end
+	if level == vim.log.levels.ERROR then
+		icon = "❌ "
+	end
 
 	local title = opts.title or "Neovim"
-	local new_lines = { string.format("%s %s", icon, title),
-	                    string.rep("─", math.max(20, #title + 4)) }
+	local new_lines = { string.format("%s %s", icon, title), string.rep("─", math.max(20, #title + 4)) }
 	for line in msg_str:gmatch("[^\r\n]+") do
 		table.insert(new_lines, " " .. line)
 	end
@@ -351,8 +380,12 @@ end
 function M.finish_progress(id)
 	local existing = M._progress_toasts[id]
 	M._progress_toasts[id] = nil
-	if not existing then return end
-	if not vim.api.nvim_win_is_valid(existing.win) then return end
+	if not existing then
+		return
+	end
+	if not vim.api.nvim_win_is_valid(existing.win) then
+		return
+	end
 
 	-- Schedule a normal auto-dismiss (2.5s slide-out)
 	local win = existing.win
@@ -362,47 +395,62 @@ function M.finish_progress(id)
 
 	vim.defer_fn(function()
 		local exit_steps = 5
-		local exit_step  = 0
+		local exit_step = 0
 		local exit_timer = uv.new_timer()
 		local exit_start_col = win_item.current_col or 0
-		local exit_end_col   = vim.o.columns
+		local exit_end_col = vim.o.columns
 
-		exit_timer:start(0, 25, vim.schedule_wrap(function()
-			exit_step = exit_step + 1
-			local t      = math.min(1.0, exit_step / exit_steps)
-			local factor = ease_in_out(t)
-			local col    = math.floor(exit_start_col + (exit_end_col - exit_start_col) * factor + 0.5)
-			local blend  = math.floor(15 + (90 - 15) * factor + 0.5)
+		exit_timer:start(
+			0,
+			25,
+			vim.schedule_wrap(function()
+				exit_step = exit_step + 1
+				local t = math.min(1.0, exit_step / exit_steps)
+				local factor = ease_in_out(t)
+				local col = math.floor(exit_start_col + (exit_end_col - exit_start_col) * factor + 0.5)
+				local blend = math.floor(15 + (90 - 15) * factor + 0.5)
 
-			if win and vim.api.nvim_win_is_valid(win) then
-				pcall(vim.api.nvim_win_set_config, win, {
-					relative = "editor", row = math.max(0, win_item.current_row),
-					col = col, focusable = false, noautocmd = true,
-				})
-				pcall(vim.api.nvim_win_set_option, win, "winblend", math.min(100, blend))
-			end
-
-			if exit_step >= exit_steps then
-				exit_timer:stop(); exit_timer:close()
 				if win and vim.api.nvim_win_is_valid(win) then
-					pcall(vim.api.nvim_win_close, win, true)
+					pcall(vim.api.nvim_win_set_config, win, {
+						relative = "editor",
+						row = math.max(0, win_item.current_row),
+						col = col,
+						focusable = false,
+						noautocmd = true,
+					})
+					pcall(vim.api.nvim_win_set_option, win, "winblend", math.min(100, blend))
 				end
-				if buf and vim.api.nvim_buf_is_valid(buf) then
-					pcall(vim.api.nvim_buf_delete, buf, { force = true })
+
+				if exit_step >= exit_steps then
+					exit_timer:stop()
+					exit_timer:close()
+					if win and vim.api.nvim_win_is_valid(win) then
+						pcall(vim.api.nvim_win_close, win, true)
+					end
+					if buf and vim.api.nvim_buf_is_valid(buf) then
+						pcall(vim.api.nvim_buf_delete, buf, { force = true })
+					end
+					for idx, item in ipairs(M.active_wins) do
+						if item.win == win then
+							table.remove(M.active_wins, idx)
+							break
+						end
+					end
+					M.reposition_wins()
 				end
-				for idx, item in ipairs(M.active_wins) do
-					if item.win == win then table.remove(M.active_wins, idx); break end
-				end
-				M.reposition_wins()
-			end
-		end))
+			end)
+		)
 	end, timeout)
 end
 
 function M.setup()
 	vim.notify = M.notify
 
-	vim.api.nvim_create_user_command("NotifyDismiss", M.dismiss_all, { desc = "Dismiss all floating toast notifications" })
+	vim.api.nvim_create_user_command(
+		"NotifyDismiss",
+		M.dismiss_all,
+		{ desc = "Dismiss all floating toast notifications" }
+	)
 	vim.api.nvim_create_user_command("ClearToasts", M.dismiss_all, { desc = "Dismiss all floating toast notifications" })
 
 	vim.keymap.set("n", "<leader>nd", M.dismiss_all, { desc = "Dismiss active notifications" })

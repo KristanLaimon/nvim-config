@@ -1118,39 +1118,44 @@ function M.open_task_menu()
 
 								if type(item) == "table" and item.chain then
 									local default_chain = table.concat(item.chain, " && ")
-									vim.ui.input({ prompt = "Edit Chained Steps (separated by '&&' or ','): ", default = default_chain }, function(raw_steps)
-										if not raw_steps or raw_steps == "" then
-											return
-										end
-
-										local steps = {}
-										for step in raw_steps:gmatch("[^&,]+") do
-											local clean = vim.trim(step)
-											if clean ~= "" then
-												table.insert(steps, clean)
+									vim.ui.input(
+										{ prompt = "Edit Chained Steps (separated by '&&' or ','): ", default = default_chain },
+										function(raw_steps)
+											if not raw_steps or raw_steps == "" then
+												return
 											end
-										end
 
-										if #steps > 0 then
-											pdata.custom_tasks = pdata.custom_tasks or {}
-											local updated = false
-											for idx, ct in ipairs(pdata.custom_tasks) do
-												if ct == item or ct.name == initial_name then
-													pdata.custom_tasks[idx] = { name = new_name, chain = steps }
-													updated = true
-													break
+											local steps = {}
+											for step in raw_steps:gmatch("[^&,]+") do
+												local clean = vim.trim(step)
+												if clean ~= "" then
+													table.insert(steps, clean)
 												end
 											end
-											if not updated then
-												table.insert(pdata.custom_tasks, { name = new_name, chain = steps })
+
+											if #steps > 0 then
+												pdata.custom_tasks = pdata.custom_tasks or {}
+												local updated = false
+												for idx, ct in ipairs(pdata.custom_tasks) do
+													if ct == item or ct.name == initial_name then
+														pdata.custom_tasks[idx] = { name = new_name, chain = steps }
+														updated = true
+														break
+													end
+												end
+												if not updated then
+													table.insert(pdata.custom_tasks, { name = new_name, chain = steps })
+												end
+												M.save_project_data(root, pdata)
+												notify("✏️ Task chain updated: " .. new_name)
 											end
-											M.save_project_data(root, pdata)
-											notify("✏️ Task chain updated: " .. new_name)
+											M.open_task_menu()
 										end
-										M.open_task_menu()
-									end)
+									)
 								else
-									local default_cmd = (type(item) == "table" and item.cmd) or (type(item) == "string" and item) or initial_name
+									local default_cmd = (type(item) == "table" and item.cmd)
+										or (type(item) == "string" and item)
+										or initial_name
 									vim.ui.input({ prompt = "Edit Command: ", default = default_cmd }, function(new_cmd)
 										if not new_cmd or new_cmd == "" then
 											return
@@ -1302,7 +1307,8 @@ function M.setup()
 		})
 	end
 
-	local run_def_keys = type(M.settings.keys.run_default) == "table" and M.settings.keys.run_default or { M.settings.keys.run_default }
+	local run_def_keys = type(M.settings.keys.run_default) == "table" and M.settings.keys.run_default
+		or { M.settings.keys.run_default }
 	for _, key in ipairs(run_def_keys) do
 		vim.keymap.set({ "n", "i", "v", "t" }, key, from_any_mode(M.run_default_or_menu), {
 			noremap = true,

@@ -28,17 +28,17 @@ describe("krsnvimtranspiler bash generation", function()
 	end)
 
 	it("transpiles numeric for loops", function()
-		local lua_code = 'for i = 1, 5 do\n  print(i)\nend'
+		local lua_code = "for i = 1, 5 do\n  print(i)\nend"
 		local sh = transpiler.to_sh(lua_code)
-		expect(sh).toContain('for ((i=1; i<=5; i+=1)); do')
+		expect(sh).toContain("for ((i=1; i<=5; i+=1)); do")
 	end)
 
 	it("transpiles function definitions and calls", function()
-		local lua_code = 'function add(a, b)\n  return a + b\nend\nadd(2, 3)'
+		local lua_code = "function add(a, b)\n  return a + b\nend\nadd(2, 3)"
 		local sh = transpiler.to_sh(lua_code)
-		expect(sh).toContain('add() {')
+		expect(sh).toContain("add() {")
 		expect(sh).toContain('local a="$1"')
-		expect(sh).toContain('add 2 3')
+		expect(sh).toContain("add 2 3")
 	end)
 end)
 
@@ -66,13 +66,13 @@ describe("krsnvimtranspiler powershell generation", function()
 	it("transpiles conditionals with logical operators", function()
 		local lua_code = 'if a >= 10 and b < 5 then\n  print("yes")\nend'
 		local ps1 = transpiler.to_ps1(lua_code)
-		expect(ps1).toContain('if ($a -ge 10 -and $b -lt 5) {')
+		expect(ps1).toContain("if ($a -ge 10 -and $b -lt 5) {")
 	end)
 
 	it("transpiles function definitions and calls", function()
 		local lua_code = 'function greet(user)\n  print("Hi", user)\nend\ngreet("Alice")'
 		local ps1 = transpiler.to_ps1(lua_code)
-		expect(ps1).toContain('function greet($user) {')
+		expect(ps1).toContain("function greet($user) {")
 		expect(ps1).toContain('greet "Alice"')
 	end)
 end)

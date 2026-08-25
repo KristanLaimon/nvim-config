@@ -67,17 +67,19 @@ function M.run()
 			thread = true,
 			fn = function(n)
 				local total = 0
-				for i = 1, n do total = total + i end
+				for i = 1, n do
+					total = total + i
+				end
 				return total
 			end,
-			args = { 100000 }
+			args = { 100000 },
 		},
 		-- Task 4: Real Task Promise
 		async.task(function(resolve)
 			async.sleep(25, function()
 				resolve("promise_task_C")
 			end)
-		end)
+		end),
 	}, function(err, results)
 		assert(err == nil, "Multitasks execution failed: " .. tostring(err))
 		multitask_results = results

@@ -129,16 +129,17 @@ function M.discover_start(root_cwd)
 
 	local proc = git.spawn({ "submodule", "status" }, root_cwd)
 
-	return nil, function()
-		local paths = finish_discovery(root_cwd, git.collect(proc))
+	return nil,
+		function()
+			local paths = finish_discovery(root_cwd, git.collect(proc))
 
-		local data = store.load(cfg_path, {})
-		data.submodules_fingerprint = fingerprint
-		data.submodule_paths = paths
-		store.save(cfg_path, data)
+			local data = store.load(cfg_path, {})
+			data.submodules_fingerprint = fingerprint
+			data.submodule_paths = paths
+			store.save(cfg_path, data)
 
-		return paths
-	end
+			return paths
+		end
 end
 
 --- Discovers submodules inside `root_cwd`. Blocking convenience wrapper

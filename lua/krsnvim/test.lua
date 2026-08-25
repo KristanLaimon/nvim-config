@@ -28,16 +28,26 @@ local state = {
 -- Deep Equality & Formatting Helpers
 -- ----------------------------------------------------------------------------
 local function deep_equal(a, b)
-	if a == b then return true end
+	if a == b then
+		return true
+	end
 	local ta, tb = type(a), type(b)
-	if ta ~= tb then return false end
-	if ta ~= "table" then return false end
+	if ta ~= tb then
+		return false
+	end
+	if ta ~= "table" then
+		return false
+	end
 
 	for k, v in pairs(a) do
-		if not deep_equal(v, b[k]) then return false end
+		if not deep_equal(v, b[k]) then
+			return false
+		end
 	end
 	for k, _ in pairs(b) do
-		if a[k] == nil then return false end
+		if a[k] == nil then
+			return false
+		end
 	end
 	return true
 end
@@ -48,7 +58,9 @@ local function format_val(v)
 		return '"' .. v .. '"'
 	elseif t == "table" then
 		local ok, json = pcall(require("krsnvim.json").encode, v)
-		if ok and json then return json end
+		if ok and json then
+			return json
+		end
 		return tostring(v)
 	else
 		return tostring(v)
@@ -222,7 +234,8 @@ local function create_expect(actual, is_not)
 		assert_cond(
 			threw and matches_err,
 			"Expected function NOT to throw error matching " .. format_val(expected_err or "any"),
-			threw and ("Expected error message to contain " .. format_val(expected_err) .. ", got: " .. tostring(err)) or "Expected function to throw an error, but it executed successfully"
+			threw and ("Expected error message to contain " .. format_val(expected_err) .. ", got: " .. tostring(err))
+				or "Expected function to throw an error, but it executed successfully"
 		)
 	end
 

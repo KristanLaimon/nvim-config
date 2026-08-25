@@ -46,8 +46,7 @@ M.settings = {
 
 	keys = {
 		--- Open the palette. Bound in normal, insert, visual and terminal mode.
-		open = is_mobile_cp
-			and { "<C-p>", "<C-P>", "<C-S-p>", "<C-S-P>", "<leader>cp", "<leader>p" }
+		open = is_mobile_cp and { "<C-p>", "<C-P>", "<C-S-p>", "<C-S-P>", "<leader>cp", "<leader>p" }
 			or { "<C-S-p>", "<C-S-P>", "<leader>cp", "<leader>p" },
 	},
 }
@@ -79,8 +78,16 @@ M.commands = {
 	{ name = "🔄 Rescan & Refresh File Explorer (Neo-tree)", cmd = "NeotreeRefresh", category = "Explorer" },
 	{ name = "➕ Create New File in Neo-tree (a / <C-n>)", cmd = "NeotreeCreateFile", category = "Explorer" },
 	{ name = "📁 Create New Folder in Neo-tree (A / <C-S-n>)", cmd = "NeotreeCreateFolder", category = "Explorer" },
-	{ name = "🙈 Toggle Custom Hidden Items Visibility (Show/Hide Marked Files)", cmd = "NeotreeToggleCustomHiddenVisibility", category = "Explorer" },
-	{ name = "🧹 Clear All Custom Hidden Files & Folders (Neo-tree)", cmd = "NeotreeClearCustomHidden", category = "Explorer" },
+	{
+		name = "🙈 Toggle Custom Hidden Items Visibility (Show/Hide Marked Files)",
+		cmd = "NeotreeToggleCustomHiddenVisibility",
+		category = "Explorer",
+	},
+	{
+		name = "🧹 Clear All Custom Hidden Files & Folders (Neo-tree)",
+		cmd = "NeotreeClearCustomHidden",
+		category = "Explorer",
+	},
 	{ name = "🐙 Toggle Git Center (Ctrl+Shift+G)", cmd = "GitCenterToggle", category = "Git" },
 	{
 		name = "🎨 Toggle Git Center Colored Tab Indicators (Default: Plain Text)",
@@ -109,21 +116,33 @@ M.commands = {
 	-- --------------------------------------------------------------------------
 	-- 📋 Snippets & 📚 Offline Documentation
 	-- --------------------------------------------------------------------------
-	{ name = "⚡ Open Snippet Manager (Create, Edit & Delete Snippets)", cmd = "KrsSnippetManager", category = "Snippets" },
+	{
+		name = "⚡ Open Snippet Manager (Create, Edit & Delete Snippets)",
+		cmd = "KrsSnippetManager",
+		category = "Snippets",
+	},
 	{ name = "📝 Edit Snippets JSON for Current Filetype", cmd = "KrsSnippetEdit", category = "Snippets" },
 	{ name = "➕ Add New Snippet Interactively", cmd = "KrsSnippetAdd", category = "Snippets" },
 	{ name = "🔄 Reload Snippets in Completion Engine", cmd = "KrsSnippetReload", category = "Snippets" },
 	{ name = "📚 Open Offline Documentation Store", cmd = "KrsDocManager", category = "Documentation" },
 	{ name = "📘 Open Downloaded Docs (language picker)", cmd = "KrsDocOpen", category = "Documentation" },
 	{ name = "🔍 Fuzzy Search Offline Language Documentation", cmd = "KrsDocSearch", category = "Documentation" },
-	{ name = "⚙️ Open VSCode Settings Sync (.vscode/settings.json)", cmd = "KrsVSCodeSettings", category = "VSCode / Settings" },
+	{
+		name = "⚙️ Open VSCode Settings Sync (.vscode/settings.json)",
+		cmd = "KrsVSCodeSettings",
+		category = "VSCode / Settings",
+	},
 
 	-- --------------------------------------------------------------------------
 	-- 🐘 PHP & Laravel
 	-- --------------------------------------------------------------------------
 	{ name = "🐘 Check PHP & Laravel Environment Status", cmd = "PHPCheckTools", category = "PHP / Laravel" },
 	{ name = "🧹 Clear Blade & Laravel Caches (blade-nav)", cmd = "BladeNavClearCache", category = "PHP / Laravel" },
-	{ name = "👁️ Toggle Blade Inline Value Annotations", cmd = "BladeNavToggleShowValues", category = "PHP / Laravel" },
+	{
+		name = "👁️ Toggle Blade Inline Value Annotations",
+		cmd = "BladeNavToggleShowValues",
+		category = "PHP / Laravel",
+	},
 	{ name = "📦 Install BladeNav Artisan Command", cmd = "BladeNavInstallArtisanCommand", category = "PHP / Laravel" },
 
 	-- --------------------------------------------------------------------------
@@ -138,18 +157,25 @@ M.commands = {
 	-- --------------------------------------------------------------------------
 	-- 🎨 Formatting & Line Endings
 	-- --------------------------------------------------------------------------
-	{ name = "🎨 Format Document / File (Pint / PHP-CS-Fixer / Blade / Prettier)", cmd = "FormatDocument", category = "Format" },
+	{
+		name = "🎨 Format Document / File (Pint / PHP-CS-Fixer / Blade / Prettier)",
+		cmd = "FormatDocument",
+		category = "Format",
+	},
 	{ name = "ℹ️ Check Formatter Info (Conform)", cmd = "ConformInfo", category = "Format" },
 	{ name = "📄 Change Current File Line Endings (LF / CRLF / CR)", cmd = "ChangeLineEndings", category = "Format" },
 	{ name = "🌐 Change Whole Repo Line Endings (LF / CRLF)", cmd = "ChangeRepoLineEndings", category = "Format" },
-
 
 	-- --------------------------------------------------------------------------
 	-- ⚙️ Setup & Dependencies
 	-- --------------------------------------------------------------------------
 	{ name = "🛠️ Create New .NET Project (dotnet new template picker)", cmd = "DotnetNew", category = "C#" },
 	{ name = "📦 Open NuGet Package Manager (.csproj references)", cmd = "NugetManager", category = "C#" },
-	{ name = "📦 Install Dependencies & Toolchains (Per-Language Bundles)", cmd = "KrsInstallDependencies", category = "Setup" },
+	{
+		name = "📦 Install Dependencies & Toolchains (Per-Language Bundles)",
+		cmd = "KrsInstallDependencies",
+		category = "Setup",
+	},
 	{ name = "🔑 Run System Setup (Sudo/Root UI Password Prompt)", cmd = "KrsSystemSetup", category = "Setup" },
 	{ name = "🚀 Install Google Antigravity CLI (agy)", cmd = "KrsInstallAgy", category = "Setup" },
 	{ name = "🤖 Install Claude Code CLI (claude)", cmd = "KrsInstallClaude", category = "Setup" },

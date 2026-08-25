@@ -41,10 +41,21 @@ M.settings = {
 		--- Meta combinations arrive differently per terminal and GUI.
 		git_center = { "<C-S-g>", "<C-S-G>", "<C-G>", "<C-g>", "<leader>gc", "<leader>gC" },
 		git_stage_all = {
-			"<C-S-x>", "<C-S-X>", "<C-X>",
-			"<C-A-s>", "<C-A-S>", "<C-M-s>", "<C-M-S>",
-			"<A-C-s>", "<A-C-S>", "<M-C-s>", "<M-C-S>",
-			"<A-s>", "<A-S>", "<M-s>", "<M-S>",
+			"<C-S-x>",
+			"<C-S-X>",
+			"<C-X>",
+			"<C-A-s>",
+			"<C-A-S>",
+			"<C-M-s>",
+			"<C-M-S>",
+			"<A-C-s>",
+			"<A-C-S>",
+			"<M-C-s>",
+			"<M-C-S>",
+			"<A-s>",
+			"<A-S>",
+			"<M-s>",
+			"<M-S>",
 			"<leader>gs",
 		},
 		smart_launch = is_mobile and { "<C-S-s>", "<C-S-S>", "<C-S>", "<C-s>" } or { "<C-S-s>", "<C-S-S>" },
@@ -196,13 +207,21 @@ end, "Open Recent Projects UI")
 map_all_modes(M.settings.keys.run_script, function()
 	local buf_name = vim.api.nvim_buf_get_name(0)
 
-	if not (buf_name:match("%.krsnvim$") or buf_name:match("%.lua$") or vim.bo.filetype == "krsnvim" or vim.bo.filetype == "lua") then
+	if
+		not (
+			buf_name:match("%.krsnvim$")
+			or buf_name:match("%.lua$")
+			or vim.bo.filetype == "krsnvim"
+			or vim.bo.filetype == "lua"
+		)
+	then
 		return
 	end
 
 	vim.cmd("silent! write")
 	local relative = vim.fn.fnamemodify(buf_name, ":.")
-	local cmd = 'nvim --headless -c "lua package.path = vim.fn.stdpath(\'config\') .. \'/lua/?.lua;\' .. vim.fn.stdpath(\'config\') .. \'/lua/?/init.lua;\' .. package.path; require(\'krsnvim\')" -l ' .. vim.fn.shellescape(relative)
+	local cmd = "nvim --headless -c \"lua package.path = vim.fn.stdpath('config') .. '/lua/?.lua;' .. vim.fn.stdpath('config') .. '/lua/?/init.lua;' .. package.path; require('krsnvim')\" -l "
+		.. vim.fn.shellescape(relative)
 	require("plugins.krs.tasks").run_custom_command(cmd, nil, nil, vim.fn.fnamemodify(buf_name, ":t"))
 end, "Run current .lua / .krsnvim file with Neovim runner")
 
@@ -299,8 +318,14 @@ vim.api.nvim_create_user_command("KrsTranspilePs1", function(command)
 end, { nargs = "?", desc = "Transpile active .krsnvim file to .ps1 (PowerShell)" })
 
 -- Aliases for backwards compatibility
-vim.api.nvim_create_user_command("KrsExport", function(...) vim.cmd("KrsTranspile " .. (... or "")) end, { nargs = "*" })
-vim.api.nvim_create_user_command("KrsExportSh", function(...) vim.cmd("KrsTranspileSh " .. (... or "")) end, { nargs = "?" })
-vim.api.nvim_create_user_command("KrsExportPs1", function(...) vim.cmd("KrsTranspilePs1 " .. (... or "")) end, { nargs = "?" })
+vim.api.nvim_create_user_command("KrsExport", function(...)
+	vim.cmd("KrsTranspile " .. (... or ""))
+end, { nargs = "*" })
+vim.api.nvim_create_user_command("KrsExportSh", function(...)
+	vim.cmd("KrsTranspileSh " .. (... or ""))
+end, { nargs = "?" })
+vim.api.nvim_create_user_command("KrsExportPs1", function(...)
+	vim.cmd("KrsTranspilePs1 " .. (... or ""))
+end, { nargs = "?" })
 
 return M

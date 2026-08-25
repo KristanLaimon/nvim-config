@@ -197,7 +197,12 @@ return {
 					local env = env_ok and env_mod.detect() or {}
 					local is_mobile_or_proot = env.is_termux or env.is_proot or env.is_mobile or (vim.env.TERMUX_VERSION ~= nil)
 
-					if not is_mobile_or_proot and client and client.supports_method and client:supports_method("textDocument/inlayHint") then
+					if
+						not is_mobile_or_proot
+						and client
+						and client.supports_method
+						and client:supports_method("textDocument/inlayHint")
+					then
 						if vim.lsp.inlay_hint then
 							pcall(vim.lsp.inlay_hint.enable, true, { bufnr = args.buf })
 						end
@@ -205,53 +210,53 @@ return {
 				end,
 			})
 
-		-- :LspInfo -- show active LSP clients for the current buffer in a float
-		vim.api.nvim_create_user_command("LspInfo", function()
-			local buf = vim.api.nvim_get_current_buf()
-			local clients = vim.lsp.get_clients({ bufnr = buf })
-			local lines = { "LSP clients attached to buffer " .. buf .. ":", "" }
-			if #clients == 0 then
-				table.insert(lines, "  (none)")
-			else
-				for _, client in ipairs(clients) do
-					table.insert(lines, "  ● " .. client.name .. "  (id=" .. client.id .. ")")
-					local python_path = vim.tbl_get(client, "config", "settings", "python", "pythonPath")
-						or vim.tbl_get(client, "config", "settings", "basedpyright", "pythonPath")
-						or (client.config.cmd and client.config.cmd[1])
-					if python_path then
-						table.insert(lines, "    interpreter: " .. python_path)
+			-- :LspInfo -- show active LSP clients for the current buffer in a float
+			vim.api.nvim_create_user_command("LspInfo", function()
+				local buf = vim.api.nvim_get_current_buf()
+				local clients = vim.lsp.get_clients({ bufnr = buf })
+				local lines = { "LSP clients attached to buffer " .. buf .. ":", "" }
+				if #clients == 0 then
+					table.insert(lines, "  (none)")
+				else
+					for _, client in ipairs(clients) do
+						table.insert(lines, "  ● " .. client.name .. "  (id=" .. client.id .. ")")
+						local python_path = vim.tbl_get(client, "config", "settings", "python", "pythonPath")
+							or vim.tbl_get(client, "config", "settings", "basedpyright", "pythonPath")
+							or (client.config.cmd and client.config.cmd[1])
+						if python_path then
+							table.insert(lines, "    interpreter: " .. python_path)
+						end
+						local root = client.config.root_dir or client.root_dir
+						if root then
+							table.insert(lines, "    root:        " .. root)
+						end
+						table.insert(lines, "")
 					end
-					local root = client.config.root_dir or client.root_dir
-					if root then
-						table.insert(lines, "    root:        " .. root)
-					end
-					table.insert(lines, "")
 				end
-			end
-			-- Open in a scratch float
-			local float_buf = vim.api.nvim_create_buf(false, true)
-			vim.api.nvim_buf_set_lines(float_buf, 0, -1, false, lines)
-			vim.bo[float_buf].modifiable = false
-			vim.bo[float_buf].filetype = "markdown"
-			local width = math.max(50, math.min(80, vim.o.columns - 4))
-			local height = math.min(#lines + 2, vim.o.lines - 4)
-			local win = vim.api.nvim_open_win(float_buf, true, {
-				relative = "editor",
-				row = math.floor((vim.o.lines - height) / 2),
-				col = math.floor((vim.o.columns - width) / 2),
-				width = width,
-				height = height,
-				style = "minimal",
-				border = "rounded",
-				title = " LSP Info ",
-				title_pos = "center",
-			})
-			vim.wo[win].wrap = false
-			-- close on q / Esc
-			for _, key in ipairs({ "q", "<Esc>" }) do
-				vim.keymap.set("n", key, "<cmd>close<CR>", { buffer = float_buf, silent = true })
-			end
-		end, { desc = "Show active LSP clients for the current buffer" })
+				-- Open in a scratch float
+				local float_buf = vim.api.nvim_create_buf(false, true)
+				vim.api.nvim_buf_set_lines(float_buf, 0, -1, false, lines)
+				vim.bo[float_buf].modifiable = false
+				vim.bo[float_buf].filetype = "markdown"
+				local width = math.max(50, math.min(80, vim.o.columns - 4))
+				local height = math.min(#lines + 2, vim.o.lines - 4)
+				local win = vim.api.nvim_open_win(float_buf, true, {
+					relative = "editor",
+					row = math.floor((vim.o.lines - height) / 2),
+					col = math.floor((vim.o.columns - width) / 2),
+					width = width,
+					height = height,
+					style = "minimal",
+					border = "rounded",
+					title = " LSP Info ",
+					title_pos = "center",
+				})
+				vim.wo[win].wrap = false
+				-- close on q / Esc
+				for _, key in ipairs({ "q", "<Esc>" }) do
+					vim.keymap.set("n", key, "<cmd>close<CR>", { buffer = float_buf, silent = true })
+				end
+			end, { desc = "Show active LSP clients for the current buffer" })
 
 			-- The TS server advertises `diagnosticProvider`, so nvim pulls and refreshes
 			-- diagnostics natively. A hand-rolled fetch into a private namespace only froze

@@ -310,234 +310,239 @@ function M.open_desktop_explorer(opts, on_select_cb)
 		end
 	end
 
-	pickers.new(picker_options({
-		prompt_title = prompt_title,
-		results_title = results_title,
-		entries = entries,
-		attach_mappings = function(prompt_bufnr, map)
-			--- Selection under the cursor, or nil. `skip_parent` filters out `../`
-			--- for actions that must not touch the parent directory.
-			local function selected(skip_parent)
-				local selection = action_state.get_selected_entry()
-				local value = selection and selection.value or nil
-				if value and skip_parent and value.is_parent then
-					return nil
+	pickers
+		.new(picker_options({
+			prompt_title = prompt_title,
+			results_title = results_title,
+			entries = entries,
+			attach_mappings = function(prompt_bufnr, map)
+				--- Selection under the cursor, or nil. `skip_parent` filters out `../`
+				--- for actions that must not touch the parent directory.
+				local function selected(skip_parent)
+					local selection = action_state.get_selected_entry()
+					local value = selection and selection.value or nil
+					if value and skip_parent and value.is_parent then
+						return nil
+					end
+					return value
 				end
-				return value
-			end
 
-			--- Closes the picker, then reopens the explorer on `dir`.
-			local function reopen(dir)
-				vim.schedule(function()
-					M.open_desktop_explorer({ path = dir or curr_dir, on_select = on_select }, on_select)
-				end)
-			end
-
-			--- Binds one action to several key/mode pairs.
-			local function map_all(bindings, fn)
-				for _, binding in ipairs(bindings) do
-					map(binding[1], binding[2], fn)
+				--- Closes the picker, then reopens the explorer on `dir`.
+				local function reopen(dir)
+					vim.schedule(function()
+						M.open_desktop_explorer({ path = dir or curr_dir, on_select = on_select }, on_select)
+					end)
 				end
-			end
 
-			actions.select_default:replace(function()
-				local item = selected()
-				if not item then
-					return
+				--- Binds one action to several key/mode pairs.
+				local function map_all(bindings, fn)
+					for _, binding in ipairs(bindings) do
+						map(binding[1], binding[2], fn)
+					end
 				end
-				actions.close(prompt_bufnr)
-				if item.is_dir then
-					reopen(item.path)
-				else
-					if on_select then
-						on_select(curr_dir)
+
+				actions.select_default:replace(function()
+					local item = selected()
+					if not item then
+						return
+					end
+					actions.close(prompt_bufnr)
+					if item.is_dir then
+						reopen(item.path)
 					else
-						vim.cmd("edit " .. vim.fn.fnameescape(item.path))
+						if on_select then
+							on_select(curr_dir)
+						else
+							vim.cmd("edit " .. vim.fn.fnameescape(item.path))
+						end
 					end
-				end
-			end)
+				end)
 
-			map_all({ { "i", "<C-o>" }, { "n", "<C-o>" }, { "n", "o" }, { "n", "O" } }, function()
-				local item = selected()
-				local target = (item and item.is_dir and not item.is_parent) and item.path or curr_dir
-				actions.close(prompt_bufnr)
-				if on_select then
-					on_select(target)
-				else
-					set_project_root(target)
-				end
-			end)
+				map_all({ { "i", "<C-o>" }, { "n", "<C-o>" }, { "n", "o" }, { "n", "O" } }, function()
+					local item = selected()
+					local target = (item and item.is_dir and not item.is_parent) and item.path or curr_dir
+					actions.close(prompt_bufnr)
+					if on_select then
+						on_select(target)
+					else
+						set_project_root(target)
+					end
+				end)
 
-			map_all({ { "n", "a" }, { "i", "<C-a>" } }, function()
-				actions.close(prompt_bufnr)
-				vim.schedule(function()
-					vim.ui.input({ prompt = "Create new (add '/' at end for folder): " }, function(name)
-						if not name or name == "" then
-							return
-						end
-						local full_path = path.join(curr_dir, name)
-						if name:sub(-1) == "/" or name:sub(-1) == "\\" then
-							vim.fn.mkdir(full_path, "p")
-							vim.notify("📁 Folder created: " .. name, vim.log.levels.INFO)
-						else
-							local file = io.open(full_path, "w")
-							if file then
-								file:close()
-								vim.notify("📄 File created: " .. name, vim.log.levels.INFO)
+				map_all({ { "n", "a" }, { "i", "<C-a>" } }, function()
+					actions.close(prompt_bufnr)
+					vim.schedule(function()
+						vim.ui.input({ prompt = "Create new (add '/' at end for folder): " }, function(name)
+							if not name or name == "" then
+								return
 							end
-						end
-						M.open_desktop_explorer({ path = curr_dir })
-					end)
-				end)
-			end)
-
-			map("n", "r", function()
-				local item = selected(true)
-				if not item then
-					return
-				end
-				actions.close(prompt_bufnr)
-				vim.schedule(function()
-					vim.ui.input({ prompt = "Rename to: ", default = item.name }, function(new_name)
-						local target_path = path.join(curr_dir, new_name)
-						local ok_ren, err_ren = os.rename(item.path, target_path)
-						if ok_ren then
-							require("krs.core.buffer_rename").update_buffers_path(item.path, target_path)
-							vim.notify("✏️ Renamed to: " .. new_name, vim.log.levels.INFO)
-						else
-							vim.notify("Error renaming: " .. tostring(err_ren), vim.log.levels.ERROR)
-						end
-						M.open_desktop_explorer({ path = curr_dir })
-					end)
-				end)
-			end)
-
-			map("n", "d", function()
-				local item = selected(true)
-				if not item then
-					return
-				end
-				actions.close(prompt_bufnr)
-				vim.schedule(function()
-					vim.ui.input({ prompt = "Delete '" .. item.name .. "'? (y/n): " }, function(confirm)
-						if confirm and confirm:lower() == "y" then
-							vim.fn.delete(item.path, "rf")
-							vim.notify("🗑️ Deleted: " .. item.name, vim.log.levels.INFO)
-						end
-						M.open_desktop_explorer({ path = curr_dir })
-					end)
-				end)
-			end)
-
-			map("n", "c", function()
-				local item = selected(true)
-				if not item then
-					return
-				end
-				actions.close(prompt_bufnr)
-				vim.schedule(function()
-					vim.ui.input({ prompt = "Copy '" .. item.name .. "' to: ", default = item.name }, function(new_name)
-						if not new_name or new_name == "" or new_name == item.name then
-							return
-						end
-						local dest = path.join(curr_dir, new_name)
-
-						if item.is_dir then
-							-- No portable recursive copy in Lua; shell out per platform.
-							if vim.fn.has("win32") == 1 then
-								vim.fn.system({
-									"xcopy",
-									item.path:gsub("/", "\\"),
-									dest:gsub("/", "\\"),
-									"/E", "/I", "/H", "/Y",
-								})
+							local full_path = path.join(curr_dir, name)
+							if name:sub(-1) == "/" or name:sub(-1) == "\\" then
+								vim.fn.mkdir(full_path, "p")
+								vim.notify("📁 Folder created: " .. name, vim.log.levels.INFO)
 							else
-								vim.fn.system({ "cp", "-r", item.path, dest })
+								local file = io.open(full_path, "w")
+								if file then
+									file:close()
+									vim.notify("📄 File created: " .. name, vim.log.levels.INFO)
+								end
 							end
-							vim.notify("📋 Copied folder to: " .. new_name, vim.log.levels.INFO)
-						else
-							local ok, err = vim.uv.fs_copyfile(item.path, dest)
-							vim.notify(
-								ok and ("📋 Copied file to: " .. new_name) or ("Error copying file: " .. tostring(err)),
-								ok and vim.log.levels.INFO or vim.log.levels.ERROR
-							)
-						end
-						M.open_desktop_explorer({ path = curr_dir })
+							M.open_desktop_explorer({ path = curr_dir })
+						end)
 					end)
 				end)
-			end)
 
-			map("n", "m", function()
-				local item = selected(true)
-				if not item then
-					return
-				end
-				actions.close(prompt_bufnr)
-				vim.schedule(function()
-					M.open_move_picker({ source_path = item.path, root_dir = curr_dir })
-				end)
-			end)
-
-			map_all({ { "i", "<C-f>" }, { "n", "<C-f>" }, { "n", "f" } }, function()
-				-- With `../` selected (or nothing), favorite the directory itself.
-				local item = selected(true)
-				local target_path = item and item.path or curr_dir
-				local target_name = item and item.name or vim.fn.fnamemodify(curr_dir, ":t")
-				if target_path == "" then
-					return
-				end
-
-				if favorites.toggle(target_path) then
-					if path.is_dir(target_path) then
-						remember_recent_project(target_path)
+				map("n", "r", function()
+					local item = selected(true)
+					if not item then
+						return
 					end
-					vim.notify("⭐ Saved as favorite: " .. target_name, vim.log.levels.INFO, { title = "Explorer Favorites" })
-				else
-					vim.notify("Removed from favorites: " .. target_name, vim.log.levels.INFO, { title = "Explorer Favorites" })
-				end
-
-				actions.close(prompt_bufnr)
-				reopen()
-			end)
-
-			local function go_parent()
-				local parent = vim.fn.fnamemodify(curr_dir, ":h")
-				if parent and parent ~= curr_dir then
 					actions.close(prompt_bufnr)
-					reopen(parent)
-				end
-			end
-			map_all({ { "n", "h" }, { "n", "<BS>" }, { "n", "<Left>" }, { "n", "u" }, { "i", "<C-h>" } }, go_parent)
+					vim.schedule(function()
+						vim.ui.input({ prompt = "Rename to: ", default = item.name }, function(new_name)
+							local target_path = path.join(curr_dir, new_name)
+							local ok_ren, err_ren = os.rename(item.path, target_path)
+							if ok_ren then
+								require("krs.core.buffer_rename").update_buffers_path(item.path, target_path)
+								vim.notify("✏️ Renamed to: " .. new_name, vim.log.levels.INFO)
+							else
+								vim.notify("Error renaming: " .. tostring(err_ren), vim.log.levels.ERROR)
+							end
+							M.open_desktop_explorer({ path = curr_dir })
+						end)
+					end)
+				end)
 
-			-- In insert mode <BS> only navigates when the filter is empty; otherwise
-			-- it has to keep deleting characters.
-			map("i", "<BS>", function()
-				if action_state.get_current_line() == "" then
-					go_parent()
-				else
-					vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<BS>", true, false, true), "n", false)
-				end
-			end)
-
-			map_all({ { "n", "l" }, { "n", "<Right>" } }, function()
-				local item = selected()
-				if item and item.is_dir then
+				map("n", "d", function()
+					local item = selected(true)
+					if not item then
+						return
+					end
 					actions.close(prompt_bufnr)
-					reopen(item.path)
+					vim.schedule(function()
+						vim.ui.input({ prompt = "Delete '" .. item.name .. "'? (y/n): " }, function(confirm)
+							if confirm and confirm:lower() == "y" then
+								vim.fn.delete(item.path, "rf")
+								vim.notify("🗑️ Deleted: " .. item.name, vim.log.levels.INFO)
+							end
+							M.open_desktop_explorer({ path = curr_dir })
+						end)
+					end)
+				end)
+
+				map("n", "c", function()
+					local item = selected(true)
+					if not item then
+						return
+					end
+					actions.close(prompt_bufnr)
+					vim.schedule(function()
+						vim.ui.input({ prompt = "Copy '" .. item.name .. "' to: ", default = item.name }, function(new_name)
+							if not new_name or new_name == "" or new_name == item.name then
+								return
+							end
+							local dest = path.join(curr_dir, new_name)
+
+							if item.is_dir then
+								-- No portable recursive copy in Lua; shell out per platform.
+								if vim.fn.has("win32") == 1 then
+									vim.fn.system({
+										"xcopy",
+										item.path:gsub("/", "\\"),
+										dest:gsub("/", "\\"),
+										"/E",
+										"/I",
+										"/H",
+										"/Y",
+									})
+								else
+									vim.fn.system({ "cp", "-r", item.path, dest })
+								end
+								vim.notify("📋 Copied folder to: " .. new_name, vim.log.levels.INFO)
+							else
+								local ok, err = vim.uv.fs_copyfile(item.path, dest)
+								vim.notify(
+									ok and ("📋 Copied file to: " .. new_name) or ("Error copying file: " .. tostring(err)),
+									ok and vim.log.levels.INFO or vim.log.levels.ERROR
+								)
+							end
+							M.open_desktop_explorer({ path = curr_dir })
+						end)
+					end)
+				end)
+
+				map("n", "m", function()
+					local item = selected(true)
+					if not item then
+						return
+					end
+					actions.close(prompt_bufnr)
+					vim.schedule(function()
+						M.open_move_picker({ source_path = item.path, root_dir = curr_dir })
+					end)
+				end)
+
+				map_all({ { "i", "<C-f>" }, { "n", "<C-f>" }, { "n", "f" } }, function()
+					-- With `../` selected (or nothing), favorite the directory itself.
+					local item = selected(true)
+					local target_path = item and item.path or curr_dir
+					local target_name = item and item.name or vim.fn.fnamemodify(curr_dir, ":t")
+					if target_path == "" then
+						return
+					end
+
+					if favorites.toggle(target_path) then
+						if path.is_dir(target_path) then
+							remember_recent_project(target_path)
+						end
+						vim.notify("⭐ Saved as favorite: " .. target_name, vim.log.levels.INFO, { title = "Explorer Favorites" })
+					else
+						vim.notify("Removed from favorites: " .. target_name, vim.log.levels.INFO, { title = "Explorer Favorites" })
+					end
+
+					actions.close(prompt_bufnr)
+					reopen()
+				end)
+
+				local function go_parent()
+					local parent = vim.fn.fnamemodify(curr_dir, ":h")
+					if parent and parent ~= curr_dir then
+						actions.close(prompt_bufnr)
+						reopen(parent)
+					end
 				end
-			end)
+				map_all({ { "n", "h" }, { "n", "<BS>" }, { "n", "<Left>" }, { "n", "u" }, { "i", "<C-h>" } }, go_parent)
 
-			map_all({ { "n", "?" }, { "n", "<F1>" } }, function()
-				require("plugins.krs.context_help").show_help()
-			end)
+				-- In insert mode <BS> only navigates when the filter is empty; otherwise
+				-- it has to keep deleting characters.
+				map("i", "<BS>", function()
+					if action_state.get_current_line() == "" then
+						go_parent()
+					else
+						vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<BS>", true, false, true), "n", false)
+					end
+				end)
 
-			map("n", "q", function()
-				actions.close(prompt_bufnr)
-			end)
+				map_all({ { "n", "l" }, { "n", "<Right>" } }, function()
+					local item = selected()
+					if item and item.is_dir then
+						actions.close(prompt_bufnr)
+						reopen(item.path)
+					end
+				end)
 
-			return true
-		end,
-	})):find()
+				map_all({ { "n", "?" }, { "n", "<F1>" } }, function()
+					require("plugins.krs.context_help").show_help()
+				end)
+
+				map("n", "q", function()
+					actions.close(prompt_bufnr)
+				end)
+
+				return true
+			end,
+		}))
+		:find()
 end
 
 -- ============================================================================
@@ -563,99 +568,105 @@ function M.open_move_picker(opts)
 	local root_dir = opts.root_dir or vim.fn.getcwd()
 	local curr_dir = resolve_dir(opts.path or root_dir, root_dir)
 
-	pickers.new(picker_options({
-		prompt_title = " 🚚 Move '" .. source_name .. "' ➜ Navigate & press [O] to confirm target folder ",
-		results_title = " Folders / Files | Press [O] to Move File Here | [l] Open Folder | [h] Parent ",
-		entries = list_directory(curr_dir, nil),
-		attach_mappings = function(prompt_bufnr, map)
-			--- Reopens this picker somewhere else, keeping the source file.
-			local function reopen(dir)
-				vim.schedule(function()
-					M.open_move_picker({ source_path = source_path, root_dir = root_dir, path = dir })
-				end)
-			end
-
-			local function map_all(bindings, fn)
-				for _, binding in ipairs(bindings) do
-					map(binding[1], binding[2], fn)
-				end
-			end
-
-			local function selected_dir()
-				local selection = action_state.get_selected_entry()
-				local value = selection and selection.value or nil
-				return (value and value.is_dir) and value.path or nil
-			end
-
-			actions.select_default:replace(function()
-				local dir = selected_dir()
-				if dir then
-					actions.close(prompt_bufnr)
-					reopen(dir)
-				end
-			end)
-
-			map_all({ { "n", "O" }, { "n", "o" }, { "i", "<C-o>" } }, function()
-				local target_dir = selected_dir() or curr_dir
-				actions.close(prompt_bufnr)
-
-				local dest_path = path.join(target_dir, source_name)
-				if source_path == dest_path then
-					vim.notify("File is already in this directory", vim.log.levels.WARN, { title = "Move File" })
-					return
-				end
-				if path.is_file(dest_path) or path.is_dir(dest_path) then
-					vim.notify("Target file already exists: " .. dest_path, vim.log.levels.ERROR, { title = "Move File" })
-					return
-				end
-
-				local ok, err = os.rename(source_path, dest_path)
-				if ok then
-					require("krs.core.buffer_rename").update_buffers_path(source_path, dest_path)
-					vim.notify("🚚 Moved '" .. source_name .. "' to:\n" .. target_dir, vim.log.levels.INFO, { title = "Move File" })
-					pcall(function()
-						require("neo-tree.sources.manager").refresh("filesystem")
+	pickers
+		.new(picker_options({
+			prompt_title = " 🚚 Move '" .. source_name .. "' ➜ Navigate & press [O] to confirm target folder ",
+			results_title = " Folders / Files | Press [O] to Move File Here | [l] Open Folder | [h] Parent ",
+			entries = list_directory(curr_dir, nil),
+			attach_mappings = function(prompt_bufnr, map)
+				--- Reopens this picker somewhere else, keeping the source file.
+				local function reopen(dir)
+					vim.schedule(function()
+						M.open_move_picker({ source_path = source_path, root_dir = root_dir, path = dir })
 					end)
-				else
-					vim.notify("Error moving file: " .. tostring(err), vim.log.levels.ERROR, { title = "Move File" })
 				end
-			end)
 
-			map_all({ { "n", "a" }, { "i", "<C-a>" } }, function()
-				actions.close(prompt_bufnr)
-				vim.schedule(function()
-					vim.ui.input({ prompt = "Create folder to move into (add '/' at end): " }, function(name)
-						if name and name ~= "" then
-							vim.fn.mkdir(path.join(curr_dir, name), "p")
-						end
-						M.open_move_picker({ source_path = source_path, root_dir = root_dir, path = curr_dir })
+				local function map_all(bindings, fn)
+					for _, binding in ipairs(bindings) do
+						map(binding[1], binding[2], fn)
+					end
+				end
+
+				local function selected_dir()
+					local selection = action_state.get_selected_entry()
+					local value = selection and selection.value or nil
+					return (value and value.is_dir) and value.path or nil
+				end
+
+				actions.select_default:replace(function()
+					local dir = selected_dir()
+					if dir then
+						actions.close(prompt_bufnr)
+						reopen(dir)
+					end
+				end)
+
+				map_all({ { "n", "O" }, { "n", "o" }, { "i", "<C-o>" } }, function()
+					local target_dir = selected_dir() or curr_dir
+					actions.close(prompt_bufnr)
+
+					local dest_path = path.join(target_dir, source_name)
+					if source_path == dest_path then
+						vim.notify("File is already in this directory", vim.log.levels.WARN, { title = "Move File" })
+						return
+					end
+					if path.is_file(dest_path) or path.is_dir(dest_path) then
+						vim.notify("Target file already exists: " .. dest_path, vim.log.levels.ERROR, { title = "Move File" })
+						return
+					end
+
+					local ok, err = os.rename(source_path, dest_path)
+					if ok then
+						require("krs.core.buffer_rename").update_buffers_path(source_path, dest_path)
+						vim.notify(
+							"🚚 Moved '" .. source_name .. "' to:\n" .. target_dir,
+							vim.log.levels.INFO,
+							{ title = "Move File" }
+						)
+						pcall(function()
+							require("neo-tree.sources.manager").refresh("filesystem")
+						end)
+					else
+						vim.notify("Error moving file: " .. tostring(err), vim.log.levels.ERROR, { title = "Move File" })
+					end
+				end)
+
+				map_all({ { "n", "a" }, { "i", "<C-a>" } }, function()
+					actions.close(prompt_bufnr)
+					vim.schedule(function()
+						vim.ui.input({ prompt = "Create folder to move into (add '/' at end): " }, function(name)
+							if name and name ~= "" then
+								vim.fn.mkdir(path.join(curr_dir, name), "p")
+							end
+							M.open_move_picker({ source_path = source_path, root_dir = root_dir, path = curr_dir })
+						end)
 					end)
 				end)
-			end)
 
-			map_all({ { "n", "h" }, { "n", "<BS>" }, { "n", "<Left>" }, { "n", "u" } }, function()
-				local parent = vim.fn.fnamemodify(curr_dir, ":h")
-				if parent and parent ~= curr_dir then
+				map_all({ { "n", "h" }, { "n", "<BS>" }, { "n", "<Left>" }, { "n", "u" } }, function()
+					local parent = vim.fn.fnamemodify(curr_dir, ":h")
+					if parent and parent ~= curr_dir then
+						actions.close(prompt_bufnr)
+						reopen(parent)
+					end
+				end)
+
+				map_all({ { "n", "l" }, { "n", "<Right>" } }, function()
+					local dir = selected_dir()
+					if dir then
+						actions.close(prompt_bufnr)
+						reopen(dir)
+					end
+				end)
+
+				map("n", "q", function()
 					actions.close(prompt_bufnr)
-					reopen(parent)
-				end
-			end)
+				end)
 
-			map_all({ { "n", "l" }, { "n", "<Right>" } }, function()
-				local dir = selected_dir()
-				if dir then
-					actions.close(prompt_bufnr)
-					reopen(dir)
-				end
-			end)
-
-			map("n", "q", function()
-				actions.close(prompt_bufnr)
-			end)
-
-			return true
-		end,
-	})):find()
+				return true
+			end,
+		}))
+		:find()
 end
 
 -- ============================================================================

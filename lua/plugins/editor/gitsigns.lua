@@ -73,7 +73,6 @@ return {
 				end)
 				return "<Ignore>"
 			end, { expr = true, desc = "Previous Git Hunk" })
-
 		end,
 	},
 }

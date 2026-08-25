@@ -10,17 +10,16 @@
 -- ============================================================================
 
 return {
-  "vuki656/package-info.nvim",
-  dependencies = "MunifTanjim/nui.nvim",
-  ft = "json",
-  config = function()
-    require("package-info").setup({
-      autostart = false, -- Prevent automatic background execution of pnpm/yq shell commands on file open
-      hide_up_to_date = true,
-      hide_unstable_versions = true,
-      -- Auto-detects via lockfile (bun.lock, pnpm-lock.yaml, etc); this is fallback
-      package_manager = "bun",
-    })
-
-  end,
+	"vuki656/package-info.nvim",
+	dependencies = "MunifTanjim/nui.nvim",
+	ft = "json",
+	config = function()
+		require("package-info").setup({
+			autostart = false, -- Prevent automatic background execution of pnpm/yq shell commands on file open
+			hide_up_to_date = true,
+			hide_unstable_versions = true,
+			-- Auto-detects via lockfile (bun.lock, pnpm-lock.yaml, etc); this is fallback
+			package_manager = "bun",
+		})
+	end,
 }

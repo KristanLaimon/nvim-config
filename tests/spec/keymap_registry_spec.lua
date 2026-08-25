@@ -125,7 +125,7 @@ describe("keymap_registry", function()
 			-- Simulate keymap bind from runtime/ftplugin/markdown.lua
 			local has_runtime = false
 			for _, pat in ipairs(registry.ALLOWLIST_SOURCE_PATTERNS) do
-				if ("share/nvim/runtime/ftplugin/markdown.lua"):find(pat) or ("[string \"?\"]:750"):find(pat) then
+				if ("share/nvim/runtime/ftplugin/markdown.lua"):find(pat) or ('[string "?"]:750'):find(pat) then
 					has_runtime = true
 				end
 			end

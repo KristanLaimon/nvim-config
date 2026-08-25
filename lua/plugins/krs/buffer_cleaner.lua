@@ -303,13 +303,15 @@ function M.setup()
 	-- attaches to the expanded user command's own `-bang` handling instead of
 	-- being swallowed by the abbrev's word-boundary trigger.
 	for _, abbrev in ipairs(M.settings.abbreviations) do
-		vim.cmd(string.format(
-			"cnoreabbrev <expr> %s (getcmdtype() == ':' && getcmdline() ==# '%s') ? '%s' : '%s'",
-			abbrev.lhs,
-			abbrev.lhs,
-			abbrev.user_cmd,
-			abbrev.lhs
-		))
+		vim.cmd(
+			string.format(
+				"cnoreabbrev <expr> %s (getcmdtype() == ':' && getcmdline() ==# '%s') ? '%s' : '%s'",
+				abbrev.lhs,
+				abbrev.lhs,
+				abbrev.user_cmd,
+				abbrev.lhs
+			)
+		)
 	end
 end
 

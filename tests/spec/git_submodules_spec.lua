@@ -136,8 +136,12 @@ describe("git submodules caching", function()
 		-- Simulate a plain `git submodule add` run from a terminal, not Git
 		-- Center: the file is rewritten by something else entirely.
 		local lines = {
-			'[submodule "libs/a"]', "\tpath = libs/a", "\turl = https://example.com/a.git",
-			'[submodule "libs/b"]', "\tpath = libs/b", "\turl = https://example.com/b.git",
+			'[submodule "libs/a"]',
+			"\tpath = libs/a",
+			"\turl = https://example.com/a.git",
+			'[submodule "libs/b"]',
+			"\tpath = libs/b",
+			"\turl = https://example.com/b.git",
 		}
 		vim.fn.writefile(lines, tmp_dir .. "/.gitmodules")
 
@@ -181,4 +185,3 @@ describe("git submodules list", function()
 		expect(list[1].full_path).toBe("C:/dev/my-project")
 	end)
 end)
-

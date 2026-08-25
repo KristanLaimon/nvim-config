@@ -54,6 +54,9 @@ local function is_stdout_tty()
 	return false
 end
 
+--- Force ANSI colors even when stdout is not a TTY (used by tests / redirected logs).
+M.force_color = false
+
 --- Wraps a text string with ANSI color styling codes (only when stdout is a TTY).
 ---
 --- @param text string Text string to format.
@@ -67,6 +70,9 @@ end
 function M.colorize(text, color_code)
 	if not color_code or vim.env.NO_COLOR then
 		return tostring(text or "")
+	end
+	if not M.force_color and not is_stdout_tty() then
+		return tostring(text)
 	end
 	return color_code .. tostring(text) .. M.colors.reset
 end

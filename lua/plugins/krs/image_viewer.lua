@@ -31,9 +31,28 @@ M.settings = {
 	--- ADD FORMATS HERE.
 	media_extensions = {
 		-- Images
-		"png", "jpg", "jpeg", "gif", "webp", "bmp", "ico", "svg", "tiff", "avif", "heic",
+		"png",
+		"jpg",
+		"jpeg",
+		"gif",
+		"webp",
+		"bmp",
+		"ico",
+		"svg",
+		"tiff",
+		"avif",
+		"heic",
 		-- Video
-		"mp4", "mkv", "avi", "mov", "wmv", "flv", "webm", "m4v", "3gp", "ogv",
+		"mp4",
+		"mkv",
+		"avi",
+		"mov",
+		"wmv",
+		"flv",
+		"webm",
+		"m4v",
+		"3gp",
+		"ogv",
 	},
 
 	--- Size of the chafa preview float, as a fraction of the editor.

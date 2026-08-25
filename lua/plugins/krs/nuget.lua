@@ -236,12 +236,9 @@ function M.show_picker(csproj)
 						end
 						actions.close(prompt_bufnr)
 						vim.schedule(function()
-							vim.ui.input(
-								{ prompt = "New version for " .. package.name .. " (blank = latest): " },
-								function(version)
-									run_dotnet(add_package_args(csproj, package.name, version), refresh)
-								end
-							)
+							vim.ui.input({ prompt = "New version for " .. package.name .. " (blank = latest): " }, function(version)
+								run_dotnet(add_package_args(csproj, package.name, version), refresh)
+							end)
 						end)
 					end)
 

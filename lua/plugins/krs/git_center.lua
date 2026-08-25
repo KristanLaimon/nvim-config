@@ -583,7 +583,12 @@ function M.stage_all_with_modal(cwd)
 		run_fn(args, function(ok, output)
 			if ok then
 				notify(
-					string.format("✅ Successfully staged %d file%s in %s!", pending, pending == 1 and "" or "s", target.name or "repository"),
+					string.format(
+						"✅ Successfully staged %d file%s in %s!",
+						pending,
+						pending == 1 and "" or "s",
+						target.name or "repository"
+					),
 					vim.log.levels.INFO,
 					M.settings.control_title
 				)
@@ -640,7 +645,14 @@ local function fetch_target_status_async(target)
 				behind = info.behind or 0,
 				ahead = info.ahead or 0,
 			}
-			if render_tab_bar and M.is_open() and M.tab_buf and vim.api.nvim_buf_is_valid(M.tab_buf) and M.main_win and vim.api.nvim_win_is_valid(M.main_win) then
+			if
+				render_tab_bar
+				and M.is_open()
+				and M.tab_buf
+				and vim.api.nvim_buf_is_valid(M.tab_buf)
+				and M.main_win
+				and vim.api.nvim_win_is_valid(M.main_win)
+			then
 				local l_width = vim.api.nvim_win_get_width(M.main_win)
 				render_tab_bar(l_width)
 			end
@@ -675,8 +687,14 @@ local function setup_tab_highlights()
 		return nil
 	end
 
-	local sel_hl = get_hl("BufferLineBufferSelected") or get_hl("TabLineSel") or get_hl("Title") or { fg = 16777215, bg = 3883602, bold = true }
-	local bg_hl = get_hl("BufferLineBackground") or get_hl("TabLine") or get_hl("Comment") or { fg = 10066329, bg = 1973790 }
+	local sel_hl = get_hl("BufferLineBufferSelected")
+		or get_hl("TabLineSel")
+		or get_hl("Title")
+		or { fg = 16777215, bg = 3883602, bold = true }
+	local bg_hl = get_hl("BufferLineBackground")
+		or get_hl("TabLine")
+		or get_hl("Comment")
+		or { fg = 10066329, bg = 1973790 }
 	local fill_hl = get_hl("BufferLineFill") or get_hl("TabLineFill") or get_hl("NormalFloat") or { bg = 1579032 }
 	local sep_hl = get_hl("BufferLineSeparator") or get_hl("FloatBorder") or { fg = 5592405 }
 	local ok_hl = get_hl("GitSignsAdd") or get_hl("DiagnosticOk") or get_hl("String") or { fg = 5307003 }
@@ -775,8 +793,7 @@ render_tab_bar = function(left_w)
 		local out_hl = base_tab_hl
 
 		if M.settings.tab_colored_indicators then
-			dot_hl = is_active
-					and (st.has_changes and "KRSGitTabDotChangedActive" or "KRSGitTabDotCleanActive")
+			dot_hl = is_active and (st.has_changes and "KRSGitTabDotChangedActive" or "KRSGitTabDotCleanActive")
 				or (st.has_changes and "KRSGitTabDotChangedInactive" or "KRSGitTabDotCleanInactive")
 
 			inc_hl = is_active and "KRSGitTabIncomingActive" or "KRSGitTabIncomingInactive"
@@ -1409,10 +1426,7 @@ function M.open_commit_log_modal(target_cwd)
 			table.insert(content, string.format(" 📁 Files Changed (%d):", #edited_files))
 			for _, item in ipairs(edited_files) do
 				local active_mark = item.filepath == current_target_file and "▶ " or "  "
-				table.insert(
-					content,
-					string.format(" %s• [%s] %s", active_mark, item.status, item.filepath)
-				)
+				table.insert(content, string.format(" %s• [%s] %s", active_mark, item.status, item.filepath))
 			end
 		end
 
@@ -1574,7 +1588,9 @@ function M.open_commit_log_modal(target_cwd)
 	end
 
 	local function handle_right_enter()
-		if not (right_win and vim.api.nvim_win_is_valid(right_win) and right_buf and vim.api.nvim_buf_is_valid(right_buf)) then
+		if
+			not (right_win and vim.api.nvim_win_is_valid(right_win) and right_buf and vim.api.nvim_buf_is_valid(right_buf))
+		then
 			return
 		end
 		local cursor_line = vim.api.nvim_win_get_cursor(right_win)[1]
@@ -1591,7 +1607,9 @@ function M.open_commit_log_modal(target_cwd)
 	end
 
 	local function current_right_file()
-		if not (right_win and vim.api.nvim_win_is_valid(right_win) and right_buf and vim.api.nvim_buf_is_valid(right_buf)) then
+		if
+			not (right_win and vim.api.nvim_win_is_valid(right_win) and right_buf and vim.api.nvim_buf_is_valid(right_buf))
+		then
 			return nil
 		end
 		local cursor_line = vim.api.nvim_win_get_cursor(right_win)[1]
@@ -1645,22 +1663,38 @@ function M.open_commit_log_modal(target_cwd)
 
 	-- Preview scrolling (<C-S-j>, <C-S-k>, <C-j>, <C-k>)
 	for _, key in ipairs(M.settings.keys.scroll_down) do
-		vim.keymap.set({ "n", "v", "i", "t" }, key, function() scroll_log_preview("down") end, opts)
-		vim.keymap.set({ "n", "v", "i", "t" }, key, function() scroll_log_preview("down") end, right_opts)
+		vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+			scroll_log_preview("down")
+		end, opts)
+		vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+			scroll_log_preview("down")
+		end, right_opts)
 	end
 	for _, key in ipairs(M.settings.keys.scroll_up) do
-		vim.keymap.set({ "n", "v", "i", "t" }, key, function() scroll_log_preview("up") end, opts)
-		vim.keymap.set({ "n", "v", "i", "t" }, key, function() scroll_log_preview("up") end, right_opts)
+		vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+			scroll_log_preview("up")
+		end, opts)
+		vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+			scroll_log_preview("up")
+		end, right_opts)
 	end
 
 	-- Resizing (< / >, <C-Left> / <C-Right>)
 	for _, key in ipairs(M.settings.keys.resize_left) do
-		vim.keymap.set({ "n", "v", "i", "t" }, key, function() resize_log_split(-0.03) end, opts)
-		vim.keymap.set({ "n", "v", "i", "t" }, key, function() resize_log_split(-0.03) end, right_opts)
+		vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+			resize_log_split(-0.03)
+		end, opts)
+		vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+			resize_log_split(-0.03)
+		end, right_opts)
 	end
 	for _, key in ipairs(M.settings.keys.resize_right) do
-		vim.keymap.set({ "n", "v", "i", "t" }, key, function() resize_log_split(0.03) end, opts)
-		vim.keymap.set({ "n", "v", "i", "t" }, key, function() resize_log_split(0.03) end, right_opts)
+		vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+			resize_log_split(0.03)
+		end, opts)
+		vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+			resize_log_split(0.03)
+		end, right_opts)
 	end
 
 	-- Closing
@@ -1925,10 +1959,14 @@ function M.open_diff_modal(target_file, _target_type, target_cwd)
 		end
 
 		for _, key in ipairs(M.settings.keys.scroll_down) do
-			vim.keymap.set({ "n", "v", "i", "t" }, key, function() scroll_diff("down") end, opts)
+			vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+				scroll_diff("down")
+			end, opts)
 		end
 		for _, key in ipairs(M.settings.keys.scroll_up) do
-			vim.keymap.set({ "n", "v", "i", "t" }, key, function() scroll_diff("up") end, opts)
+			vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+				scroll_diff("up")
+			end, opts)
 		end
 
 		for _, key in ipairs({ "<Tab>", "]" }) do
@@ -2311,8 +2349,6 @@ function M.open_git_center()
 		return M.line_map[vim.api.nvim_win_get_cursor(M.main_win)[1]]
 	end
 
-
-
 	--- Unstaging changed spelling across git versions: `restore --staged` is the
 	--- modern form, `reset HEAD` the fallback for older ones, `rm --cached` for fresh repos without HEAD.
 	--- @param paths string[] Paths, or `{ "." }` for everything.
@@ -2649,7 +2685,11 @@ function M.open_git_center()
 
 		git_run(args, function(ok, output)
 			if ok then
-				notify("🚀 Commit successful:\n" .. (output ~= "" and output or "Commit created"), nil, M.settings.control_title)
+				notify(
+					"🚀 Commit successful:\n" .. (output ~= "" and output or "Commit created"),
+					nil,
+					M.settings.control_title
+				)
 				if M.commit_data.tag ~= "" then
 					git_lines({ "tag", M.commit_data.tag })
 					notify("🏷️ Tag created: " .. M.commit_data.tag)

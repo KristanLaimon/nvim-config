@@ -59,7 +59,8 @@ M.hunk_pattern = "^@@ %-%d+,?%d* %+%d+,?%d* @@"
 M.separator_width = 65
 
 --- Banner shown above the contents of a new, untracked file.
-M.untracked_banner = " ─── 📄 New Untracked File ──────────────────────────────────────────"
+M.untracked_banner =
+	" ─── 📄 New Untracked File ──────────────────────────────────────────"
 
 --- Shown when a file has no visible changes (mode change, whitespace only).
 M.empty_message = " (no visible changes in this file)"
@@ -363,7 +364,12 @@ function M.format_side_by_side_dual(raw_lines, is_untracked)
 	end
 
 	if is_untracked then
-		push(" ─── 📄 Before (Empty File) ─────────────────────────", "header", " ─── 📄 After (New Untracked File) ──────────────────", "header")
+		push(
+			" ─── 📄 Before (Empty File) ─────────────────────────",
+			"header",
+			" ─── 📄 After (New Untracked File) ──────────────────",
+			"header"
+		)
 		for _, line in ipairs(raw_lines) do
 			push("", "filler", "+ " .. line, "add")
 		end

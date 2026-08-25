@@ -10,12 +10,20 @@
 local M = {}
 
 local function parse_scalar(val)
-	if not val then return nil end
+	if not val then
+		return nil
+	end
 	val = val:match("^%s*(.-)%s*$")
-	if val == "true" then return true end
-	if val == "false" then return false end
+	if val == "true" then
+		return true
+	end
+	if val == "false" then
+		return false
+	end
 	local num = tonumber(val)
-	if num then return num end
+	if num then
+		return num
+	end
 	if (val:sub(1, 1) == '"' and val:sub(-1) == '"') or (val:sub(1, 1) == "'" and val:sub(-1) == "'") then
 		return val:sub(2, -2)
 	end
@@ -51,7 +59,9 @@ end
 --- ]])
 --- print(data.title, data.owner.name)
 function M.decode(str)
-	if not str or str == "" then return {} end
+	if not str or str == "" then
+		return {}
+	end
 	local root = {}
 	local current_section = root
 
@@ -89,7 +99,9 @@ end
 --- local str = toml.encode({ app = "Nvim", server = { port = 8080 } })
 --- print(str)
 function M.encode(obj)
-	if not obj then return "" end
+	if not obj then
+		return ""
+	end
 	local lines = {}
 	local sections = {}
 

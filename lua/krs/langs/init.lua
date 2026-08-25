@@ -134,7 +134,8 @@ M.langs = {
 --- language-agnostic thing left to declare once; everything else per bundle
 --- (name, requires, Mason packages, Treesitter parsers) comes from the module
 --- itself, see lua/krs/core/installer.lua's `M.language_bundles`.
-M.lang_order = { "lua", "php", "typescript", "go", "python", "csharp", "web", "angular", "docker_proto", "bash", "mermaid" }
+M.lang_order =
+	{ "lua", "php", "typescript", "go", "python", "csharp", "web", "angular", "docker_proto", "bash", "mermaid" }
 
 --- Initialize all per-language configuration submodules.
 function M.setup()

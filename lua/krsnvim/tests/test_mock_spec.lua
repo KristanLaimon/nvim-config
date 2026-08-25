@@ -34,21 +34,27 @@ function M.run()
 	-- fn(): mockImplementation ---------------------------------------------
 	do
 		local fn = t.fn()
-		fn.mockImplementation(function(x) return x * 2 end)
+		fn.mockImplementation(function(x)
+			return x * 2
+		end)
 		local result = fn(5)
 		check(result == 10, "mockImplementation should run custom fn, got " .. tostring(result))
 	end
 
 	-- fn(impl): implementation passed at creation ---------------------------
 	do
-		local fn = t.fn(function(a, b) return a + b end)
+		local fn = t.fn(function(a, b)
+			return a + b
+		end)
 		local result = fn(2, 3)
 		check(result == 5, "t.fn(impl) should use impl as default implementation, got " .. tostring(result))
 	end
 
 	-- fn(): mockClear / mockReset --------------------------------------------
 	do
-		local fn = t.fn(function() return "x" end)
+		local fn = t.fn(function()
+			return "x"
+		end)
 		fn(1)
 		fn(2)
 		check(#fn.mock.calls == 2, "expected 2 calls before clear")
@@ -66,7 +72,9 @@ function M.run()
 	-- spyOn(): wraps original and records calls -----------------------------
 	do
 		local obj = {
-			greet = function(name) return "hi " .. name end,
+			greet = function(name)
+				return "hi " .. name
+			end,
 		}
 		local original = obj.greet
 
@@ -85,9 +93,15 @@ function M.run()
 
 	-- spyOn(): mockImplementation overrides behavior while still tracking ---
 	do
-		local obj = { double = function(n) return n * 2 end }
+		local obj = {
+			double = function(n)
+				return n * 2
+			end,
+		}
 		local spy = t.spyOn(obj, "double")
-		spy.mockImplementation(function(n) return n * 100 end)
+		spy.mockImplementation(function(n)
+			return n * 100
+		end)
 
 		local result = obj.double(3)
 		check(result == 300, "spy.mockImplementation should override call behavior, got " .. tostring(result))

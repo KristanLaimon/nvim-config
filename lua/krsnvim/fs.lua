@@ -30,7 +30,9 @@ local M = {}
 ---     print("Tasks file found!")
 --- end
 function M.exists(path)
-	if not path or path == "" then return false end
+	if not path or path == "" then
+		return false
+	end
 	return vim.fn.empty(vim.fn.glob(path)) == 0 or vim.fn.filereadable(path) == 1 or vim.fn.isdirectory(path) == 1
 end
 
@@ -52,7 +54,9 @@ end
 --- print("File size in bytes: " .. #text)
 function M.read(path)
 	local f = io.open(path, "r")
-	if not f then error("krsnvim.fs: Cannot read file: " .. tostring(path)) end
+	if not f then
+		error("krsnvim.fs: Cannot read file: " .. tostring(path))
+	end
 	local content = f:read("*a")
 	f:close()
 	return content
@@ -78,7 +82,9 @@ end
 --- fs.write("dist/bundle.js", "console.log('Hello');")
 function M.write(path, content)
 	local f = io.open(path, "w")
-	if not f then error("krsnvim.fs: Cannot write file: " .. tostring(path)) end
+	if not f then
+		error("krsnvim.fs: Cannot write file: " .. tostring(path))
+	end
 	f:write(content or "")
 	f:close()
 	return true

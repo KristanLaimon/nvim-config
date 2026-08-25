@@ -111,18 +111,8 @@ return {
 			callback = apply_tab_highlights,
 		})
 
-		vim.keymap.set(
-			"n",
-			"gt",
-			"<Cmd>BufferLineCycleNext<CR>",
-			{ noremap = true, silent = true, desc = "Next tab" }
-		)
-		vim.keymap.set(
-			"n",
-			"gT",
-			"<Cmd>BufferLineCyclePrev<CR>",
-			{ noremap = true, silent = true, desc = "Previous tab" }
-		)
+		vim.keymap.set("n", "gt", "<Cmd>BufferLineCycleNext<CR>", { noremap = true, silent = true, desc = "Next tab" })
+		vim.keymap.set("n", "gT", "<Cmd>BufferLineCyclePrev<CR>", { noremap = true, silent = true, desc = "Previous tab" })
 
 		-- Move active tab order left / right (reordering buffer tabs)
 		local move_left_keys = {
@@ -147,11 +137,23 @@ return {
 		}
 
 		for _, key in ipairs(move_left_keys) do
-			pcall(vim.keymap.set, "n", key, "<Cmd>BufferLineMovePrev<CR>", { noremap = true, silent = true, desc = "Move buffer tab left" })
+			pcall(
+				vim.keymap.set,
+				"n",
+				key,
+				"<Cmd>BufferLineMovePrev<CR>",
+				{ noremap = true, silent = true, desc = "Move buffer tab left" }
+			)
 		end
 
 		for _, key in ipairs(move_right_keys) do
-			pcall(vim.keymap.set, "n", key, "<Cmd>BufferLineMoveNext<CR>", { noremap = true, silent = true, desc = "Move buffer tab right" })
+			pcall(
+				vim.keymap.set,
+				"n",
+				key,
+				"<Cmd>BufferLineMoveNext<CR>",
+				{ noremap = true, silent = true, desc = "Move buffer tab right" }
+			)
 		end
 	end,
 }

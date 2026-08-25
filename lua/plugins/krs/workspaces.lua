@@ -45,7 +45,6 @@ function M.set_active_workspace(ws)
 	M.current_workspace = ws
 end
 
-
 -- ============================================================================
 -- CONFIGURATION
 -- ============================================================================
@@ -317,13 +316,17 @@ function M.save_workspace(name, callback)
 				ws_item[key] = value
 			end
 		else
-			table.insert(index, 1, vim.tbl_extend("force", {
-				id = id,
-				name = ws_name,
-				cwd = cwd,
-				cwd_name = cwd_name,
-				created_at = os.time(),
-			}, snapshot))
+			table.insert(
+				index,
+				1,
+				vim.tbl_extend("force", {
+					id = id,
+					name = ws_name,
+					cwd = cwd,
+					cwd_name = cwd_name,
+					created_at = os.time(),
+				}, snapshot)
+			)
 		end
 
 		save_index(index)

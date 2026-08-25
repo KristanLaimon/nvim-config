@@ -107,7 +107,8 @@ end
 --- Launch-profile runtimes this language owns (see lua/krs/launch/runtimes.lua).
 --- `krsnvimtranspiler` isn't a process: it transpiles the script to shell files
 --- and returns. `args_str` selects the target ("sh", "ps1", anything else = both).
-local NVIM_LUA_ENTRY_COMMAND = 'nvim --headless -c "lua package.path = vim.fn.stdpath(\'config\') .. \'/lua/?.lua;\' .. vim.fn.stdpath(\'config\') .. \'/lua/?/init.lua;\' .. package.path; require(\'krsnvim\')" -l'
+local NVIM_LUA_ENTRY_COMMAND =
+	"nvim --headless -c \"lua package.path = vim.fn.stdpath('config') .. '/lua/?.lua;' .. vim.fn.stdpath('config') .. '/lua/?/init.lua;' .. package.path; require('krsnvim')\" -l"
 M.launch_runtimes = {
 	lua = {
 		command = NVIM_LUA_ENTRY_COMMAND,

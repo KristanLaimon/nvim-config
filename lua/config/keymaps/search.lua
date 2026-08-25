@@ -27,9 +27,16 @@ M.settings = {
 		find_files = { "<C-k>", "<C-K>" },
 		--- Fuzzy find everything, ignored and hidden files included.
 		find_all_files = {
-			"<C-A-k>", "<C-A-K>", "<C-M-k>", "<C-M-K>",
-			"<A-C-k>", "<A-C-K>", "<M-C-k>", "<M-C-K>",
-			"<C-S-/>", "<C-?>",
+			"<C-A-k>",
+			"<C-A-K>",
+			"<C-M-k>",
+			"<C-M-K>",
+			"<A-C-k>",
+			"<A-C-K>",
+			"<M-C-k>",
+			"<M-C-K>",
+			"<C-S-/>",
+			"<C-?>",
 		},
 		--- Find a file and open it in a split. Direction follows hjkl.
 		split = {

@@ -29,9 +29,16 @@ local settings = {
 	--- Find files, ignoring .gitignore. Several aliases: Alt/Meta combinations
 	--- arrive differently depending on terminal and GUI.
 	find_all_keys = {
-		"<C-A-k>", "<C-A-K>", "<C-M-k>", "<C-M-K>",
-		"<A-C-k>", "<A-C-K>", "<M-C-k>", "<M-C-K>",
-		"<C-S-/>", "<C-?>",
+		"<C-A-k>",
+		"<C-A-K>",
+		"<C-M-k>",
+		"<C-M-K>",
+		"<A-C-k>",
+		"<A-C-K>",
+		"<M-C-k>",
+		"<M-C-K>",
+		"<C-S-/>",
+		"<C-?>",
 	},
 	live_grep_key = "<C-f>",
 	help_tags_key = nil,
@@ -71,18 +78,102 @@ return {
 		"TelescopeFindFilesNoIgnore",
 	},
 	keys = {
-		{ "<C-k>", function() if _G.FindFilesGitignore then _G.FindFilesGitignore() else require("telescope.builtin").git_files({ recurse_submodules = true }) end end, mode = { "n", "i" }, desc = "Telescope find files (excludes .gitignore)" },
-		{ "<C-K>", function() if _G.FindFilesGitignore then _G.FindFilesGitignore() else require("telescope.builtin").git_files({ recurse_submodules = true }) end end, mode = { "n", "i" }, desc = "Telescope find files (excludes .gitignore)" },
-		{ "<C-/>", function() if _G.FindFilesGitignore then _G.FindFilesGitignore() else require("telescope.builtin").git_files({ recurse_submodules = true }) end end, mode = { "n", "i" }, desc = "Telescope find files (excludes .gitignore)" },
-		{ "<C-_>", function() if _G.FindFilesGitignore then _G.FindFilesGitignore() else require("telescope.builtin").git_files({ recurse_submodules = true }) end end, mode = { "n", "i" }, desc = "Telescope find files (excludes .gitignore)" },
-		{ "<C-A-k>", "<cmd>TelescopeFindFilesNoIgnore<CR>", mode = { "n", "i" }, desc = "Telescope find files (ignoring .gitignore)" },
-		{ "<C-A-K>", "<cmd>TelescopeFindFilesNoIgnore<CR>", mode = { "n", "i" }, desc = "Telescope find files (ignoring .gitignore)" },
-		{ "<C-M-k>", "<cmd>TelescopeFindFilesNoIgnore<CR>", mode = { "n", "i" }, desc = "Telescope find files (ignoring .gitignore)" },
-		{ "<C-M-K>", "<cmd>TelescopeFindFilesNoIgnore<CR>", mode = { "n", "i" }, desc = "Telescope find files (ignoring .gitignore)" },
-		{ "<A-C-k>", "<cmd>TelescopeFindFilesNoIgnore<CR>", mode = { "n", "i" }, desc = "Telescope find files (ignoring .gitignore)" },
-		{ "<A-C-K>", "<cmd>TelescopeFindFilesNoIgnore<CR>", mode = { "n", "i" }, desc = "Telescope find files (ignoring .gitignore)" },
-		{ "<M-C-k>", "<cmd>TelescopeFindFilesNoIgnore<CR>", mode = { "n", "i" }, desc = "Telescope find files (ignoring .gitignore)" },
-		{ "<M-C-K>", "<cmd>TelescopeFindFilesNoIgnore<CR>", mode = { "n", "i" }, desc = "Telescope find files (ignoring .gitignore)" },
+		{
+			"<C-k>",
+			function()
+				if _G.FindFilesGitignore then
+					_G.FindFilesGitignore()
+				else
+					require("telescope.builtin").git_files({ recurse_submodules = true })
+				end
+			end,
+			mode = { "n", "i" },
+			desc = "Telescope find files (excludes .gitignore)",
+		},
+		{
+			"<C-K>",
+			function()
+				if _G.FindFilesGitignore then
+					_G.FindFilesGitignore()
+				else
+					require("telescope.builtin").git_files({ recurse_submodules = true })
+				end
+			end,
+			mode = { "n", "i" },
+			desc = "Telescope find files (excludes .gitignore)",
+		},
+		{
+			"<C-/>",
+			function()
+				if _G.FindFilesGitignore then
+					_G.FindFilesGitignore()
+				else
+					require("telescope.builtin").git_files({ recurse_submodules = true })
+				end
+			end,
+			mode = { "n", "i" },
+			desc = "Telescope find files (excludes .gitignore)",
+		},
+		{
+			"<C-_>",
+			function()
+				if _G.FindFilesGitignore then
+					_G.FindFilesGitignore()
+				else
+					require("telescope.builtin").git_files({ recurse_submodules = true })
+				end
+			end,
+			mode = { "n", "i" },
+			desc = "Telescope find files (excludes .gitignore)",
+		},
+		{
+			"<C-A-k>",
+			"<cmd>TelescopeFindFilesNoIgnore<CR>",
+			mode = { "n", "i" },
+			desc = "Telescope find files (ignoring .gitignore)",
+		},
+		{
+			"<C-A-K>",
+			"<cmd>TelescopeFindFilesNoIgnore<CR>",
+			mode = { "n", "i" },
+			desc = "Telescope find files (ignoring .gitignore)",
+		},
+		{
+			"<C-M-k>",
+			"<cmd>TelescopeFindFilesNoIgnore<CR>",
+			mode = { "n", "i" },
+			desc = "Telescope find files (ignoring .gitignore)",
+		},
+		{
+			"<C-M-K>",
+			"<cmd>TelescopeFindFilesNoIgnore<CR>",
+			mode = { "n", "i" },
+			desc = "Telescope find files (ignoring .gitignore)",
+		},
+		{
+			"<A-C-k>",
+			"<cmd>TelescopeFindFilesNoIgnore<CR>",
+			mode = { "n", "i" },
+			desc = "Telescope find files (ignoring .gitignore)",
+		},
+		{
+			"<A-C-K>",
+			"<cmd>TelescopeFindFilesNoIgnore<CR>",
+			mode = { "n", "i" },
+			desc = "Telescope find files (ignoring .gitignore)",
+		},
+		{
+			"<M-C-k>",
+			"<cmd>TelescopeFindFilesNoIgnore<CR>",
+			mode = { "n", "i" },
+			desc = "Telescope find files (ignoring .gitignore)",
+		},
+		{
+			"<M-C-K>",
+			"<cmd>TelescopeFindFilesNoIgnore<CR>",
+			mode = { "n", "i" },
+			desc = "Telescope find files (ignoring .gitignore)",
+		},
 		{ "<C-f>", "<cmd>Telescope live_grep<CR>", mode = { "n", "i" }, desc = "Telescope live grep" },
 		{ "<C-S-y>", "<cmd>TelescopeOpenFolder<CR>", mode = { "n", "i" }, desc = "Telescope open folder" },
 		{ "<C-/>", "<cmd>TelescopeFileBrowserDesktop<CR>", mode = { "n", "i", "v" }, desc = "Open Desktop File Explorer" },
@@ -274,11 +365,13 @@ return {
 
 			local ok, scandir = pcall(require, "plenary.scandir")
 			if ok then
-				for _, found in ipairs(scandir.scan_dir(dir, {
-					only_dirs = true,
-					depth = settings.folder_scan_depth,
-					hidden = false,
-				})) do
+				for _, found in
+					ipairs(scandir.scan_dir(dir, {
+						only_dirs = true,
+						depth = settings.folder_scan_depth,
+						hidden = false,
+					}))
+				do
 					table.insert(dirs, (found:gsub("\\", "/"):gsub("/$", "")))
 				end
 			end

@@ -71,8 +71,22 @@ M.settings = {
 		{ key = "name", label = "Profile Name", edit = "text" },
 		{ key = "runtime", label = "Runtime", edit = "cycle" },
 		{ key = "entry_point", label = "Entry Point File", edit = "text", prompt = "Entry Point File (relative path)" },
-		{ key = "args", label = "Command Args", edit = "list", separator = "%S+", join = " ", prompt = "Command Arguments (space separated)" },
-		{ key = "pre_launch_tasks", label = "Pre-launch Tasks", edit = "list", separator = "[^,]+", join = ", ", prompt = "Pre-launch Tasks (comma separated)" },
+		{
+			key = "args",
+			label = "Command Args",
+			edit = "list",
+			separator = "%S+",
+			join = " ",
+			prompt = "Command Arguments (space separated)",
+		},
+		{
+			key = "pre_launch_tasks",
+			label = "Pre-launch Tasks",
+			edit = "list",
+			separator = "[^,]+",
+			join = ", ",
+			prompt = "Pre-launch Tasks (comma separated)",
+		},
 		{ key = "mode", label = "Execution Mode", edit = "swap", values = { "run", "debug" } },
 		{ key = "is_default", label = "Primary Default", edit = "toggle" },
 		{ key = "auto_build", label = "Auto Build", edit = "toggle" },
@@ -481,13 +495,16 @@ function M.open_form_editor(root, existing_profile, on_saved)
 			"",
 		}
 		for idx, field in ipairs(fields) do
-			table.insert(lines, string.format(
-				"  %s [%d] %-17s %s",
-				selected == idx and "👉" or "  ",
-				idx,
-				field.label .. ":",
-				render_field_value(profile, field)
-			))
+			table.insert(
+				lines,
+				string.format(
+					"  %s [%d] %-17s %s",
+					selected == idx and "👉" or "  ",
+					idx,
+					field.label .. ":",
+					render_field_value(profile, field)
+				)
+			)
 		end
 		vim.list_extend(lines, {
 			"",
@@ -646,11 +663,26 @@ local function profile_card(p)
 		"├──────────────────────────────────────────────────────────────┤",
 		string.format("│ ⚡ Runtime:        %-42s │", tostring(p.runtime):upper():sub(1, 42)),
 		string.format("│ 📄 Entry Point:    %-42s │", tostring(p.entry_point):sub(1, 42)),
-		string.format("│ 📌 Arguments:      %-42s │", (p.args and #p.args > 0) and table.concat(p.args, " "):sub(1, 42) or "(none)"),
-		string.format("│ ⚙️ Pre-Tasks:      %-42s │", (p.pre_launch_tasks and #p.pre_launch_tasks > 0) and table.concat(p.pre_launch_tasks, ", "):sub(1, 42) or "(none)"),
-		string.format("│ 🛠️ Exec Mode:      %-42s │", (p.mode == "debug" and "🐞 DAP Debugger" or "🖥️ Terminal Task Slot"):sub(1, 42)),
-		string.format("│ ⭐ Primary Default: %-42s │", (p.is_default and "✅ YES (Primary for Ctrl+Shift+S)" or "❌ No"):sub(1, 42)),
-		string.format("│ 🔨 Auto Build:     %-42s │", (p.auto_build and "✅ YES (dotnet build first)" or "❌ No"):sub(1, 42)),
+		string.format(
+			"│ 📌 Arguments:      %-42s │",
+			(p.args and #p.args > 0) and table.concat(p.args, " "):sub(1, 42) or "(none)"
+		),
+		string.format(
+			"│ ⚙️ Pre-Tasks:      %-42s │",
+			(p.pre_launch_tasks and #p.pre_launch_tasks > 0) and table.concat(p.pre_launch_tasks, ", "):sub(1, 42) or "(none)"
+		),
+		string.format(
+			"│ 🛠️ Exec Mode:      %-42s │",
+			(p.mode == "debug" and "🐞 DAP Debugger" or "🖥️ Terminal Task Slot"):sub(1, 42)
+		),
+		string.format(
+			"│ ⭐ Primary Default: %-42s │",
+			(p.is_default and "✅ YES (Primary for Ctrl+Shift+S)" or "❌ No"):sub(1, 42)
+		),
+		string.format(
+			"│ 🔨 Auto Build:     %-42s │",
+			(p.auto_build and "✅ YES (dotnet build first)" or "❌ No"):sub(1, 42)
+		),
 		"└──────────────────────────────────────────────────────────────┘",
 	}
 end
@@ -670,7 +702,12 @@ local function profile_entry(p, idx)
 	return {
 		display = string.format(
 			"%s  %s  %-20s ──>  %-22s%s%s",
-			star, mode_str, p.name, p.runtime .. ":" .. p.entry_point, args_str, tasks_str
+			star,
+			mode_str,
+			p.name,
+			p.runtime .. ":" .. p.entry_point,
+			args_str,
+			tasks_str
 		),
 		value = p,
 		-- Defaults sort first; the prefix is stripped by the sorter's display.
@@ -713,130 +750,132 @@ function M.open_management_menu(root)
 		table.insert(entries, profile_entry(p, idx))
 	end
 
-	pickers.new({}, {
-		prompt_title = " 🚀 Launch Profiles | <Enter>: Run | [d] Delete | [r] Rename | [e] Edit | [f] Favorite | [a] New ",
-		layout_strategy = "horizontal",
-		layout_config = {
-			horizontal = { preview_width = 0.48, width = 0.9, height = 0.8 },
-			preview_cutoff = 0,
-		},
-		finder = finders.new_table({
-			results = entries,
-			entry_maker = function(entry)
-				return { value = entry.value, display = entry.display, ordinal = entry.ordinal }
-			end,
-		}),
-		previewer = previewers.new_buffer_previewer({
-			title = " 📋 Profile Card Preview ",
-			define_preview = function(self, entry)
-				if not entry.value then
-					return
-				end
-				vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, profile_card(entry.value))
-				pcall(function()
-					vim.bo[self.state.bufnr].filetype = "markdown"
-				end)
-				if self.state.winid and vim.api.nvim_win_is_valid(self.state.winid) then
-					vim.wo[self.state.winid].conceallevel = 3
-					vim.wo[self.state.winid].concealcursor = "nvic"
-					local ok, rm_ui = pcall(require, "render-markdown.core.ui")
-					if ok and rm_ui and type(rm_ui.update) == "function" then
-						rm_ui.update(self.state.bufnr, self.state.winid, "UserCommand", true)
+	pickers
+		.new({}, {
+			prompt_title = " 🚀 Launch Profiles | <Enter>: Run | [d] Delete | [r] Rename | [e] Edit | [f] Favorite | [a] New ",
+			layout_strategy = "horizontal",
+			layout_config = {
+				horizontal = { preview_width = 0.48, width = 0.9, height = 0.8 },
+				preview_cutoff = 0,
+			},
+			finder = finders.new_table({
+				results = entries,
+				entry_maker = function(entry)
+					return { value = entry.value, display = entry.display, ordinal = entry.ordinal }
+				end,
+			}),
+			previewer = previewers.new_buffer_previewer({
+				title = " 📋 Profile Card Preview ",
+				define_preview = function(self, entry)
+					if not entry.value then
+						return
 					end
-				end
-			end,
-		}),
-		sorter = conf.generic_sorter({}),
-		attach_mappings = function(prompt_bufnr, map)
-			--- Deletes the selected profile and reopens the menu.
-			local function action_delete(selection)
-				if not (selection and selection.value) then
-					return
-				end
-				local cur = M.load_profiles(root)
-				local kept = {}
-				for _, p in ipairs(cur.profiles) do
-					if p.id ~= selection.value.id then
-						table.insert(kept, p)
-					end
-				end
-				cur.profiles = kept
-				M.save_profiles(root, cur)
-				notify("🗑️ Deleted launch profile: " .. selection.value.name)
-				M.open_management_menu(root)
-			end
-
-			local function action_rename(selection)
-				if not (selection and selection.value) then
-					return
-				end
-				require("plugins.krs.input_modal").open({
-					label = "Rename Launch Profile",
-					default_value = selection.value.name,
-					callback = function(ok, new_name)
-						if ok and new_name ~= "" and new_name ~= selection.value.name then
-							M.rename_profile(selection.value.id, new_name, root)
+					vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, profile_card(entry.value))
+					pcall(function()
+						vim.bo[self.state.bufnr].filetype = "markdown"
+					end)
+					if self.state.winid and vim.api.nvim_win_is_valid(self.state.winid) then
+						vim.wo[self.state.winid].conceallevel = 3
+						vim.wo[self.state.winid].concealcursor = "nvic"
+						local ok, rm_ui = pcall(require, "render-markdown.core.ui")
+						if ok and rm_ui and type(rm_ui.update) == "function" then
+							rm_ui.update(self.state.bufnr, self.state.winid, "UserCommand", true)
 						end
+					end
+				end,
+			}),
+			sorter = conf.generic_sorter({}),
+			attach_mappings = function(prompt_bufnr, map)
+				--- Deletes the selected profile and reopens the menu.
+				local function action_delete(selection)
+					if not (selection and selection.value) then
+						return
+					end
+					local cur = M.load_profiles(root)
+					local kept = {}
+					for _, p in ipairs(cur.profiles) do
+						if p.id ~= selection.value.id then
+							table.insert(kept, p)
+						end
+					end
+					cur.profiles = kept
+					M.save_profiles(root, cur)
+					notify("🗑️ Deleted launch profile: " .. selection.value.name)
+					M.open_management_menu(root)
+				end
+
+				local function action_rename(selection)
+					if not (selection and selection.value) then
+						return
+					end
+					require("plugins.krs.input_modal").open({
+						label = "Rename Launch Profile",
+						default_value = selection.value.name,
+						callback = function(ok, new_name)
+							if ok and new_name ~= "" and new_name ~= selection.value.name then
+								M.rename_profile(selection.value.id, new_name, root)
+							end
+							M.open_management_menu(root)
+						end,
+					})
+				end
+
+				local function action_edit(selection)
+					if not (selection and selection.value) then
+						return
+					end
+					M.open_form_editor(root, selection.value, function()
 						M.open_management_menu(root)
-					end,
-				})
-			end
-
-			local function action_edit(selection)
-				if not (selection and selection.value) then
-					return
+					end)
 				end
-				M.open_form_editor(root, selection.value, function()
+
+				local function action_toggle_favorite(selection)
+					if not (selection and selection.value) then
+						return
+					end
+					M.toggle_default(selection.value.id, root)
 					M.open_management_menu(root)
-				end)
-			end
-
-			local function action_toggle_favorite(selection)
-				if not (selection and selection.value) then
-					return
 				end
-				M.toggle_default(selection.value.id, root)
-				M.open_management_menu(root)
-			end
 
-			local function action_create_new()
-				M.open_creation_wizard(root, function()
-					M.open_management_menu(root)
-				end)
-			end
-
-			--- Closes the picker, then runs `fn` with the entry that was selected.
-			--- @param fn function(selection)|function()
-			--- @param needs_selection boolean|nil False for actions that ignore the row.
-			local function with_selection(fn, needs_selection)
-				return function()
-					local selection = needs_selection ~= false and action_state.get_selected_entry() or nil
-					actions.close(prompt_bufnr)
-					fn(selection)
+				local function action_create_new()
+					M.open_creation_wizard(root, function()
+						M.open_management_menu(root)
+					end)
 				end
-			end
 
-			actions.select_default:replace(with_selection(function(selection)
-				if selection and selection.value then
-					M.run_profile(selection.value)
+				--- Closes the picker, then runs `fn` with the entry that was selected.
+				--- @param fn function(selection)|function()
+				--- @param needs_selection boolean|nil False for actions that ignore the row.
+				local function with_selection(fn, needs_selection)
+					return function()
+						local selection = needs_selection ~= false and action_state.get_selected_entry() or nil
+						actions.close(prompt_bufnr)
+						fn(selection)
+					end
 				end
-			end))
 
-			map("n", "d", with_selection(action_delete))
-			map("n", "r", with_selection(action_rename))
-			map("n", "e", with_selection(action_edit))
-			map("n", "f", with_selection(action_toggle_favorite))
-			map("n", "a", with_selection(action_create_new, false))
+				actions.select_default:replace(with_selection(function(selection)
+					if selection and selection.value then
+						M.run_profile(selection.value)
+					end
+				end))
 
-			-- Control-key mirrors so the same actions work while typing a filter.
-			map({ "n", "i" }, "<C-d>", with_selection(action_toggle_favorite))
-			map({ "n", "i" }, "<C-e>", with_selection(action_edit))
-			map({ "n", "i" }, "<C-n>", with_selection(action_create_new, false))
-			map({ "n", "i" }, "<C-x>", with_selection(action_delete))
+				map("n", "d", with_selection(action_delete))
+				map("n", "r", with_selection(action_rename))
+				map("n", "e", with_selection(action_edit))
+				map("n", "f", with_selection(action_toggle_favorite))
+				map("n", "a", with_selection(action_create_new, false))
 
-			return true
-		end,
-	}):find()
+				-- Control-key mirrors so the same actions work while typing a filter.
+				map({ "n", "i" }, "<C-d>", with_selection(action_toggle_favorite))
+				map({ "n", "i" }, "<C-e>", with_selection(action_edit))
+				map({ "n", "i" }, "<C-n>", with_selection(action_create_new, false))
+				map({ "n", "i" }, "<C-x>", with_selection(action_delete))
+
+				return true
+			end,
+		})
+		:find()
 end
 
 --- The `<C-S-s>` behaviour: stop a live debug session, else run the default
@@ -914,9 +953,14 @@ function M.setup()
 	}
 	for _, binding in ipairs(bindings) do
 		for _, key in ipairs(binding.keys) do
-			vim.keymap.set({ "n", "i", "v", "t" }, key, from_any_mode(function()
-				binding.fn()
-			end), { noremap = true, silent = true, desc = binding.desc })
+			vim.keymap.set(
+				{ "n", "i", "v", "t" },
+				key,
+				from_any_mode(function()
+					binding.fn()
+				end),
+				{ noremap = true, silent = true, desc = binding.desc }
+			)
 		end
 	end
 end

@@ -371,26 +371,26 @@ function M.open()
 		follow_link_in_reader()
 	end
 
---- Resizes the split ratio between left index pane and right reader pane.
---- @param delta number Fraction to adjust left ratio (e.g. -0.03 or 0.03).
-function M.resize_split(delta)
-	if not state.is_open or not state.left_win or not vim.api.nvim_win_is_valid(state.left_win) then
-		return
-	end
+	--- Resizes the split ratio between left index pane and right reader pane.
+	--- @param delta number Fraction to adjust left ratio (e.g. -0.03 or 0.03).
+	function M.resize_split(delta)
+		if not state.is_open or not state.left_win or not vim.api.nvim_win_is_valid(state.left_win) then
+			return
+		end
 
-	M.settings.left_width_ratio = ui.resize_dual_panel({
-		left_win = state.left_win,
-		right_win = state.right_win,
-		delta = delta,
-		left_ratio = M.settings.left_width_ratio or 0.35,
-		width_ratio = 0.88,
-		height_ratio = 0.85,
-		gap = 2,
-		min_ratio = 0.15,
-		max_ratio = 0.70,
-		min_left_width = M.settings.min_left_width,
-	})
-end
+		M.settings.left_width_ratio = ui.resize_dual_panel({
+			left_win = state.left_win,
+			right_win = state.right_win,
+			delta = delta,
+			left_ratio = M.settings.left_width_ratio or 0.35,
+			width_ratio = 0.88,
+			height_ratio = 0.85,
+			gap = 2,
+			min_ratio = 0.15,
+			max_ratio = 0.70,
+			min_left_width = M.settings.min_left_width,
+		})
+	end
 
 	local function map_keys(buf, win)
 		local function make_opts(desc)
@@ -494,7 +494,12 @@ end
 			end
 		end
 	end
-	vim.keymap.set({ "n", "v" }, "<S-LeftMouse>", select_index_at_mouse, left_opts("Select wiki index item at mouse click"))
+	vim.keymap.set(
+		{ "n", "v" },
+		"<S-LeftMouse>",
+		select_index_at_mouse,
+		left_opts("Select wiki index item at mouse click")
+	)
 end
 
 function M.setup()

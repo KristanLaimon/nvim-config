@@ -44,8 +44,7 @@ M.settings = {
 	--- Flat manifest written over bun's own workspace root package.json.
 	--- `ws` is the inspector client; `source-map-js` is needed by sourcemap.ts for
 	--- any TypeScript entry point.
-	package_json =
-		'{"name":"krs-bun-dap","private":true,"type":"module","dependencies":{"ws":"^8.18.3","source-map-js":"^1.2.1"}}',
+	package_json = '{"name":"krs-bun-dap","private":true,"type":"module","dependencies":{"ws":"^8.18.3","source-map-js":"^1.2.1"}}',
 
 	--- Notification title.
 	notify_title = "Bun Debug Adapter",
@@ -188,7 +187,10 @@ function M.install(on_done)
 		table.insert(steps, {
 			cmd = { "git", "clone", "--depth=1", "--filter=blob:none", "--sparse", M.settings.repo, M.dir },
 		})
-		table.insert(steps, { cmd = vim.list_extend({ "git", "sparse-checkout", "set" }, M.settings.packages), cwd = M.dir })
+		table.insert(
+			steps,
+			{ cmd = vim.list_extend({ "git", "sparse-checkout", "set" }, M.settings.packages), cwd = M.dir }
+		)
 	else
 		table.insert(steps, { cmd = { "git", "pull", "--ff-only" }, cwd = M.dir })
 	end
@@ -209,7 +211,7 @@ function M.install(on_done)
 
 		run_chain({ { cmd = { "bun", "install" }, cwd = M.dir } }, 1, function(installed)
 			if installed then
-				notify("✅ Bun debug adapter ready. `type = \"bun\"` launch configs now work.")
+				notify('✅ Bun debug adapter ready. `type = "bun"` launch configs now work.')
 			end
 			on_done(installed)
 		end)

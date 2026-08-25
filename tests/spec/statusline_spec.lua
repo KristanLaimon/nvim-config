@@ -46,7 +46,9 @@ describe("plugins.krs.statusline_picker", function()
 	end)
 
 	it("cleans up raw terminal URLs into readable badges", function()
-		expect(statusline.format_filename("term://~\\AppData\\Local\\nvim//14964:C:\\PROGRA~1\\Git\\bin\\bash.exe")).toBe("󰞷 Terminal (bash)")
+		expect(statusline.format_filename("term://~\\AppData\\Local\\nvim//14964:C:\\PROGRA~1\\Git\\bin\\bash.exe")).toBe(
+			"󰞷 Terminal (bash)"
+		)
 		expect(statusline.format_filename("term://code//5120:powershell.exe")).toBe("󰞷 Terminal (powershell)")
 		expect(statusline.format_filename("lua/config/options.lua")).toBe("lua/config/options.lua")
 	end)

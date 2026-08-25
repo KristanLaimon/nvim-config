@@ -39,15 +39,12 @@ local info_box = cli.box({
 
 print(info_box .. "\n")
 
-local table_output = cli.table(
-	{ "ID", "Module", "Status", "Control Input" },
-	{
-		{ "01", "cli.ascii_title", "ACTIVE", "Single Text String" },
-		{ "02", "cli.menu", "ACTIVE", "Vim (j/k) + Arrows + Mouse Click" },
-		{ "03", "cli.multi_select", "ACTIVE", "Vim + Arrows + Space + Mouse Click" },
-		{ "04", "terminal.exec", "ACTIVE", "Cross-Platform Shell" },
-	}
-)
+local table_output = cli.table({ "ID", "Module", "Status", "Control Input" }, {
+	{ "01", "cli.ascii_title", "ACTIVE", "Single Text String" },
+	{ "02", "cli.menu", "ACTIVE", "Vim (j/k) + Arrows + Mouse Click" },
+	{ "03", "cli.multi_select", "ACTIVE", "Vim + Arrows + Space + Mouse Click" },
+	{ "04", "terminal.exec", "ACTIVE", "Cross-Platform Shell" },
+})
 
 print(cli.box(table_output, { title = "CLI COMPONENT MATRIX", style = "double" }) .. "\n")
 

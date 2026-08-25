@@ -12,7 +12,7 @@ function M.run()
 	assert(ps1_fn:find("function deploy($target, $verbose) {", 1, true), "PS1 function declaration missing")
 
 	-- Test 2: Advanced loops (while, for i, ipairs)
-	local loop_code = 'for i = 1, 5 do\nprint(i)\nend\nfor _, item in ipairs(items) do\nprint(item)\nend'
+	local loop_code = "for i = 1, 5 do\nprint(i)\nend\nfor _, item in ipairs(items) do\nprint(item)\nend"
 	local sh_loop = transpiler.to_sh(loop_code)
 	local ps1_loop = transpiler.to_ps1(loop_code)
 	assert(sh_loop:find("for ((i=1; i<=5; i+=1)); do", 1, true), "Bash numeric for loop missing")
@@ -24,9 +24,15 @@ function M.run()
 	local err_code = 'assert(fs.exists("config.json"), "Config missing")\nerror("Fatal stop")'
 	local sh_err = transpiler.to_sh(err_code)
 	local ps1_err = transpiler.to_ps1(err_code)
-	assert(sh_err:find('[[ -e "config.json" ]] || { echo "Config missing" >&2; exit 1; }', 1, true), "Bash assert missing")
+	assert(
+		sh_err:find('[[ -e "config.json" ]] || { echo "Config missing" >&2; exit 1; }', 1, true),
+		"Bash assert missing"
+	)
 	assert(sh_err:find('echo "Fatal stop" >&2', 1, true), "Bash error missing")
-	assert(ps1_err:find('if (-not ($fs.exists("config.json"))) { throw "Config missing" }', 1, true), "PS1 assert missing")
+	assert(
+		ps1_err:find('if (-not ($fs.exists("config.json"))) { throw "Config missing" }', 1, true),
+		"PS1 assert missing"
+	)
 	assert(ps1_err:find('throw "Fatal stop"', 1, true), "PS1 throw missing")
 
 	-- Test 4: User prompt test case with test.afterAll, describe, test, expect, and test.run()
@@ -48,12 +54,21 @@ test.run()
 	local sh_user = transpiler.to_sh(user_prompt_code)
 	local ps1_user = transpiler.to_ps1(user_prompt_code)
 	assert(sh_user:find('echo "After all functions!"', 1, true), "User test: Bash console.log in afterAll missing")
-	assert(not sh_user:find("\nfi\n") and not sh_user:find("\nfi$"), "User test: Bash should NOT contain stray standalone fi")
-	assert(not sh_user:find("\ntest%.run%(") and not sh_user:find("^test%.run%("), "User test: Bash should NOT contain un-transpiled test.run()")
+	assert(
+		not sh_user:find("\nfi\n") and not sh_user:find("\nfi$"),
+		"User test: Bash should NOT contain stray standalone fi"
+	)
+	assert(
+		not sh_user:find("\ntest%.run%(") and not sh_user:find("^test%.run%("),
+		"User test: Bash should NOT contain un-transpiled test.run()"
+	)
 	assert(sh_user:find("# [krsnvim] test.run()", 1, true), "User test: Bash test.run comment missing")
 
 	assert(ps1_user:find('Write-Host "After all functions!"', 1, true), "User test: PS1 console.log in afterAll missing")
-	assert(not ps1_user:find("\ntest%.run%(") and not ps1_user:find("^test%.run%("), "User test: PS1 should NOT contain un-transpiled test.run()")
+	assert(
+		not ps1_user:find("\ntest%.run%(") and not ps1_user:find("^test%.run%("),
+		"User test: PS1 should NOT contain un-transpiled test.run()"
+	)
 	assert(ps1_user:find("# [krsnvim] test.run()", 1, true), "User test: PS1 test.run comment missing")
 
 	-- Test 5: Lifecycle hooks (beforeAll, afterAll, beforeEach, afterEach) on t/test/global
@@ -167,7 +182,7 @@ local res = fetch.json("https://api.example.com/status")
 	assert(ps1_net:find("Invoke-RestMethod", 1, true), "Fetch: PS1 Invoke-RestMethod missing")
 
 	-- Test 13: Sleep & Async
-	local sleep_code = 'async.sleep(500)\nsleep(1000)'
+	local sleep_code = "async.sleep(500)\nsleep(1000)"
 	local sh_sleep = transpiler.to_sh(sleep_code)
 	local ps1_sleep = transpiler.to_ps1(sleep_code)
 	assert(sh_sleep:find("time.sleep(500/1000)", 1, true), "Sleep: Bash python sleep missing")

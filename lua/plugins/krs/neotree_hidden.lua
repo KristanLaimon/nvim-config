@@ -188,7 +188,11 @@ function M.toggle_path(path, root)
 		M.hidden_paths[rel] = true
 		M.save_state(root)
 		M.refresh_neotree()
-		vim.notify("🙈 Marked item HIDDEN in Neo-tree (.krsnvim/neotree_hidden.json): " .. name, vim.log.levels.INFO, { title = "Neo-tree" })
+		vim.notify(
+			"🙈 Marked item HIDDEN in Neo-tree (.krsnvim/neotree_hidden.json): " .. name,
+			vim.log.levels.INFO,
+			{ title = "Neo-tree" }
+		)
 		return true
 	end
 end
@@ -201,7 +205,11 @@ function M.toggle_visibility(root)
 
 	if M.visibility_mode == "hide" then
 		M.visibility_mode = "show"
-		vim.notify("👁️ Custom Hidden items are now VISIBLE (strikethrough theme color)", vim.log.levels.INFO, { title = "Neo-tree" })
+		vim.notify(
+			"👁️ Custom Hidden items are now VISIBLE (strikethrough theme color)",
+			vim.log.levels.INFO,
+			{ title = "Neo-tree" }
+		)
 	else
 		M.visibility_mode = "hide"
 		vim.notify("🙈 Custom Hidden items are now HIDDEN", vim.log.levels.INFO, { title = "Neo-tree" })
@@ -218,7 +226,11 @@ function M.clear_all(root)
 	M.hidden_paths = {}
 	M.save_state(root)
 	M.refresh_neotree()
-	vim.notify("🧹 Cleared all marked hidden items in Neo-tree (.krsnvim/neotree_hidden.json)", vim.log.levels.INFO, { title = "Neo-tree" })
+	vim.notify(
+		"🧹 Cleared all marked hidden items in Neo-tree (.krsnvim/neotree_hidden.json)",
+		vim.log.levels.INFO,
+		{ title = "Neo-tree" }
+	)
 end
 
 --- Triggers a Neo-tree refresh.
