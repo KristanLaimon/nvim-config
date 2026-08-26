@@ -307,11 +307,12 @@ function M.resize_dual_panel(opts)
 
 	-- Update Tab Window (if present)
 	if opts.tab_win and vim.api.nvim_win_is_valid(opts.tab_win) then
+		local t_width = opts.tab_full_width and (geo.total_width + 2) or (geo.left_width + 2)
 		pcall(vim.api.nvim_win_set_config, opts.tab_win, {
 			relative = "editor",
 			row = geo.row - 1,
-			col = geo.left_col,
-			width = geo.left_width + (opts.gap or 2),
+			col = geo.left_col - 1,
+			width = t_width,
 			height = 1,
 		})
 	end

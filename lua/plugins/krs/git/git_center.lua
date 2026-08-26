@@ -320,6 +320,7 @@ function M.resize_split(delta)
 		left_win = M.main_win,
 		right_win = M.preview_win,
 		tab_win = M.tab_win,
+		tab_full_width = true,
 		delta = delta,
 		left_ratio = cur_ratio,
 		width_ratio = M.settings.width_ratio,
@@ -653,8 +654,7 @@ local function fetch_target_status_async(target)
 				and M.main_win
 				and vim.api.nvim_win_is_valid(M.main_win)
 			then
-				local l_width = vim.api.nvim_win_get_width(M.main_win)
-				render_tab_bar(l_width)
+				render_tab_bar(math.floor(vim.o.columns * M.settings.width_ratio))
 			end
 		end
 	end)
@@ -878,6 +878,39 @@ render_tab_bar = function(left_w)
 			end_col = h.end_col,
 			hl_group = h.hl,
 		})
+	end
+
+	if M.tab_win and vim.api.nvim_win_is_valid(M.tab_win) then
+		local active_range = nil
+		for _, range in ipairs(M.tab_click_ranges) do
+			if range.idx == M.active_submodule_idx then
+				active_range = range
+				break
+			end
+		end
+
+		if active_range then
+			local win_width = vim.api.nvim_win_get_width(M.tab_win)
+			vim.api.nvim_win_call(M.tab_win, function()
+				local view = vim.fn.winsaveview()
+				local current_leftcol = view.leftcol
+				local tab_start = active_range.start_col
+				local tab_end = active_range.end_col
+				local needs_scroll = false
+
+				if tab_end > current_leftcol + win_width then
+					view.leftcol = tab_end - win_width + 1
+					needs_scroll = true
+				elseif tab_start < current_leftcol then
+					view.leftcol = math.max(0, tab_start - 1)
+					needs_scroll = true
+				end
+
+				if needs_scroll then
+					vim.fn.winrestview(view)
+				end
+			end)
+		end
 	end
 end
 
@@ -2124,7 +2157,7 @@ function M.open_git_center()
 
 	M.tab_win = vim.api.nvim_open_win(tab_buf, false, {
 		relative = "editor",
-		width = left_width + 2,
+		width = total_width + 2,
 		height = 1,
 		row = start_row - 1,
 		col = start_col - 1,
@@ -2172,7 +2205,7 @@ function M.open_git_center()
 		end
 	end
 
-	render_tab_bar(left_width)
+	render_tab_bar(total_width)
 
 	local opts_tab = { buffer = tab_buf, silent = true, noremap = true }
 	vim.keymap.set("n", "<LeftMouse>", function()
@@ -2310,7 +2343,7 @@ function M.open_git_center()
 		vim.bo[main_buf].modifiable = false
 		pcall(vim.api.nvim_win_set_cursor, M.main_win, { math.min(cursor[1], #new_lines), cursor[2] })
 
-		render_tab_bar(l_width)
+		render_tab_bar(math.floor(vim.o.columns * M.settings.width_ratio))
 
 		M.diff_cache = {}
 		update_preview()
