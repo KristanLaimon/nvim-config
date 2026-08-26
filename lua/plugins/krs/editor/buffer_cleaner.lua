@@ -146,16 +146,61 @@ function _G.Smart_Close_Buffer(target_buf, force)
 		return
 	end
 
-	-- Closing the last real buffer would leave an empty editor, so land on the
-	-- dashboard first and only then delete it.
-	if #real_buffers() <= 1 then
-		if target_buf == cur_buf and not pcall(vim.cmd, M.settings.dashboard_command) then
-			pcall(vim.cmd, "enew")
+	-- 1. Identify the visually next/prev buffer to land on
+	local next_buf = nil
+	local has_bl, bl = pcall(require, "bufferline")
+	if has_bl and type(bl.get_elements) == "function" then
+		local res = bl.get_elements()
+		local elements = res and res.elements
+		if elements and type(elements) == "table" then
+			local idx = nil
+			for i, e in ipairs(elements) do
+				if e.id == target_buf then
+					idx = i
+					break
+				end
+			end
+			if idx then
+				if idx < #elements then
+					next_buf = elements[idx + 1].id
+				elseif idx > 1 then
+					next_buf = elements[idx - 1].id
+				end
+			end
 		end
-	elseif target_buf == cur_buf then
-		pcall(vim.cmd, "BufferLineCyclePrev")
 	end
 
+	-- Fallback to Neovim's buffer list if bufferline didn't help
+	if not next_buf then
+		local real = real_buffers()
+		for i, b in ipairs(real) do
+			if b == target_buf then
+				if i < #real then
+					next_buf = real[i + 1]
+				elseif i > 1 then
+					next_buf = real[i - 1]
+				end
+				break
+			end
+		end
+	end
+
+	-- 2. Switch all windows showing this buffer to the next buffer (or dashboard)
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == target_buf then
+			if next_buf then
+				pcall(vim.api.nvim_win_set_buf, win, next_buf)
+			else
+				vim.api.nvim_win_call(win, function()
+					if not pcall(vim.cmd, M.settings.dashboard_command) then
+						pcall(vim.cmd, "enew")
+					end
+				end)
+			end
+		end
+	end
+
+	-- 3. Delete the buffer
 	pcall(vim.api.nvim_buf_delete, target_buf, { force = force or is_deleted })
 end
 
