@@ -38,6 +38,12 @@ $Atajos = @(
     @{ Codigo = 32; Mod = "6u"; Tecla = "ctrl+shift+space" }
 )
 
+# Generar números del 0 al 9 para Ctrl+[Número]
+for ($i = 48; $i -le 57; $i++) {
+    $numero = ([char]$i).ToString()
+    $Atajos += @{ Codigo = $i; Mod = "5u"; Tecla = "ctrl+$numero" }
+}
+
 # Generar letras de la A a la Z para Ctrl+Shift+[Letra]
 # Si quieres mandar TODO a neovim (incluso copiar/pegar de la terminal), deja esta lista vacía: $Excluir = @()
 $Excluir = @("c", "v", "t") 

@@ -46,7 +46,8 @@ return {
 					return ft == "blade" or ft == "php"
 				end,
 			}
-			if opts.sources.default and not vim.tbl_contains(opts.sources.default, "blade-nav") then
+			opts.sources.default = opts.sources.default or {}
+			if not vim.tbl_contains(opts.sources.default, "blade-nav") then
 				table.insert(opts.sources.default, "blade-nav")
 			end
 		end,

@@ -360,7 +360,7 @@ return {
 		event = { "BufReadPre", "BufReadPost", "BufNewFile", "InsertEnter" },
 		dependencies = { "rafamadriz/friendly-snippets" },
 		version = "*",
-		opts = function()
+		opts = function(_, opts)
 			local is_mobile = false
 			local env_ok, env_mod = pcall(require, "krs.core.environment")
 			if env_ok then
@@ -370,7 +370,7 @@ return {
 				is_mobile = vim.env.TERMUX_VERSION ~= nil or vim.fn.isdirectory("/data/data/com.termux") == 1
 			end
 
-			return {
+			local merged = vim.tbl_deep_extend("force", opts or {}, {
 				enabled = function()
 					return vim.bo.filetype ~= "krsinputmodal" and vim.b.completion ~= false
 				end,
@@ -452,7 +452,6 @@ return {
 					window = { border = "rounded" },
 				},
 				sources = {
-					default = { "lsp", "path", "snippets", "buffer" },
 					-- Debug repl completes from the stopped frame only, never lsp/buffer words.
 					per_filetype = { ["dap-repl"] = { "dap" } },
 					providers = {
@@ -482,7 +481,16 @@ return {
 						"sort_text",
 					},
 				},
-			}
+			})
+
+			merged.sources = merged.sources or {}
+			merged.sources.default = merged.sources.default or {}
+			for _, v in ipairs({ "lsp", "path", "snippets", "buffer" }) do
+				if not vim.tbl_contains(merged.sources.default, v) then
+					table.insert(merged.sources.default, v)
+				end
+			end
+			return merged
 		end,
 		opts_extend = { "sources.default" },
 	},

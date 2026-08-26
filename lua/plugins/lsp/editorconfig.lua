@@ -62,7 +62,7 @@ local function validate_buffer(bufnr)
 		local is_content = trimmed ~= "" and not trimmed:match("^[#;]") and not trimmed:match("^%[.*%]$")
 
 		if is_content then
-			local key, value = trimmed:match("^([%w_]+)%s*=%s*(.-)%s*$")
+			local key, value = trimmed:match("^([%w_]+)%s*=?%s*(.-)%s*$")
 			if key then
 				local known, valid, allowed = editorconfig.validate(key, value)
 
@@ -174,7 +174,8 @@ return {
 				end,
 			}
 
-			if opts.sources.default and not vim.tbl_contains(opts.sources.default, "editorconfig") then
+			opts.sources.default = opts.sources.default or {}
+			if not vim.tbl_contains(opts.sources.default, "editorconfig") then
 				table.insert(opts.sources.default, "editorconfig")
 			end
 		end,

@@ -55,7 +55,8 @@ return {
 			for name, definition in pairs(sources) do
 				opts.sources.providers[name] = definition
 
-				if opts.sources.default and not vim.tbl_contains(opts.sources.default, name) then
+				opts.sources.default = opts.sources.default or {}
+				if not vim.tbl_contains(opts.sources.default, name) then
 					table.insert(opts.sources.default, name)
 				end
 			end
