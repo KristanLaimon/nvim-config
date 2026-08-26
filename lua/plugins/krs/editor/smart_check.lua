@@ -304,7 +304,7 @@ _G.SmartCheck = M
 return setmetatable({
 	name = "krs_smart_check",
 	dir = require("krs.core.lazyspec").for_module(),
-	lazy = false,
+	event = "VeryLazy",
 	cmd = { "SmartCheck", "KrsSmartCheck" },
 	config = M.setup,
 }, { __index = M })

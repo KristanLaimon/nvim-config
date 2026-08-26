@@ -662,6 +662,6 @@ end
 return setmetatable({
 	name = "doc_manager",
 	dir = require("krs.core.lazyspec").for_module(),
-	lazy = false,
+	event = "VeryLazy",
 	config = M.setup,
 }, { __index = M })

@@ -340,7 +340,7 @@ end
 
 M.name = "krs_neotree_hidden"
 M.dir = require("krs.core.lazyspec").for_module()
-M.lazy = false
+M.event = "VeryLazy"
 M.config = M.setup
 
 return M

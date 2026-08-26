@@ -41,7 +41,7 @@ return {
 	{
 		"nvim-mini/mini.icons",
 		version = false,
-		lazy = false,
+		event = "VeryLazy",
 		-- Must configure before bufferline/neo-tree/telescope/devicons.lua ever
 		-- call require("nvim-web-devicons"), so the mock is in place first.
 		priority = 10000,

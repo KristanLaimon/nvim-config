@@ -300,6 +300,6 @@ M.setup_ui_input_override()
 return setmetatable({
 	name = "krs_input_modal",
 	dir = require("krs.core.lazyspec").for_module(),
-	lazy = false,
+	event = "VeryLazy",
 	config = M.setup_ui_input_override,
 }, { __index = M })

@@ -367,6 +367,6 @@ end
 return setmetatable({
 	name = "snippet_manager",
 	dir = require("krs.core.lazyspec").for_module(),
-	lazy = false,
+	event = "VeryLazy",
 	config = M.setup,
 }, { __index = M })

@@ -536,6 +536,6 @@ _G.DapBreakpoints = M
 return setmetatable({
 	name = "krs_dap_breakpoints",
 	dir = require("krs.core.lazyspec").for_module(),
-	lazy = false,
+	event = "VeryLazy",
 	config = M.setup,
 }, { __index = M })

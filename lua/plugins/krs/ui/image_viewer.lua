@@ -285,6 +285,6 @@ _G.ImageViewer = M
 return setmetatable({
 	name = "image_viewer",
 	dir = require("krs.core.lazyspec").for_module(),
-	lazy = false,
+	event = "VeryLazy",
 	config = M.setup,
 }, { __index = M })

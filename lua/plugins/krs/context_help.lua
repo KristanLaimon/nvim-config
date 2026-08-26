@@ -153,6 +153,6 @@ _G.ContextHelp = M
 return setmetatable({
 	name = "context_help",
 	dir = require("krs.core.lazyspec").for_module(),
-	lazy = false,
+	event = "VeryLazy",
 	config = M.setup,
 }, { __index = M })

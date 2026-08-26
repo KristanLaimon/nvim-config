@@ -229,6 +229,6 @@ end
 return setmetatable({
 	name = "vscode_settings",
 	dir = require("krs.core.lazyspec").for_module(),
-	lazy = false,
+	event = "VeryLazy",
 	config = M.setup,
 }, { __index = M })

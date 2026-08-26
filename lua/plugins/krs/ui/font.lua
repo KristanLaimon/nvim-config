@@ -172,6 +172,6 @@ _G.FontManager = M
 return setmetatable({
 	name = "krs_font",
 	dir = require("krs.core.lazyspec").for_module(),
-	lazy = false,
+	event = "VeryLazy",
 	config = M.setup,
 }, { __index = M })

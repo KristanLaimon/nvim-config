@@ -12,7 +12,7 @@
 return {
 	{
 		"rcarriga/nvim-notify",
-		lazy = false,
+		event = "VeryLazy",
 		priority = 1000,
 		opts = function()
 			local is_mobile = false
