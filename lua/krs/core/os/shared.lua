@@ -97,7 +97,7 @@ except Exception as e:
 	)
 
 	local res = vim.fn.system({ "python3", "-c", py_script })
-	local json = require("krsnvim.json")
+	local json = require("krs.lib.krsnvim.json")
 	local ok, parsed = pcall(json.decode, res)
 	if ok and type(parsed) == "table" and parsed.status then
 		return true, parsed

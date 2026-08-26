@@ -2,11 +2,11 @@
 -- tests/spec/alt_keymaps_spec.lua -- Alt + <something> keymap functionality tests.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
 -- Ensure keymaps are loaded
-require("config.keymaps")
+require("keymaps")
 
 --- Helper to check if a keymap exists in normal mode
 --- @param lhs string
@@ -17,7 +17,7 @@ end
 
 describe("Alt / Meta keymaps functionality", function()
 	it("binds buffer previous (left tab cycle) keymaps for Alt and Meta variants", function()
-		local editor = require("config.keymaps.editor")
+		local editor = require("keymaps.editor")
 		expect(editor.settings.keys.buffer_prev).toContain("<A-h>")
 		expect(editor.settings.keys.buffer_prev).toContain("<M-h>")
 		expect(editor.settings.keys.buffer_prev).toContain("<A-Left>")
@@ -29,7 +29,7 @@ describe("Alt / Meta keymaps functionality", function()
 	end)
 
 	it("binds buffer next (right tab cycle) keymaps for Alt and Meta variants", function()
-		local editor = require("config.keymaps.editor")
+		local editor = require("keymaps.editor")
 		expect(editor.settings.keys.buffer_next).toContain("<A-l>")
 		expect(editor.settings.keys.buffer_next).toContain("<M-l>")
 		expect(editor.settings.keys.buffer_next).toContain("<A-Right>")
@@ -41,7 +41,7 @@ describe("Alt / Meta keymaps functionality", function()
 	end)
 
 	it("binds LSP definition jump keymaps for Alt and Meta variants", function()
-		local lsp_keys = require("config.keymaps.lsp")
+		local lsp_keys = require("keymaps.lsp")
 		expect(lsp_keys.settings.keys.goto_definition).toContain("<A-j>")
 		expect(lsp_keys.settings.keys.goto_definition).toContain("<M-j>")
 		expect(lsp_keys.settings.keys.goto_definition).toContain("<A-k>")
@@ -53,7 +53,7 @@ describe("Alt / Meta keymaps functionality", function()
 	end)
 
 	it("binds LSP symbol usages keymaps for Alt+Shift+K and Meta variants", function()
-		local lsp_keys = require("config.keymaps.lsp")
+		local lsp_keys = require("keymaps.lsp")
 		expect(lsp_keys.settings.keys.show_usages).toContain("<A-S-k>")
 		expect(lsp_keys.settings.keys.show_usages).toContain("<A-S-K>")
 		expect(lsp_keys.settings.keys.show_usages).toContain("<M-S-k>")
@@ -65,7 +65,7 @@ describe("Alt / Meta keymaps functionality", function()
 	end)
 
 	it("binds git stage all keymaps for Ctrl+Shift+X, Alt and Meta variants", function()
-		local krs_keys = require("config.keymaps.krs")
+		local krs_keys = require("keymaps.krs")
 		expect(krs_keys.settings.keys.git_stage_all).toContain("<C-S-x>")
 		expect(krs_keys.settings.keys.git_stage_all).toContain("<C-S-X>")
 		expect(krs_keys.settings.keys.git_stage_all).toContain("<A-s>")
@@ -101,7 +101,7 @@ describe("Alt / Meta keymaps functionality", function()
 	end)
 
 	it("binds window focus upper keymaps for Ctrl+Shift+Alt+K and variants", function()
-		local editor = require("config.keymaps.editor")
+		local editor = require("keymaps.editor")
 		expect(editor.settings.keys.window_up).toContain("<C-S-A-k>")
 		expect(editor.settings.keys.window_up).toContain("<C-A-S-k>")
 		expect(editor.settings.keys.window_up).toContain("<C-S-M-k>")

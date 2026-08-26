@@ -6,7 +6,7 @@
 -- quoted paths, detached HEAD, and binary files in numstat.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 local status = require("krs.git.status")
 

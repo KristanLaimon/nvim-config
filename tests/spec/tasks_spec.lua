@@ -6,9 +6,9 @@
 -- Telescope picker are deliberately out of scope -- they need a real UI.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, beforeEach, afterEach = t.describe, t.it, t.expect, t.beforeEach, t.afterEach
-local tasks = require("plugins.krs.tasks")
+local tasks = require("plugins.krs.dev.tasks")
 local path = require("krs.core.path")
 
 local root

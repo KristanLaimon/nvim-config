@@ -1,9 +1,9 @@
 -- ============================================================================
 -- tests/krsnvimscript/libraries/fetch_spec.lua -- Spec tests for krsnvim.fetch module
 -- ============================================================================
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local fetch = require("krsnvim.fetch")
+local fetch = require("krs.lib.krsnvim.fetch")
 
 describe("krsnvim.fetch module", function()
 	it("exposes HTTP request methods", function()

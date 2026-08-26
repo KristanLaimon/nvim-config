@@ -2,7 +2,7 @@
 -- tests/spec/cmp_colorify_spec.lua -- Colorify engine & CMP kind formatting.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 local colorify = require("krs.lsp.colorify")
 

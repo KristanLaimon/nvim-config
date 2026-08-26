@@ -2,11 +2,11 @@
 -- tests/spec/lsp_references_spec.lua -- LSP reference counter & CodeLens.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local lsp_refs = require("plugins.krs.lsp_references")
+local lsp_refs = require("plugins.krs.tools.lsp_references")
 
-describe("plugins.krs.lsp_references", function()
+describe("plugins.krs.tools.lsp_references", function()
 	it("defaults to enabled = true (ON)", function()
 		expect(type(lsp_refs.is_enabled())).toBe("boolean")
 	end)

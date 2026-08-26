@@ -1,11 +1,11 @@
 -- tests/spec/leader_keymaps_spec.lua -- Enforces leader keymaps non-triggerability in insert & terminal modes.
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
 describe("leader keymaps scoping and protection", function()
 	it("ensures leader keymaps are NOT bound in insert or terminal modes", function()
-		require("config.keymaps")
+		require("keymaps")
 		local registry = require("krs.core.keymap_registry")
 		registry.install()
 
@@ -24,7 +24,7 @@ describe("leader keymaps scoping and protection", function()
 	end)
 
 	it("verifies global leader mappings (e.g. <leader>fw, <leader>ta) do not exist in insert mode", function()
-		require("config.keymaps")
+		require("keymaps")
 
 		local wsl_insert = vim.fn.maparg("<leader>fw", "i") ~= ""
 		local wsl_term = vim.fn.maparg("<leader>fw", "t") ~= ""

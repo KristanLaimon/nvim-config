@@ -2,7 +2,7 @@
 -- tests/spec/gitsigns_spec.lua -- GitSigns plugin specification and setup.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 local gitsigns_spec = require("plugins.editor.gitsigns")
 

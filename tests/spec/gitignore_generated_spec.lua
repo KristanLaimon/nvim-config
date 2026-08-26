@@ -2,11 +2,11 @@
 -- tests/spec/gitignore_generated_spec.lua -- .gitignore insertion test suite.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, beforeEach, afterEach = t.describe, t.it, t.expect, t.beforeEach, t.afterEach
-local type_injector = require("plugins.krs.type_injector")
+local type_injector = require("plugins.krs.tools.type_injector")
 
-describe("plugins.krs.type_injector.gitignore_generated", function()
+describe("plugins.krs.tools.type_injector.gitignore_generated", function()
 	local temp_dir
 	local gitignore_path
 

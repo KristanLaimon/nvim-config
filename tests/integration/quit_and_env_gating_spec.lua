@@ -8,7 +8,7 @@
 --            treesitter.lua, autopairs.lua and lsp.lua's blink.cmp opts.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
 -- ----------------------------------------------------------------------------
@@ -16,7 +16,7 @@ local describe, it, expect = t.describe, t.it, t.expect
 -- ----------------------------------------------------------------------------
 
 describe("buffer_cleaner bang routing", function()
-	local buffer_cleaner = require("plugins.krs.buffer_cleaner")
+	local buffer_cleaner = require("plugins.krs.editor.buffer_cleaner")
 	buffer_cleaner.setup()
 
 	it("registers KrsQ and KrsBd as bang-aware user commands", function()

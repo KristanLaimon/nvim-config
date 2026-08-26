@@ -11,7 +11,7 @@ return {
 	"Wansmer/symbol-usage.nvim",
 	event = "LspAttach",
 	config = function(_, opts)
-		local ok, picker = pcall(require, "plugins.krs.usages_picker")
+		local ok, picker = pcall(require, "plugins.krs.tools.usages_picker")
 		opts = opts or {}
 		opts.kinds = {
 			vim.lsp.protocol.SymbolKind.Function,

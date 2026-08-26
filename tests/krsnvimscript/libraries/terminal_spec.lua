@@ -1,9 +1,9 @@
 -- ============================================================================
 -- tests/krsnvimscript/libraries/terminal_spec.lua -- Spec tests for krsnvim.terminal module
 -- ============================================================================
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local terminal = require("krsnvim.terminal")
+local terminal = require("krs.lib.krsnvim.terminal")
 
 describe("krsnvim.terminal module", function()
 	it("executes basic echo command", function()

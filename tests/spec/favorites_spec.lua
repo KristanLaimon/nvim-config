@@ -6,7 +6,7 @@
 -- rule and every saved favorite silently disappears from the UI.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, beforeEach, afterEach = t.describe, t.it, t.expect, t.beforeEach, t.afterEach
 local favorites = require("krs.projects.favorites")
 

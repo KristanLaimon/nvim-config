@@ -2,11 +2,11 @@
 -- tests/spec/koreader_types_spec.lua -- KOReader type injector schema test suite.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local type_injector = require("plugins.krs.type_injector")
+local type_injector = require("plugins.krs.tools.type_injector")
 
-describe("plugins.krs.type_injector.koreader_types", function()
+describe("plugins.krs.tools.type_injector.koreader_types", function()
 	it("discovers 'koreader' as an available Lua schema", function()
 		local schemas = type_injector.scan_available_schemas("lua")
 		local found = false

@@ -1,4 +1,4 @@
-# 🙈 Neo-tree Custom Hidden Files & Folders (`plugins.krs.neotree_hidden`)
+# 🙈 Neo-tree Custom Hidden Files & Folders (`plugins.krs.editor.neotree_hidden`)
 
 [← Back to Wiki Index](index.md)
 
@@ -68,10 +68,10 @@ vim.api.nvim_set_hl(0, "NeoTreeCustomHidden", { link = "Comment", strikethrough 
 
 ## 🧠 Lua API Reference
 
-The `plugins.krs.neotree_hidden` module exports the following functions for programmatic access:
+The `plugins.krs.editor.neotree_hidden` module exports the following functions for programmatic access:
 
 ```lua
-local neotree_hidden = require("plugins.krs.neotree_hidden")
+local neotree_hidden = require("plugins.krs.editor.neotree_hidden")
 
 -- Toggles hidden state for an absolute or relative path
 neotree_hidden.toggle_path("/path/to/file_or_dir")

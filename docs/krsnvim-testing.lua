@@ -7,7 +7,7 @@
 --   Method 2: Execute `:KrsRun` or run headlessly: `nvim --headless -l docs/krsnvim-testing.lua`
 -- ============================================================================
 
-local krsnvim = require("krsnvim")
+local krsnvim = require("krs.lib.krsnvim")
 local cli = krsnvim.cli
 local terminal = krsnvim.terminal
 

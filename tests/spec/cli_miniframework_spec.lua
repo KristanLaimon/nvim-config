@@ -3,10 +3,10 @@
 -- Comprehensive unit tests for krsnvim.cli mini-framework and krsnvim.terminal.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
-local krsnvim = require("krsnvim")
+local krsnvim = require("krs.lib.krsnvim")
 local cli = krsnvim.cli
 local terminal = krsnvim.terminal
 

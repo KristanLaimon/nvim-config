@@ -2,9 +2,9 @@
 -- tests/spec/line_endings_spec.lua -- Line Endings Manager (LF / CRLF).
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local line_endings = require("plugins.krs.line_endings")
+local line_endings = require("plugins.krs.editor.line_endings")
 
 local function read_file(path)
 	local f = io.open(path, "rb")
@@ -30,7 +30,7 @@ local function make_tmp_files()
 	return dir, f1, binary
 end
 
-describe("plugins.krs.line_endings", function()
+describe("plugins.krs.editor.line_endings", function()
 	it("registers the line endings user commands", function()
 		line_endings.setup()
 		local cmds = vim.api.nvim_get_commands({})

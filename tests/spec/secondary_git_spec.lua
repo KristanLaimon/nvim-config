@@ -5,7 +5,7 @@
 -- construction for secondary decoupled repositories.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, beforeEach, afterEach = t.describe, t.it, t.expect, t.beforeEach, t.afterEach
 local sec_git = require("krs.git.secondary")
 local store = require("krs.core.store")

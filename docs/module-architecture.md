@@ -52,7 +52,7 @@ local plugin_spec = {
 return setmetatable(plugin_spec, { __index = M })
 ```
 
-The `setmetatable` is what makes both worlds work at once: lazy.nvim sees a spec table, while `require("plugins.krs.dap_breakpoints").save_breakpoints()` still resolves to the module's own functions through `__index`.
+The `setmetatable` is what makes both worlds work at once: lazy.nvim sees a spec table, while `require("plugins.krs.dev.dap_breakpoints").save_breakpoints()` still resolves to the module's own functions through `__index`.
 
 Modules that only need to exist on demand use `keys = { … }` or `cmd = { … }` in the spec instead of `lazy = false`, so their code never loads until the key or command is used.
 
@@ -117,7 +117,7 @@ If you find a stale `require("config.krs.…")` anywhere, it's a leftover — th
 
 ## 🗂️ Per-project state
 
-Modules that persist anything write it under the project root, resolved by `plugins.krs.tasks.get_project_root()` (every other module defers to it so they all agree on what "the project" is):
+Modules that persist anything write it under the project root, resolved by `plugins.krs.dev.tasks.get_project_root()` (every other module defers to it so they all agree on what "the project" is):
 
 | File | Module |
 |---|---|

@@ -81,7 +81,7 @@ function M.toggle()
 	vim.notify("🎨 UI Icons Mode Changed: " .. mode_name, vim.log.levels.INFO, { title = "UI Icons Settings" })
 
 	-- Refresh open panels
-	local ok_gc, gc = pcall(require, "plugins.krs.git_center")
+	local ok_gc, gc = pcall(require, "plugins.krs.git.git_center")
 	if ok_gc and gc.is_open and gc.is_open() and gc.refresh then
 		gc.refresh()
 	end

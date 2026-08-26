@@ -2,9 +2,9 @@
 -- tests/spec/caps_lock_spec.lua -- Caps Lock warning plugin tests.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, afterEach = t.describe, t.it, t.expect, t.afterEach
-local caps_lock = require("plugins.krs.caps_lock")
+local caps_lock = require("plugins.krs.editor.caps_lock")
 
 local scratch_buffers = {}
 
@@ -18,7 +18,7 @@ local function open_buffer(filetype)
 	return buf
 end
 
-describe("plugins.krs.caps_lock context detection", function()
+describe("plugins.krs.editor.caps_lock context detection", function()
 	afterEach(function()
 		for _, buf in ipairs(scratch_buffers) do
 			pcall(vim.api.nvim_buf_delete, buf, { force = true })
@@ -48,7 +48,7 @@ describe("plugins.krs.caps_lock context detection", function()
 	end)
 end)
 
-describe("plugins.krs.caps_lock state management and notification trigger", function()
+describe("plugins.krs.editor.caps_lock state management and notification trigger", function()
 	local original_is_caps_on = caps_lock.is_caps_lock_on
 	local original_notify = vim.notify
 	local notified_messages = {}

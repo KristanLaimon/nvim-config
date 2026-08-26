@@ -1,9 +1,9 @@
 -- ============================================================================
 -- tests/krsnvimscript/libraries/json_spec.lua -- Spec tests for krsnvim.json module
 -- ============================================================================
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local json = require("krsnvim.json")
+local json = require("krs.lib.krsnvim.json")
 
 describe("krsnvim.json module", function()
 	it("encodes and decodes JSON objects", function()

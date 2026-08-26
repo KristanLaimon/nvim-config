@@ -1,4 +1,4 @@
-# 🚀 Launch Profiles (`plugins.krs.launch_profiles`)
+# 🚀 Launch Profiles (`plugins.krs.dev.launch_profiles`)
 
 [← Back to Wiki Index](index.md)
 
@@ -88,7 +88,7 @@ This is **not** VSCode's `.vscode/launch.json` — that file is still read by nv
 
 ### 🧠 IntelliSense inside `launch.json`
 
-`plugins.krs.launch_cmp` registers a blink.cmp source that only fires in files named `launch.json`:
+`plugins.krs.dev.launch_cmp` registers a blink.cmp source that only fires in files named `launch.json`:
 
 - `pre_launch_tasks` → tasks discovered in the project (npm scripts, Makefile targets, go/cargo commands, `.krsnvim/tasks.json` entries)
 - `runtime` → the eight runtimes, with a description of each
@@ -147,7 +147,7 @@ With **Auto Build** on, `dotnet build <target>` is prepended to the pre-launch t
 
 ---
 
-## 🌐 Dev Server Bridge (`plugins.krs.dev_server`)
+## 🌐 Dev Server Bridge (`plugins.krs.dev.dev_server`)
 
 Browser debug configurations need a URL that is *already serving*. This module starts the project's dev server (or reuses one that is up) and hands back its URL.
 
@@ -155,7 +155,7 @@ It is meant to be used as a **function value inside a DAP configuration**. nvim-
 
 ```lua
 url = function()
-  return require("plugins.krs.dev_server").url()
+  return require("plugins.krs.dev.dev_server").url()
 end
 ```
 

@@ -1,10 +1,10 @@
 -- ============================================================================
 -- tests/spec/terminal_auto_insert_spec.lua -- Spec for Terminal auto-insert & click behavior
 -- ============================================================================
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, afterEach = t.describe, t.it, t.expect, t.afterEach
 
-local terminal = require("plugins.krs.terminal")
+local terminal = require("plugins.krs.dev.terminal")
 
 describe("terminal auto insert & click behavior", function()
 	local created_bufs = {}
@@ -40,14 +40,14 @@ describe("terminal auto insert & click behavior", function()
 	end)
 
 	it("binds window focus navigation keys in terminal mode", function()
-		require("config.keymaps.editor")
+		require("keymaps.editor")
 		for _, key in ipairs({ "<C-h>", "<C-l>", "<C-j>" }) do
 			expect(vim.fn.maparg(key, "t") ~= "").toBe(true)
 		end
 	end)
 
 	it("returns to terminal window when moving right from neo-tree if originated in terminal", function()
-		local editor_map = require("config.keymaps.editor")
+		local editor_map = require("keymaps.editor")
 		local neotree_buf = vim.api.nvim_create_buf(false, true)
 		local term_buf = vim.api.nvim_create_buf(false, true)
 		table.insert(created_bufs, neotree_buf)

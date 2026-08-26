@@ -2,11 +2,11 @@
 -- tests/spec/theme_picker_spec.lua -- Nagatoro theme discovery & picker.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local theme_picker = require("plugins.krs.theme_picker")
+local theme_picker = require("plugins.krs.ui.theme_picker")
 
-describe("plugins.krs.theme_picker", function()
+describe("plugins.krs.ui.theme_picker", function()
 	it("discovers all -krs and nagatoro-* formatted themes in colors/", function()
 		local themes = theme_picker.discover_themes()
 		expect(themes).toContain("nagatoro-krs")

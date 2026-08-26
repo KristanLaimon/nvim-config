@@ -2,7 +2,7 @@
 -- tests/spec/installer_spec.lua -- KRS System Setup Installer spec.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 local installer = require("krs.core.installer")
 

@@ -9,7 +9,7 @@
 local shared = require("plugins.krs.debuggers._shared")
 
 return function(dap)
-	local bun_dap = require("plugins.krs.bun_dap")
+	local bun_dap = require("plugins.krs.dev.bun_dap")
 	if bun_dap.installed() then
 		dap.adapters.bun = {
 			type = "executable",

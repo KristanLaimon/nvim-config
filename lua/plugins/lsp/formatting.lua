@@ -19,7 +19,7 @@
 --   format_on_save     Timeout and LSP fallback.
 --
 -- MANUAL FORMAT
---   <leader>ff (see lua/config/keymaps/lsp.lua).
+--   <leader>ff (see lua/keymaps/lsp.lua).
 -- ============================================================================
 
 local langs = require("krs.langs").langs

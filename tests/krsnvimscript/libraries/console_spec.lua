@@ -1,9 +1,9 @@
 -- ============================================================================
 -- tests/krsnvimscript/libraries/console_spec.lua -- Spec tests for krsnvim.console module
 -- ============================================================================
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local console = require("krsnvim.console")
+local console = require("krs.lib.krsnvim.console")
 
 describe("krsnvim.console module", function()
 	it("formats primitive arguments and strings", function()

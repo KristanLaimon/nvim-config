@@ -311,7 +311,7 @@ end
 --- @param parent_dir string Directory to create in.
 --- @param kind "file"|"folder"
 local function create_entry(parent_dir, kind)
-	require("plugins.krs.input_modal").open({
+	require("plugins.krs.ui.input_modal").open({
 		label = kind == "folder" and "New Folder" or "New File",
 		default_value = "",
 		relative = "editor",
@@ -421,7 +421,7 @@ return {
 				})
 			end
 
-			local neotree_hidden = require("plugins.krs.neotree_hidden")
+			local neotree_hidden = require("plugins.krs.editor.neotree_hidden")
 			neotree_hidden.setup()
 
 			local user_cmds = {
@@ -500,13 +500,13 @@ return {
 						neotree_hidden.toggle_path(node.path)
 					end, true),
 					open_with_system_app = with_node(function(node)
-						require("plugins.krs.image_viewer").open_with_system_app(node.path)
+						require("plugins.krs.ui.image_viewer").open_with_system_app(node.path)
 					end, true),
 
 					rename_with_modal = with_node(function(node)
 						local old_path, old_name = node.path, node.name
 
-						require("plugins.krs.input_modal").open({
+						require("plugins.krs.ui.input_modal").open({
 							label = "Rename (" .. old_name .. ")",
 							default_value = old_name,
 							relative = "editor",
@@ -534,7 +534,7 @@ return {
 					end, true),
 
 					move_with_picker = with_node(function(node)
-						require("plugins.krs.file_explorer").open_move_picker({
+						require("plugins.krs.tools.file_explorer").open_move_picker({
 							source_path = node.path,
 							root_dir = vim.fn.getcwd(),
 						})

@@ -1,5 +1,5 @@
 -- 12_testing_framework.krsnvim: Test suite for krsnvim.test testing framework transpilation
-local test = require("krsnvim.test")
+local test = require("krs.lib.krsnvim.test")
 local describe = test.describe
 local it = test.it
 local expect = test.expect

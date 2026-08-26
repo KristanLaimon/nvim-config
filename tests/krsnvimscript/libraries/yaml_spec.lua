@@ -1,9 +1,9 @@
 -- ============================================================================
 -- tests/krsnvimscript/libraries/yaml_spec.lua -- Spec tests for krsnvim.yaml module
 -- ============================================================================
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local yaml = require("krsnvim.yaml")
+local yaml = require("krs.lib.krsnvim.yaml")
 
 describe("krsnvim.yaml module", function()
 	it("parses YAML strings and handles invalid input", function()

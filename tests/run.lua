@@ -13,7 +13,7 @@
 --      is printed and the process exits non-zero on failure (CI friendly).
 --
 -- WRITING A SPEC -- create tests/spec/<module>_spec.lua:
---   local t = require("krsnvim.test")
+--   local t = require("krs.lib.krsnvim.test")
 --   local describe, it, expect = t.describe, t.it, t.expect
 --   describe("krs.core.path", function()
 --     it("normalizes separators", function()
@@ -96,7 +96,7 @@ function M.run(root, filter)
 		return #errors > 0 and 1 or 0
 	end
 
-	local ok, result = pcall(require("krsnvim.test").run)
+	local ok, result = pcall(require("krs.lib.krsnvim.test").run)
 	if not ok or #errors > 0 then
 		if not ok then
 			print(tostring(result))

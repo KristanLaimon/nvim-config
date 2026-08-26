@@ -4,7 +4,7 @@
 
 require("lazy").load({ plugins = { "telescope.nvim" } })
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
 --- True when a user command exists.

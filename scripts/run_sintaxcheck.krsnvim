@@ -1,4 +1,4 @@
 local root = vim.fn.stdpath("config")
 package.path = root .. "/lua/?.lua;" .. root .. "/lua/?/init.lua;" .. package.path
-require("krsnvim")
+require("krs.lib.krsnvim")
 dofile(root .. "/tests/syntax_check.lua")

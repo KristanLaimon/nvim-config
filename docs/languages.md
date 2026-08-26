@@ -60,7 +60,7 @@ No autocmd or pattern edits needed either way. For a full new language (server +
 
 ---
 
-## 👁️ LSP Reference Counter & CodeLens (`plugins.krs.lsp_references`)
+## 👁️ LSP Reference Counter & CodeLens (`plugins.krs.tools.lsp_references`)
 
 KrsVim displays reference counts (`󰌹 3 references`, `1 reference`) above functions, methods, classes, and structs across all supported languages:
 
@@ -106,4 +106,4 @@ Documentation is opt-in (`<C-space>`), and `{` / `[` are excluded from trigger c
 | Source | Fires in | Offers |
 |---|---|---|
 | [`krs.lsp.dap_repl_source`](debug-adapters.md#36-repl-completion-immediate-window) | `dap-repl`, only while a session is live | Real variables from the stopped frame, via the adapter's `completions` / `scopes` requests |
-| [`plugins.krs.launch_cmp`](launch-profiles.md#-intellisense-inside-launchjson) | Any file named `launch.json` | Discovered project tasks for `pre_launch_tasks`, runtimes for `runtime`, `run`/`debug` for `mode` |
+| [`plugins.krs.dev.launch_cmp`](launch-profiles.md#-intellisense-inside-launchjson) | Any file named `launch.json` | Discovered project tasks for `pre_launch_tasks`, runtimes for `runtime`, `run`/`debug` for `mode` |

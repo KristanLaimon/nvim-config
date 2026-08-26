@@ -2,13 +2,13 @@
 -- tests/spec/command_palette_spec.lua -- Command palette MRU history tests.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, beforeEach, afterEach = t.describe, t.it, t.expect, t.beforeEach, t.afterEach
-local cp = require("plugins.krs.command_palette")
+local cp = require("plugins.krs.tools.command_palette")
 
 local original_history_file
 
-describe("plugins.krs.command_palette MRU history", function()
+describe("plugins.krs.tools.command_palette MRU history", function()
 	beforeEach(function()
 		original_history_file = cp.settings.history_file
 		cp.settings.history_file = vim.fn.tempname() .. ".json"

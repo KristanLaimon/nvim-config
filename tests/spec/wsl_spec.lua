@@ -6,9 +6,9 @@
 -- or makes the project picker stat a network path and boot WSL for no reason.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, afterEach = t.describe, t.it, t.expect, t.afterEach
-local wsl = require("plugins.krs.wsl")
+local wsl = require("plugins.krs.tools.wsl")
 
 describe("wsl.parse_wsl_path", function()
 	it("splits a wsl.localhost path into distro and linux path", function()

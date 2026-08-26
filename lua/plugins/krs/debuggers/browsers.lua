@@ -12,11 +12,11 @@
 local shared = require("plugins.krs.debuggers._shared")
 
 local function dev()
-	return require("plugins.krs.dev_server").url()
+	return require("plugins.krs.dev.dev_server").url()
 end
 
 local function existing()
-	return require("plugins.krs.dev_server").existing_url()
+	return require("plugins.krs.dev.dev_server").existing_url()
 end
 
 return function(dap)

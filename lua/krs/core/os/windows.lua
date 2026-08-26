@@ -123,7 +123,7 @@ try {
 }
 ]=]
 	local res = vim.fn.system({ "powershell", "-NoProfile", "-NonInteractive", "-Command", ps_script })
-	local json = require("krsnvim.json")
+	local json = require("krs.lib.krsnvim.json")
 	local ok, parsed = pcall(json.decode, res)
 	if ok and type(parsed) == "table" and parsed.status then
 		return true, parsed

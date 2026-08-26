@@ -6,14 +6,14 @@
 --        <C-k>           respect .gitignore (git ls-files inside a repo)
 --        <C-A-k> / <C-?> ignore it entirely (everything, including hidden)
 --      Both are also exported as `_G.FindFilesGitignore` / `_G.FindFilesNoIgnore`,
---      which is what the keymaps in lua/config/keymaps/search.lua call.
+--      which is what the keymaps in lua/keymaps/search.lua call.
 --   2. `:TelescopeOpenFolder` -- browse directories and ADOPT one as the project:
 --      close splits, drop the old buffers, cd, record it, reopen the tree.
 --   3. `:TelescopeFindFilesSplit{Left,Below,Above,Right}` -- find a file and open
 --      it in a split.
 --
 -- KEY OWNERSHIP
---   The <C-S-h/j/k/l> split keys are bound in lua/config/keymaps/search.lua, not
+--   The <C-S-h/j/k/l> split keys are bound in lua/keymaps/search.lua, not
 --   here, because <C-S-j> has to fall through to the DAP repl during a debug
 --   session. This file only provides the commands they drive.
 -- ============================================================================
@@ -284,7 +284,7 @@ return {
 			end
 		end
 
-		-- Exported for lua/config/keymaps/search.lua, which binds these before
+		-- Exported for lua/keymaps/search.lua, which binds these before
 		-- telescope has loaded.
 		_G.FindFilesGitignore = find_files_gitignore
 		_G.FindFilesNoIgnore = find_files_no_ignore
@@ -407,7 +407,7 @@ return {
 			end
 
 			pcall(function()
-				require("plugins.krs.wsl").add_recent_project(key)
+				require("plugins.krs.tools.wsl").add_recent_project(key)
 			end)
 		end
 
@@ -448,7 +448,7 @@ return {
 		--- @param on_select function|nil `function(dir)` Optional callback when selected.
 		open_folder_picker = function(opts, on_select)
 			opts = opts or {}
-			return require("plugins.krs.file_explorer").open_folder_picker(opts, on_select)
+			return require("plugins.krs.tools.file_explorer").open_folder_picker(opts, on_select)
 		end
 
 		_G.OpenFolderPicker = open_folder_picker
@@ -460,16 +460,16 @@ return {
 		end, { desc = "Browse folders and open one as the active project" })
 		if settings.open_folder_key then
 			vim.keymap.set({ "n", "i" }, settings.open_folder_key, function()
-				require("plugins.krs.sneak_peek").toggle_or_pick()
+				require("plugins.krs.dev.sneak_peek").toggle_or_pick()
 			end, { desc = "Sneak-Peek Project Modal (Ctrl+Shift+O)" })
 		end
 
 		vim.api.nvim_create_user_command("TelescopeFileBrowserDesktop", function()
-			require("plugins.krs.file_explorer").open_desktop_explorer()
+			require("plugins.krs.tools.file_explorer").open_desktop_explorer()
 		end, { desc = "Open the floating desktop file explorer" })
 		if settings.desktop_explorer_key then
 			vim.keymap.set({ "n", "i" }, settings.desktop_explorer_key, function()
-				require("plugins.krs.file_explorer").open_desktop_explorer()
+				require("plugins.krs.tools.file_explorer").open_desktop_explorer()
 			end, { desc = "Open Desktop File Explorer" })
 		end
 
@@ -500,7 +500,7 @@ return {
 			})
 		end
 
-		-- Keys for these live in lua/config/keymaps/search.lua (see the header).
+		-- Keys for these live in lua/keymaps/search.lua (see the header).
 		local split_commands = {
 			TelescopeFindFilesSplitLeft = "h",
 			TelescopeFindFilesSplitBelow = "j",

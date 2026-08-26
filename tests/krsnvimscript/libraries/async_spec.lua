@@ -1,9 +1,9 @@
 -- ============================================================================
 -- tests/krsnvimscript/libraries/async_spec.lua -- Spec tests for krsnvim.async module
 -- ============================================================================
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local async = require("krsnvim.async")
+local async = require("krs.lib.krsnvim.async")
 
 describe("krsnvim.async module", function()
 	it("exposes concurrency, parallelism, and async primitives", function()

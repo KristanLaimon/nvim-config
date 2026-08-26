@@ -6,7 +6,7 @@
 -- tested because it carries no logic.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, afterEach = t.describe, t.it, t.expect, t.afterEach
 local ui = require("krs.core.ui")
 

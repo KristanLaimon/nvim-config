@@ -4,7 +4,7 @@
 -- WHAT IT DOES
 --   - Sets PSR-12 standard PHP indentation defaults (4 spaces) when no .editorconfig exists.
 --   - Integrates Composer vendor bin PATH prepending (`krs.langs.php.composer`).
---   - Integrates PHP/Laravel toolchain check modal (`plugins.krs.php_tools_modal`).
+--   - Integrates PHP/Laravel toolchain check modal (`plugins.krs.tools.php_tools_modal`).
 --   - Owns the intelephense LSP server and the pint/php_cs_fixer/blade-formatter
 --     formatters: settings, Mason package names, and filetype assignment.
 -- ============================================================================
@@ -16,11 +16,11 @@
 ---@type PHPLangModule
 local M = {
 	composer = require("krs.langs.php.composer"),
-	modal = require("plugins.krs.php_tools_modal"),
+	modal = require("plugins.krs.tools.php_tools_modal"),
 }
 
 -- M.composer = require("krs.langs.php.composer")
--- M.modal = require("plugins.krs.php_tools_modal")
+-- M.modal = require("plugins.krs.tools.php_tools_modal")
 
 --- The lspconfig/mason server name(s) this language owns.
 M.lsp_server = { "intelephense" }

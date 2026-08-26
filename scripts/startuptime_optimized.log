@@ -42,16 +42,16 @@ times in msec
 057.827  001.454  000.367: require('vim.treesitter.query')
 057.845  001.802  000.349: require('vim.treesitter.languagetree')
 057.855  002.448  000.646: require('vim.treesitter')
-058.499  006.557  001.656: require('config.options')
+058.499  006.557  001.656: require('vim_options')
 058.760  000.253  000.253: require('krs.core.keymap_registry')
-060.152  001.162  001.162: require('config.keymaps.editor')
-060.881  000.468  000.468: require('config.keymaps.debug')
-061.074  000.914  000.446: require('config.keymaps.search')
+060.152  001.162  001.162: require('keymaps.editor')
+060.881  000.468  000.468: require('keymaps.debug')
+061.074  000.914  000.446: require('keymaps.search')
 062.296  000.144  000.144: require('vim.F')
 062.511  001.006  000.862: require('vim.diagnostic')
-062.837  001.757  000.751: require('config.keymaps.lsp')
-064.509  001.662  001.662: require('config.keymaps.krs')
-064.523  005.756  000.260: require('config.keymaps')
+062.837  001.757  000.751: require('keymaps.lsp')
+064.509  001.662  001.662: require('keymaps.krs')
+064.523  005.756  000.260: require('keymaps')
 068.689  003.497  003.497: require('lazy')
 068.743  000.027  000.027: require('ffi')
 069.040  000.288  000.288: require('lazy.stats')
@@ -297,7 +297,7 @@ times in msec
 252.647  000.312  000.312: sourcing C:\Users\Kristan\scoop\apps\neovim\current\share/nvim/runtime/plugin/spellfile.lua
 252.681  000.834  000.522: sourcing nvim_exec2() called at C:\Users\Kristan\AppData\Local\nvim\init.lua:0
 253.938  000.977  000.977: require('krs.core.installer')
-254.156  189.628  123.389: require('config.lazy')
+254.156  189.628  123.389: require('lazy_init')
 254.178  203.692  000.265: sourcing C:\Users\Kristan\AppData\Local\nvim\init.lua
 254.242  003.361: sourcing vimrc file(s)
 257.413  000.266  000.266: sourcing C:\Users\Kristan\scoop\apps\neovim\current\share\nvim\runtime\filetype.lua

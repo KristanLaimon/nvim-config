@@ -2,7 +2,7 @@
 -- tests/spec/buffer_rename_spec.lua -- Buffer & bufferline tab rename tests.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
 local buffer_rename = require("krs.core.buffer_rename")

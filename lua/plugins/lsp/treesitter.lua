@@ -3,7 +3,7 @@
 -- ============================================================================
 -- ADD A LANGUAGE by adding its parser to the list below; `:TSUpdate` installs it.
 -- The `.krsnvim` filetype has no parser of its own: it is registered as an alias
--- of Lua in lua/config/options.lua.
+-- of Lua in lua/vim_options.lua.
 --
 -- NOTE ON THE `main` BRANCH
 --   It dropped the old `highlight.enable` option, so highlighting is started per

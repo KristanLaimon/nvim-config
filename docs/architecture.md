@@ -127,9 +127,9 @@ manager. It wires things together and owns no features of its own.
 sequenceDiagram
     participant NV as Neovim
     participant INIT as init.lua
-    participant OPT as config.options
-    participant KEY as config.keymaps
-    participant LAZY as config.lazy
+    participant OPT as vim_options
+    participant KEY as keymaps
+    participant LAZY as lazy_init
     participant SPEC as plugins/*
 
     NV->>INIT: source init.lua
@@ -183,7 +183,7 @@ return setmetatable({
 ```
 
 `setmetatable` makes both worlds work at once: lazy.nvim sees a spec table,
-while `require("plugins.krs.tasks").run_task_item(...)` still reaches the
+while `require("plugins.krs.dev.tasks").run_task_item(...)` still reaches the
 module's own functions through `__index`.
 
 Two rules come out of this:

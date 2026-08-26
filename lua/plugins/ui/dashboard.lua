@@ -101,7 +101,7 @@ return {
 		dashboard.section.buttons.val = vim.tbl_map(make_button, settings.buttons)
 
 		-- The WSL entry would be a dead end on a machine without WSL.
-		local ok_wsl, wsl = pcall(require, "plugins.krs.wsl")
+		local ok_wsl, wsl = pcall(require, "plugins.krs.tools.wsl")
 		if ok_wsl and wsl.available() then
 			table.insert(dashboard.section.buttons.val, settings.wsl_button_position, make_button(settings.wsl_button))
 		end

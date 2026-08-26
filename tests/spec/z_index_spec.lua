@@ -2,7 +2,7 @@
 -- tests/spec/z_index_spec.lua -- Spec suite for krs.core.z_index manager.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, beforeEach = t.describe, t.it, t.expect, t.beforeEach
 local z_index = require("krs.core.z_index")
 

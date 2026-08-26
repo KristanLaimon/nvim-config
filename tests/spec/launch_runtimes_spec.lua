@@ -6,7 +6,7 @@
 -- Anything that shells out (`node -v`, dotnet globs) is avoided or sandboxed.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 local runtimes = require("krs.launch.runtimes")
 
@@ -95,20 +95,20 @@ describe("runtimes.build_dap_config", function()
 	end)
 
 	it("keeps js-debug out of node internals", function()
-		expect(runtimes.build_dap_config(profile("node"), ROOT).skipFiles).toEqual(runtimes.js_skip_files)
+		expect(runtimes.build_dap_config(profile("node"), ROOT).skipFiles).toEqual(require("krs.langs.typescript").js_skip_files)
 	end)
 
 	it("attaches deno to its inspector port", function()
 		local cfg = runtimes.build_dap_config(profile("deno"), ROOT)
 
 		expect(cfg.runtimeExecutable).toBe("deno")
-		expect(cfg.attachSimplePort).toBe(runtimes.deno_inspect_port)
+		expect(cfg.attachSimplePort).toBe(require("krs.langs.typescript").deno_inspect_port)
 	end)
 
 	it("waits for xdebug to connect back on the configured port", function()
 		local cfg = runtimes.build_dap_config(profile("php"), ROOT)
 
-		expect(cfg.port).toBe(runtimes.php_debug_port)
+		expect(cfg.port).toBe(require("krs.langs.php").php_debug_port)
 		expect(cfg.pathMappings["/var/www/html"]).toBe(ROOT)
 	end)
 

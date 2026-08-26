@@ -2,7 +2,7 @@
 -- tests/spec/notify_focus_protection_spec.lua -- Notify focus protection tests.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
 describe("krs.core.notify focus protection", function()

@@ -6,7 +6,7 @@
 -- the two panes would fight over the same side of the dock.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, afterEach = t.describe, t.it, t.expect, t.afterEach
 local dock = require("krs.core.dock")
 

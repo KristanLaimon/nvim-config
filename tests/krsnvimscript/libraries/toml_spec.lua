@@ -1,9 +1,9 @@
 -- ============================================================================
 -- tests/krsnvimscript/libraries/toml_spec.lua -- Spec tests for krsnvim.toml module
 -- ============================================================================
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local toml = require("krsnvim.toml")
+local toml = require("krs.lib.krsnvim.toml")
 
 describe("krsnvim.toml module", function()
 	it("parses TOML strings and handles basic structures", function()

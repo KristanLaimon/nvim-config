@@ -2,7 +2,7 @@
 -- tests/spec/git_submodules_spec.lua -- Submodule parsing, discovery and listing.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 local submodules = require("krs.git.submodules")
 

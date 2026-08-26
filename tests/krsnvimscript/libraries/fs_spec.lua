@@ -1,9 +1,9 @@
 -- ============================================================================
 -- tests/krsnvimscript/libraries/fs_spec.lua -- Spec tests for krsnvim.fs module
 -- ============================================================================
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local fs = require("krsnvim.fs")
+local fs = require("krs.lib.krsnvim.fs")
 
 describe("krsnvim.fs module", function()
 	it("checks file and directory existence", function()

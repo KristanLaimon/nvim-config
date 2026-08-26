@@ -6,7 +6,7 @@
 -- press the key, so the whole surface is asserted here after a real startup.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
 --- True when a user command exists.
@@ -31,9 +31,9 @@ end
 
 pcall(function()
 	vim.api.nvim_exec_autocmds("VimEnter", { modeline = false })
-	require("plugins.krs.workspaces").setup()
-	require("plugins.krs.git_center").setup()
-	require("plugins.krs.tasks").setup()
+	require("plugins.krs.tools.workspaces").setup()
+	require("plugins.krs.git.git_center").setup()
+	require("plugins.krs.dev.tasks").setup()
 end)
 
 describe("user commands", function()
@@ -125,7 +125,7 @@ describe("keymaps", function()
 	end)
 
 	it("binds every terminal slot", function()
-		local terminal = require("plugins.krs.terminal")
+		local terminal = require("plugins.krs.dev.terminal")
 		for slot = 1, terminal.settings.count do
 			local key = "<A-" .. slot .. ">"
 			expect({ key, has_keymap(key, { "n", "i", "t" }) }).toEqual({ key, true })
@@ -133,7 +133,7 @@ describe("keymaps", function()
 	end)
 
 	it("binds every task output slot", function()
-		local tasks = require("plugins.krs.tasks")
+		local tasks = require("plugins.krs.dev.tasks")
 		for slot = 1, tasks.settings.max_slots do
 			local key = "<C-A-S-" .. slot .. ">"
 			expect({ key, has_keymap(key, { "n", "i", "t" }) }).toEqual({ key, true })
@@ -151,6 +151,6 @@ describe("global helpers other modules rely on", function()
 
 	it("replaces vim.ui.input with the shared modal", function()
 		expect(type(vim.ui.input)).toBe("function")
-		expect(type(require("plugins.krs.input_modal").open)).toBe("function")
+		expect(type(require("plugins.krs.ui.input_modal").open)).toBe("function")
 	end)
 end)

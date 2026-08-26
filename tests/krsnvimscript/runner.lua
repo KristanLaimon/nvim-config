@@ -8,8 +8,8 @@
 --   nvim -l tests/krsnvimscript/runner.lua          # Deletes generated .sh and .ps1 by default
 --   nvim -l tests/krsnvimscript/runner.lua keep     # Keeps generated .sh and .ps1 files on disk
 -- ============================================================================
-local transpiler = require("krsnvim.krsnvimtranspiler")
-local fs = require("krsnvim.fs")
+local transpiler = require("krs.lib.krsnvim.krsnvimtranspiler")
+local fs = require("krs.lib.krsnvim.fs")
 
 local args = _G.arg or {}
 local should_keep = false

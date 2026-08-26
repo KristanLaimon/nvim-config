@@ -5,7 +5,7 @@
 -- mode+lhs+scope. A second bind of the same key fires a toast instead of
 -- silently overwriting the first one.
 --
--- A key bound eagerly in config/keymaps/krs.lua is deliberately re-bound by
+-- A key bound eagerly in keymaps/krs.lua is deliberately re-bound by
 -- lazy.nvim's own `keys = {...}` stub handler for the matching plugin (see
 -- krs.lua:17-20) -- confirmed at real startup: every intentional duplicate
 -- has its second bind sourced from lazy.nvim's stub handler itself, so that
@@ -20,7 +20,7 @@ local seen = {}
 
 --- Every un-allowlisted collision seen since startup, in order. A test can
 --- inspect this after the fact even for collisions that happened before it
---- got a chance to install a vim.notify stub (e.g. the eager config.keymaps
+--- got a chance to install a vim.notify stub (e.g. the eager keymaps
 --- load, which finishes before any spec file runs).
 M.collisions = {}
 
@@ -37,7 +37,7 @@ M.collisions = {}
 --   whose own docstring says a terminal buffer's <C-w> closes the window, not
 --   :bdelete, same as terminal.lua's fallback.
 -- - plugins/krs/git_center.lua's own M.setup() binds toggle/stage_all keys
---   itself, duplicating config/keymaps/krs.lua's git_center/git_stage_all
+--   itself, duplicating keymaps/krs.lua's git_center/git_stage_all
 --   binds of the same keys to the same actions (toggle_git_center /
 --   stage_all_with_modal) -- deliberate per krs.lua's own "WHY THE KEYS ARE
 --   DUPLICATED HERE AND IN THE PLUGINS" docstring (krs.lua:17-20): each
@@ -45,7 +45,7 @@ M.collisions = {}
 --   eager bind or lazy.nvim's stub handler has run.
 M.ALLOWLIST_SOURCE_PATTERNS = {
 	"lazy/core/handler/keys%.lua",
-	"config/keymaps/",
+	"keymaps/",
 	"plugins/krs/",
 	"plugins/editor/",
 	"plugins/lsp/",

@@ -5,7 +5,7 @@
 -- edge cases (drive letters, trailing slashes, case sensitivity) are pinned here.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 local path = require("krs.core.path")
 

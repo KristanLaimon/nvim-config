@@ -1,9 +1,9 @@
 -- ============================================================================
 -- tests/krsnvimscript/libraries/transpiler_spec.lua -- Spec tests for krsnvimtranspiler
 -- ============================================================================
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local transpiler = require("krsnvim.krsnvimtranspiler")
+local transpiler = require("krs.lib.krsnvim.krsnvimtranspiler")
 
 describe("krsnvimtranspiler bash generation", function()
 	it("transpiles basic print and variable assignments", function()

@@ -1,4 +1,4 @@
-# 💉 Type Injector (`plugins.krs.type_injector`)
+# 💉 Type Injector (`plugins.krs.tools.type_injector`)
 
 [← Back to Wiki Index](index.md)
 

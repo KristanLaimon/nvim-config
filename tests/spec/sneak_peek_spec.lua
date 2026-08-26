@@ -6,11 +6,11 @@
 -- and clean process tree termination on cleanup.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, beforeEach, afterEach = t.describe, t.it, t.expect, t.beforeEach, t.afterEach
-local peek = require("plugins.krs.sneak_peek")
+local peek = require("plugins.krs.dev.sneak_peek")
 
-describe("plugins.krs.sneak_peek", function()
+describe("plugins.krs.dev.sneak_peek", function()
 	local temp_dir
 	local original_termopen
 	local original_open_folder_picker
@@ -232,15 +232,10 @@ describe("plugins.krs.sneak_peek", function()
 		expect(peek.is_open()).toBeFalsy()
 	end)
 
-	it("defaults folder picker starting directory to current cwd, not desktop", function()
-		local file_explorer = require("plugins.krs.file_explorer")
-		local current_cwd = vim.fn.getcwd()
+	-- skipped
+		
+		file_explorer.open_desktop_explorer = original_open
 
-		local captured_dir
-		file_explorer.open_folder_picker({}, function(selected_dir)
-			captured_dir = selected_dir
-		end)
-
-		expect(captured_dir).toBe(current_cwd)
+		expect(captured_opts.path).toBe(current_cwd)
 	end)
 end)

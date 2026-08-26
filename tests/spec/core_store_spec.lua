@@ -6,7 +6,7 @@
 -- the caller's fallback instead of breaking the editor at startup.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, beforeEach, afterEach = t.describe, t.it, t.expect, t.beforeEach, t.afterEach
 local store = require("krs.core.store")
 

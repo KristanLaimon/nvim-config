@@ -23,7 +23,7 @@
 local sources = {
 	launch_json = {
 		name = "LaunchJson",
-		module = "plugins.krs.launch_cmp",
+		module = "plugins.krs.dev.launch_cmp",
 		score_offset = 100,
 		enabled = function()
 			return vim.fn.expand("%:t") == "launch.json"
@@ -31,7 +31,7 @@ local sources = {
 	},
 	krsnvim = {
 		name = "KrsNvimScript",
-		module = "plugins.krs.krsnvim_cmp",
+		module = "plugins.krs.dev.krsnvim_cmp",
 		score_offset = 100,
 		enabled = function()
 			local ft = vim.bo.filetype

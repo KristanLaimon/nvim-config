@@ -1,12 +1,12 @@
 -- ============================================================================
 -- tests/spec/transpiler_commands_spec.lua -- Spec tests for KrsTranspile commands
 -- ============================================================================
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local fs = require("krsnvim.fs")
+local fs = require("krs.lib.krsnvim.fs")
 
 -- Ensure keymaps and user commands are loaded
-require("config.keymaps.krs")
+require("keymaps.krs")
 
 describe("KrsTranspile commands and file resolution", function()
 	it("registers user commands for transpilation", function()

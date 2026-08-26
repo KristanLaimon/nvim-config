@@ -1,11 +1,11 @@
 -- 🦊 test.krsnvim - krsnvimscript example
 local root = vim.fn.stdpath("config")
 package.path = root .. "/lua/?.lua;" .. root .. "/lua/?/init.lua;" .. package.path
-require("krsnvim")
+require("krs.lib.krsnvim")
 
-local cli = require("krsnvim.terminal")
-local fetch = require("krsnvim.fetch")
-local console = require("krsnvim.console")
+local cli = require("krs.lib.krsnvim.terminal")
+local fetch = require("krs.lib.krsnvim.fetch")
+local console = require("krs.lib.krsnvim.console")
 
 print("Hello from test.krsnvim script! 🦊")
 

@@ -53,7 +53,7 @@ M.commands = {
     { 
         name = "🧹 Clean Unused Buffers", 
         fn = function()
-            require("plugins.krs.buffer_cleaner").clean_buffers()
+            require("plugins.krs.editor.buffer_cleaner").clean_buffers()
         end, 
         category = "Buffer" 
     },
@@ -65,7 +65,7 @@ M.commands = {
 You can register commands dynamically from any other Lua plugin or configuration file without modifying `command_palette.lua`:
 
 ```lua
-local cp = require("plugins.krs.command_palette")
+local cp = require("plugins.krs.tools.command_palette")
 
 cp.add_command({
     name = "🚀 Run Custom Build Script",

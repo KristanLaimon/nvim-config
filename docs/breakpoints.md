@@ -1,4 +1,4 @@
-# 🔴 Breakpoints (`plugins.krs.dap_breakpoints`)
+# 🔴 Breakpoints (`plugins.krs.dev.dap_breakpoints`)
 
 [← Back to Wiki Index](index.md)
 

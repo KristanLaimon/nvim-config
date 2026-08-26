@@ -6,7 +6,7 @@
 -- settings, so each precedence rule gets its own test.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, beforeEach, afterEach = t.describe, t.it, t.expect, t.beforeEach, t.afterEach
 local project = require("krs.core.project")
 local path = require("krs.core.path")

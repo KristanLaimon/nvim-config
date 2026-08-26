@@ -9,10 +9,10 @@
 
 require("lazy").load({ plugins = { "nvim-dap" } })
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 local dap_bp = require("dap.breakpoints")
-local krs = require("plugins.krs.dap_breakpoints")
+local krs = require("plugins.krs.dev.dap_breakpoints")
 
 local root = vim.fn.tempname()
 vim.fn.mkdir(root, "p")

@@ -4,9 +4,9 @@
 -- Target / Current Neovim Version: NVIM v0.12.4
 --
 -- STARTUP ORDER (each step depends on the one before it)
---   1. config.options   Editor options, filetypes, shell, PATH repair.
---   2. config.keymaps   Every keybinding, grouped by domain.
---   3. config.lazy      Bootstraps lazy.nvim and imports lua/plugins/*.
+--   1. vim_options   Editor options, filetypes, shell, PATH repair.
+--   2. keymaps   Every keybinding, grouped by domain.
+--   3. lazy_init      Bootstraps lazy.nvim and imports lua/plugins/*.
 --
 -- WHERE THINGS LIVE
 --   lua/config/    Editor bootstrap: options, keymaps, plugin manager.
@@ -24,17 +24,17 @@ if vim.loader then
 	vim.loader.enable()
 end
 
-require("config.options")
+require("vim_options")
 require("krs.core.keymap_registry").install()
-require("config.keymaps")
-require("config.lazy")
+require("keymaps")
+require("lazy_init")
 
--- Reload the configuration without restarting. Only `config.*` modules are
+-- Reload the configuration without restarting. Only top-level config modules are
 -- dropped from the cache; plugins keep their state, which is what makes this
 -- fast enough to use while editing keymaps.
 vim.api.nvim_create_user_command("ReloadConfig", function()
 	for name, _ in pairs(package.loaded) do
-		if name:match("^config") then
+		if name == "vim_options" or name == "lazy_init" or name:match("^keymaps") then
 			package.loaded[name] = nil
 		end
 	end

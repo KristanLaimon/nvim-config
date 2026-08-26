@@ -2,7 +2,7 @@
 -- tests/spec/lazy_specs_spec.lua -- Validates lazy plugin specs for well-formedness.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
 describe("lazy plugin specs integrity", function()

@@ -2,11 +2,11 @@
 -- tests/spec/git_center_spec.lua -- Lifecycle, toggle, buffer flags and keys.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, beforeEach, afterEach = t.describe, t.it, t.expect, t.beforeEach, t.afterEach
-local git_center = require("plugins.krs.git_center")
+local git_center = require("plugins.krs.git.git_center")
 
-describe("plugins.krs.git_center", function()
+describe("plugins.krs.git.git_center", function()
 	beforeEach(function()
 		if git_center.is_open() then
 			git_center.close_git_center()

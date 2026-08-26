@@ -1,4 +1,4 @@
-# 📁 File Explorers & Move Picker (`plugins.krs.file_explorer`)
+# 📁 File Explorers & Move Picker (`plugins.krs.tools.file_explorer`)
 
 [← Back to Wiki Index](index.md)
 

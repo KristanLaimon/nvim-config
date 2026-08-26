@@ -23,7 +23,7 @@ return {
 			"nvim-tree/nvim-web-devicons",
 		},
 		opts = function()
-			local has_picker, picker = pcall(require, "plugins.krs.statusline_picker")
+			local has_picker, picker = pcall(require, "plugins.krs.ui.statusline_picker")
 			if has_picker then
 				return picker.get_lualine_config()
 			end

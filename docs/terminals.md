@@ -1,4 +1,4 @@
-# 🖥️ Multi-Terminal Manager (`plugins.krs.terminal`)
+# 🖥️ Multi-Terminal Manager (`plugins.krs.dev.terminal`)
 
 [← Back to Wiki Index](index.md)
 

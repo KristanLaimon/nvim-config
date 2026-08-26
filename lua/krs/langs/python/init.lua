@@ -28,7 +28,7 @@ function M.get_python_interpreter(bufnr)
 	end
 
 	-- 1. Check vscode_settings or .vscode/settings.json / .krsnvim/settings.json
-	local ok_vsc, vsc = pcall(require, "plugins.krs.vscode_settings")
+	local ok_vsc, vsc = pcall(require, "plugins.krs.tools.vscode_settings")
 	if ok_vsc then
 		local _, settings = vsc.load_settings()
 		if settings then

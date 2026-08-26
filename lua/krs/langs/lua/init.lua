@@ -31,7 +31,7 @@ M.lsp_config = {
 				},
 				workspace = {
 					checkThirdParty = false,
-					library = require("plugins.krs.type_injector").get_active_lua_libraries(),
+					library = require("plugins.krs.tools.type_injector").get_active_lua_libraries(),
 				},
 				completion = {
 					callSnippet = "Replace",
@@ -87,7 +87,7 @@ function M.dap_setup(dap)
 			args = {
 				"--headless",
 				"-c",
-				"lua package.path = vim.fn.stdpath('config') .. '/lua/?.lua;' .. vim.fn.stdpath('config') .. '/lua/?/init.lua;' .. package.path; require('krsnvim'); dofile('"
+				"lua package.path = vim.fn.stdpath('config') .. '/lua/?.lua;' .. vim.fn.stdpath('config') .. '/lua/?/init.lua;' .. package.path; require('krs.lib.krsnvim'); dofile('"
 					.. (config.program or "")
 					.. "')",
 			},
@@ -108,7 +108,7 @@ end
 --- `krsnvimtranspiler` isn't a process: it transpiles the script to shell files
 --- and returns. `args_str` selects the target ("sh", "ps1", anything else = both).
 local NVIM_LUA_ENTRY_COMMAND =
-	"nvim --headless -c \"lua package.path = vim.fn.stdpath('config') .. '/lua/?.lua;' .. vim.fn.stdpath('config') .. '/lua/?/init.lua;' .. package.path; require('krsnvim')\" -l"
+	"nvim --headless -c \"lua package.path = vim.fn.stdpath('config') .. '/lua/?.lua;' .. vim.fn.stdpath('config') .. '/lua/?/init.lua;' .. package.path; require('krs.lib.krsnvim')\" -l"
 M.launch_runtimes = {
 	lua = {
 		command = NVIM_LUA_ENTRY_COMMAND,
@@ -136,7 +136,7 @@ M.launch_runtimes = {
 	},
 	krsnvimtranspiler = {
 		execute = function(ctx)
-			local transpiler = require("krsnvim").krsnvimtranspiler
+			local transpiler = require("krs.lib.krsnvim").krsnvimtranspiler
 			if ctx.args_str == "sh" then
 				transpiler.export_sh(ctx.full_entry)
 			elseif ctx.args_str == "ps1" then

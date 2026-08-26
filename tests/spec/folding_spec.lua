@@ -3,12 +3,12 @@
 -- Unit tests for plugins/krs/folding.lua (HTML, functions, scope folding & persistence).
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, beforeEach, afterEach = t.describe, t.it, t.expect, t.beforeEach, t.afterEach
 
-local folding = require("plugins.krs.folding")
+local folding = require("plugins.krs.editor.folding")
 
-describe("plugins.krs.folding", function()
+describe("plugins.krs.editor.folding", function()
 	local buf
 
 	beforeEach(function()

@@ -1,4 +1,4 @@
-# 🛠️ Per-Project Task Runner & Executor (`plugins.krs.tasks`)
+# 🛠️ Per-Project Task Runner & Executor (`plugins.krs.dev.tasks`)
 
 [← Back to Wiki Index](index.md)
 

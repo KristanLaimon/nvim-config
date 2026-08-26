@@ -88,6 +88,9 @@ $Content = $Content -replace '(?s)\s*"acrylicOpacity"\s*:\s*[\d\.]+,?', ''
 $Content = $Content -replace '(?s)\s*"padding"\s*:\s*"[^"]*",?', ''
 $Content = $Content -replace '(?s)\s*"scrollbarState"\s*:\s*"[^"]*",?', ''
 
+# Forzar JetBrainsMono Nerd Font en cualquier configuración de fuente existente
+$Content = $Content -replace '(?i)"face"\s*:\s*"[^"]+"', '"face": "JetBrainsMono Nerd Font"'
+
 $VisualConfig = @"
             "useAcrylic": true,
             "opacity": 25,

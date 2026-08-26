@@ -7,7 +7,7 @@
 -- original order so the list does not shuffle between identical requests.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 local menu = require("krs.lsp.code_action_menu")
 

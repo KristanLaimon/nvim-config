@@ -2,11 +2,11 @@
 -- tests/spec/statusline_spec.lua -- Statusline engine & theme picker.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local statusline = require("plugins.krs.statusline_picker")
+local statusline = require("plugins.krs.ui.statusline_picker")
 
-describe("plugins.krs.statusline_picker", function()
+describe("plugins.krs.ui.statusline_picker", function()
 	it("formats modes into NvChad icon pills", function()
 		expect(statusline.format_mode("NORMAL")).toBe(" NORMAL")
 		expect(statusline.format_mode("INSERT")).toBe("󰏫 INSERT")

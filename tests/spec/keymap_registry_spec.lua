@@ -2,7 +2,7 @@
 -- tests/spec/keymap_registry_spec.lua -- Keymap collision toast test.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
 describe("keymap_registry", function()
@@ -32,7 +32,11 @@ describe("keymap_registry", function()
 			vim.wait(100, function()
 				return #calls > 0
 			end)
-
+            if #calls ~= 1 then
+                for i, c in ipairs(calls) do
+                    print("CALL", i, c.msg)
+                end
+            end
 			expect(#calls).toBe(1)
 			expect(calls[1].opts.title).toBe("Keymap collision")
 			expect(calls[1].opts.max_width).toBe(120)

@@ -41,7 +41,7 @@ list grows constantly, so don't trust a snapshot of it here — `nvim -l tests/r
 every spec currently in the suite, and `ls tests/spec/` shows the files directly.
 
 The `krsnvimscript` library keeps its own suite in `lua/krsnvim/tests/`, run with
-`require("krsnvim.tests").run_all()`.
+`require("krs.lib.krsnvim.tests").run_all()`.
 
 ---
 
@@ -57,7 +57,7 @@ Both runners use the same framework, `krsnvim.test` — the Vitest-style
 -- Why these particular cases matter.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 local feature = require("krs.core.path")
 

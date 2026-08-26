@@ -15,7 +15,7 @@
 --
 -- COLLABORATORS
 --   krs.projects.favorites   Starred paths, shared with the file explorer.
---   plugins.krs.wsl          WSL detection and its own recent list.
+--   plugins.krs.tools.wsl          WSL detection and its own recent list.
 -- ============================================================================
 
 local lazy_req = require("krs.core.lazy_require")
@@ -175,7 +175,7 @@ return {
 		--- WSL helper module, when it is available.
 		--- @return table|nil wsl
 		local function wsl_module()
-			local ok, wsl = pcall(require, "plugins.krs.wsl")
+			local ok, wsl = pcall(require, "plugins.krs.tools.wsl")
 			return ok and wsl or nil
 		end
 
@@ -501,7 +501,7 @@ return {
 								actions.close(prompt_bufnr)
 
 								vim.schedule(function()
-									require("plugins.krs.input_modal").open({
+									require("plugins.krs.ui.input_modal").open({
 										label = "Rename Project (" .. old_name .. ")",
 										default_value = old_name,
 										relative = "editor",

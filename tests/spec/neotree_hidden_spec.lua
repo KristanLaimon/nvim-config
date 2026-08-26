@@ -2,12 +2,12 @@
 -- tests/spec/neotree_hidden_spec.lua -- Neo-tree custom hidden items tests.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, beforeEach, afterEach = t.describe, t.it, t.expect, t.beforeEach, t.afterEach
-local neotree_hidden = require("plugins.krs.neotree_hidden")
+local neotree_hidden = require("plugins.krs.editor.neotree_hidden")
 local project = require("krs.core.project")
 
-describe("plugins.krs.neotree_hidden state management", function()
+describe("plugins.krs.editor.neotree_hidden state management", function()
 	local test_root = nil
 
 	beforeEach(function()

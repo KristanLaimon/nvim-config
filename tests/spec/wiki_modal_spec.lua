@@ -2,12 +2,12 @@
 -- tests/spec/wiki_modal_spec.lua -- Documentation Center Wiki Modal.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
-local wiki_modal = require("plugins.krs.wiki_modal")
-local lsp_keymaps = require("config.keymaps.lsp")
+local wiki_modal = require("plugins.krs.ui.wiki_modal")
+local lsp_keymaps = require("keymaps.lsp")
 
-describe("plugins.krs.wiki_modal", function()
+describe("plugins.krs.ui.wiki_modal", function()
 	it("exposes documentation categories and docs directory setting", function()
 		expect(wiki_modal.categories).toBeDefined()
 		expect(#wiki_modal.categories).toBeGreaterThan(0)
@@ -29,7 +29,7 @@ describe("plugins.krs.wiki_modal", function()
 	end)
 
 	-- Regression: <C-S-d> silently opened LSP "go to definition" instead of
-	-- the wiki, because config.keymaps.lsp (loaded before lazy.nvim) and
+	-- the wiki, because keymaps.lsp (loaded before lazy.nvim) and
 	-- wiki_modal both claimed the same key. Whichever set it last won, so
 	-- the wiki could vanish again the moment another module reused the key.
 	it("does not share its open key with LSP go-to-definition", function()

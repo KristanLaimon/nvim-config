@@ -6,9 +6,9 @@ local root = vim.fn.stdpath("config")
 package.path = root .. "/lua/?.lua;" .. root .. "/lua/?/init.lua;" .. package.path
 
 -- Explicit krsnvimscript library imports
-local cli = require("krsnvim.cli")
-local terminal = require("krsnvim.terminal")
-local console = require("krsnvim.console")
+local cli = require("krs.lib.krsnvim.cli")
+local terminal = require("krs.lib.krsnvim.terminal")
+local console = require("krs.lib.krsnvim.console")
 
 local schema = {
 	name = "run_me",
@@ -47,8 +47,8 @@ end
 
 local function run_tests()
 	console.log("[run_me] Running Test Suite...")
-	_G.arg = {}
-	local code = safe_dofile(root .. "/tests/run.lua")
+	local runner = dofile(root .. "/tests/run.lua")
+	local code = runner.run(root, nil)
 	if code ~= 0 then
 		print(cli.colorize("[run_me] Tests failed (exit " .. code .. ").", cli.colors.red))
 	end

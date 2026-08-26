@@ -1,4 +1,4 @@
-# 🐙 Interactive Git Control Center (`plugins.krs.git_center`)
+# 🐙 Interactive Git Control Center (`plugins.krs.git.git_center`)
 
 [← Back to Wiki Index](index.md)
 

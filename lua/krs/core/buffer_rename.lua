@@ -63,7 +63,7 @@ function M.update_buffers_path(old_path, new_path)
 
 	-- Update pinned tabs list if any pinned file was renamed/moved
 	pcall(function()
-		local pinned_tabs = require("plugins.krs.pinned_tabs")
+		local pinned_tabs = require("plugins.krs.ui.pinned_tabs")
 		local pins = pinned_tabs.load_pins()
 		local updated_pins = {}
 		local changed_pins = false

@@ -6,7 +6,7 @@
 -- rather than matching something loosely.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect, afterEach = t.describe, t.it, t.expect, t.afterEach
 local help = require("plugins.krs.context_help")
 

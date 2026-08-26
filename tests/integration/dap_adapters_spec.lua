@@ -8,7 +8,7 @@
 
 require("lazy").load({ plugins = { "nvim-dap" } })
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 local dap = require("dap")
 

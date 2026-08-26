@@ -35,7 +35,7 @@ for _, file in ipairs(vim.fn.glob(root .. "/tests/integration/*_spec.lua", false
 	end
 end
 
-local ok, result = pcall(require("krsnvim.test").run)
+local ok, result = pcall(require("krs.lib.krsnvim.test").run)
 if not ok then
 	print(tostring(result))
 end

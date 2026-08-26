@@ -14,7 +14,7 @@ KrsVim provides a complete web frontend development setup for HTML, CSS, Svelte,
 | **Formatters (Conform)** | `prettierd`, `prettier`, `biome` | `prettier` plugin for Astro; `prettierd`/`prettier` for HTML, CSS, Svelte |
 | **Treesitter Parsers** | `html`, `css`, `svelte`, `astro` | Syntax highlighting and element folding |
 | **Autocompletion** | `blink.cmp` | Emmet abbreviations, CSS class autocompletion, and live Tailwind color previews (` ██ `) |
-| **Tailwind Class Sorting** | `plugins.krs.tailwind_organizer` | Automatic class sorting on save or on command (`:TailwindOrganize`) |
+| **Tailwind Class Sorting** | `plugins.krs.editor.tailwind_organizer` | Automatic class sorting on save or on command (`:TailwindOrganize`) |
 
 ---
 

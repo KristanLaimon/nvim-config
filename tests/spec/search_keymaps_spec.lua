@@ -2,12 +2,12 @@
 -- tests/spec/search_keymaps_spec.lua -- Unit tests for search keymappings.
 -- ============================================================================
 
-local t = require("krsnvim.test")
+local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
 describe("search keymaps configuration", function()
 	it("configures <C-k> and <C-K> for find_files (respecting .gitignore)", function()
-		local search = require("config.keymaps.search")
+		local search = require("keymaps.search")
 		local find_files = search.settings.keys.find_files
 
 		local has_ck, has_ck_upper = false, false
@@ -25,7 +25,7 @@ describe("search keymaps configuration", function()
 	end)
 
 	it("configures <C-A-k> and <C-A-K> for find_all_files (ignoring .gitignore)", function()
-		local search = require("config.keymaps.search")
+		local search = require("keymaps.search")
 		local find_all = search.settings.keys.find_all_files
 
 		local has_cak, has_cak_upper = false, false

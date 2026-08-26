@@ -46,7 +46,7 @@ function M.build(args, cwd)
 	local argv
 
 	if vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1 then
-		local ok_wsl, wsl = pcall(require, "plugins.krs.wsl")
+		local ok_wsl, wsl = pcall(require, "plugins.krs.tools.wsl")
 		if ok_wsl and wsl and wsl.parse_wsl_path then
 			local distro, linux_path = wsl.parse_wsl_path(cwd)
 			if distro and linux_path then
@@ -148,7 +148,7 @@ function M.git_dir(cwd)
 	if not git_dir:match("^/") and not git_dir:match("^%a:") and not git_dir:match("^//") then
 		git_dir = cwd .. "/" .. git_dir
 	elseif (vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1) and git_dir:match("^/") then
-		local ok_wsl, wsl = pcall(require, "plugins.krs.wsl")
+		local ok_wsl, wsl = pcall(require, "plugins.krs.tools.wsl")
 		if ok_wsl and wsl and wsl.parse_wsl_path then
 			local distro, _ = wsl.parse_wsl_path(cwd)
 			if distro then
