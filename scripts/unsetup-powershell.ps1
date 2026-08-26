@@ -55,10 +55,17 @@ foreach ($atajo in $Atajos) {
     }
 }
 
+# --- ELIMINACIÓN DE CONFIGURACIÓN VISUAL ---
+$Content = $Content -replace '(?s)\s*"useAcrylic"\s*:\s*(true|false),?', ''
+$Content = $Content -replace '(?s)\s*"opacity"\s*:\s*\d+,?', ''
+$Content = $Content -replace '(?s)\s*"acrylicOpacity"\s*:\s*[\d\.]+,?', ''
+$Content = $Content -replace '(?s)\s*"padding"\s*:\s*"[^"]*",?', ''
+$Content = $Content -replace '(?s)\s*"scrollbarState"\s*:\s*"[^"]*",?', ''
+
 if ($OriginalContent -ne $Content) {
     Set-Content -Path $SettingsPath -Value $Content -Encoding UTF8
-    Write-Host "   Configuración limpiada con éxito." -ForegroundColor Green
+    Write-Host "   Configuración limpiada con éxito (atajos y visual)." -ForegroundColor Green
     Write-Host "`n¡LISTO! Cierra y vuelve a abrir Windows Terminal." -ForegroundColor Cyan
 } else {
-    Write-Host "   No se encontraron atajos de Neovim que eliminar." -ForegroundColor Green
+    Write-Host "   No se encontraron configuraciones de Neovim que eliminar." -ForegroundColor Green
 }

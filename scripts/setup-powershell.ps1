@@ -67,15 +67,45 @@ foreach ($atajo in $Atajos) {
     }
 }
 
+$Changed = $false
+
 if ($Payload -ne "") {
     if ($Content -match '"actions":\s*\[') {
-        $NewContent = $Content -replace '("actions":\s*\[)', "`$1`n$Payload"
-        Set-Content -Path $SettingsPath -Value $NewContent -Encoding UTF8
-        Write-Host "   Configuración actualizada con éxito." -ForegroundColor Green
-        Write-Host "`n¡LISTO! Cierra y vuelve a abrir Windows Terminal." -ForegroundColor Cyan
+        $Content = $Content -replace '("actions":\s*\[)', "`$1`n$Payload"
+        $Changed = $true
     } else {
         Write-Warning "No se encontró el bloque 'actions: [' en tu archivo."
     }
 } else {
     Write-Host "   Todos los atajos inyectables ya estaban configurados." -ForegroundColor Green
+}
+
+# --- CONFIGURACIÓN VISUAL ---
+$OldContent = $Content
+$Content = $Content -replace '(?s)\s*"useAcrylic"\s*:\s*(true|false),?', ''
+$Content = $Content -replace '(?s)\s*"opacity"\s*:\s*\d+,?', ''
+$Content = $Content -replace '(?s)\s*"acrylicOpacity"\s*:\s*[\d\.]+,?', ''
+$Content = $Content -replace '(?s)\s*"padding"\s*:\s*"[^"]*",?', ''
+$Content = $Content -replace '(?s)\s*"scrollbarState"\s*:\s*"[^"]*",?', ''
+
+$VisualConfig = @"
+            "useAcrylic": true,
+            "opacity": 25,
+            "acrylicOpacity": 0.25,
+            "padding": "0",
+            "scrollbarState": "hidden",
+"@
+
+if ($Content -match '"defaults":\s*\{') {
+    $Content = $Content -replace '("defaults":\s*\{)', "`$1`n$VisualConfig"
+    if ($OldContent -ne $Content) {
+        $Changed = $true
+        Write-Host "   [+] Configuración visual (Blur y Padding) inyectada." -ForegroundColor Yellow
+    }
+}
+
+if ($Changed) {
+    Set-Content -Path $SettingsPath -Value $Content -Encoding UTF8
+    Write-Host "   Configuración actualizada con éxito." -ForegroundColor Green
+    Write-Host "`n¡LISTO! Cierra y vuelve a abrir Windows Terminal." -ForegroundColor Cyan
 }
