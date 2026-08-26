@@ -1,0 +1,39 @@
+{
+    "name": "libgmod",
+    "version": "0.0.1",
+    "description": "This is a vain attempt to get sane IDE completion working with Visual Studio Code.",
+    "main": "src/main.ts",
+    "type": "module",
+    "dependencies": {
+        "entities": "^5.0.0",
+        "gmod-wiki-scraper": "git+https://github.com/Lexicality/gmod-wiki-scraper.git#field-installable",
+        "lodash": "^4.17.23",
+        "tsx": "^4.19.1"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.12.0",
+        "@types/eslint__js": "^8.42.3",
+        "@types/lodash": "^4.14.155",
+        "@types/node": "^18",
+        "eslint": "^9.12.0",
+        "eslint-config-prettier": "^9",
+        "globals": "^15.10.0",
+        "prettier": "^3",
+        "typescript": "5.5.*",
+        "typescript-eslint": "^8"
+    },
+    "scripts": {
+        "start": "tsx src/main.ts",
+        "download": "gmod-wiki-scraper && ./sort_output.sh"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Lexicality/libgmod.git"
+    },
+    "author": "Lex Robinson",
+    "license": "Apache-2.0",
+    "bugs": {
+        "url": "https://github.com/Lexicality/libgmod/issues"
+    },
+    "homepage": "https://github.com/Lexicality/libgmod#readme"
+}

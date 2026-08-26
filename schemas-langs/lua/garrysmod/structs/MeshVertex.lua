@@ -1,0 +1,24 @@
+--- @meta
+
+--- A table structure representing the data stored by a single vertex of a mesh.  
+--- MeshVertex structures are usually grouped together in sets of 3 to define the corners of a triangle.  
+--- ℹ **NOTE**: Not all MeshVertex will contain all fields and not all fields are used by all shaders  
+--- Information on the fields used by most Source Engine shaders (Like `VertexLitGeneric`, `UnlitGeneric`, etc.) can be found [on the Valve Developer Wiki here.](https://developer.valvesoftware.com/wiki/Category:Shaders)  
+--- Returned by:  
+--- * util.GetModelMeshes  
+--- * PhysObj:GetMesh  
+--- Used by:  
+--- * IMesh:BuildFromTriangles  
+--- * Entity:PhysicsFromMesh  
+--- @class SMeshVertex
+--- @field color GColor @The Color that the area around this corner of a triangle should be tinted.
+--- @field normal GVector @A normalized Vector representing a direction facing away from (perpendicular to) the surface of the triangle that this vertex is a part of
+--- @field tangent GVector @A normalized Vector representing a direction facing along (parallel with) the surface of the triangle that this vertex is a part of.
+--- @field binormal GVector @A normalized Vector representing a direction facing away from (perpendicular to) both the vertex's normal and tangent directions
+--- @field pos GVector @The position of the vertex in local space.
+--- @field u number @The horizontal coordinate of a position on the texture of the triangle that this vertex is a part of
+--- @field v number @The vertical coordinate of a position on the texture of the triangle that this vertex is a part of
+--- @field u1 number @A secondary U texture coordinate used by some shaders like `LightmappedGeneric`
+--- @field v1 number @A secondary V texture coordinate used by some shaders like `LightmappedGeneric`
+--- @field userdata number[] @A sequential table of four numbers whose purpose and expected values are determined by the shader
+--- @field weights table[] @A sequential table of all the BoneWeight structures that affect this vertex
