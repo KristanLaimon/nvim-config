@@ -40,7 +40,7 @@ second while you iterate.
 
 ```
 c:\Users\Kristan\AppData\Local\nvim\
-├── init.lua                   -- Main Neovim bootstrap file (loads lua/config/lazy.lua)
+├── init.lua                   -- Main Neovim bootstrap file (loads lua/lazy_init.lua)
 ├── colors/                    -- Colorscheme files in nagatoro-krs palette format (*-krs.lua & nagatoro-*.lua)
 ├── docs/                      -- Full offline documentation & Wiki files
 ├── lua/
@@ -72,11 +72,11 @@ Two kinds of keybind live in this config, and the fix is different for each —
 [keybinds.md](keybinds.md) explains which is which up top:
 
 **Global keybind** (editing, windows, LSP, debugging — anything in
-`lua/config/keymaps/*.lua`): open the matching file, find the key in its
+`lua/keymaps/*.lua`): open the matching file, find the key in its
 `M.settings.keys` table, change the string, save, `:source $MYVIMRC`.
 
 ```lua
--- lua/config/keymaps/lsp.lua
+-- lua/keymaps/lsp.lua
 M.settings = {
     keys = {
         hover = "K",              -- change this to e.g. "<leader>k" if K feels wrong
@@ -208,7 +208,7 @@ KrsVim includes a multi-terminal manager supporting 9 independent floating/docke
 - **Toggle Terminal**: `<C-;>`
 - **Switch Slots**: `<A-1>` .. `<A-9>`
 - **Config file**: `lua/plugins/krs/terminals.lua`
-- **Default Shell**: Automatically detects WSL `wsl.exe` on Windows, or `pwsh.exe` / `bash`. You can set your preferred shell in `lua/config/options.lua`:
+- **Default Shell**: Automatically detects WSL `wsl.exe` on Windows, or `pwsh.exe` / `bash`. You can set your preferred shell in `lua/vim_options.lua`:
   ```lua
   vim.opt.shell = "pwsh"
   ```
@@ -299,5 +299,5 @@ Per-project build tasks and debugging launch profiles live in `.krsnvim/` inside
 
 When running inside [Neovide](https://neovide.dev/):
 - **Window Opacity**: Set `vim.g.neovide_opacity = 0.80` in `init.lua` (*Note: `neovide_opacity` replaces the deprecated `neovide_transparency` option*).
-- **Hit-Enter Suppression**: `shortmess = "sWICcfotT"` in `lua/config/options.lua` suppresses hit-enter prompts on startup.
+- **Hit-Enter Suppression**: `shortmess = "sWICcfotT"` in `lua/vim_options.lua` suppresses hit-enter prompts on startup.
 - **Font & Scale**: Font size can be adjusted live via `<C-+>`, `<C-->`, and `<C-0>`, persisted to `font_config.json` in `nvim-data` (`stdpath("data")`).

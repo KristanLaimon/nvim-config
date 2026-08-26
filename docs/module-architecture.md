@@ -31,7 +31,7 @@ lua/
         └── debuggers/ -- per-language DAP modules (NOT specs)
 ```
 
-`lua/config/lazy.lua` imports `plugins.krs` as a whole directory, so **every file directly inside `lua/plugins/krs/` must return a lazy spec**.
+`lua/lazy_init.lua` imports `plugins.krs` as a whole directory, so **every file directly inside `lua/plugins/krs/` must return a lazy spec**.
 
 ---
 
@@ -103,7 +103,7 @@ The name matters. `config` and `opts` are **lazy.nvim spec fields**, so a module
 
 ## 🚚 The `config/krs` → `plugins/krs` migration
 
-Custom modules used to live in `lua/config/krs/` and were required by hand from `lua/config/*.lua` wrappers (`lua/config/tasks.lua`, `lua/config/font.lua`, …). Those wrapper files and the whole `lua/config/krs/` tree are gone; the modules now live in `lua/plugins/krs/` as self-contained specs.
+Custom modules used to live in `lua/krs/` and were required by hand from `lua/*.lua` wrappers (`lua/tasks.lua`, `lua/font.lua`, …). Those wrapper files and the whole `lua/krs/` tree are gone; the modules now live in `lua/plugins/krs/` as self-contained specs.
 
 What that changed:
 

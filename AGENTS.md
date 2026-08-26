@@ -54,7 +54,7 @@ When adding support for a new programming language (or updating an existing one)
 ## 🏛️ 2. Neovim Architecture Summary
 
 KrsVim follows a modular four-layer design:
-1. **`lua/config/`**: Core options (`options.lua`), global keymaps (`keymaps/`), and plugin manager entry (`lazy.lua`).
+1. **`lua/`**: Core editor options (`vim_options.lua`), global keymaps (`keymaps/`), and plugin manager entry (`lazy_init.lua`).
 2. **`lua/krs/`**: Pure, testable core modules (UI float helpers, installer, workspace sessions, project path resolution, Z-index manager).
 3. **`lua/plugins/`**: Plugin specifications loaded by `lazy.nvim`:
    - `lua/plugins/editor/`: Core editor plugins (Telescope, Neo-tree, DAP, Treesitter).

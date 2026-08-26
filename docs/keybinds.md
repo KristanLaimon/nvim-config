@@ -2,7 +2,7 @@
 
 [← Back to Wiki Index](index.md)
 
-All keymappings in KrsVim are designed to be frictionless, non-modal where possible, and VSCode-style (`Ctrl+Shift+<letter>`, `Ctrl+<letter>`, or direct function keys). Global mappings live in `lua/config/keymaps/` — one file per domain (`editor`, `search`, `lsp`, `debug`, `krs`) — while module-local ones are defined by the module itself in its settings block.
+All keymappings in KrsVim are designed to be frictionless, non-modal where possible, and VSCode-style (`Ctrl+Shift+<letter>`, `Ctrl+<letter>`, or direct function keys). Global mappings live in `lua/keymaps/` — one file per domain (`editor`, `search`, `lsp`, `debug`, `krs`) — while module-local ones are defined by the module itself in its settings block.
 
 Forgot a shortcut? Press `?` or `<F1>` to see context-aware help, or press `<C-S-p>` to fuzzy-search every registered command in the Command Palette.
 

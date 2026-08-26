@@ -68,7 +68,7 @@ something from a higher one.
 graph TD
     subgraph L4["Layer 4 · Bootstrap"]
         INIT["init.lua"]
-        CONFIG["lua/config/<br/>options · keymaps · lazy"]
+        CONFIG["lua/<br/>options · keymaps · lazy"]
     end
 
     subgraph L3["Layer 3 · Features (lazy specs)"]
@@ -116,7 +116,7 @@ starting a plugin, which is exactly why the tests in `tests/spec/` are fast.
 This is where UI, keymaps, commands and state live. KRS features may use
 third-party plugins (telescope, dap) and each other.
 
-**Layer 4 — Bootstrap (`lua/config/`).** Options, keymaps and the plugin
+**Layer 4 — Bootstrap (`lua/`).** Options, keymaps and the plugin
 manager. It wires things together and owns no features of its own.
 
 ---
@@ -159,7 +159,7 @@ To achieve ultra-fast startup times (~260ms total startup time on Windows), KrsV
 
 * **Top-Level Spec Import Deferral (`lazy_require`)**: Spec files in `lua/plugins/krs/` and `lua/plugins/editor/` use `require("krs.core.lazy_require")("krs.module.name")`. This creates a zero-overhead metatable proxy that defers actual module loading until a property or function is accessed at runtime.
 * **Lazy Persistence State**: State reads from disk (such as Neo-tree sidebar width or terminal split height) are wrapped in lazy getters (`get_saved_width()`, `get_terminal_height()`) so no file I/O blocks initial editor startup.
-* **Optimized PATH Repair**: Candidate toolchain directories in `lua/config/options.lua` are checked and appended efficiently without blocking `init.lua`.
+* **Optimized PATH Repair**: Candidate toolchain directories in `lua/vim_options.lua` are checked and appended efficiently without blocking `init.lua`.
 
 ---
 
@@ -293,12 +293,12 @@ Global state (caches, not settings) lives under `stdpath("data")`:
 
 | I want to… | Put it in | Notes |
 | :--- | :--- | :--- |
-| Add a keybinding | `lua/config/keymaps/<domain>.lua` | Unless it belongs to a lazy-loaded plugin — then use that spec's `keys`. |
+| Add a keybinding | `lua/keymaps/<domain>.lua` | Unless it belongs to a lazy-loaded plugin — then use that spec's `keys`. |
 | Add a third-party plugin | `lua/plugins/<area>/<name>.lua` | Return a lazy spec. Nothing else to register. |
 | Add a KRS feature | `lua/plugins/krs/<name>.lua` | Follow the local spec pattern above. |
 | Add a helper used by two features | `lua/krs/<area>/<name>.lua` | Must stay pure: no keymaps, no commands. |
 | Add a language to run/debug | `lua/krs/launch/runtimes.lua` + `lua/plugins/krs/debuggers/` | See [adding-language.md](adding-language.md). |
-| Add an editor option | `lua/config/options.lua` | The `settings` table at the top. |
+| Add an editor option | `lua/vim_options.lua` | The `settings` table at the top. |
 | Change a feature's behaviour | That module's `M.settings` block | Always the first thing in the file. |
 | Add a test | `tests/spec/` or `tests/integration/` | See [testing.md](testing.md). |
 
