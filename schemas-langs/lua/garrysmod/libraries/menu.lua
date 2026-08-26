@@ -1,4 +1,4 @@
 --- @meta
 
---- The menu library.  
+--- The menu library.
 _G.menu = {}

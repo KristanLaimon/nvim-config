@@ -1,7 +1,7 @@
 --- @meta
 
---- Table structure used as trace result. Default values are when the trace hits nothing.  
---- See util.TraceLine and util.TraceHull.  
+--- Table structure used as trace result. Default values are when the trace hits nothing.
+--- See util.TraceLine and util.TraceHull.
 --- @class STraceResult
 --- @field Entity? GEntity @The entity hit by the trace.
 --- @field Fraction? number @This indicates the how much of your trace length was used from 0-1 (resultLength/originalLength).

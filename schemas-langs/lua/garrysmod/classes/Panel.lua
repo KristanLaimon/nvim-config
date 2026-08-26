@@ -1,1658 +1,1390 @@
 --- @meta
 
 --- @class GPanel
---- This is the base panel for every other [VGUI](vgui) panel.  
---- It contains all of the basic methods, some of which may only work on certain VGUI elements. See also Panel Hooks.  
---- As their functionality is provided at the game's C/C++ level rather than by its Lua script extension, they are unfortunately unavailable for most practical purposes, however, they can still be obtained in a way similar to that provided by the baseclass library:  
---- ```  
---- -- Create a new panel type NewPanel that inherits all of its functionality from DLabel,  
---- -- but has a different SetText method than DLabel does - all without the hassle of that  
---- -- old DLabel's default text getting in the way. Fun stuff.  
---- local PANEL = {}  
---- function PANEL:Init()  
---- self:SetText_Base( "" )  
---- self:SetText( "Time for something different!" )  
---- end  
---- function PANEL:Paint( aWide, aTall )  
---- local TextX, TextY = 0, 0  
---- local TextColor = Color( 255, 0, 0, 255 )  
---- surface.SetFont( self:GetFont() or "default" )  
---- surface.SetTextColor( TextColor )  
---- surface.SetTextPos( TextX, TextY )  
---- surface.DrawText( self:GetText() )  
---- end  
---- -- And here we go:  
---- PANEL.SetText_Base = FindMetaTable( "Panel" ).SetText  
---- function PANEL:SetText( aText )  
---- self.Text = tostring( aText )  
---- end  
---- function PANEL:GetText()  
---- return self.Text or ""  
---- end  
---- vgui.Register( "NewPanel", PANEL, "DLabel" )  
---- ```  
+--- This is the base panel for every other [VGUI](vgui) panel.
+--- It contains all of the basic methods, some of which may only work on certain VGUI elements. See also Panel Hooks.
+--- As their functionality is provided at the game's C/C++ level rather than by its Lua script extension, they are unfortunately unavailable for most practical purposes, however, they can still be obtained in a way similar to that provided by the baseclass library:
+--- ```
+--- -- Create a new panel type NewPanel that inherits all of its functionality from DLabel,
+--- -- but has a different SetText method than DLabel does - all without the hassle of that
+--- -- old DLabel's default text getting in the way. Fun stuff.
+--- local PANEL = {}
+--- function PANEL:Init()
+--- self:SetText_Base( "" )
+--- self:SetText( "Time for something different!" )
+--- end
+--- function PANEL:Paint( aWide, aTall )
+--- local TextX, TextY = 0, 0
+--- local TextColor = Color( 255, 0, 0, 255 )
+--- surface.SetFont( self:GetFont() or "default" )
+--- surface.SetTextColor( TextColor )
+--- surface.SetTextPos( TextX, TextY )
+--- surface.DrawText( self:GetText() )
+--- end
+--- -- And here we go:
+--- PANEL.SetText_Base = FindMetaTable( "Panel" ).SetText
+--- function PANEL:SetText( aText )
+--- self.Text = tostring( aText )
+--- end
+--- function PANEL:GetText()
+--- return self.Text or ""
+--- end
+--- vgui.Register( "NewPanel", PANEL, "DLabel" )
+--- ```
 local GPanel = {}
---- Set to true by the dragndrop system when the panel is being drawn for the drag'n'drop.  
+--- Set to true by the dragndrop system when the panel is being drawn for the drag'n'drop.
 --- @type boolean
 GPanel.PaintingDragging = nil --[[@as boolean]]
 
---- When provided with a string or table, this function will create a new vgui element with that name and set the parent to the panel that this method is called on. When provided with a panel it will use Panel:SetParent on the provided panel to set it to our source panel  
+--- When provided with a string or table, this function will create a new vgui element with that name and set the parent to the panel that this method is called on. When provided with a panel it will use Panel:SetParent on the provided panel to set it to our source panel
 --- @param object GPanel @The panel to be added (parented).
 --- @return GPanel @New panel
-function GPanel:Add(object)
-end
---- When provided with a string or table, this function will create a new vgui element with that name and set the parent to the panel that this method is called on. When provided with a panel it will use Panel:SetParent on the provided panel to set it to our source panel  
+function GPanel:Add(object) end
+--- When provided with a string or table, this function will create a new vgui element with that name and set the parent to the panel that this method is called on. When provided with a panel it will use Panel:SetParent on the provided panel to set it to our source panel
 --- @param class string @The class to be added.
 --- @return GPanel @New panel
-function GPanel:Add(class)
-end
---- When provided with a string or table, this function will create a new vgui element with that name and set the parent to the panel that this method is called on. When provided with a panel it will use Panel:SetParent on the provided panel to set it to our source panel  
+function GPanel:Add(class) end
+--- When provided with a string or table, this function will create a new vgui element with that name and set the parent to the panel that this method is called on. When provided with a panel it will use Panel:SetParent on the provided panel to set it to our source panel
 --- @param table table @The table to create the panel from.
 --- @return GPanel @New panel
-function GPanel:Add(table)
-end
+function GPanel:Add(table) end
 
---- @deprecated  
---- 🛑 **DEPRECATED**: Does nothing  
---- This function does nothing.  
-function GPanel:AddText()
-end
+--- @deprecated
+--- 🛑 **DEPRECATED**: Does nothing
+--- This function does nothing.
+function GPanel:AddText() end
 
---- Aligns the panel on the bottom of its parent with the specified offset.  
+--- Aligns the panel on the bottom of its parent with the specified offset.
 --- @param offset? number @The align offset.
-function GPanel:AlignBottom(offset)
-end
+function GPanel:AlignBottom(offset) end
 
---- Aligns the panel on the left of its parent with the specified offset.  
+--- Aligns the panel on the left of its parent with the specified offset.
 --- @param offset? number @The align offset.
-function GPanel:AlignLeft(offset)
-end
+function GPanel:AlignLeft(offset) end
 
---- Aligns the panel on the right of its parent with the specified offset.  
+--- Aligns the panel on the right of its parent with the specified offset.
 --- @param offset? number @The align offset.
-function GPanel:AlignRight(offset)
-end
+function GPanel:AlignRight(offset) end
 
---- Aligns the panel on the top of its parent with the specified offset.  
+--- Aligns the panel on the top of its parent with the specified offset.
 --- @param offset? number @The align offset.
-function GPanel:AlignTop(offset)
-end
+function GPanel:AlignTop(offset) end
 
---- Uses animation to transition the current alpha value of a panel to a new alpha, over a set period of time and after a specified delay.  
+--- Uses animation to transition the current alpha value of a panel to a new alpha, over a set period of time and after a specified delay.
 --- @param alpha number @The alpha value (0-255) to approach.
 --- @param duration number @The time in seconds it should take to reach the alpha.
 --- @param delay? number @The delay before the animation starts.
 --- @param callback? function @The function to be called once the animation finishes
-function GPanel:AlphaTo(alpha, duration, delay, callback)
-end
+function GPanel:AlphaTo(alpha, duration, delay, callback) end
 
---- Returns the Global.SysTime value when all animations for this panel object will end.  
+--- Returns the Global.SysTime value when all animations for this panel object will end.
 --- @return number @The system time value when all animations will end for this panel.
-function GPanel:AnimTail()
-end
+function GPanel:AnimTail() end
 
---- Appends text to a RichText element. This does not automatically add a new line.  
+--- Appends text to a RichText element. This does not automatically add a new line.
 --- @param txt string @The text to append (add on).
-function GPanel:AppendText(txt)
-end
+function GPanel:AppendText(txt) end
 
---- Appends text to a RichText element (exactly like Panel:AppendText), while also parsing and adding valid URLs (Panel:InsertClickableTextStart). This does not automatically add a new line.  
+--- Appends text to a RichText element (exactly like Panel:AppendText), while also parsing and adding valid URLs (Panel:InsertClickableTextStart). This does not automatically add a new line.
 --- @param txt string @The text to append (add on).
-function GPanel:AppendTextWithURLs(txt)
-end
+function GPanel:AppendTextWithURLs(txt) end
 
---- Used by Panel:LoadGWENFile and Panel:LoadGWENString to apply a GWEN controls table to a panel object.  
---- You can do this manually using file.Read and util.JSONToTable to import and create a GWEN table structure from a `.gwen` file. This method can then be called, passing the GWEN table's `Controls` member.  
+--- Used by Panel:LoadGWENFile and Panel:LoadGWENString to apply a GWEN controls table to a panel object.
+--- You can do this manually using file.Read and util.JSONToTable to import and create a GWEN table structure from a `.gwen` file. This method can then be called, passing the GWEN table's `Controls` member.
 --- @param GWENTable table @The GWEN controls table to apply to the panel.
-function GPanel:ApplyGWEN(GWENTable)
-end
+function GPanel:ApplyGWEN(GWENTable) end
 
---- Centers the panel on its parent.  
---- ℹ **NOTE**: This will center the panel using the current size of the panel so should be called AFTER setting or adjusting the size of the 	panel  
-function GPanel:Center()
-end
+--- Centers the panel on its parent.
+--- ℹ **NOTE**: This will center the panel using the current size of the panel so should be called AFTER setting or adjusting the size of the 	panel
+function GPanel:Center() end
 
---- Centers the panel horizontally with specified fraction.  
+--- Centers the panel horizontally with specified fraction.
 --- @param fraction? number @The center fraction.
-function GPanel:CenterHorizontal(fraction)
-end
+function GPanel:CenterHorizontal(fraction) end
 
---- Centers the panel vertically with specified fraction.  
+--- Centers the panel vertically with specified fraction.
 --- @param fraction? number @The center fraction.
-function GPanel:CenterVertical(fraction)
-end
+function GPanel:CenterVertical(fraction) end
 
---- Returns the amount of children of the of panel.  
+--- Returns the amount of children of the of panel.
 --- @return number @The amount of children the panel has.
-function GPanel:ChildCount()
-end
+function GPanel:ChildCount() end
 
---- Returns the width and height of the space between the position of the panel (upper-left corner) and the max bound of the children panels (farthest reaching lower-right corner).  
+--- Returns the width and height of the space between the position of the panel (upper-left corner) and the max bound of the children panels (farthest reaching lower-right corner).
 --- @return number @The children size width.
 --- @return number @The children size height.
-function GPanel:ChildrenSize()
-end
+function GPanel:ChildrenSize() end
 
---- Removes all of the panel's children. Many panels also override this method to gracefully clear their contents without breaking themselves.  
-function GPanel:Clear()
-end
+--- Removes all of the panel's children. Many panels also override this method to gracefully clear their contents without breaking themselves.
+function GPanel:Clear() end
 
---- Fades panels color to specified one.  
---- ℹ **NOTE**: The panel must have `GetColor` and `SetColor` functions for `ColorTo` to work.  
+--- Fades panels color to specified one.
+--- ℹ **NOTE**: The panel must have `GetColor` and `SetColor` functions for `ColorTo` to work.
 --- @param color GColor @The color to fade to
 --- @param length number @Length of the animation
 --- @param delay? number @Delay before start fading
 --- @param callback? function @Function to execute when finished
-function GPanel:ColorTo(color, length, delay, callback)
-end
+function GPanel:ColorTo(color, length, delay, callback) end
 
---- Updates a panel object's associated console variable. This must first be set up with Global.Derma_Install_Convar_Functions, and have a ConVar set using Panel:SetConVar.  
+--- Updates a panel object's associated console variable. This must first be set up with Global.Derma_Install_Convar_Functions, and have a ConVar set using Panel:SetConVar.
 --- @param newValue string @The new value to set the associated console variable to.
-function GPanel:ConVarChanged(newValue)
-end
+function GPanel:ConVarChanged(newValue) end
 
---- A think hook for Panels using ConVars as a value. Call it in the Think hook. Sets the panel's value should the convar change.  
---- This function is best for: checkboxes, sliders, number wangs  
---- For a string alternative, see Panel:ConVarStringThink.  
---- ℹ **NOTE**: Make sure your Panel has a SetValue function, else you may get errors.  
-function GPanel:ConVarNumberThink()
-end
+--- A think hook for Panels using ConVars as a value. Call it in the Think hook. Sets the panel's value should the convar change.
+--- This function is best for: checkboxes, sliders, number wangs
+--- For a string alternative, see Panel:ConVarStringThink.
+--- ℹ **NOTE**: Make sure your Panel has a SetValue function, else you may get errors.
+function GPanel:ConVarNumberThink() end
 
---- A think hook for panels using ConVars as a value. Call it in the Think hook. Sets the panel's value should the convar change.  
---- This function is best for: text inputs, read-only inputs, dropdown selects  
---- For a number alternative, see Panel:ConVarNumberThink.  
---- ℹ **NOTE**: Make sure your Panel has a SetValue function, else you may get errors.  
-function GPanel:ConVarStringThink()
-end
+--- A think hook for panels using ConVars as a value. Call it in the Think hook. Sets the panel's value should the convar change.
+--- This function is best for: text inputs, read-only inputs, dropdown selects
+--- For a number alternative, see Panel:ConVarNumberThink.
+--- ℹ **NOTE**: Make sure your Panel has a SetValue function, else you may get errors.
+function GPanel:ConVarStringThink() end
 
---- Gets the size, position and dock state of the passed panel object, and applies it to this one.  
+--- Gets the size, position and dock state of the passed panel object, and applies it to this one.
 --- @param srcPanel GPanel @The panel to copy the boundary and dock settings from.
-function GPanel:CopyBase(srcPanel)
-end
+function GPanel:CopyBase(srcPanel) end
 
---- Copies position and size of the panel.  
+--- Copies position and size of the panel.
 --- @param base GPanel @The panel to copy size and position from.
-function GPanel:CopyBounds(base)
-end
+function GPanel:CopyBounds(base) end
 
---- Copies the height of the panel.  
+--- Copies the height of the panel.
 --- @param base GPanel @Panel to copy the height from.
-function GPanel:CopyHeight(base)
-end
+function GPanel:CopyHeight(base) end
 
---- Copies the position of the panel.  
+--- Copies the position of the panel.
 --- @param base GPanel @Panel to position the width from.
-function GPanel:CopyPos(base)
-end
+function GPanel:CopyPos(base) end
 
---- Performs the `CONTROL` + `C` key combination effect ( Copy selection to clipboard ) on selected text in a TextEntry or RichText based element.  
-function GPanel:CopySelected()
-end
+--- Performs the `CONTROL` + `C` key combination effect ( Copy selection to clipboard ) on selected text in a TextEntry or RichText based element.
+function GPanel:CopySelected() end
 
---- Copies the width of the panel.  
+--- Copies the width of the panel.
 --- @param base GPanel @Panel to copy the width from.
-function GPanel:CopyWidth(base)
-end
+function GPanel:CopyWidth(base) end
 
---- Returns the cursor position relative to the top left of the panel.  
---- This is equivalent to calling gui.MousePos and then Panel:ScreenToLocal.  
---- ⚠ **WARNING**: This function uses a cached value for the screen position of the panel, computed at the end of the last VGUI Think/Layout pass.  
---- ie. inaccurate results may be returned if the panel or any of its ancestors have been repositioned outside of PANEL:Think or PANEL:PerformLayout within the last frame.  
+--- Returns the cursor position relative to the top left of the panel.
+--- This is equivalent to calling gui.MousePos and then Panel:ScreenToLocal.
+--- ⚠ **WARNING**: This function uses a cached value for the screen position of the panel, computed at the end of the last VGUI Think/Layout pass.
+--- ie. inaccurate results may be returned if the panel or any of its ancestors have been repositioned outside of PANEL:Think or PANEL:PerformLayout within the last frame.
 --- @return number @X coordinate of the cursor, relative to the top left of the panel.
 --- @return number @Y coordinate of the cursor, relative to the top left of the panel.
-function GPanel:CursorPos()
-end
+function GPanel:CursorPos() end
 
---- Performs the `CONTROL` + `X` (delete text and copy it to clipboard buffer) action on selected text in a TextEntry or RichText based element.  
-function GPanel:CutSelected()
-end
+--- Performs the `CONTROL` + `X` (delete text and copy it to clipboard buffer) action on selected text in a TextEntry or RichText based element.
+function GPanel:CutSelected() end
 
---- Deletes a cookie value using the panel's cookie name ( Panel:GetCookieName ) and the passed extension.  
+--- Deletes a cookie value using the panel's cookie name ( Panel:GetCookieName ) and the passed extension.
 --- @param cookieName string @The unique cookie name to delete.
-function GPanel:DeleteCookie(cookieName)
-end
+function GPanel:DeleteCookie(cookieName) end
 
---- Resets the panel object's Panel:SetPos method and removes its animation table (`Panel.LerpAnim`). This effectively undoes the changes made by Panel:LerpPositions.  
---- In order to use Lerp animation again, you must call Panel:Stop before setting its `SetPosReal` property to `nil`. See the example below.  
-function GPanel:DisableLerp()
-end
+--- Resets the panel object's Panel:SetPos method and removes its animation table (`Panel.LerpAnim`). This effectively undoes the changes made by Panel:LerpPositions.
+--- In order to use Lerp animation again, you must call Panel:Stop before setting its `SetPosReal` property to `nil`. See the example below.
+function GPanel:DisableLerp() end
 
---- Returns the linear distance from the center of this panel object and another. **Both panels must have the same parent for this function to work properly.**  
+--- Returns the linear distance from the center of this panel object and another. **Both panels must have the same parent for this function to work properly.**
 --- @param tgtPanel GPanel @The target object with which to compare position.
 --- @return number @The linear (straight-line) distance between the center of the two objects.
-function GPanel:Distance(tgtPanel)
-end
+function GPanel:Distance(tgtPanel) end
 
---- Returns the distance between the center of this panel object and a specified point **local to the parent panel**.  
+--- Returns the distance between the center of this panel object and a specified point **local to the parent panel**.
 --- @param posX number @The horizontal (x) position in pixels of the point to compare with
 --- @param posY number @The vertical (y) position in pixels of the point to compare with
 --- @return number @The linear (straight-line) distance between the specified point local to parent panel and the center of this panel object.
-function GPanel:DistanceFrom(posX, posY)
-end
+function GPanel:DistanceFrom(posX, posY) end
 
---- Makes the panel "lock" the screen until it is removed. All input will be directed to the given panel.  
---- It will silently fail if used while cursor is not visible.  
---- Call Panel:MakePopup before calling this function.  
---- This must be called on a panel derived from EditablePanel.  
-function GPanel:DoModal()
-end
+--- Makes the panel "lock" the screen until it is removed. All input will be directed to the given panel.
+--- It will silently fail if used while cursor is not visible.
+--- Call Panel:MakePopup before calling this function.
+--- This must be called on a panel derived from EditablePanel.
+function GPanel:DoModal() end
 
---- Sets the dock type for the panel, making the panel "dock" in a certain direction, modifying it's position and size.  
---- You can set the inner spacing of a panel's docking using Panel:DockPadding, which will affect docked child panels, and you can set the outer spacing of a panel's docking using Panel:DockMargin, which affects how docked siblings are positioned/sized.  
---- You may need to use Panel:SetZPos to ensure child panels (DTextEntry) stay in a specific order.  
---- ℹ **NOTE**: After using this function, if you want to get the correct panel's bounds (position, size), use Panel:InvalidateParent (use `true` as argument if you need to update immediately)  
+--- Sets the dock type for the panel, making the panel "dock" in a certain direction, modifying it's position and size.
+--- You can set the inner spacing of a panel's docking using Panel:DockPadding, which will affect docked child panels, and you can set the outer spacing of a panel's docking using Panel:DockMargin, which affects how docked siblings are positioned/sized.
+--- You may need to use Panel:SetZPos to ensure child panels (DTextEntry) stay in a specific order.
+--- ℹ **NOTE**: After using this function, if you want to get the correct panel's bounds (position, size), use Panel:InvalidateParent (use `true` as argument if you need to update immediately)
 --- @param dockType EDOCK @Dock type using Enums/DOCK.
-function GPanel:Dock(dockType)
-end
+function GPanel:Dock(dockType) end
 
---- Sets the dock margin of the panel.  
---- The dock margin is the extra space that will be left around the edge when this element is docked inside its parent element.  
+--- Sets the dock margin of the panel.
+--- The dock margin is the extra space that will be left around the edge when this element is docked inside its parent element.
 --- @param marginLeft number @The left margin to the parent.
 --- @param marginTop number @The top margin to the parent.
 --- @param marginRight number @The right margin to the parent.
 --- @param marginBottom number @The bottom margin to the parent.
-function GPanel:DockMargin(marginLeft, marginTop, marginRight, marginBottom)
-end
+function GPanel:DockMargin(marginLeft, marginTop, marginRight, marginBottom) end
 
---- Sets the dock padding of the panel.  
---- The dock padding is the extra space that will be left around the edge when child elements are docked inside this element.  
+--- Sets the dock padding of the panel.
+--- The dock padding is the extra space that will be left around the edge when child elements are docked inside this element.
 --- @param paddingLeft number @The left padding to the parent.
 --- @param paddingTop number @The top padding to the parent.
 --- @param paddingRight number @The right padding to the parent.
 --- @param paddingBottom number @The bottom padding to the parent.
-function GPanel:DockPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
-end
+function GPanel:DockPadding(paddingLeft, paddingTop, paddingRight, paddingBottom) end
 
---- Called to inform the dragndrop that a mouse button is being held down on a panel object.  
+--- Called to inform the dragndrop that a mouse button is being held down on a panel object.
 --- @param mouseCode number @The code for the mouse button pressed, passed by, for example, PANEL:OnMousePressed
-function GPanel:DragMousePress(mouseCode)
-end
+function GPanel:DragMousePress(mouseCode) end
 
---- Called to inform the dragndrop that a mouse button has been depressed on a panel object.  
+--- Called to inform the dragndrop that a mouse button has been depressed on a panel object.
 --- @param mouseCode number @The code for the mouse button pressed, passed by, for example, PANEL:OnMouseReleased
 --- @return boolean @`true` if an object was being dragged, otherwise `false`.
-function GPanel:DragMouseRelease(mouseCode)
-end
+function GPanel:DragMouseRelease(mouseCode) end
 
---- Draws a coloured rectangle to fill the panel object this method is called on. The colour is set using surface.SetDrawColor. This should only be called within the object's PANEL:Paint or PANEL:PaintOver hooks, as a shortcut for surface.DrawRect.  
---- 🟥 **NOTE**: Requires a 2D rendering context  
-function GPanel:DrawFilledRect()
-end
+--- Draws a coloured rectangle to fill the panel object this method is called on. The colour is set using surface.SetDrawColor. This should only be called within the object's PANEL:Paint or PANEL:PaintOver hooks, as a shortcut for surface.DrawRect.
+--- 🟥 **NOTE**: Requires a 2D rendering context
+function GPanel:DrawFilledRect() end
 
---- Draws a hollow rectangle the size of the panel object this method is called on, with a border width of 1 px. The border colour is set using surface.SetDrawColor. This should only be called within the object's PANEL:Paint or PANEL:PaintOver hooks, as a shortcut for surface.DrawOutlinedRect.  
---- 🟥 **NOTE**: Requires a 2D rendering context  
-function GPanel:DrawOutlinedRect()
-end
+--- Draws a hollow rectangle the size of the panel object this method is called on, with a border width of 1 px. The border colour is set using surface.SetDrawColor. This should only be called within the object's PANEL:Paint or PANEL:PaintOver hooks, as a shortcut for surface.DrawOutlinedRect.
+--- 🟥 **NOTE**: Requires a 2D rendering context
+function GPanel:DrawOutlinedRect() end
 
---- Used to draw the magenta highlight colour of a panel object when it is selected. This should be called in the object's PANEL:PaintOver hook. Once this is implemented, the highlight colour will be displayed only when the object is selectable and selected. This is achieved using Panel:SetSelectable and Panel:SetSelected respectively.  
-function GPanel:DrawSelections()
-end
+--- Used to draw the magenta highlight colour of a panel object when it is selected. This should be called in the object's PANEL:PaintOver hook. Once this is implemented, the highlight colour will be displayed only when the object is selectable and selected. This is achieved using Panel:SetSelectable and Panel:SetSelected respectively.
+function GPanel:DrawSelections() end
 
---- Used to draw the text in a DTextEntry within a derma skin. This is usually called within the SKIN:PaintTextEntry skin hook.  
---- ℹ **NOTE**: Will silently fail if any of arguments are not given.  
---- 🟥 **NOTE**: Requires a 2D rendering context  
+--- Used to draw the text in a DTextEntry within a derma skin. This is usually called within the SKIN:PaintTextEntry skin hook.
+--- ℹ **NOTE**: Will silently fail if any of arguments are not given.
+--- 🟥 **NOTE**: Requires a 2D rendering context
 --- @param textCol table @The colour of the main text.
 --- @param highlightCol table @The colour of the selection highlight (when selecting text).
 --- @param cursorCol table @The colour of the text cursor (or caret).
-function GPanel:DrawTextEntryText(textCol, highlightCol, cursorCol)
-end
+function GPanel:DrawTextEntryText(textCol, highlightCol, cursorCol) end
 
---- Draws a textured rectangle to fill the panel object this method is called on. The texture is set using surface.SetTexture or surface.SetMaterial. This should only be called within the object's PANEL:Paint or PANEL:PaintOver hooks, as a shortcut for surface.DrawTexturedRect.  
---- 🟥 **NOTE**: Requires a 2D rendering context  
-function GPanel:DrawTexturedRect()
-end
+--- Draws a textured rectangle to fill the panel object this method is called on. The texture is set using surface.SetTexture or surface.SetMaterial. This should only be called within the object's PANEL:Paint or PANEL:PaintOver hooks, as a shortcut for surface.DrawTexturedRect.
+--- 🟥 **NOTE**: Requires a 2D rendering context
+function GPanel:DrawTexturedRect() end
 
---- Makes this panel droppable. This is used with Panel:Receiver to create drag and drop events.  
---- Can be called multiple times with different names allowing to be dropped onto different receivers.  
+--- Makes this panel droppable. This is used with Panel:Receiver to create drag and drop events.
+--- Can be called multiple times with different names allowing to be dropped onto different receivers.
 --- @param name string @Name of your droppable panel
 --- @return table @Blank table stored on the panel itself under pnl.m_DragSlot[ name ]
-function GPanel:Droppable(name)
-end
+function GPanel:Droppable(name) end
 
---- Completes a box selection. If the end point of the selection box is within the selection canvas, mouse capture is disabled for the panel object, and the selected state of each child object within the selection box is toggled.  
+--- Completes a box selection. If the end point of the selection box is within the selection canvas, mouse capture is disabled for the panel object, and the selected state of each child object within the selection box is toggled.
 --- @return boolean @Whether the end point of the selection box was within the selection canvas.
-function GPanel:EndBoxSelection()
-end
+function GPanel:EndBoxSelection() end
 
---- Finds a panel in its children(and sub children) with the given name.  
+--- Finds a panel in its children(and sub children) with the given name.
 --- @param panelName string @The name of the panel that should be found.
 --- @return GPanel @foundPanel
-function GPanel:Find(panelName)
-end
+function GPanel:Find(panelName) end
 
---- Focuses the next panel in the focus queue.  
-function GPanel:FocusNext()
-end
+--- Focuses the next panel in the focus queue.
+function GPanel:FocusNext() end
 
---- Focuses the previous panel in the focus queue.  
-function GPanel:FocusPrevious()
-end
+--- Focuses the previous panel in the focus queue.
+function GPanel:FocusPrevious() end
 
---- Returns the alpha multiplier for this panel.  
+--- Returns the alpha multiplier for this panel.
 --- @return number @alphaMul
-function GPanel:GetAlpha()
-end
+function GPanel:GetAlpha() end
 
---- Returns the background color of a panel such as a RichText, Label or DColorCube.  
---- ℹ **NOTE**: This doesn't apply to all VGUI elements and its function varies between them  
+--- Returns the background color of a panel such as a RichText, Label or DColorCube.
+--- ℹ **NOTE**: This doesn't apply to all VGUI elements and its function varies between them
 --- @return number @The Color structure
-function GPanel:GetBGColor()
-end
+function GPanel:GetBGColor() end
 
---- Returns the position and size of the panel.  
---- This is equivalent to calling Panel:GetPos and Panel:GetSize together.  
+--- Returns the position and size of the panel.
+--- This is equivalent to calling Panel:GetPos and Panel:GetSize together.
 --- @return number @The x coordinate of the panel, relative to its parent's top left.
 --- @return number @The y coordinate of the panel, relative to its parent's top left.
 --- @return number @The width of the panel.
 --- @return number @The height of the panel.
-function GPanel:GetBounds()
-end
+function GPanel:GetBounds() end
 
---- Returns the position/offset of the caret (or text cursor) in a text-based panel object.  
+--- Returns the position/offset of the caret (or text cursor) in a text-based panel object.
 --- @return number @The caret position/offset from the start of the text
-function GPanel:GetCaretPos()
-end
+function GPanel:GetCaretPos() end
 
---- Gets a child by its index. For use with Panel:ChildCount.  
+--- Gets a child by its index. For use with Panel:ChildCount.
 --- @param childIndex number @The index of the child to get
-function GPanel:GetChild(childIndex)
-end
+function GPanel:GetChild(childIndex) end
 
---- Gets a child object's position relative to this panel object. The number of levels is not relevant; the child may have many parents between itself and the object on which the method is called.  
+--- Gets a child object's position relative to this panel object. The number of levels is not relevant; the child may have many parents between itself and the object on which the method is called.
 --- @param pnl GPanel @The panel to get the position of.
 --- @return number @The horizontal (x) position of the child relative to this panel object.
 --- @return number @The vertical (y) position of the child relative to this panel object.
-function GPanel:GetChildPosition(pnl)
-end
+function GPanel:GetChildPosition(pnl) end
 
---- Returns a table with all the child panels of the panel.  
+--- Returns a table with all the child panels of the panel.
 --- @return table @All direct children of this panel.
-function GPanel:GetChildren()
-end
+function GPanel:GetChildren() end
 
---- Returns a table of all visible, selectable children of the panel object that lie at least partially within the specified rectangle.  
+--- Returns a table of all visible, selectable children of the panel object that lie at least partially within the specified rectangle.
 --- @param x number @The horizontal (x) position of the top-left corner of the rectangle, relative to the panel object.
 --- @param y number @The vertical (y) position of the top-left corner of the rectangle, relative to the panel object.
 --- @param w number @The width of the rectangle.
 --- @param h number @The height of the rectangle.
 --- @return table @A table of panel objects that lie at least partially within the specified rectangle.
-function GPanel:GetChildrenInRect(x, y, w, h)
-end
+function GPanel:GetChildrenInRect(x, y, w, h) end
 
---- Returns the class name of the panel. This would be the class name of the base engine-level panel, not Lua classname. The latter is stored usually in Panel:GetName.  
+--- Returns the class name of the panel. This would be the class name of the base engine-level panel, not Lua classname. The latter is stored usually in Panel:GetName.
 --- @return string @The panel's class name.
-function GPanel:GetClassName()
-end
+function GPanel:GetClassName() end
 
---- Returns the child of this panel object that is closest to the specified point. The point is relative to the object on which the method is called. The distance the child is from this point is also returned.  
+--- Returns the child of this panel object that is closest to the specified point. The point is relative to the object on which the method is called. The distance the child is from this point is also returned.
 --- @param x number @The horizontal (x) position of the point.
 --- @param y number @The vertical (y) position of the point.
 --- @return GPanel @The child object that was closest to the specified point.
 --- @return number @The distance that this child was from the point.
-function GPanel:GetClosestChild(x, y)
-end
+function GPanel:GetClosestChild(x, y) end
 
---- Returns the alignment of the text of a Label.  
---- ℹ **NOTE**: This function only works on Label panels and its derivatives.  
+--- Returns the alignment of the text of a Label.
+--- ℹ **NOTE**: This function only works on Label panels and its derivatives.
 --- @return number @The direction of the content, based on the number pad
-function GPanel:GetContentAlignment()
-end
+function GPanel:GetContentAlignment() end
 
---- Gets the size of the content/children within a panel object.  
---- Only works with Label derived panels by default such as DLabel.  
---- Will also work on any panel that manually implements this method.  
+--- Gets the size of the content/children within a panel object.
+--- Only works with Label derived panels by default such as DLabel.
+--- Will also work on any panel that manually implements this method.
 --- @return number @The content width of the object.
 --- @return number @The content height of the object.
-function GPanel:GetContentSize()
-end
+function GPanel:GetContentSize() end
 
---- Gets the value of a cookie stored by the panel object. This can also be done with cookie.GetString, using the panel's cookie name, a fullstop, and then the actual name of the cookie.  
---- Make sure the panel's cookie name has not changed since writing, or the cookie will not be accessible. This can be done with Panel:GetCookieName and Panel:SetCookieName.  
+--- Gets the value of a cookie stored by the panel object. This can also be done with cookie.GetString, using the panel's cookie name, a fullstop, and then the actual name of the cookie.
+--- Make sure the panel's cookie name has not changed since writing, or the cookie will not be accessible. This can be done with Panel:GetCookieName and Panel:SetCookieName.
 --- @param cookieName string @The name of the cookie from which to retrieve the value.
 --- @param default string @The default value to return if the cookie does not exist.
 --- @return string @The value of the stored cookie, or the default value should the cookie not exist.
-function GPanel:GetCookie(cookieName, default)
-end
+function GPanel:GetCookie(cookieName, default) end
 
---- Gets the name the panel uses to store cookies. This is set with Panel:SetCookieName.  
+--- Gets the name the panel uses to store cookies. This is set with Panel:SetCookieName.
 --- @return string @The name the panel uses when reading or writing cookies
-function GPanel:GetCookieName()
-end
+function GPanel:GetCookieName() end
 
---- Gets the value of a cookie stored by the panel object, as a number. This can also be done with cookie.GetNumber, using the panel's cookie name, a fullstop, and then the actual name of the cookie.  
---- Make sure the panel's cookie name has not changed since writing, or the cookie will not be accessible. This can be done with Panel:GetCookieName and Panel:SetCookieName.  
+--- Gets the value of a cookie stored by the panel object, as a number. This can also be done with cookie.GetNumber, using the panel's cookie name, a fullstop, and then the actual name of the cookie.
+--- Make sure the panel's cookie name has not changed since writing, or the cookie will not be accessible. This can be done with Panel:GetCookieName and Panel:SetCookieName.
 --- @param cookieName string @The name of the cookie from which to retrieve the value.
 --- @param default number @The default value to return if the cookie does not exist.
 --- @return number @The number value of the stored cookie, or the default value should the cookie not exist.
-function GPanel:GetCookieNumber(cookieName, default)
-end
+function GPanel:GetCookieNumber(cookieName, default) end
 
---- Returns a dock enum for the panel's current docking type.  
+--- Returns a dock enum for the panel's current docking type.
 --- @return number @The dock enum for the panel
-function GPanel:GetDock()
-end
+function GPanel:GetDock() end
 
---- Returns the docked margins of the panel. (set by Panel:DockMargin)  
+--- Returns the docked margins of the panel. (set by Panel:DockMargin)
 --- @return number @Left margin.
 --- @return number @Top margin.
 --- @return number @Right margin.
 --- @return number @Bottom margin.
-function GPanel:GetDockMargin()
-end
+function GPanel:GetDockMargin() end
 
---- Returns the docked padding of the panel. (set by Panel:DockPadding)  
+--- Returns the docked padding of the panel. (set by Panel:DockPadding)
 --- @return number @Left padding.
 --- @return number @Top padding.
 --- @return number @Right padding.
 --- @return number @Bottom padding.
-function GPanel:GetDockPadding()
-end
+function GPanel:GetDockPadding() end
 
---- Returns the foreground color of the panel.  
---- For a Label or RichText, this is the color of its text.  
---- ℹ **NOTE**: This doesn't apply to all VGUI elements (such as DLabel) and its function varies between them  
+--- Returns the foreground color of the panel.
+--- For a Label or RichText, this is the color of its text.
+--- ℹ **NOTE**: This doesn't apply to all VGUI elements (such as DLabel) and its function varies between them
 --- @return table @A color structure
-function GPanel:GetFGColor()
-end
+function GPanel:GetFGColor() end
 
---- Returns the name of the font that the panel renders its text with.  
---- This is the same font name set with Panel:SetFontInternal.  
---- ℹ **NOTE**: Only works on Label and TextEntry and their derived panels by default (such as DLabel and DTextEntry), and on any panel that manually implemented the Panel:GetFont method.  
+--- Returns the name of the font that the panel renders its text with.
+--- This is the same font name set with Panel:SetFontInternal.
+--- ℹ **NOTE**: Only works on Label and TextEntry and their derived panels by default (such as DLabel and DTextEntry), and on any panel that manually implemented the Panel:GetFont method.
 --- @return string @The font name.
-function GPanel:GetFont()
-end
+function GPanel:GetFont() end
 
---- Returns the panel's HTML material. Only works with Awesomium, HTML and DHTML panels that have been fully loaded.  
+--- Returns the panel's HTML material. Only works with Awesomium, HTML and DHTML panels that have been fully loaded.
 --- @return GIMaterial @The HTML material used by the panel
-function GPanel:GetHTMLMaterial()
-end
+function GPanel:GetHTMLMaterial() end
 
---- Returns the height of a single line of a RichText panel.  
+--- Returns the height of a single line of a RichText panel.
 --- @return number @The line height.
-function GPanel:GetLineHeight()
-end
+function GPanel:GetLineHeight() end
 
---- Returns the current maximum character count.  
---- This function will only work on RichText and TextEntry panels and their derivatives.  
+--- Returns the current maximum character count.
+--- This function will only work on RichText and TextEntry panels and their derivatives.
 --- @return number @The maximum amount of characters this panel is allowed to contain.
-function GPanel:GetMaximumCharCount()
-end
+function GPanel:GetMaximumCharCount() end
 
---- Returns the internal name of the panel. Can be set via Panel:SetName.  
+--- Returns the internal name of the panel. Can be set via Panel:SetName.
 --- @return string @The previously set internal name of the panel.
-function GPanel:GetName()
-end
+function GPanel:GetName() end
 
---- Returns the number of lines in a RichText or a TextEntry.  
---- You must wait a couple frames before calling this after using Panel:AppendText or Panel:SetText, otherwise it will return the number of text lines before the text change.  
+--- Returns the number of lines in a RichText or a TextEntry.
+--- You must wait a couple frames before calling this after using Panel:AppendText or Panel:SetText, otherwise it will return the number of text lines before the text change.
 --- @return number @The number of lines.
-function GPanel:GetNumLines()
-end
+function GPanel:GetNumLines() end
 
---- Returns the parent of the panel, returns nil if there is no parent.  
+--- Returns the parent of the panel, returns nil if there is no parent.
 --- @return GPanel @The parent of given panel
-function GPanel:GetParent()
-end
+function GPanel:GetParent() end
 
---- Returns the position of the panel relative to its Panel:GetParent.  
---- If you require the panel's position **and** size, consider using Panel:GetBounds instead.  
---- If you need the position in screen space, see Panel:LocalToScreen.  
---- See also Panel:GetX and Panel:GetY.  
+--- Returns the position of the panel relative to its Panel:GetParent.
+--- If you require the panel's position **and** size, consider using Panel:GetBounds instead.
+--- If you need the position in screen space, see Panel:LocalToScreen.
+--- See also Panel:GetX and Panel:GetY.
 --- @return number @X coordinate, relative to this panels parents top left corner.
 --- @return number @Y coordinate, relative to this panels parents top left corner.
-function GPanel:GetPos()
-end
+function GPanel:GetPos() end
 
---- Returns the vertical and horizontal start indexes of a TextEntry's visible text. This is useful when the panel is scrolled.  
+--- Returns the vertical and horizontal start indexes of a TextEntry's visible text. This is useful when the panel is scrolled.
 --- @return number @The horizontal start index
 --- @return number @The vertical start index
-function GPanel:GetScrollStartIndexes()
-end
+function GPanel:GetScrollStartIndexes() end
 
---- Returns a table of all children of the panel object that are selected. This is recursive, and the returned table will include tables for any child objects that also have children. This means that not all first-level members in the returned table will be of type Panel.  
+--- Returns a table of all children of the panel object that are selected. This is recursive, and the returned table will include tables for any child objects that also have children. This means that not all first-level members in the returned table will be of type Panel.
 --- @return table @A table of any child objects that are selected, including tables for children of the child objects (These tables may also contain table memb
-function GPanel:GetSelectedChildren()
-end
+function GPanel:GetSelectedChildren() end
 
---- Returns the currently selected range of text.  
---- This function will only work on RichText and TextEntry panels and their derivatives.  
+--- Returns the currently selected range of text.
+--- This function will only work on RichText and TextEntry panels and their derivatives.
 --- @return number @The start of the range
 --- @return number @The end of the range
-function GPanel:GetSelectedTextRange()
-end
+function GPanel:GetSelectedTextRange() end
 
---- Returns the selection canvas for this panel. This will be the first parent that has Panel:SetSelectionCanvas set to true (or `self` if this panel is the selection canvas)  
---- A selection canvas would be the panel that contains a bunch of selectable panels (Panel:SetSelectable), usually for the drag'n'drop system. Calling this function on any of the selectable items, or any of their children, will return the first parent that can contain selectable panels.  
+--- Returns the selection canvas for this panel. This will be the first parent that has Panel:SetSelectionCanvas set to true (or `self` if this panel is the selection canvas)
+--- A selection canvas would be the panel that contains a bunch of selectable panels (Panel:SetSelectable), usually for the drag'n'drop system. Calling this function on any of the selectable items, or any of their children, will return the first parent that can contain selectable panels.
 --- @return GPanel @The selection canvas, otherwise `nil`.
-function GPanel:GetSelectionCanvas()
-end
+function GPanel:GetSelectionCanvas() end
 
---- Returns the size of the panel.  
---- If you require both the panel's position and size, consider using Panel:GetBounds instead.  
+--- Returns the size of the panel.
+--- If you require both the panel's position and size, consider using Panel:GetBounds instead.
 --- @return number @width
 --- @return number @height
-function GPanel:GetSize()
-end
+function GPanel:GetSize() end
 
---- Returns the table for the derma skin currently being used by this panel object.  
+--- Returns the table for the derma skin currently being used by this panel object.
 --- @return table @The derma skin table currently being used by this object.
-function GPanel:GetSkin()
-end
+function GPanel:GetSkin() end
 
---- Returns the internal Lua table of the panel.  
+--- Returns the internal Lua table of the panel.
 --- @return table @A table containing all the members of given panel object.
-function GPanel:GetTable()
-end
+function GPanel:GetTable() end
 
---- Returns the height of the panel.  
---- See Panel:GetWide for the width of the panel. See also Panel:GetSize for a function that returns both.  
+--- Returns the height of the panel.
+--- See Panel:GetWide for the width of the panel. See also Panel:GetSize for a function that returns both.
 --- @return number @height
-function GPanel:GetTall()
-end
+function GPanel:GetTall() end
 
---- Returns the panel's text (where applicable).  
---- This method returns a maximum of 1023 bytes, except for TextEntry.  
+--- Returns the panel's text (where applicable).
+--- This method returns a maximum of 1023 bytes, except for TextEntry.
 --- @return string @The panel's text.
-function GPanel:GetText()
-end
+function GPanel:GetText() end
 
---- Gets the left and top text margins of a text-based panel object, such as a DButton or DLabel. This is set with Panel:SetTextInset.  
+--- Gets the left and top text margins of a text-based panel object, such as a DButton or DLabel. This is set with Panel:SetTextInset.
 --- @return number @The left margin of the text, in pixels.
 --- @return number @The top margin of the text, in pixels.
-function GPanel:GetTextInset()
-end
+function GPanel:GetTextInset() end
 
---- Gets the size of the text within a Label derived panel.  
+--- Gets the size of the text within a Label derived panel.
 --- @return number @The width of the text in the DLabel.
 --- @return number @The height of the text in the DLabel.
-function GPanel:GetTextSize()
-end
+function GPanel:GetTextSize() end
 
---- Returns the tooltip text that was set with PANEL:SetTooltip.  
+--- Returns the tooltip text that was set with PANEL:SetTooltip.
 --- @return string @The tooltip text, if it was set.
-function GPanel:GetTooltip()
-end
+function GPanel:GetTooltip() end
 
---- Returns the tooltip delay (time between hovering over the panel, and the tooltip showing up) that was set with Panel:SetTooltipDelay, or nothing if it was not set.  
---- If the delay is not explicitly set by this function, it will fallback to the value of the `tooltip_delay` ConVar, which is `0.5` by default.  
+--- Returns the tooltip delay (time between hovering over the panel, and the tooltip showing up) that was set with Panel:SetTooltipDelay, or nothing if it was not set.
+--- If the delay is not explicitly set by this function, it will fallback to the value of the `tooltip_delay` ConVar, which is `0.5` by default.
 --- @return number @The tooltip delay in seconds, if it was set.
-function GPanel:GetTooltipDelay()
-end
+function GPanel:GetTooltipDelay() end
 
---- Returns the tooltip panel that was set with PANEL:SetTooltipPanel.  
+--- Returns the tooltip panel that was set with PANEL:SetTooltipPanel.
 --- @return GPanel @The tooltip panel, if it was set.
-function GPanel:GetTooltipPanel()
-end
+function GPanel:GetTooltipPanel() end
 
---- Gets valid receiver slot of currently dragged panel.  
+--- Gets valid receiver slot of currently dragged panel.
 --- @return GPanel @The panel this was called on if a valid receiver slot exists, otherwise false.
 --- @return table @The slot table.
-function GPanel:GetValidReceiverSlot()
-end
+function GPanel:GetValidReceiverSlot() end
 
---- Returns the value the panel holds.  
---- In engine is only implemented for CheckButton, Label and TextEntry as a string.  
---- ℹ **NOTE**: This function is limited to 8092 Bytes. If using DTextEntry, use Panel:GetText for unlimited bytes.  
+--- Returns the value the panel holds.
+--- In engine is only implemented for CheckButton, Label and TextEntry as a string.
+--- ℹ **NOTE**: This function is limited to 8092 Bytes. If using DTextEntry, use Panel:GetText for unlimited bytes.
 --- @return any @The value the panel holds.
-function GPanel:GetValue()
-end
+function GPanel:GetValue() end
 
---- Returns the width of the panel.  
---- See Panel:GetTall for the height of the panel. See also Panel:GetSize for a function that returns both.  
+--- Returns the width of the panel.
+--- See Panel:GetTall for the height of the panel. See also Panel:GetSize for a function that returns both.
 --- @return number @width
-function GPanel:GetWide()
-end
+function GPanel:GetWide() end
 
---- Returns the X position of the panel relative to its Panel:GetParent.  
---- Uses Panel:GetPos internally.  
+--- Returns the X position of the panel relative to its Panel:GetParent.
+--- Uses Panel:GetPos internally.
 --- @return number @X coordinate.
-function GPanel:GetX()
-end
+function GPanel:GetX() end
 
---- Returns the Y position of the panel relative to its Panel:GetParent.  
---- Uses Panel:GetPos internally.  
+--- Returns the Y position of the panel relative to its Panel:GetParent.
+--- Uses Panel:GetPos internally.
 --- @return number @Y coordinate.
-function GPanel:GetY()
-end
+function GPanel:GetY() end
 
---- Returns the Z position of the panel.  
+--- Returns the Z position of the panel.
 --- @return number @The Z order position of the panel.
-function GPanel:GetZPos()
-end
+function GPanel:GetZPos() end
 
---- Goes back one page in the HTML panel's history if available.  
-function GPanel:GoBack()
-end
+--- Goes back one page in the HTML panel's history if available.
+function GPanel:GoBack() end
 
---- Goes forward one page in the HTML panel's history if available.  
-function GPanel:GoForward()
-end
+--- Goes forward one page in the HTML panel's history if available.
+function GPanel:GoForward() end
 
---- Goes to the page in the HTML panel's history at the specified relative offset.  
+--- Goes to the page in the HTML panel's history at the specified relative offset.
 --- @param offset number @The offset in the panel's back/forward history, relative to the current page, that you would like to skip to
-function GPanel:GoToHistoryOffset(offset)
-end
+function GPanel:GoToHistoryOffset(offset) end
 
---- Causes a RichText element to scroll to the bottom of its text.  
-function GPanel:GotoTextEnd()
-end
+--- Causes a RichText element to scroll to the bottom of its text.
+function GPanel:GotoTextEnd() end
 
---- Causes a RichText element to scroll to the top of its text.  
-function GPanel:GotoTextStart()
-end
+--- Causes a RichText element to scroll to the top of its text.
+function GPanel:GotoTextStart() end
 
---- Returns whenever the panel has child panels.  
+--- Returns whenever the panel has child panels.
 --- @return boolean @hasChilds
-function GPanel:HasChildren()
-end
+function GPanel:HasChildren() end
 
---- Returns if the panel is focused.  
+--- Returns if the panel is focused.
 --- @return boolean @hasFocus
-function GPanel:HasFocus()
-end
+function GPanel:HasFocus() end
 
---- Returns if the panel or any of its children(sub children and so on) has the focus.  
+--- Returns if the panel or any of its children(sub children and so on) has the focus.
 --- @return boolean @hasHierarchicalFocus
-function GPanel:HasHierarchicalFocus()
-end
+function GPanel:HasHierarchicalFocus() end
 
---- Returns whether the panel is a descendent of the given panel.  
---- @param parentPanel GPanel 
+--- Returns whether the panel is a descendent of the given panel.
+--- @param parentPanel GPanel
 --- @return boolean @True if the panel is contained within parentPanel.
-function GPanel:HasParent(parentPanel)
-end
+function GPanel:HasParent(parentPanel) end
 
---- Makes a panel invisible.  
-function GPanel:Hide()
-end
+--- Makes a panel invisible.
+function GPanel:Hide() end
 
---- Marks the end of a clickable text segment in a RichText element, started with Panel:InsertClickableTextStart.  
-function GPanel:InsertClickableTextEnd()
-end
+--- Marks the end of a clickable text segment in a RichText element, started with Panel:InsertClickableTextStart.
+function GPanel:InsertClickableTextEnd() end
 
---- Starts the insertion of clickable text for a RichText element. Any text appended with Panel:AppendText between this call and Panel:InsertClickableTextEnd will become clickable text.  
---- The hook PANEL:OnTextClicked is called when the text is clicked.  
---- ℹ **NOTE**: The clickable text is a separate Derma panel which will not inherit the current font from the `RichText`.  
+--- Starts the insertion of clickable text for a RichText element. Any text appended with Panel:AppendText between this call and Panel:InsertClickableTextEnd will become clickable text.
+--- The hook PANEL:OnTextClicked is called when the text is clicked.
+--- ℹ **NOTE**: The clickable text is a separate Derma panel which will not inherit the current font from the `RichText`.
 --- @param signalValue string @The text passed as the action signal's value.
-function GPanel:InsertClickableTextStart(signalValue)
-end
+function GPanel:InsertClickableTextStart(signalValue) end
 
---- Inserts a color change in a RichText element, which affects the color of all text added with Panel:AppendText until another color change is applied.  
+--- Inserts a color change in a RichText element, which affects the color of all text added with Panel:AppendText until another color change is applied.
 --- @param r number @The red value `(0 - 255)`.
 --- @param g number @The green value `(0 - 255)`.
 --- @param b number @The blue value `(0 - 255)`.
 --- @param a number @The alpha value `(0 - 255)`.
-function GPanel:InsertColorChange(r, g, b, a)
-end
+function GPanel:InsertColorChange(r, g, b, a) end
 
---- Begins a text fade for a RichText element where the last appended text segment is fully faded out after a specific amount of time, at a specific speed.  
---- The alpha of the text at any given time is determined by the text's base alpha * ((`sustain` - Global.CurTime) / `length`) where Global.CurTime is added to `sustain` when this method is called.  
+--- Begins a text fade for a RichText element where the last appended text segment is fully faded out after a specific amount of time, at a specific speed.
+--- The alpha of the text at any given time is determined by the text's base alpha * ((`sustain` - Global.CurTime) / `length`) where Global.CurTime is added to `sustain` when this method is called.
 --- @param sustain number @The number of seconds the text remains visible.
 --- @param length number @The number of seconds it takes the text to fade out
-function GPanel:InsertFade(sustain, length)
-end
+function GPanel:InsertFade(sustain, length) end
 
---- Invalidates the layout of this panel object and all its children. This will cause these objects to re-layout immediately, calling PANEL:PerformLayout. If you want to perform the layout in the next frame, you will have loop manually through all children, and call Panel:InvalidateLayout on each.  
+--- Invalidates the layout of this panel object and all its children. This will cause these objects to re-layout immediately, calling PANEL:PerformLayout. If you want to perform the layout in the next frame, you will have loop manually through all children, and call Panel:InvalidateLayout on each.
 --- @param recursive? boolean @If `true`, the method will recursively invalidate the layout of all children
-function GPanel:InvalidateChildren(recursive)
-end
+function GPanel:InvalidateChildren(recursive) end
 
---- Causes the panel to re-layout in the next frame. During the layout process  PANEL:PerformLayout will be called on the target panel.  
---- You should avoid calling this function every frame.  
---- 🦟 **BUG**: [Using this on a panel after clicking on a docked element will cause docked elements to reorient themselves incorrectly. This can be fixed by assigning a unique Panel:SetZPos to each docked element.](https://github.com/Facepunch/garrysmod-issues/issues/2574)  
+--- Causes the panel to re-layout in the next frame. During the layout process  PANEL:PerformLayout will be called on the target panel.
+--- You should avoid calling this function every frame.
+--- 🦟 **BUG**: [Using this on a panel after clicking on a docked element will cause docked elements to reorient themselves incorrectly. This can be fixed by assigning a unique Panel:SetZPos to each docked element.](https://github.com/Facepunch/garrysmod-issues/issues/2574)
 --- @param layoutNow? boolean @If true the panel will re-layout instantly and not wait for the next frame.
-function GPanel:InvalidateLayout(layoutNow)
-end
+function GPanel:InvalidateLayout(layoutNow) end
 
---- Calls Panel:InvalidateLayout on the panel's parent. This function will silently fail if the panel has no parent.  
---- This will cause the parent panel to re-layout, calling PANEL:PerformLayout.  
---- Internally sets `LayingOutParent` to `true` on this panel, and will silently fail if it is already set.  
+--- Calls Panel:InvalidateLayout on the panel's parent. This function will silently fail if the panel has no parent.
+--- This will cause the parent panel to re-layout, calling PANEL:PerformLayout.
+--- Internally sets `LayingOutParent` to `true` on this panel, and will silently fail if it is already set.
 --- @param layoutNow? boolean @If `true`, the re-layout will occur immediately, otherwise it will be performed in the next frame.
-function GPanel:InvalidateParent(layoutNow)
-end
+function GPanel:InvalidateParent(layoutNow) end
 
---- Determines whether the mouse cursor is hovered over one of this panel object's children. This is a reverse process using vgui.GetHoveredPanel, and looks upward to find the parent.  
+--- Determines whether the mouse cursor is hovered over one of this panel object's children. This is a reverse process using vgui.GetHoveredPanel, and looks upward to find the parent.
 --- @param immediate? boolean @Set to true to check only the immediate children of given panel ( first level )
 --- @return boolean @Whether or not one of this panel object's children is being hovered over.
-function GPanel:IsChildHovered(immediate)
-end
+function GPanel:IsChildHovered(immediate) end
 
---- Returns whether this panel is draggable ( if user is able to drag it ) or not.  
+--- Returns whether this panel is draggable ( if user is able to drag it ) or not.
 --- @return boolean @Whether this panel is draggable ( if user is able to drag it ) or not.
-function GPanel:IsDraggable()
-end
+function GPanel:IsDraggable() end
 
---- Returns whether this panel is currently being dragged or not.  
+--- Returns whether this panel is currently being dragged or not.
 --- @return boolean @Whether this panel is currently being dragged or not.
-function GPanel:IsDragging()
-end
+function GPanel:IsDragging() end
 
---- Returns whether the the panel is enabled or disabled.  
---- See Panel:SetEnabled for a function that makes the panel enabled or disabled.  
+--- Returns whether the the panel is enabled or disabled.
+--- See Panel:SetEnabled for a function that makes the panel enabled or disabled.
 --- @return boolean @Whether the panel is enabled or disabled.
-function GPanel:IsEnabled()
-end
+function GPanel:IsEnabled() end
 
---- Returns whether the mouse cursor is hovering over this panel or not  
---- Uses vgui.GetHoveredPanel internally.  
---- Requires Panel:SetMouseInputEnabled to be set to true.  
+--- Returns whether the mouse cursor is hovering over this panel or not
+--- Uses vgui.GetHoveredPanel internally.
+--- Requires Panel:SetMouseInputEnabled to be set to true.
 --- @return boolean @true if the panel is hovered
-function GPanel:IsHovered()
-end
+function GPanel:IsHovered() end
 
---- Returns true if the panel can receive keyboard input.  
+--- Returns true if the panel can receive keyboard input.
 --- @return boolean @keyboardInputEnabled
-function GPanel:IsKeyboardInputEnabled()
-end
+function GPanel:IsKeyboardInputEnabled() end
 
---- Determines whether or not a HTML or DHTML element is currently loading a page.  
---- ℹ **NOTE**: Before calling Panel:SetHTML or DHTML:OpenURL, the result seems to be `false` with the Awesomium web renderer and `true` for the Chromium web renderer. This difference can be used to determine the available HTML5 capabilities.  
---- ℹ **NOTE**: On Awesomium, the result remains `true` until the root document is loaded and when in-page content is loading (when adding pictures, frames, etc.). During this state, the HTML texture is not refreshed and the panel is not painted (it becomes invisible).  
---- On Chromium, the value is only `true` when the root document is not ready. The rendering is not suspended when in-page elements are loading.  
+--- Determines whether or not a HTML or DHTML element is currently loading a page.
+--- ℹ **NOTE**: Before calling Panel:SetHTML or DHTML:OpenURL, the result seems to be `false` with the Awesomium web renderer and `true` for the Chromium web renderer. This difference can be used to determine the available HTML5 capabilities.
+--- ℹ **NOTE**: On Awesomium, the result remains `true` until the root document is loaded and when in-page content is loading (when adding pictures, frames, etc.). During this state, the HTML texture is not refreshed and the panel is not painted (it becomes invisible).
+--- On Chromium, the value is only `true` when the root document is not ready. The rendering is not suspended when in-page elements are loading.
 --- @return boolean @Whether or not the (D)HTML object is loading.
-function GPanel:IsLoading()
-end
+function GPanel:IsLoading() end
 
---- Returns if the panel is going to be deleted in the next frame.  
+--- Returns if the panel is going to be deleted in the next frame.
 --- @return boolean @markedForDeletion
-function GPanel:IsMarkedForDeletion()
-end
+function GPanel:IsMarkedForDeletion() end
 
---- Returns whether the panel was made modal or not. See Panel:DoModal.  
+--- Returns whether the panel was made modal or not. See Panel:DoModal.
 --- @return boolean @True if the panel is modal.
-function GPanel:IsModal()
-end
+function GPanel:IsModal() end
 
---- Returns true if the panel can receive mouse input.  
+--- Returns true if the panel can receive mouse input.
 --- @return boolean @mouseInputEnabled
-function GPanel:IsMouseInputEnabled()
-end
+function GPanel:IsMouseInputEnabled() end
 
---- Determines whether or not a TextEntry panel is in multi-line mode. This is set with Panel:SetMultiline.  
+--- Determines whether or not a TextEntry panel is in multi-line mode. This is set with Panel:SetMultiline.
 --- @return boolean @Whether the object is in multi-line mode or not.
-function GPanel:IsMultiline()
-end
+function GPanel:IsMultiline() end
 
---- Returns whether the panel contains the given panel, recursively.  
---- @param childPanel GPanel 
+--- Returns whether the panel contains the given panel, recursively.
+--- @param childPanel GPanel
 --- @return boolean @True if the panel contains childPanel.
-function GPanel:IsOurChild(childPanel)
-end
+function GPanel:IsOurChild(childPanel) end
 
---- Returns if the panel was made popup or not. See Panel:MakePopup  
+--- Returns if the panel was made popup or not. See Panel:MakePopup
 --- @return boolean @`true` if the panel was made popup.
-function GPanel:IsPopup()
-end
+function GPanel:IsPopup() end
 
---- Determines if the panel object is selectable (like icons in the Spawn Menu, holding `Shift`). This is set with Panel:SetSelectable.  
+--- Determines if the panel object is selectable (like icons in the Spawn Menu, holding `Shift`). This is set with Panel:SetSelectable.
 --- @return boolean @Whether the panel is selectable or not.
-function GPanel:IsSelectable()
-end
+function GPanel:IsSelectable() end
 
---- Returns if the panel object is selected (like icons in the Spawn Menu, holding `Shift`). This can be set in Lua using Panel:SetSelected.  
+--- Returns if the panel object is selected (like icons in the Spawn Menu, holding `Shift`). This can be set in Lua using Panel:SetSelected.
 --- @return boolean @Whether the panel object is selected or not
-function GPanel:IsSelected()
-end
+function GPanel:IsSelected() end
 
---- Determines if the panel object is a selection canvas or not. This is set with Panel:SetSelectionCanvas.  
+--- Determines if the panel object is a selection canvas or not. This is set with Panel:SetSelectionCanvas.
 --- @return any @The value (if any) set by Panel:SetSelectionCanvas.
-function GPanel:IsSelectionCanvas()
-end
+function GPanel:IsSelectionCanvas() end
 
---- Returns if the panel is valid and not marked for deletion.  
+--- Returns if the panel is valid and not marked for deletion.
 --- @return boolean @True if the object is valid.
-function GPanel:IsValid()
-end
+function GPanel:IsValid() end
 
---- Returns if the panel is visible. This will **NOT** take into account visibility of the parent.  
+--- Returns if the panel is visible. This will **NOT** take into account visibility of the parent.
 --- @return boolean @`true` if the panel ls visible, `false` otherwise.
-function GPanel:IsVisible()
-end
+function GPanel:IsVisible() end
 
---- Returns if a panel allows world clicking set by Panel:SetWorldClicker.  
+--- Returns if a panel allows world clicking set by Panel:SetWorldClicker.
 --- @return boolean @If the panel allows world clicking.
-function GPanel:IsWorldClicker()
-end
+function GPanel:IsWorldClicker() end
 
---- Remove the focus from the panel.  
-function GPanel:KillFocus()
-end
+--- Remove the focus from the panel.
+function GPanel:KillFocus() end
 
---- Redefines the panel object's Panel:SetPos method to operate using frame-by-frame linear interpolation (Global.Lerp). When the panel's position is changed, it will move to the target position at the speed defined. You can undo this with Panel:DisableLerp.  
---- Unlike the other panel animation functions, such as Panel:MoveTo, this animation method will not operate whilst the game is paused. This is because it relies on Global.FrameTime.  
+--- Redefines the panel object's Panel:SetPos method to operate using frame-by-frame linear interpolation (Global.Lerp). When the panel's position is changed, it will move to the target position at the speed defined. You can undo this with Panel:DisableLerp.
+--- Unlike the other panel animation functions, such as Panel:MoveTo, this animation method will not operate whilst the game is paused. This is because it relies on Global.FrameTime.
 --- @param speed number @The speed at which to move the panel
 --- @param easeOut boolean @This causes the panel object to 'jump' at the target, slowing as it approaches
-function GPanel:LerpPositions(speed, easeOut)
-end
+function GPanel:LerpPositions(speed, easeOut) end
 
---- Loads a .gwen file (created by GWEN Designer) and calls Panel:LoadGWENString with the contents of the loaded file.  
---- Used to load panel controls from a file.  
+--- Loads a .gwen file (created by GWEN Designer) and calls Panel:LoadGWENString with the contents of the loaded file.
+--- Used to load panel controls from a file.
 --- @param filename string @The file to open
 --- @param path? string @The path used to look up the file
-function GPanel:LoadGWENFile(filename, path)
-end
+function GPanel:LoadGWENFile(filename, path) end
 
---- Loads controls for the panel from a JSON string.  
+--- Loads controls for the panel from a JSON string.
 --- @param str string @JSON string containing information about controls to create.
-function GPanel:LoadGWENString(str)
-end
+function GPanel:LoadGWENString(str) end
 
---- Sets a new image to be loaded by a TGAImage.  
+--- Sets a new image to be loaded by a TGAImage.
 --- @param imageName string @The file path.
 --- @param strPath string @The PATH to search in
-function GPanel:LoadTGAImage(imageName, strPath)
-end
+function GPanel:LoadTGAImage(imageName, strPath) end
 
---- Returns the cursor position local to the position of the panel (usually the upper-left corner).  
+--- Returns the cursor position local to the position of the panel (usually the upper-left corner).
 --- @return number @The x coordinate
 --- @return number @The y coordinate
-function GPanel:LocalCursorPos()
-end
+function GPanel:LocalCursorPos() end
 
---- Takes X and Y coordinates relative to the panel and returns their corresponding positions relative to the screen.  
---- See also Panel:ScreenToLocal.  
---- ⚠ **WARNING**: This function uses a cached value for the screen position of the panel, computed at the end of the last VGUI Think/Layout pass, so inaccurate results may be returned if the panel or any of its ancestors have been re-positioned outside of PANEL:Think or PANEL:PerformLayout within the last frame.  
---- ℹ **NOTE**: If the panel uses Panel:Dock, this function will return 0, 0 when the panel was created. The position will be updated in the next frame.  
+--- Takes X and Y coordinates relative to the panel and returns their corresponding positions relative to the screen.
+--- See also Panel:ScreenToLocal.
+--- ⚠ **WARNING**: This function uses a cached value for the screen position of the panel, computed at the end of the last VGUI Think/Layout pass, so inaccurate results may be returned if the panel or any of its ancestors have been re-positioned outside of PANEL:Think or PANEL:PerformLayout within the last frame.
+--- ℹ **NOTE**: If the panel uses Panel:Dock, this function will return 0, 0 when the panel was created. The position will be updated in the next frame.
 --- @param posX number @The X coordinate of the position on the panel to translate.
 --- @param posY number @The Y coordinate of the position on the panel to translate.
 --- @return number @The X coordinate relative to the screen.
 --- @return number @The Y coordinate relative to the screen.
-function GPanel:LocalToScreen(posX, posY)
-end
+function GPanel:LocalToScreen(posX, posY) end
 
---- Focuses the panel and enables it to receive input.  
---- This automatically calls Panel:SetMouseInputEnabled and Panel:SetKeyboardInputEnabled and sets them to `true`.  
---- ℹ **NOTE**: Panels derived from Panel will not work properly with this function. Due to this, any children will not be intractable with keyboard. Derive from EditablePanel instead.  
---- For non gui related mouse focus, you can use gui.EnableScreenClicker.  
-function GPanel:MakePopup()
-end
+--- Focuses the panel and enables it to receive input.
+--- This automatically calls Panel:SetMouseInputEnabled and Panel:SetKeyboardInputEnabled and sets them to `true`.
+--- ℹ **NOTE**: Panels derived from Panel will not work properly with this function. Due to this, any children will not be intractable with keyboard. Derive from EditablePanel instead.
+--- For non gui related mouse focus, you can use gui.EnableScreenClicker.
+function GPanel:MakePopup() end
 
---- Allows the panel to receive mouse input even if the mouse cursor is outside the bounds of the panel.  
+--- Allows the panel to receive mouse input even if the mouse cursor is outside the bounds of the panel.
 --- @param doCapture boolean @Set to true to enable, set to false to disable.
-function GPanel:MouseCapture(doCapture)
-end
+function GPanel:MouseCapture(doCapture) end
 
---- Places the panel above the passed panel with the specified offset.  
+--- Places the panel above the passed panel with the specified offset.
 --- @param panel GPanel @Panel to position relatively to.
 --- @param offset? number @The align offset.
-function GPanel:MoveAbove(panel, offset)
-end
+function GPanel:MoveAbove(panel, offset) end
 
---- Places the panel below the passed panel with the specified offset.  
+--- Places the panel below the passed panel with the specified offset.
 --- @param panel GPanel @Panel to position relatively to.
 --- @param offset? number @The align offset.
-function GPanel:MoveBelow(panel, offset)
-end
+function GPanel:MoveBelow(panel, offset) end
 
---- Moves the panel by the specified coordinates using animation.  
+--- Moves the panel by the specified coordinates using animation.
 --- @param moveX number @The number of pixels to move by in the horizontal (x) direction.
 --- @param moveY number @The number of pixels to move by in the vertical (y) direction.
 --- @param time number @The time (in seconds) in which to perform the animation.
 --- @param delay? number @The delay (in seconds) before the animation begins.
 --- @param ease? number @The easing of the start and/or end speed of the animation
 --- @param callback? function @The function to be called once the animation is complete
-function GPanel:MoveBy(moveX, moveY, time, delay, ease, callback)
-end
+function GPanel:MoveBy(moveX, moveY, time, delay, ease, callback) end
 
---- Places the panel left to the passed panel with the specified offset.  
+--- Places the panel left to the passed panel with the specified offset.
 --- @param panel GPanel @Panel to position relatively to.
 --- @param offset? number @The align offset.
-function GPanel:MoveLeftOf(panel, offset)
-end
+function GPanel:MoveLeftOf(panel, offset) end
 
---- Places the panel right to the passed panel with the specified offset.  
+--- Places the panel right to the passed panel with the specified offset.
 --- @param panel GPanel @Panel to position relatively to.
 --- @param offset? number @The align offset.
-function GPanel:MoveRightOf(panel, offset)
-end
+function GPanel:MoveRightOf(panel, offset) end
 
---- Moves the panel to the specified position using animation.  
---- ℹ **NOTE**: Setting the ease argument to 0 will result in the animation happening instantly, this applies to all MoveTo/SizeTo functions  
+--- Moves the panel to the specified position using animation.
+--- ℹ **NOTE**: Setting the ease argument to 0 will result in the animation happening instantly, this applies to all MoveTo/SizeTo functions
 --- @param posX number @The target x coordinate of the panel.
 --- @param posY number @The target y coordinate of the panel.
 --- @param time number @The time to perform the animation within.
 --- @param delay? number @The delay before the animation starts.
 --- @param ease? number @The easing of the start and/or end speed of the animation
 --- @param callback? function @The function to be called once the animation finishes
-function GPanel:MoveTo(posX, posY, time, delay, ease, callback)
-end
+function GPanel:MoveTo(posX, posY, time, delay, ease, callback) end
 
---- Moves this panel object in front of the specified sibling (child of the same parent) in the render order, and shuffles up the Z-positions of siblings now behind.  
+--- Moves this panel object in front of the specified sibling (child of the same parent) in the render order, and shuffles up the Z-positions of siblings now behind.
 --- @param siblingPanel GPanel @The panel to move this one in front of
 --- @return boolean @`false` if the passed panel is not a sibling, otherwise `nil`.
-function GPanel:MoveToAfter(siblingPanel)
-end
+function GPanel:MoveToAfter(siblingPanel) end
 
---- Moves the panel object behind all other panels on screen. If the panel has been made a pop-up with Panel:MakePopup, it will still draw in front of any panels that haven't.  
-function GPanel:MoveToBack()
-end
+--- Moves the panel object behind all other panels on screen. If the panel has been made a pop-up with Panel:MakePopup, it will still draw in front of any panels that haven't.
+function GPanel:MoveToBack() end
 
---- Moves this panel object behind the specified sibling (child of the same parent) in the render order, and shuffles up the Panel:SetZPos of siblings now in front.  
+--- Moves this panel object behind the specified sibling (child of the same parent) in the render order, and shuffles up the Panel:SetZPos of siblings now in front.
 --- @param siblingPanel GPanel @The panel to move this one behind
 --- @return boolean @`false` if the passed panel is not a sibling, otherwise `nil`.
-function GPanel:MoveToBefore(siblingPanel)
-end
+function GPanel:MoveToBefore(siblingPanel) end
 
---- Moves the panel in front of all other panels on screen. Unless the panel has been made a pop-up using Panel:MakePopup, it will still draw behind any that have.  
-function GPanel:MoveToFront()
-end
+--- Moves the panel in front of all other panels on screen. Unless the panel has been made a pop-up using Panel:MakePopup, it will still draw behind any that have.
+function GPanel:MoveToFront() end
 
---- Creates a new animation for the panel object.  
---- Methods that use this function:  
---- * Panel:MoveTo  
---- * Panel:SizeTo  
---- * Panel:SlideUp  
---- * Panel:SlideDown  
---- * Panel:ColorTo  
---- * Panel:AlphaTo  
---- * Panel:MoveBy  
---- * Panel:LerpPositions  
+--- Creates a new animation for the panel object.
+--- Methods that use this function:
+--- * Panel:MoveTo
+--- * Panel:SizeTo
+--- * Panel:SlideUp
+--- * Panel:SlideDown
+--- * Panel:ColorTo
+--- * Panel:AlphaTo
+--- * Panel:MoveBy
+--- * Panel:LerpPositions
 --- @param length number @The length of the animation in seconds.
 --- @param delay? number @The delay before the animation starts.
 --- @param ease? number @The power/index to use for easing
 --- @param callback? function @The function to be called when the animation ends
 --- @return table @Partially filled Structures/AnimationData with the following members:
-function GPanel:NewAnimation(length, delay, ease, callback)
-end
+function GPanel:NewAnimation(length, delay, ease, callback) end
 
---- Sets whether this panel's drawings should be clipped within the parent panel's bounds.  
---- See render.SetScissorRect if you wish to set the clipping rect instead.  
---- ℹ **NOTE**: This only disabled clipping for the Paint Related functions (as far as i can tell at the current moment, more testing should be done) so things like the text of a DLabel will still be clipped to the parent.  
---- To fully disable the clipping of any children see Global.DisableClipping.  
+--- Sets whether this panel's drawings should be clipped within the parent panel's bounds.
+--- See render.SetScissorRect if you wish to set the clipping rect instead.
+--- ℹ **NOTE**: This only disabled clipping for the Paint Related functions (as far as i can tell at the current moment, more testing should be done) so things like the text of a DLabel will still be clipped to the parent.
+--- To fully disable the clipping of any children see Global.DisableClipping.
 --- @param disableClipping boolean @Whether to disable clipping or not
-function GPanel:NoClipping(disableClipping)
-end
+function GPanel:NoClipping(disableClipping) end
 
---- Returns the number of children of the panel object that are selected. This is equivalent to calling Panel:IsSelected on all child objects and counting the number of returns that are `true`.  
+--- Returns the number of children of the panel object that are selected. This is equivalent to calling Panel:IsSelected on all child objects and counting the number of returns that are `true`.
 --- @return number @The number of child objects that are currently selected
-function GPanel:NumSelectedChildren()
-end
+function GPanel:NumSelectedChildren() end
 
---- Instructs a HTML control to download and parse a HTML script using the passed URL.  
---- This function can only be used on [HTML](HTML) panel and its derivatives.  
+--- Instructs a HTML control to download and parse a HTML script using the passed URL.
+--- This function can only be used on [HTML](HTML) panel and its derivatives.
 --- @param URL string @URL to open
-function GPanel:OpenURL(URL)
-end
+function GPanel:OpenURL(URL) end
 
---- Paints a ghost copy of the panel at the given position.  
---- ⚠ **WARNING**: This function sets Z pos of panel's children (PANEL:SetZPos). It also briefly unparents and reparents the panel.  
+--- Paints a ghost copy of the panel at the given position.
+--- ⚠ **WARNING**: This function sets Z pos of panel's children (PANEL:SetZPos). It also briefly unparents and reparents the panel.
 --- @param posX number @The x coordinate to draw the panel from.
 --- @param posY number @The y coordinate to draw the panel from.
-function GPanel:PaintAt(posX, posY)
-end
+function GPanel:PaintAt(posX, posY) end
 
---- Paints the panel at its current position. To use this you must call Panel:SetPaintedManually(true).  
+--- Paints the panel at its current position. To use this you must call Panel:SetPaintedManually(true).
 --- @param unclamp? boolean @If set, overrides panels' clipping so that it can render fully when its size is larger than the game's resolution.
-function GPanel:PaintManual(unclamp)
-end
+function GPanel:PaintManual(unclamp) end
 
---- Parents the panel to the HUD.  
---- Makes it invisible on the escape-menu and disables controls.  
-function GPanel:ParentToHUD()
-end
+--- Parents the panel to the HUD.
+--- Makes it invisible on the escape-menu and disables controls.
+function GPanel:ParentToHUD() end
 
---- @deprecated  
---- 🛑 **DEPRECATED**: Due to privacy concerns, this function has been disabled  
---- Only works for TextEntries.  
---- Pastes the contents of the clipboard into the TextEntry.  
---- ℹ **NOTE**: Tab characters will be dropped from the pasted text  
-function GPanel:Paste()
-end
+--- @deprecated
+--- 🛑 **DEPRECATED**: Due to privacy concerns, this function has been disabled
+--- Only works for TextEntries.
+--- Pastes the contents of the clipboard into the TextEntry.
+--- ℹ **NOTE**: Tab characters will be dropped from the pasted text
+function GPanel:Paste() end
 
---- Sets the width and position of a DLabel and places the passed panel object directly to the right of it. Returns the `y` value of the bottom of the tallest object. The panel on which this method is run is not relevant; only the passed objects are affected.  
+--- Sets the width and position of a DLabel and places the passed panel object directly to the right of it. Returns the `y` value of the bottom of the tallest object. The panel on which this method is run is not relevant; only the passed objects are affected.
 --- @param lblWidth number @The width to set the label to.
 --- @param x number @The horizontal (x) position at which to place the label.
 --- @param y number @The vertical (y) position at which to place the label.
 --- @param lbl GPanel @The label to resize and position.
 --- @param panelObj GPanel @The panel object to place to the right of the label.
 --- @return number @The distance from the top of the parent panel to the bottom of the tallest object (the `y` position plus the height of the label or passed p
-function GPanel:PositionLabel(lblWidth, x, y, lbl, panelObj)
-end
+function GPanel:PositionLabel(lblWidth, x, y, lbl, panelObj) end
 
---- Enables the queue for panel animations. If enabled, the next new animation will begin after all current animations have ended. This must be called before Panel:NewAnimation to work, and only applies to the next new animation. If you want to queue many, you must call this before each.  
-function GPanel:Queue()
-end
+--- Enables the queue for panel animations. If enabled, the next new animation will begin after all current animations have ended. This must be called before Panel:NewAnimation to work, and only applies to the next new animation. If you want to queue many, you must call this before each.
+function GPanel:Queue() end
 
---- Causes a SpawnIcon to rebuild its model image.  
-function GPanel:RebuildSpawnIcon()
-end
+--- Causes a SpawnIcon to rebuild its model image.
+function GPanel:RebuildSpawnIcon() end
 
---- Re-renders a spawn icon with customized cam data.  
---- Global.PositionSpawnIcon can be used to easily calculate the necessary camera parameters.  
---- ℹ **NOTE**: This function does **not** accept the standard Structures/CamData.  
+--- Re-renders a spawn icon with customized cam data.
+--- Global.PositionSpawnIcon can be used to easily calculate the necessary camera parameters.
+--- ℹ **NOTE**: This function does **not** accept the standard Structures/CamData.
 --- @param data table @A four-membered table containing the information needed to re-render:
-function GPanel:RebuildSpawnIconEx(data)
-end
+function GPanel:RebuildSpawnIconEx(data) end
 
---- Allows the panel to receive drag and drop events. Can be called multiple times with different names to receive multiple different draggable panel events.  
+--- Allows the panel to receive drag and drop events. Can be called multiple times with different names to receive multiple different draggable panel events.
 --- @param name string @Name of DnD panels to receive
 --- @param func function @This function is called whenever a panel with valid name is hovering above and dropped on this panel
 --- @param menu? table @A table of strings that will act as a menu if drag'n'drop was performed with a right click
-function GPanel:Receiver(name, func, menu)
-end
+function GPanel:Receiver(name, func, menu) end
 
---- Refreshes the HTML panel's current page.  
+--- Refreshes the HTML panel's current page.
 --- @param ignoreCache? boolean @If true, the refresh will ignore cached content similar to "ctrl+f5" in most browsers.
-function GPanel:Refresh(ignoreCache)
-end
+function GPanel:Refresh(ignoreCache) end
 
---- Marks a panel for deletion so it will be deleted on the next frame.  
---- This will not mark child panels for deletion this frame, but they will be marked and deleted in the next frame.  
---- See also Panel:IsMarkedForDeletion  
---- Will automatically call Panel:InvalidateParent.  
-function GPanel:Remove()
-end
+--- Marks a panel for deletion so it will be deleted on the next frame.
+--- This will not mark child panels for deletion this frame, but they will be marked and deleted in the next frame.
+--- See also Panel:IsMarkedForDeletion
+--- Will automatically call Panel:InvalidateParent.
+function GPanel:Remove() end
 
---- Attempts to obtain focus for this panel.  
-function GPanel:RequestFocus()
-end
+--- Attempts to obtain focus for this panel.
+function GPanel:RequestFocus() end
 
---- Resets all text fades in a RichText element made with Panel:InsertFade.  
+--- Resets all text fades in a RichText element made with Panel:InsertFade.
 --- @param hold boolean @True to reset fades, false otherwise.
 --- @param expiredOnly boolean @Any value equating to `true` will reset fades only on text segments that are completely faded out.
 --- @param newSustain number @The new sustain value of each faded text segment
-function GPanel:ResetAllFades(hold, expiredOnly, newSustain)
-end
+function GPanel:ResetAllFades(hold, expiredOnly, newSustain) end
 
---- Executes a string as JavaScript code on a web document panel.  
---- ℹ **NOTE**: This function does **NOT** allow you to pass variables from JavaScript (JS) to Lua context.  
---- If you wish to pass/return values from JS to Lua, you may want to use DHTML:AddFunction function to accomplish that job.  
---- ℹ **NOTE**: The Awesomium web renderer automatically delays the code execution if the document is not ready, but the Chromium web renderer does not!  
---- This means that with Chromium, you cannot JavaScript run code immediatly after calling Panel:SetHTML or Panel:OpenURL. You should wait for the events PANEL:OnDocumentReady or PANEL:OnFinishLoadingDocument to be triggered before proceeding, otherwise you may manipulate an empty / incomplete document.  
+--- Executes a string as JavaScript code on a web document panel.
+--- ℹ **NOTE**: This function does **NOT** allow you to pass variables from JavaScript (JS) to Lua context.
+--- If you wish to pass/return values from JS to Lua, you may want to use DHTML:AddFunction function to accomplish that job.
+--- ℹ **NOTE**: The Awesomium web renderer automatically delays the code execution if the document is not ready, but the Chromium web renderer does not!
+--- This means that with Chromium, you cannot JavaScript run code immediatly after calling Panel:SetHTML or Panel:OpenURL. You should wait for the events PANEL:OnDocumentReady or PANEL:OnFinishLoadingDocument to be triggered before proceeding, otherwise you may manipulate an empty / incomplete document.
 --- @param js string @Specify JavaScript code to be executed.
-function GPanel:RunJavascript(js)
-end
+function GPanel:RunJavascript(js) end
 
---- Saves the current state (caret position and the text inside) of a TextEntry as an undo state.  
---- See also Panel:Undo.  
-function GPanel:SaveUndoState()
-end
+--- Saves the current state (caret position and the text inside) of a TextEntry as an undo state.
+--- See also Panel:Undo.
+function GPanel:SaveUndoState() end
 
---- Translates global screen coordinate to coordinates relative to the panel.  
---- See also Panel:LocalToScreen.  
---- ⚠ **WARNING**: This function uses a cached value for the screen position of the panel, computed at the end of the last VGUI Think/Layout pass, so inaccurate results may be returned if the panel or any of its ancestors have been re-positioned outside of PANEL:Think or PANEL:PerformLayout within the last frame.  
+--- Translates global screen coordinate to coordinates relative to the panel.
+--- See also Panel:LocalToScreen.
+--- ⚠ **WARNING**: This function uses a cached value for the screen position of the panel, computed at the end of the last VGUI Think/Layout pass, so inaccurate results may be returned if the panel or any of its ancestors have been re-positioned outside of PANEL:Think or PANEL:PerformLayout within the last frame.
 --- @param screenX number @The x coordinate of the screen position to be translated.
 --- @param screenY number @The y coordinate of the screed position be to translated.
 --- @return number @Relativeposition X
 --- @return number @Relativeposition Y
-function GPanel:ScreenToLocal(screenX, screenY)
-end
+function GPanel:ScreenToLocal(screenX, screenY) end
 
---- Selects all items within a panel or object. For text-based objects, selects all text.  
---- ℹ **NOTE**: Only works on RichText and TextEntry and their derived panels by default (such as DTextEntry), and on any panel that manually reimplemented this method.  
-function GPanel:SelectAll()
-end
+--- Selects all items within a panel or object. For text-based objects, selects all text.
+--- ℹ **NOTE**: Only works on RichText and TextEntry and their derived panels by default (such as DTextEntry), and on any panel that manually reimplemented this method.
+function GPanel:SelectAll() end
 
---- If called on a TextEntry, clicking the text entry for the first time will automatically select all of the text ready to be copied by the user.  
-function GPanel:SelectAllOnFocus()
-end
+--- If called on a TextEntry, clicking the text entry for the first time will automatically select all of the text ready to be copied by the user.
+function GPanel:SelectAllOnFocus() end
 
---- @deprecated  
---- 🛑 **DEPRECATED**: Duplicate of Panel:SelectAll.  
---- Selects all the text in a panel object. Will not select non-text items; for this, use Panel:SelectAll.  
+--- @deprecated
+--- 🛑 **DEPRECATED**: Duplicate of Panel:SelectAll.
+--- Selects all the text in a panel object. Will not select non-text items; for this, use Panel:SelectAll.
 --- @param resetCursorPos boolean @Reset cursor pos?
-function GPanel:SelectAllText(resetCursorPos)
-end
+function GPanel:SelectAllText(resetCursorPos) end
 
---- Deselects all items in a panel object. For text-based objects, this will deselect all text.  
---- ℹ **NOTE**: Only works on RichText and TextEntry and their derived panels by default (such as DTextEntry), and on any panel that manually reimplemented this method.  
-function GPanel:SelectNone()
-end
+--- Deselects all items in a panel object. For text-based objects, this will deselect all text.
+--- ℹ **NOTE**: Only works on RichText and TextEntry and their derived panels by default (such as DTextEntry), and on any panel that manually reimplemented this method.
+function GPanel:SelectNone() end
 
---- Sets the achievement to be displayed by AchievementIcon.  
+--- Sets the achievement to be displayed by AchievementIcon.
 --- @param id number @Achievement number ID
-function GPanel:SetAchievement(id)
-end
+function GPanel:SetAchievement(id) end
 
---- Configures a TextEntry to allow user to type characters that are not included in the US-ASCII (7-bit ASCII) character set.  
---- Characters not included in US-ASCII are multi-byte characters in UTF-8. They can be accented characters, non-Latin characters and special characters.  
+--- Configures a TextEntry to allow user to type characters that are not included in the US-ASCII (7-bit ASCII) character set.
+--- Characters not included in US-ASCII are multi-byte characters in UTF-8. They can be accented characters, non-Latin characters and special characters.
 --- @param allowed boolean @Set to true in order not to restrict input characters.
-function GPanel:SetAllowNonAsciiCharacters(allowed)
-end
+function GPanel:SetAllowNonAsciiCharacters(allowed) end
 
---- Sets the alpha multiplier for the panel  
+--- Sets the alpha multiplier for the panel
 --- @param alpha number @The alpha value in the range of 0-255.
-function GPanel:SetAlpha(alpha)
-end
+function GPanel:SetAlpha(alpha) end
 
---- Enables or disables animations for the panel object by overriding the PANEL:AnimationThink hook to nil and back.  
+--- Enables or disables animations for the panel object by overriding the PANEL:AnimationThink hook to nil and back.
 --- @param enable boolean @Whether to enable or disable animations.
-function GPanel:SetAnimationEnabled(enable)
-end
+function GPanel:SetAnimationEnabled(enable) end
 
---- Sets whenever the panel should be removed if the parent was removed.  
+--- Sets whenever the panel should be removed if the parent was removed.
 --- @param autoDelete boolean @Whenever to delete if the parent was removed or not.
-function GPanel:SetAutoDelete(autoDelete)
-end
+function GPanel:SetAutoDelete(autoDelete) end
 
---- Sets the background color of a panel such as a RichText, Label, DColorCube or the base Panel.  
---- For many panels, such as DLabel and Panel, you must use Panel:SetPaintBackgroundEnabled( true ) for the background to appear.  
---- Please note that for most panels the engine will overwrite the foreground and background colors a frame after panel creation via the PANEL:ApplySchemeSettings hook, so you may want to set the color in that hook instead.  
---- See Panel:SetFGColor for the foreground color.  
---- ℹ **NOTE**: This doesn't apply to all VGUI elements and its function varies between them  
+--- Sets the background color of a panel such as a RichText, Label, DColorCube or the base Panel.
+--- For many panels, such as DLabel and Panel, you must use Panel:SetPaintBackgroundEnabled( true ) for the background to appear.
+--- Please note that for most panels the engine will overwrite the foreground and background colors a frame after panel creation via the PANEL:ApplySchemeSettings hook, so you may want to set the color in that hook instead.
+--- See Panel:SetFGColor for the foreground color.
+--- ℹ **NOTE**: This doesn't apply to all VGUI elements and its function varies between them
 --- @param r_or_color number @The red channel of the color, or a Color
 --- @param g number @The green channel of the color.
 --- @param b number @The blue channel of the color.
 --- @param a number @The alpha channel of the color.
-function GPanel:SetBGColor(r_or_color, g, b, a)
-end
+function GPanel:SetBGColor(r_or_color, g, b, a) end
 
---- Sets the position of the caret (or text cursor) in a text-based panel object.  
+--- Sets the position of the caret (or text cursor) in a text-based panel object.
 --- @param offset number @Caret position/offset from the start of text
-function GPanel:SetCaretPos(offset)
-end
+function GPanel:SetCaretPos(offset) end
 
---- ⚠ **WARNING**: This function does not exist on all panels  
---- ⚠ **WARNING**: This function cannot interact with serverside convars unless you are host  
---- ℹ **NOTE**: Blocked convars will not work with this, see Blocked ConCommands  
---- Sets this panel's convar. When the convar changes this panel will update automatically.  
---- For developer implementation, see Global.Derma_Install_Convar_Functions.  
+--- ⚠ **WARNING**: This function does not exist on all panels
+--- ⚠ **WARNING**: This function cannot interact with serverside convars unless you are host
+--- ℹ **NOTE**: Blocked convars will not work with this, see Blocked ConCommands
+--- Sets this panel's convar. When the convar changes this panel will update automatically.
+--- For developer implementation, see Global.Derma_Install_Convar_Functions.
 --- @param convar string @The console variable to check.
-function GPanel:SetConVar(convar)
-end
+function GPanel:SetConVar(convar) end
 
---- Sets the alignment of the contents.  
---- ℹ **NOTE**: This function only works on Label panels and its derivatives.  
---- ℹ **NOTE**: This function doesnt work, if Panel:SetWrap is true.  
+--- Sets the alignment of the contents.
+--- ℹ **NOTE**: This function only works on Label panels and its derivatives.
+--- ℹ **NOTE**: This function doesnt work, if Panel:SetWrap is true.
 --- @param alignment number @The direction of the content, based on the number pad
-function GPanel:SetContentAlignment(alignment)
-end
+function GPanel:SetContentAlignment(alignment) end
 
---- Stores a string in the named cookie using Panel:GetCookieName as prefix.  
---- You can also retrieve and modify this cookie by using the cookie. Cookies are stored in this format:  
---- ```  
---- panelCookieName.cookieName  
---- ```  
---- ⚠ **WARNING**: The panel's cookie name MUST be set for this function to work. See Panel:SetCookieName.  
+--- Stores a string in the named cookie using Panel:GetCookieName as prefix.
+--- You can also retrieve and modify this cookie by using the cookie. Cookies are stored in this format:
+--- ```
+--- panelCookieName.cookieName
+--- ```
+--- ⚠ **WARNING**: The panel's cookie name MUST be set for this function to work. See Panel:SetCookieName.
 --- @param cookieName string @The unique name used to retrieve the cookie later.
 --- @param value string @The value to store in the cookie
-function GPanel:SetCookie(cookieName, value)
-end
+function GPanel:SetCookie(cookieName, value) end
 
---- Sets the panel's cookie name. Calls PANEL:LoadCookies if defined.  
+--- Sets the panel's cookie name. Calls PANEL:LoadCookies if defined.
 --- @param name string @The panel's cookie name
-function GPanel:SetCookieName(name)
-end
+function GPanel:SetCookieName(name) end
 
---- Sets the appearance of the cursor. You can find a list of all available cursors with image previews [here](https://wiki.facepunch.com/gmod/Cursors).  
+--- Sets the appearance of the cursor. You can find a list of all available cursors with image previews [here](https://wiki.facepunch.com/gmod/Cursors).
 --- @param cursor string @The cursor to be set
-function GPanel:SetCursor(cursor)
-end
+function GPanel:SetCursor(cursor) end
 
---- Sets the drag parent.  
---- Drag parent means that when we start to drag this panel, we'll really start dragging the defined parent.  
+--- Sets the drag parent.
+--- Drag parent means that when we start to drag this panel, we'll really start dragging the defined parent.
 --- @param parent GPanel @The panel to set as drag parent.
-function GPanel:SetDragParent(parent)
-end
+function GPanel:SetDragParent(parent) end
 
---- Sets the visibility of the language selection box when typing in non-English mode.  
---- See Panel:SetDrawLanguageIDAtLeft for a function that changes the position of the language selection box.  
+--- Sets the visibility of the language selection box when typing in non-English mode.
+--- See Panel:SetDrawLanguageIDAtLeft for a function that changes the position of the language selection box.
 --- @param visible boolean @true to make it visible, false to hide it.
-function GPanel:SetDrawLanguageID(visible)
-end
+function GPanel:SetDrawLanguageID(visible) end
 
---- Sets where to draw the language selection box.  
---- See Panel:SetDrawLanguageID for a function that hides or shows the language selection box.  
+--- Sets where to draw the language selection box.
+--- See Panel:SetDrawLanguageID for a function that hides or shows the language selection box.
 --- @param left boolean @true = left, false = right
-function GPanel:SetDrawLanguageIDAtLeft(left)
-end
+function GPanel:SetDrawLanguageIDAtLeft(left) end
 
---- Makes the panel render in front of all others, including the spawn menu and main menu.  
---- Priority is given based on the last call, so of two panels that call this method, the second will draw in front of the first.  
---- ℹ **NOTE**: This only makes the panel **draw** above other panels. If there's another panel that would have otherwise covered it, users will not be able to interact with it.  
---- Completely disregards PANEL:ParentToHUD.  
---- ⚠ **WARNING**: This does not work when using PANEL:SetPaintedManually or PANEL:PaintAt.  
+--- Makes the panel render in front of all others, including the spawn menu and main menu.
+--- Priority is given based on the last call, so of two panels that call this method, the second will draw in front of the first.
+--- ℹ **NOTE**: This only makes the panel **draw** above other panels. If there's another panel that would have otherwise covered it, users will not be able to interact with it.
+--- Completely disregards PANEL:ParentToHUD.
+--- ⚠ **WARNING**: This does not work when using PANEL:SetPaintedManually or PANEL:PaintAt.
 --- @param drawOnTop? boolean @Whether or not to draw the panel in front of all others.
-function GPanel:SetDrawOnTop(drawOnTop)
-end
+function GPanel:SetDrawOnTop(drawOnTop) end
 
---- Sets the target area for dropping when an object is being dragged around this panel using the dragndrop.  
---- This draws a target box of the specified size and position, until Panel:DragHoverEnd is called. It uses Panel:DrawDragHover to draw this area.  
+--- Sets the target area for dropping when an object is being dragged around this panel using the dragndrop.
+--- This draws a target box of the specified size and position, until Panel:DragHoverEnd is called. It uses Panel:DrawDragHover to draw this area.
 --- @param x number @The x coordinate of the top-left corner of the drop area.
 --- @param y number @The y coordinate of the top-left corner of the drop area.
 --- @param width number @The width of the drop area.
 --- @param height number @The height of the drop area.
-function GPanel:SetDropTarget(x, y, width, height)
-end
+function GPanel:SetDropTarget(x, y, width, height) end
 
---- Sets the enabled state of a disable-able panel object, such as a DButton or DTextEntry.  
---- See Panel:IsEnabled for a function that retrieves the "enabled" state of a panel.  
+--- Sets the enabled state of a disable-able panel object, such as a DButton or DTextEntry.
+--- See Panel:IsEnabled for a function that retrieves the "enabled" state of a panel.
 --- @param enable boolean @Whether to enable or disable the panel object.
-function GPanel:SetEnabled(enable)
-end
+function GPanel:SetEnabled(enable) end
 
---- Adds a shadow falling to the bottom right corner of the panel's text.  
---- ℹ **NOTE**: This works only on  panels that derive from Label.  
+--- Adds a shadow falling to the bottom right corner of the panel's text.
+--- ℹ **NOTE**: This works only on  panels that derive from Label.
 --- @param distance number @The distance of the shadow from the panel.
 --- @param Color table @The color of the shadow
-function GPanel:SetExpensiveShadow(distance, Color)
-end
+function GPanel:SetExpensiveShadow(distance, Color) end
 
---- Sets the foreground color of a panel.  
---- For a Label or RichText, this is the color of its text.  
---- This function calls Panel:SetFGColorEx internally.  
---- Please note that for most panels the engine will overwrite the foreground and background colors a frame after panel creation via the PANEL:ApplySchemeSettings hook, so you may want to set the color in that hook instead.  
---- See Panel:SetBGColor for the background color.  
---- ℹ **NOTE**: This doesn't apply to all VGUI elements (such as DLabel) and its function varies between them  
+--- Sets the foreground color of a panel.
+--- For a Label or RichText, this is the color of its text.
+--- This function calls Panel:SetFGColorEx internally.
+--- Please note that for most panels the engine will overwrite the foreground and background colors a frame after panel creation via the PANEL:ApplySchemeSettings hook, so you may want to set the color in that hook instead.
+--- See Panel:SetBGColor for the background color.
+--- ℹ **NOTE**: This doesn't apply to all VGUI elements (such as DLabel) and its function varies between them
 --- @param r_or_color number @The red channel of the color, or a Color
 --- @param g number @The green channel of the color.
 --- @param b number @The blue channel of the color.
 --- @param a number @The alpha channel of the color.
-function GPanel:SetFGColor(r_or_color, g, b, a)
-end
+function GPanel:SetFGColor(r_or_color, g, b, a) end
 
---- Sets the panel that owns this FocusNavGroup to be the root in the focus traversal hierarchy. This function will only work on EditablePanel class panels and its derivatives.  
---- ℹ **NOTE**: Child panels that should be part of the tab navigation need Panel:SetTabPosition called on them.  
---- @param state boolean 
-function GPanel:SetFocusTopLevel(state)
-end
+--- Sets the panel that owns this FocusNavGroup to be the root in the focus traversal hierarchy. This function will only work on EditablePanel class panels and its derivatives.
+--- ℹ **NOTE**: Child panels that should be part of the tab navigation need Panel:SetTabPosition called on them.
+--- @param state boolean
+function GPanel:SetFocusTopLevel(state) end
 
---- Sets the font used to render this panel's text. This works for Label, TextEntry and RichText, but it's a better idea to use their local `SetFont` (DTextEntry:SetFont, DLabel:SetFont) methods when available.  
---- To retrieve the font used by a panel, call Panel:GetFont.  
+--- Sets the font used to render this panel's text. This works for Label, TextEntry and RichText, but it's a better idea to use their local `SetFont` (DTextEntry:SetFont, DLabel:SetFont) methods when available.
+--- To retrieve the font used by a panel, call Panel:GetFont.
 --- @param fontName string @The name of the font
-function GPanel:SetFontInternal(fontName)
-end
+function GPanel:SetFontInternal(fontName) end
 
---- Allows you to set HTML code within a panel.  
+--- Allows you to set HTML code within a panel.
 --- @param HTML string @The HTML code to set.
-function GPanel:SetHTML(HTML)
-end
+function GPanel:SetHTML(HTML) end
 
---- Sets the height of the panel.  
---- Calls PANEL:OnSizeChanged and marks this panel for layout (Panel:InvalidateLayout).  
---- See also Panel:SetSize.  
+--- Sets the height of the panel.
+--- Calls PANEL:OnSizeChanged and marks this panel for layout (Panel:InvalidateLayout).
+--- See also Panel:SetSize.
 --- @param height number @The height to be set.
-function GPanel:SetHeight(height)
-end
+function GPanel:SetHeight(height) end
 
---- @deprecated  
---- 🛑 **DEPRECATED**: Alias of Panel:SetKeyboardInputEnabled  
---- Enables or disables the keyboard input for the panel.  
+--- @deprecated
+--- 🛑 **DEPRECATED**: Alias of Panel:SetKeyboardInputEnabled
+--- Enables or disables the keyboard input for the panel.
 --- @param keyboardInput boolean @Whether to enable or disable keyboard input.
-function GPanel:SetKeyBoardInputEnabled(keyboardInput)
-end
+function GPanel:SetKeyBoardInputEnabled(keyboardInput) end
 
---- Allows or disallows the panel to receive keyboard focus and input. This is recursively applied to all children.  
+--- Allows or disallows the panel to receive keyboard focus and input. This is recursively applied to all children.
 --- @param enable boolean @Whether keyboard input should be enabled for this panel.
-function GPanel:SetKeyboardInputEnabled(enable)
-end
+function GPanel:SetKeyboardInputEnabled(enable) end
 
---- Sets the height of a single line of a RichText panel.  
+--- Sets the height of a single line of a RichText panel.
 --- @return number @The new line height
-function GPanel:SetLineHeight()
-end
+function GPanel:SetLineHeight() end
 
---- Sets the maximum character count this panel should have.  
---- This function will only work on RichText and TextEntry panels and their derivatives.  
+--- Sets the maximum character count this panel should have.
+--- This function will only work on RichText and TextEntry panels and their derivatives.
 --- @param maxChar number @The new maximum amount of characters this panel is allowed to contain.
-function GPanel:SetMaximumCharCount(maxChar)
-end
+function GPanel:SetMaximumCharCount(maxChar) end
 
---- Sets the minimum dimensions of the panel or object.  
---- You can restrict either or both values.  
---- Calling the function without arguments will remove the minimum size.  
+--- Sets the minimum dimensions of the panel or object.
+--- You can restrict either or both values.
+--- Calling the function without arguments will remove the minimum size.
 --- @param minW? number @The minimum width of the object.
 --- @param minH? number @The minimum height of the object.
-function GPanel:SetMinimumSize(minW, minH)
-end
+function GPanel:SetMinimumSize(minW, minH) end
 
---- Sets the model to be displayed by SpawnIcon.  
---- ℹ **NOTE**: This must be called after setting size if you wish to use a different size spawnicon  
+--- Sets the model to be displayed by SpawnIcon.
+--- ℹ **NOTE**: This must be called after setting size if you wish to use a different size spawnicon
 --- @param ModelPath string @The path of the model to set
 --- @param skin? number @The skin to set
 --- @param bodygroups? string @The body groups to set
-function GPanel:SetModel(ModelPath, skin, bodygroups)
-end
+function GPanel:SetModel(ModelPath, skin, bodygroups) end
 
---- Enables or disables the mouse input for the panel.  
---- ℹ **NOTE**: Panels parented to the context menu will not be clickable unless Panel:SetKeyboardInputEnabled is enabled or Panel:MakePopup has been called. If you want the panel to have mouse input but you do not want to prevent players from moving, set Panel:SetKeyboardInputEnabled to false immediately after calling Panel:MakePopup.  
+--- Enables or disables the mouse input for the panel.
+--- ℹ **NOTE**: Panels parented to the context menu will not be clickable unless Panel:SetKeyboardInputEnabled is enabled or Panel:MakePopup has been called. If you want the panel to have mouse input but you do not want to prevent players from moving, set Panel:SetKeyboardInputEnabled to false immediately after calling Panel:MakePopup.
 --- @param mouseInput boolean @Whenever to enable or disable mouse input.
-function GPanel:SetMouseInputEnabled(mouseInput)
-end
+function GPanel:SetMouseInputEnabled(mouseInput) end
 
---- Enables or disables the multi-line functionality of TextEntry panel and its derivatives.  
+--- Enables or disables the multi-line functionality of TextEntry panel and its derivatives.
 --- @param multiline boolean @Whether to enable multiline or not.
-function GPanel:SetMultiline(multiline)
-end
+function GPanel:SetMultiline(multiline) end
 
---- Sets the internal name of the panel. Can be retrieved with Panel:GetName.  
+--- Sets the internal name of the panel. Can be retrieved with Panel:GetName.
 --- @param name string @The new name of the panel.
-function GPanel:SetName(name)
-end
+function GPanel:SetName(name) end
 
---- Sets whether the default background of the panel should be drawn or not. It's color is usually set by Panel:SetBGColor.  
+--- Sets whether the default background of the panel should be drawn or not. It's color is usually set by Panel:SetBGColor.
 --- @param paintBackground boolean @Whether to draw the background or not.
-function GPanel:SetPaintBackgroundEnabled(paintBackground)
-end
+function GPanel:SetPaintBackgroundEnabled(paintBackground) end
 
---- Sets whether the default border of the panel should be drawn or not.  
+--- Sets whether the default border of the panel should be drawn or not.
 --- @param paintBorder boolean @Whether to draw the border or not.
-function GPanel:SetPaintBorderEnabled(paintBorder)
-end
+function GPanel:SetPaintBorderEnabled(paintBorder) end
 
---- Enables or disables painting of the panel manually with Panel:PaintManual.  
+--- Enables or disables painting of the panel manually with Panel:PaintManual.
 --- @param paintedManually boolean @True if the panel should be painted manually.
-function GPanel:SetPaintedManually(paintedManually)
-end
+function GPanel:SetPaintedManually(paintedManually) end
 
---- Sets the parent of the panel.  
---- ℹ **NOTE**: Panels parented to the context menu will not be clickable unless Panel:SetMouseInputEnabled and Panel:SetKeyboardInputEnabled are both true or Panel:MakePopup has been called. If you want the panel to have mouse input but you do not want to prevent players from moving, set Panel:SetKeyboardInputEnabled to false immediately after calling Panel:MakePopup.  
+--- Sets the parent of the panel.
+--- ℹ **NOTE**: Panels parented to the context menu will not be clickable unless Panel:SetMouseInputEnabled and Panel:SetKeyboardInputEnabled are both true or Panel:MakePopup has been called. If you want the panel to have mouse input but you do not want to prevent players from moving, set Panel:SetKeyboardInputEnabled to false immediately after calling Panel:MakePopup.
 --- @param parent GPanel @The new parent of the panel.
-function GPanel:SetParent(parent)
-end
+function GPanel:SetParent(parent) end
 
---- Used by AvatarImage to load an avatar for given player.  
+--- Used by AvatarImage to load an avatar for given player.
 --- @param player GPlayer @The player to use avatar of.
 --- @param size? number @The size of the avatar to use
-function GPanel:SetPlayer(player, size)
-end
+function GPanel:SetPlayer(player, size) end
 
---- If this panel object has been made a popup with Panel:MakePopup, this method will prevent it from drawing in front of other panels when it receives input focus.  
+--- If this panel object has been made a popup with Panel:MakePopup, this method will prevent it from drawing in front of other panels when it receives input focus.
 --- @param stayAtBack boolean @If `true`, the popup panel will not draw in front of others when it gets focus, for example when it is clicked.
-function GPanel:SetPopupStayAtBack(stayAtBack)
-end
+function GPanel:SetPopupStayAtBack(stayAtBack) end
 
---- Sets the position of the panel's top left corner.  
---- This will trigger PANEL:PerformLayout. You should avoid calling this function in PANEL:PerformLayout to avoid infinite loops.  
---- See also Panel:SetX and Panel:SetY.  
---- ℹ **NOTE**: If you wish to position and re-size panels without much guesswork and have them look good on different screen resolutions, you may find Panel:Dock useful  
+--- Sets the position of the panel's top left corner.
+--- This will trigger PANEL:PerformLayout. You should avoid calling this function in PANEL:PerformLayout to avoid infinite loops.
+--- See also Panel:SetX and Panel:SetY.
+--- ℹ **NOTE**: If you wish to position and re-size panels without much guesswork and have them look good on different screen resolutions, you may find Panel:Dock useful
 --- @param posX number @The x coordinate of the position.
 --- @param posY number @The y coordinate of the position.
-function GPanel:SetPos(posX, posY)
-end
+function GPanel:SetPos(posX, posY) end
 
---- Sets whenever the panel should be rendered in the next screenshot.  
+--- Sets whenever the panel should be rendered in the next screenshot.
 --- @param renderInScreenshot boolean @Whether to render in the screenshot or not.
-function GPanel:SetRenderInScreenshots(renderInScreenshot)
-end
+function GPanel:SetRenderInScreenshots(renderInScreenshot) end
 
---- Sets whether the panel object can be selected or not (like icons in the Spawn Menu, holding `Shift`). If enabled, this will affect the function of a DButton whilst `Shift` is pressed. Panel:SetSelected can be used to select/deselect the object.  
+--- Sets whether the panel object can be selected or not (like icons in the Spawn Menu, holding `Shift`). If enabled, this will affect the function of a DButton whilst `Shift` is pressed. Panel:SetSelected can be used to select/deselect the object.
 --- @param selectable boolean @Whether the panel object should be selectable or not.
-function GPanel:SetSelectable(selectable)
-end
+function GPanel:SetSelectable(selectable) end
 
---- Sets the selected state of a selectable panel object. This functionality is set with Panel:SetSelectable and checked with Panel:IsSelectable.  
+--- Sets the selected state of a selectable panel object. This functionality is set with Panel:SetSelectable and checked with Panel:IsSelectable.
 --- @param selected? boolean @Whether the object should be selected or deselected
-function GPanel:SetSelected(selected)
-end
+function GPanel:SetSelected(selected) end
 
---- Enables the panel object for selection (much like the spawn menu).  
+--- Enables the panel object for selection (much like the spawn menu).
 --- @param set boolean @Whether to enable selection.
-function GPanel:SetSelectionCanvas(set)
-end
+function GPanel:SetSelectionCanvas(set) end
 
---- Sets the size of the panel.  
---- Calls PANEL:OnSizeChanged and marks this panel for layout (Panel:InvalidateLayout).  
---- See also Panel:SetWidth and Panel:SetHeight.  
---- ℹ **NOTE**: If you wish to position and re-size panels without much guesswork and have them look good on different screen resolutions, you may find Panel:Dock useful  
+--- Sets the size of the panel.
+--- Calls PANEL:OnSizeChanged and marks this panel for layout (Panel:InvalidateLayout).
+--- See also Panel:SetWidth and Panel:SetHeight.
+--- ℹ **NOTE**: If you wish to position and re-size panels without much guesswork and have them look good on different screen resolutions, you may find Panel:Dock useful
 --- @param width number @The width of the panel.
 --- @param height number @The height of the panel.
-function GPanel:SetSize(width, height)
-end
+function GPanel:SetSize(width, height) end
 
---- Sets the derma skin that the panel object will use, and refreshes all panels with derma.RefreshSkins.  
+--- Sets the derma skin that the panel object will use, and refreshes all panels with derma.RefreshSkins.
 --- @param skinName string @The name of the skin to use
-function GPanel:SetSkin(skinName)
-end
+function GPanel:SetSkin(skinName) end
 
---- Sets the `.png` image to be displayed on a  SpawnIcon or the panel it is based on - ModelImage.  
---- Only `.png` images can be used with this function.  
+--- Sets the `.png` image to be displayed on a  SpawnIcon or the panel it is based on - ModelImage.
+--- Only `.png` images can be used with this function.
 --- @param icon string @A path to the .png material, for example one of the Silkicons shipped with the game.
-function GPanel:SetSpawnIcon(icon)
-end
+function GPanel:SetSpawnIcon(icon) end
 
---- Used by AvatarImage panels to load an avatar by its 64-bit Steam ID (community ID).  
+--- Used by AvatarImage panels to load an avatar by its 64-bit Steam ID (community ID).
 --- @param steamid string @The 64bit SteamID of the player to load avatar of
 --- @param size number @The size of the avatar to use
-function GPanel:SetSteamID(steamid, size)
-end
+function GPanel:SetSteamID(steamid, size) end
 
---- When TAB is pressed, the next selectable panel in the number sequence is selected.  
---- ℹ **NOTE**: This function requires Panel:SetFocusTopLevel to be called on the parent panel for tab navigation to work.  
---- @param position number 
-function GPanel:SetTabPosition(position)
-end
+--- When TAB is pressed, the next selectable panel in the number sequence is selected.
+--- ℹ **NOTE**: This function requires Panel:SetFocusTopLevel to be called on the parent panel for tab navigation to work.
+--- @param position number
+function GPanel:SetTabPosition(position) end
 
---- Sets height of a panel. An alias of Panel:SetHeight.  
+--- Sets height of a panel. An alias of Panel:SetHeight.
 --- @param height number @Desired height to set
-function GPanel:SetTall(height)
-end
+function GPanel:SetTall(height) end
 
---- Removes the panel after given time in seconds.  
---- ℹ **NOTE**: This function will not work if PANEL:AnimationThink is overridden, unless Panel:AnimationThinkInternal is called every frame.  
+--- Removes the panel after given time in seconds.
+--- ℹ **NOTE**: This function will not work if PANEL:AnimationThink is overridden, unless Panel:AnimationThinkInternal is called every frame.
 --- @param delay number @Delay in seconds after which the panel should be removed.
-function GPanel:SetTerm(delay)
-end
+function GPanel:SetTerm(delay) end
 
---- Sets the text value of a panel object containing text, such as a Label, TextEntry or  RichText and their derivatives, such as DLabel, DTextEntry or DButton.  
---- ⚠ **WARNING**: When used on a Label or its derivatives ( DLabel and DButton ), it will automatically call Panel:InvalidateLayout, meaning that you should avoid running this function every frame on these panels to avoid unnecessary performance loss.  
---- ⚠ **WARNING**: Label & its derivatives has hard length limit, maximum 1023 ascii characters.  
+--- Sets the text value of a panel object containing text, such as a Label, TextEntry or  RichText and their derivatives, such as DLabel, DTextEntry or DButton.
+--- ⚠ **WARNING**: When used on a Label or its derivatives ( DLabel and DButton ), it will automatically call Panel:InvalidateLayout, meaning that you should avoid running this function every frame on these panels to avoid unnecessary performance loss.
+--- ⚠ **WARNING**: Label & its derivatives has hard length limit, maximum 1023 ascii characters.
 --- @param text string @The text value to set.
-function GPanel:SetText(text)
-end
+function GPanel:SetText(text) end
 
---- Makes TextEntry's text be replaced by `*` characters, just like a password-entry text field would.  
+--- Makes TextEntry's text be replaced by `*` characters, just like a password-entry text field would.
 --- @param arg boolean @Whether to have the text be hidden.
-function GPanel:SetTextHidden(arg)
-end
+function GPanel:SetTextHidden(arg) end
 
---- Sets the left and top text margins of a text-based panel object, such as a DButton or DLabel.  
+--- Sets the left and top text margins of a text-based panel object, such as a DButton or DLabel.
 --- @param insetX number @The left margin for the text, in pixels
 --- @param insetY number @The top margin for the text, in pixels.
-function GPanel:SetTextInset(insetX, insetY)
-end
+function GPanel:SetTextInset(insetX, insetY) end
 
---- Sets text selection colors of a RichText element.  
+--- Sets text selection colors of a RichText element.
 --- @param textColor table @The Global.Color to set for selected text.
 --- @param backgroundColor table @The Global.Color to set for selected text background.
-function GPanel:SetTextSelectionColors(textColor, backgroundColor)
-end
+function GPanel:SetTextSelectionColors(textColor, backgroundColor) end
 
---- Sets the height of a RichText element to accommodate the text inside.  
---- ℹ **NOTE**: This function internally relies on Panel:GetNumLines, so it should be called at least a couple frames after modifying the text using Panel:AppendText  
-function GPanel:SetToFullHeight()
-end
+--- Sets the height of a RichText element to accommodate the text inside.
+--- ℹ **NOTE**: This function internally relies on Panel:GetNumLines, so it should be called at least a couple frames after modifying the text using Panel:AppendText
+function GPanel:SetToFullHeight() end
 
---- Sets the tooltip to be displayed when a player hovers over the panel object with their cursor.  
---- By default, DTooltip will be used. Panel:SetTooltipPanelOverride can be used to override the tooltip panel.  
+--- Sets the tooltip to be displayed when a player hovers over the panel object with their cursor.
+--- By default, DTooltip will be used. Panel:SetTooltipPanelOverride can be used to override the tooltip panel.
 --- @param str? string @The text to be displayed in the tooltip
-function GPanel:SetTooltip(str)
-end
+function GPanel:SetTooltip(str) end
 
---- Sets the tooltip delay. (time between hovering over the panel, and the tooltip showing up)  
---- Can be retrieved with Panel:GetTooltipDelay.  
+--- Sets the tooltip delay. (time between hovering over the panel, and the tooltip showing up)
+--- Can be retrieved with Panel:GetTooltipDelay.
 --- @param tooltip number @The tooltip delay to set.
-function GPanel:SetTooltipDelay(tooltip)
-end
+function GPanel:SetTooltipDelay(tooltip) end
 
---- Sets the panel to be displayed as contents of a DTooltip when a player hovers over the panel object with their cursor. See Panel:SetTooltipPanelOverride if you are looking to override DTooltip itself.  
---- ℹ **NOTE**: Panel:SetTooltip will override this functionality.  
---- ⚠ **WARNING**: Calling this from PANEL:OnCursorEntered is too late! The tooltip will not be displayed or be updated.  
---- Given panel or the previously set one will **NOT** be automatically removed.  
+--- Sets the panel to be displayed as contents of a DTooltip when a player hovers over the panel object with their cursor. See Panel:SetTooltipPanelOverride if you are looking to override DTooltip itself.
+--- ℹ **NOTE**: Panel:SetTooltip will override this functionality.
+--- ⚠ **WARNING**: Calling this from PANEL:OnCursorEntered is too late! The tooltip will not be displayed or be updated.
+--- Given panel or the previously set one will **NOT** be automatically removed.
 --- @param tooltipPanel? GPanel @The panel to use as the tooltip.
-function GPanel:SetTooltipPanel(tooltipPanel)
-end
+function GPanel:SetTooltipPanel(tooltipPanel) end
 
---- Sets the panel class to be created instead of DTooltip when the player hovers over this panel and a tooltip needs creating.  
+--- Sets the panel class to be created instead of DTooltip when the player hovers over this panel and a tooltip needs creating.
 --- @param override string @The panel class to override the default DTooltip
-function GPanel:SetTooltipPanelOverride(override)
-end
+function GPanel:SetTooltipPanelOverride(override) end
 
---- Sets the URL of a link-based panel such as DLabelURL.  
+--- Sets the URL of a link-based panel such as DLabelURL.
 --- @param url string @The URL to set
-function GPanel:SetURL(url)
-end
+function GPanel:SetURL(url) end
 
---- Sets the underlined font for use by clickable text in a RichText. See also Panel:InsertClickableTextStart  
---- This function will only work on RichText panels.  
+--- Sets the underlined font for use by clickable text in a RichText. See also Panel:InsertClickableTextStart
+--- This function will only work on RichText panels.
 --- @param fontName string @The name of the font
-function GPanel:SetUnderlineFont(fontName)
-end
+function GPanel:SetUnderlineFont(fontName) end
 
---- Sets the visibility of the vertical scrollbar.  
---- Works for RichText and TextEntry.  
+--- Sets the visibility of the vertical scrollbar.
+--- Works for RichText and TextEntry.
 --- @param display? boolean @True to display the vertical text scroll bar, false to hide it.
-function GPanel:SetVerticalScrollbarEnabled(display)
-end
+function GPanel:SetVerticalScrollbarEnabled(display) end
 
---- Sets the "visibility" of the panel.  
+--- Sets the "visibility" of the panel.
 --- @param visible boolean @The visibility of the panel.
-function GPanel:SetVisible(visible)
-end
+function GPanel:SetVisible(visible) end
 
---- Sets width of a panel. An alias of Panel:SetWidth.  
+--- Sets width of a panel. An alias of Panel:SetWidth.
 --- @param width number @Desired width to set
-function GPanel:SetWide(width)
-end
+function GPanel:SetWide(width) end
 
---- Sets the width of the panel.  
---- Calls PANEL:OnSizeChanged and marks this panel for layout (Panel:InvalidateLayout).  
---- See also Panel:SetSize.  
+--- Sets the width of the panel.
+--- Calls PANEL:OnSizeChanged and marks this panel for layout (Panel:InvalidateLayout).
+--- See also Panel:SetSize.
 --- @param width number @The new width of the panel.
-function GPanel:SetWidth(width)
-end
+function GPanel:SetWidth(width) end
 
---- This makes it so that when you're hovering over this panel you can "click" on the world. Your weapon aim (and its viewmodel) will follow the cursor. This is primarily used for the Sandbox context menu.  
+--- This makes it so that when you're hovering over this panel you can "click" on the world. Your weapon aim (and its viewmodel) will follow the cursor. This is primarily used for the Sandbox context menu.
 --- @param enable boolean @Whether to enable or disable the feature for this panel.
-function GPanel:SetWorldClicker(enable)
-end
+function GPanel:SetWorldClicker(enable) end
 
---- Sets whether text wrapping should be enabled or disabled on Label and DLabel panels.  
---- Use DLabel:SetAutoStretchVertical to automatically correct vertical size; Panel:SizeToContents will not set the correct height.  
+--- Sets whether text wrapping should be enabled or disabled on Label and DLabel panels.
+--- Use DLabel:SetAutoStretchVertical to automatically correct vertical size; Panel:SizeToContents will not set the correct height.
 --- @param wrap boolean @`True` to enable text wrapping, `false` otherwise.
-function GPanel:SetWrap(wrap)
-end
+function GPanel:SetWrap(wrap) end
 
---- Sets the X position of the panel.  
---- Uses Panel:SetPos internally.  
+--- Sets the X position of the panel.
+--- Uses Panel:SetPos internally.
 --- @param x number @The X coordinate of the position.
-function GPanel:SetX(x)
-end
+function GPanel:SetX(x) end
 
---- Sets the Y position of the panel.  
---- Uses Panel:SetPos internally.  
+--- Sets the Y position of the panel.
+--- Uses Panel:SetPos internally.
 --- @param y number @The Y coordinate of the position.
-function GPanel:SetY(y)
-end
+function GPanel:SetY(y) end
 
---- Sets the panels z position which determines the rendering order.  
---- Panels with lower z positions appear behind panels with higher z positions.  
---- This also controls in which order panels docked with Panel:Dock appears.  
+--- Sets the panels z position which determines the rendering order.
+--- Panels with lower z positions appear behind panels with higher z positions.
+--- This also controls in which order panels docked with Panel:Dock appears.
 --- @param zIndex number @The z position of the panel
-function GPanel:SetZPos(zIndex)
-end
+function GPanel:SetZPos(zIndex) end
 
---- Makes a panel visible.  
-function GPanel:Show()
-end
+--- Makes a panel visible.
+function GPanel:Show() end
 
---- Uses animation to resize the panel to the specified size.  
+--- Uses animation to resize the panel to the specified size.
 --- @param sizeW? number @The target width of the panel
 --- @param sizeH? number @The target height of the panel
 --- @param time? number @The time to perform the animation within.
 --- @param delay? number @The delay before the animation starts.
 --- @param ease? number @Easing of the start and/or end speed of the animation
 --- @param callback? function @The function to be called once the animation finishes
-function GPanel:SizeTo(sizeW, sizeH, time, delay, ease, callback)
-end
+function GPanel:SizeTo(sizeW, sizeH, time, delay, ease, callback) end
 
---- Resizes the panel to fit the bounds of its children.  
---- ℹ **NOTE**: Your panel must have its layout updated (Panel:InvalidateLayout) for this function to work properly.  
---- ℹ **NOTE**: The sizeW and sizeH parameters are false by default. Therefore, calling this function with no arguments will result in a no-op.  
+--- Resizes the panel to fit the bounds of its children.
+--- ℹ **NOTE**: Your panel must have its layout updated (Panel:InvalidateLayout) for this function to work properly.
+--- ℹ **NOTE**: The sizeW and sizeH parameters are false by default. Therefore, calling this function with no arguments will result in a no-op.
 --- @param sizeW? boolean @Resize with width of the panel.
 --- @param sizeH? boolean @Resize the height of the panel.
-function GPanel:SizeToChildren(sizeW, sizeH)
-end
+function GPanel:SizeToChildren(sizeW, sizeH) end
 
---- Resizes the panel so that its width and height fit all of the content inside.  
---- ℹ **NOTE**: Only works on Label derived panels such as DLabel by default, and on any panel that manually implemented the Panel:SizeToContents method, such as DNumberWang and DImage.  
---- ⚠ **WARNING**: You must call this function **AFTER** setting text/font, adjusting child panels or otherwise altering the panel.  
-function GPanel:SizeToContents()
-end
+--- Resizes the panel so that its width and height fit all of the content inside.
+--- ℹ **NOTE**: Only works on Label derived panels such as DLabel by default, and on any panel that manually implemented the Panel:SizeToContents method, such as DNumberWang and DImage.
+--- ⚠ **WARNING**: You must call this function **AFTER** setting text/font, adjusting child panels or otherwise altering the panel.
+function GPanel:SizeToContents() end
 
---- Resizes the panel object's width to accommodate all child objects/contents.  
---- Only works on Label derived panels such as DLabel by default, and on any panel that manually implemented Panel:GetContentSize method.  
---- ℹ **NOTE**: You must call this function **AFTER** setting text/font or adjusting child panels.  
+--- Resizes the panel object's width to accommodate all child objects/contents.
+--- Only works on Label derived panels such as DLabel by default, and on any panel that manually implemented Panel:GetContentSize method.
+--- ℹ **NOTE**: You must call this function **AFTER** setting text/font or adjusting child panels.
 --- @param addVal? number @The number of extra pixels to add to the width
-function GPanel:SizeToContentsX(addVal)
-end
+function GPanel:SizeToContentsX(addVal) end
 
---- Resizes the panel object's height to accommodate all child objects/contents.  
---- Only works on Label derived panels such as DLabel by default, and on any panel that manually implemented Panel:GetContentSize method.  
---- ℹ **NOTE**: You must call this function **AFTER** setting text/font or adjusting child panels.  
+--- Resizes the panel object's height to accommodate all child objects/contents.
+--- Only works on Label derived panels such as DLabel by default, and on any panel that manually implemented Panel:GetContentSize method.
+--- ℹ **NOTE**: You must call this function **AFTER** setting text/font or adjusting child panels.
 --- @param addVal? number @The number of extra pixels to add to the height.
-function GPanel:SizeToContentsY(addVal)
-end
+function GPanel:SizeToContentsY(addVal) end
 
---- Slides the panel in from above.  
+--- Slides the panel in from above.
 --- @param Length number @Time to complete the animation.
-function GPanel:SlideDown(Length)
-end
+function GPanel:SlideDown(Length) end
 
---- Slides the panel out to the top.  
+--- Slides the panel out to the top.
 --- @param Length number @Time to complete the animation.
-function GPanel:SlideUp(Length)
-end
+function GPanel:SlideUp(Length) end
 
---- Begins a box selection, enables mouse capture for the panel object, and sets the start point of the selection box to the mouse cursor's position, relative to this object. For this to work, either the object or its parent must be enabled as a selection canvas. This is set using Panel:SetSelectionCanvas.  
-function GPanel:StartBoxSelection()
-end
+--- Begins a box selection, enables mouse capture for the panel object, and sets the start point of the selection box to the mouse cursor's position, relative to this object. For this to work, either the object or its parent must be enabled as a selection canvas. This is set using Panel:SetSelectionCanvas.
+function GPanel:StartBoxSelection() end
 
---- Stops all panel animations by clearing its animation list. This also clears all delayed animations.  
-function GPanel:Stop()
-end
+--- Stops all panel animations by clearing its animation list. This also clears all delayed animations.
+function GPanel:Stop() end
 
---- Stops the loading of the HTML panel's current page.  
-function GPanel:StopLoading()
-end
+--- Stops the loading of the HTML panel's current page.
+function GPanel:StopLoading() end
 
---- Resizes the panel object's height so that its bottom is aligned with the top of the passed panel. An offset greater than zero will reduce the panel's height to leave a gap between it and the passed panel.  
+--- Resizes the panel object's height so that its bottom is aligned with the top of the passed panel. An offset greater than zero will reduce the panel's height to leave a gap between it and the passed panel.
 --- @param tgtPanel GPanel @The panel to align the bottom of this one with.
 --- @param offset? number @The gap to leave between this and the passed panel
-function GPanel:StretchBottomTo(tgtPanel, offset)
-end
+function GPanel:StretchBottomTo(tgtPanel, offset) end
 
---- Resizes the panel object's width so that its right edge is aligned with the left of the passed panel. An offset greater than zero will reduce the panel's width to leave a gap between it and the passed panel.  
+--- Resizes the panel object's width so that its right edge is aligned with the left of the passed panel. An offset greater than zero will reduce the panel's width to leave a gap between it and the passed panel.
 --- @param tgtPanel GPanel @The panel to align the right edge of this one with.
 --- @param offset? number @The gap to leave between this and the passed panel
-function GPanel:StretchRightTo(tgtPanel, offset)
-end
+function GPanel:StretchRightTo(tgtPanel, offset) end
 
---- Sets the dimensions of the panel to fill its parent. It will only stretch in directions that aren't nil.  
+--- Sets the dimensions of the panel to fill its parent. It will only stretch in directions that aren't nil.
 --- @param offsetLeft? number @The left offset to the parent.
 --- @param offsetTop? number @The top offset to the parent.
 --- @param offsetRight? number @The right offset to the parent.
 --- @param offsetBottom? number @The bottom offset to the parent.
-function GPanel:StretchToParent(offsetLeft, offsetTop, offsetRight, offsetBottom)
-end
+function GPanel:StretchToParent(offsetLeft, offsetTop, offsetRight, offsetBottom) end
 
---- Toggles the selected state of a selectable panel object. This functionality is set with Panel:SetSelectable and checked with Panel:IsSelectable. To check whether the object is selected or not, Panel:IsSelected is used.  
-function GPanel:ToggleSelection()
-end
+--- Toggles the selected state of a selectable panel object. This functionality is set with Panel:SetSelectable and checked with Panel:IsSelectable. To check whether the object is selected or not, Panel:IsSelected is used.
+function GPanel:ToggleSelection() end
 
---- Toggles the visibility of a panel and all its children.  
-function GPanel:ToggleVisible()
-end
+--- Toggles the visibility of a panel and all its children.
+function GPanel:ToggleVisible() end
 
---- Restores the last saved state (caret position and the text inside) of a TextEntry. Should act identically to pressing CTRL+Z in a TextEntry.  
---- See also Panel:SaveUndoState.  
-function GPanel:Undo()
-end
+--- Restores the last saved state (caret position and the text inside) of a TextEntry. Should act identically to pressing CTRL+Z in a TextEntry.
+--- See also Panel:SaveUndoState.
+function GPanel:Undo() end
 
---- Recursively deselects this panel object and all of its children. This will cascade to all child objects at every level below the parent.  
-function GPanel:UnselectAll()
-end
+--- Recursively deselects this panel object and all of its children. This will cascade to all child objects at every level below the parent.
+function GPanel:UnselectAll() end
 
---- Forcibly updates the panels' HTML Material, similar to when Paint is called on it.  
---- This is only useful if the panel is not normally visible, i.e the panel exists purely for its HTML Material.  
---- ℹ **NOTE**: Only works on with panels that have a HTML Material. See Panel:GetHTMLMaterial for more details.  
---- ℹ **NOTE**: A good place to call this is in the GM:PreRender hook  
-function GPanel:UpdateHTMLTexture()
-end
+--- Forcibly updates the panels' HTML Material, similar to when Paint is called on it.
+--- This is only useful if the panel is not normally visible, i.e the panel exists purely for its HTML Material.
+--- ℹ **NOTE**: Only works on with panels that have a HTML Material. See Panel:GetHTMLMaterial for more details.
+--- ℹ **NOTE**: A good place to call this is in the GM:PreRender hook
+function GPanel:UpdateHTMLTexture() end
 
---- @deprecated  
---- 🛑 **DEPRECATED**: Use Panel:IsValid instead.  
---- Returns if a given panel is valid or not.  
+--- @deprecated
+--- 🛑 **DEPRECATED**: Use Panel:IsValid instead.
+--- Returns if a given panel is valid or not.
 --- @return boolean @Whether the panel is valid or not, true being it is, false being it isn't.
-function GPanel:Valid()
-end
+function GPanel:Valid() end

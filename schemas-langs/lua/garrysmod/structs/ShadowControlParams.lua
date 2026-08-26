@@ -1,6 +1,6 @@
 --- @meta
 
---- Table used by PhysObj:ComputeShadowControl. Default values are given if the table element is omitted.  
+--- Table used by PhysObj:ComputeShadowControl. Default values are given if the table element is omitted.
 --- @class SShadowControlParams
 --- @field secondstoarrive? number @How long it takes to move to the set pos and angle
 --- @field delta? number @The time it should use - just use the one from ENTITY:PhysicsSimulate.

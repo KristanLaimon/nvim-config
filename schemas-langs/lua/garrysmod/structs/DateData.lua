@@ -1,6 +1,6 @@
 --- @meta
 
---- Table returned by os.date and used by os.time.  
+--- Table returned by os.date and used by os.time.
 --- @class SDateData
 --- @field day number @Day of the month
 --- @field hour number @Hour

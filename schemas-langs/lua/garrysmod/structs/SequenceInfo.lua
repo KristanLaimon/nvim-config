@@ -1,6 +1,6 @@
 --- @meta
 
---- Used by Entity:GetSequenceInfo.  
+--- Used by Entity:GetSequenceInfo.
 --- @class SSequenceInfo
 --- @field label string @Name of the sequence.
 --- @field activityname string @Name of the activity this sequence is attached to.

@@ -1,7 +1,7 @@
 --- @meta
 
---- Used for cam.Start.  
---- Unless stated otherwise, the default values for all these keys would be inherited from the engine's current `CViewSetup` and do not have static representations.  
+--- Used for cam.Start.
+--- Unless stated otherwise, the default values for all these keys would be inherited from the engine's current `CViewSetup` and do not have static representations.
 --- @class SRenderCamData
 --- @field x? number @The x position of the view port
 --- @field y? number @The y position of the view port

@@ -1,6 +1,6 @@
 --- @meta
 
---- Table returned by util.GetModelInfo.  
+--- Table returned by util.GetModelInfo.
 --- @class SModelInfo
 --- @field SkinCount number @Identical to Entity:SkinCount.
 --- @field KeyValues string @Valve key-value formatted info about the model's physics (Constraint Info, etc)

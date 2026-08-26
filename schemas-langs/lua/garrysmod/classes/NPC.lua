@@ -1,1015 +1,832 @@
 --- @meta
 
 --- @class GNPC : GEntity
---- This is a list of all methods only available for NPCs. It is also possible to call Entity functions on NPCs.  
+--- This is a list of all methods only available for NPCs. It is also possible to call Entity functions on NPCs.
 local GNPC = {}
---- Makes the NPC like, hate, feel neutral towards, or fear the entity in question. If you want to setup relationship towards a certain entity `class`, use NPC:AddRelationship.  
---- ℹ **NOTE**: NPCs do not see NextBots by default. This can be fixed by adding the FL_OBJECT flag to the NextBot.  
+--- Makes the NPC like, hate, feel neutral towards, or fear the entity in question. If you want to setup relationship towards a certain entity `class`, use NPC:AddRelationship.
+--- ℹ **NOTE**: NPCs do not see NextBots by default. This can be fixed by adding the FL_OBJECT flag to the NextBot.
 --- @param target GEntity @The entity for the relationship to be applied to.
 --- @param disposition number @A Enums/D representing the relationship type.
 --- @param priority? number @How strong the relationship is
-function GNPC:AddEntityRelationship(target, disposition, priority)
-end
+function GNPC:AddEntityRelationship(target, disposition, priority) end
 
---- Changes how an NPC feels towards another NPC.  If you want to setup relationship towards a certain `entity`, use NPC:AddEntityRelationship.  
---- ⚠ **WARNING**: Avoid using this in GM:OnEntityCreated to prevent crashing due to infinite loops. This function may create an entity with given class and delete it immediately after.  
+--- Changes how an NPC feels towards another NPC.  If you want to setup relationship towards a certain `entity`, use NPC:AddEntityRelationship.
+--- ⚠ **WARNING**: Avoid using this in GM:OnEntityCreated to prevent crashing due to infinite loops. This function may create an entity with given class and delete it immediately after.
 --- @param relationstring string @A string representing how the relationship should be set up
-function GNPC:AddRelationship(relationstring)
-end
+function GNPC:AddRelationship(relationstring) end
 
---- Advances the NPC on its path to the next waypoint.  
---- ⚠ **WARNING**: Calling this on an NPC without any route will result in an instant crash.  
-function GNPC:AdvancePath()
-end
+--- Advances the NPC on its path to the next waypoint.
+--- ⚠ **WARNING**: Calling this on an NPC without any route will result in an instant crash.
+function GNPC:AdvancePath() end
 
---- Force an NPC to play their Alert sound.  
-function GNPC:AlertSound()
-end
+--- Force an NPC to play their Alert sound.
+function GNPC:AlertSound() end
 
---- Executes any movement the current sequence may have.  
+--- Executes any movement the current sequence may have.
 --- @param interval number @This is a good place to use Entity:GetAnimTimeInterval.
---- @param target? GEntity 
+--- @param target? GEntity
 --- @return boolean @`true` if any movement was performed.
-function GNPC:AutoMovement(interval, target)
-end
+function GNPC:AutoMovement(interval, target) end
 
---- Become a ragdoll and remove the entity. Internally handles serverside/clientside ragdoll creation, momentum calculation, triggering ragdoll creation hooks / events and cloning entity's bone transforms to the created ragdoll.  
+--- Become a ragdoll and remove the entity. Internally handles serverside/clientside ragdoll creation, momentum calculation, triggering ragdoll creation hooks / events and cloning entity's bone transforms to the created ragdoll.
 --- @param info GCTakeDamageInfo @Damage info passed from an onkilled event
 --- @return GEntity @The created serverside ragdoll, nil if failed or a clientside ragdoll created.
-function GNPC:BecomeRagdoll(info)
-end
+function GNPC:BecomeRagdoll(info) end
 
---- Adds a capability to the NPC.  
+--- Adds a capability to the NPC.
 --- @param capabilities ECAP @Capabilities to add, see Enums/CAP.
-function GNPC:CapabilitiesAdd(capabilities)
-end
+function GNPC:CapabilitiesAdd(capabilities) end
 
---- Removes all of Capabilities the NPC has.  
-function GNPC:CapabilitiesClear()
-end
+--- Removes all of Capabilities the NPC has.
+function GNPC:CapabilitiesClear() end
 
---- Returns the NPC's capabilities along the ones defined on its weapon.  
+--- Returns the NPC's capabilities along the ones defined on its weapon.
 --- @return ECAP @The capabilities as a bitflag
-function GNPC:CapabilitiesGet()
-end
+function GNPC:CapabilitiesGet() end
 
---- Checks whether the NPC has the specified capabilities.  
+--- Checks whether the NPC has the specified capabilities.
 --- @param capabilities ECAP @Capabilities to check, see Enums/CAP.
-function GNPC:CapabilitiesHas(capabilities)
-end
+function GNPC:CapabilitiesHas(capabilities) end
 
---- Remove a certain capability.  
+--- Remove a certain capability.
 --- @param capabilities number @Capabilities to remove, see Enums/CAP
-function GNPC:CapabilitiesRemove(capabilities)
-end
+function GNPC:CapabilitiesRemove(capabilities) end
 
---- Returns the NPC class. Do not confuse with Entity:GetClass!  
+--- Returns the NPC class. Do not confuse with Entity:GetClass!
 --- @return ECLASS @See Enums/CLASS
-function GNPC:Classify()
-end
+function GNPC:Classify() end
 
---- Resets the NPC:GetBlockingEntity.  
-function GNPC:ClearBlockingEntity()
-end
+--- Resets the NPC:GetBlockingEntity.
+function GNPC:ClearBlockingEntity() end
 
---- Clears out the specified Enums/COND on this NPC.  
+--- Clears out the specified Enums/COND on this NPC.
 --- @param condition number @The Enums/COND to clear out.
-function GNPC:ClearCondition(condition)
-end
+function GNPC:ClearCondition(condition) end
 
---- Clears the Enemy from the NPC's memory, effectively forgetting it until met again with either the NPC vision or with NPC:UpdateEnemyMemory.  
+--- Clears the Enemy from the NPC's memory, effectively forgetting it until met again with either the NPC vision or with NPC:UpdateEnemyMemory.
 --- @param enemy? GEntity @The enemy to mark
-function GNPC:ClearEnemyMemory(enemy)
-end
+function GNPC:ClearEnemyMemory(enemy) end
 
---- Clears the NPC's current expression which can be set with NPC:SetExpression.  
-function GNPC:ClearExpression()
-end
+--- Clears the NPC's current expression which can be set with NPC:SetExpression.
+function GNPC:ClearExpression() end
 
---- Clears the current NPC goal or target.  
-function GNPC:ClearGoal()
-end
+--- Clears the current NPC goal or target.
+function GNPC:ClearGoal() end
 
---- Stops the current schedule that the NPC is doing.  
-function GNPC:ClearSchedule()
-end
+--- Stops the current schedule that the NPC is doing.
+function GNPC:ClearSchedule() end
 
---- Returns the ID of a given condition by name. Opposite of NPC:ConditionName.  
---- This is useful for custom conditions defined by engine NPCs, such as `COND_ZOMBIE_RELEASECRAB` for zombies, and `COND_COMBINE_ON_FIRE` for Combine Soldiers.  
+--- Returns the ID of a given condition by name. Opposite of NPC:ConditionName.
+--- This is useful for custom conditions defined by engine NPCs, such as `COND_ZOMBIE_RELEASECRAB` for zombies, and `COND_COMBINE_ON_FIRE` for Combine Soldiers.
 --- @param conditionName string @The condition name.
 --- @return number @The condition ID, see Enums/COND
-function GNPC:ConditionID(conditionName)
-end
+function GNPC:ConditionID(conditionName) end
 
---- Translates condition ID to a string. For the opposite process, see NPC:ConditionID.  
+--- Translates condition ID to a string. For the opposite process, see NPC:ConditionID.
 --- @param cond number @The NPCs condition ID, see Enums/COND
 --- @return string @A human understandable string equivalent of that condition.
-function GNPC:ConditionName(cond)
-end
+function GNPC:ConditionName(cond) end
 
---- Returns the way the NPC "feels" about a given entity. See NPC:AddEntityRelationship.  
---- ℹ **NOTE**: For `ai` type entities, this will return ENTITY:GetRelationship. If it returns `nil` or for engine NPCs, this will return whatever was last set by NPC:AddEntityRelationship. As a last resort, engine will decide on the disposition based on this NPC's NPC:Classify.  
+--- Returns the way the NPC "feels" about a given entity. See NPC:AddEntityRelationship.
+--- ℹ **NOTE**: For `ai` type entities, this will return ENTITY:GetRelationship. If it returns `nil` or for engine NPCs, this will return whatever was last set by NPC:AddEntityRelationship. As a last resort, engine will decide on the disposition based on this NPC's NPC:Classify.
 --- @param ent GEntity @The entity to test our disposition towards.
 --- @return ED @The NPCs disposition, see Enums/D.
 --- @return number @The NPCs disposition priority.
-function GNPC:Disposition(ent)
-end
+function GNPC:Disposition(ent) end
 
---- Forces the NPC to drop the specified weapon.  
+--- Forces the NPC to drop the specified weapon.
 --- @param weapon? GWeapon @Weapon to be dropped
 --- @param target? GVector @If set, launches the weapon at given position
 --- @param velocity? GVector @If set and previous argument is unset, launches the weapon with given velocity
-function GNPC:DropWeapon(weapon, target, velocity)
-end
+function GNPC:DropWeapon(weapon, target, velocity) end
 
---- Makes an NPC exit a scripted sequence, if one is playing.  
-function GNPC:ExitScriptedSequence()
-end
+--- Makes an NPC exit a scripted sequence, if one is playing.
+function GNPC:ExitScriptedSequence() end
 
---- Force an NPC to play its Fear sound.  
-function GNPC:FearSound()
-end
+--- Force an NPC to play its Fear sound.
+function GNPC:FearSound() end
 
---- Force an NPC to play its FoundEnemy sound.  
-function GNPC:FoundEnemySound()
-end
+--- Force an NPC to play its FoundEnemy sound.
+function GNPC:FoundEnemySound() end
 
---- Returns the weapon the NPC is currently carrying, or NULL.  
+--- Returns the weapon the NPC is currently carrying, or NULL.
 --- @return GEntity @The NPCs current weapon
-function GNPC:GetActiveWeapon()
-end
+function GNPC:GetActiveWeapon() end
 
---- Returns the NPC's current activity.  
+--- Returns the NPC's current activity.
 --- @return number @Current activity, see Enums/ACT.
-function GNPC:GetActivity()
-end
+function GNPC:GetActivity() end
 
---- Returns the aim vector of the NPC. NPC alternative of Player:GetAimVector.  
---- ℹ **NOTE**: If the NPC has both NPC:GetEnemy and NPC:GetActiveWeapon, engine will automatically call ENTITY:GetAttackSpread to add random spread degrees to the return value.  
+--- Returns the aim vector of the NPC. NPC alternative of Player:GetAimVector.
+--- ℹ **NOTE**: If the NPC has both NPC:GetEnemy and NPC:GetActiveWeapon, engine will automatically call ENTITY:GetAttackSpread to add random spread degrees to the return value.
 --- @return GVector @The aim direction of the NPC, usually a noisy direction to it's NPC:GetEnemy
-function GNPC:GetAimVector()
-end
+function GNPC:GetAimVector() end
 
---- Returns the activity to be played when the NPC arrives at its goal  
+--- Returns the activity to be played when the NPC arrives at its goal
 --- @return number @The arrival activity
-function GNPC:GetArrivalActivity()
-end
+function GNPC:GetArrivalActivity() end
 
---- Returns the direction from the NPC origin to its current navigational destination.  
+--- Returns the direction from the NPC origin to its current navigational destination.
 --- @return GVector @The arrival direction.
-function GNPC:GetArrivalDirection()
-end
+function GNPC:GetArrivalDirection() end
 
---- Returns NPC arrival distance, set by NPC:SetArrivalDistance.  
+--- Returns NPC arrival distance, set by NPC:SetArrivalDistance.
 --- @return number @The current arrival distance.
-function GNPC:GetArrivalDistance()
-end
+function GNPC:GetArrivalDistance() end
 
---- Returns the sequence to be played when the NPC arrives at its goal.  
+--- Returns the sequence to be played when the NPC arrives at its goal.
 --- @return number @Sequence ID to be played, or -1 if there's no sequence.
-function GNPC:GetArrivalSequence()
-end
+function GNPC:GetArrivalSequence() end
 
---- Returns NPC arrival speed, set by NPC:SetArrivalSpeed.  
+--- Returns NPC arrival speed, set by NPC:SetArrivalSpeed.
 --- @return number @The current arrival peed.
-function GNPC:GetArrivalSpeed()
-end
+function GNPC:GetArrivalSpeed() end
 
---- Returns the most dangerous/closest sound hint based on the NPCs location and the types of sounds it can sense.  
+--- Returns the most dangerous/closest sound hint based on the NPCs location and the types of sounds it can sense.
 --- @param types number @The types of sounds to choose from
 --- @return table @A table with SoundHintData structure or `nil` if no sound hints are nearby.
-function GNPC:GetBestSoundHint(types)
-end
+function GNPC:GetBestSoundHint(types) end
 
---- Returns the entity blocking the NPC along its path.  
+--- Returns the entity blocking the NPC along its path.
 --- @return GEntity @Blocking entity
-function GNPC:GetBlockingEntity()
-end
+function GNPC:GetBlockingEntity() end
 
---- Returns the goal type for current navigation path.  
+--- Returns the goal type for current navigation path.
 --- @return number @The goal type
-function GNPC:GetCurGoalType()
-end
+function GNPC:GetCurGoalType() end
 
---- Gets the NPC's current waypoint position (where NPC is currently moving towards), if any is available.  
+--- Gets the NPC's current waypoint position (where NPC is currently moving towards), if any is available.
 --- @return GVector @The position of the current NPC waypoint.
-function GNPC:GetCurWaypointPos()
-end
+function GNPC:GetCurWaypointPos() end
 
---- Returns the NPC's current schedule.  
+--- Returns the NPC's current schedule.
 --- @return number @The NPCs schedule, see Enums/SCHED or -1 if we failed for some reason
-function GNPC:GetCurrentSchedule()
-end
+function GNPC:GetCurrentSchedule() end
 
---- Returns how proficient (skilled) an NPC is with its current weapon.  
+--- Returns how proficient (skilled) an NPC is with its current weapon.
 --- @return number @NPC's proficiency for current weapon
-function GNPC:GetCurrentWeaponProficiency()
-end
+function GNPC:GetCurrentWeaponProficiency() end
 
---- Returns the entity that this NPC is trying to fight.  
---- 🦟 **BUG**: [This returns nil if the NPC has no enemy. You should use Global.IsValid (which accounts for nil and NULL) on the return to verify validity of the enemy.](https://github.com/Facepunch/garrysmod-issues/issues/3132)  
+--- Returns the entity that this NPC is trying to fight.
+--- 🦟 **BUG**: [This returns nil if the NPC has no enemy. You should use Global.IsValid (which accounts for nil and NULL) on the return to verify validity of the enemy.](https://github.com/Facepunch/garrysmod-issues/issues/3132)
 --- @return GNPC @Enemy NPC.
-function GNPC:GetEnemy()
-end
+function GNPC:GetEnemy() end
 
---- Returns the first time an NPC's enemy was seen by the NPC.  
+--- Returns the first time an NPC's enemy was seen by the NPC.
 --- @param enemy? GEntity @The enemy to check.
 --- @return number @First time the given enemy was seen.
-function GNPC:GetEnemyFirstTimeSeen(enemy)
-end
+function GNPC:GetEnemyFirstTimeSeen(enemy) end
 
---- Returns the last known position of an NPC's enemy.  
---- Similar to NPC:GetEnemyLastSeenPos, but the known position will be a few seconds ahead of the last seen position.  
+--- Returns the last known position of an NPC's enemy.
+--- Similar to NPC:GetEnemyLastSeenPos, but the known position will be a few seconds ahead of the last seen position.
 --- @param enemy? GEntity @The enemy to check.
 --- @return GVector @The last known position.
-function GNPC:GetEnemyLastKnownPos(enemy)
-end
+function GNPC:GetEnemyLastKnownPos(enemy) end
 
---- Returns the last seen position of an NPC's enemy.  
---- Similar to NPC:GetEnemyLastKnownPos, but the known position will be a few seconds ahead of the last seen position.  
+--- Returns the last seen position of an NPC's enemy.
+--- Similar to NPC:GetEnemyLastKnownPos, but the known position will be a few seconds ahead of the last seen position.
 --- @param enemy? GEntity @The enemy to check.
 --- @return GVector @The last seen position.
-function GNPC:GetEnemyLastSeenPos(enemy)
-end
+function GNPC:GetEnemyLastSeenPos(enemy) end
 
---- Returns the last time an NPC's enemy was seen by the NPC.  
+--- Returns the last time an NPC's enemy was seen by the NPC.
 --- @param enemy? GEntity @The enemy to check.
 --- @return number @Last time the given enemy was seen.
-function GNPC:GetEnemyLastTimeSeen(enemy)
-end
+function GNPC:GetEnemyLastTimeSeen(enemy) end
 
---- Returns the expression file the NPC is currently playing.  
+--- Returns the expression file the NPC is currently playing.
 --- @return string @The file path of the expression.
-function GNPC:GetExpression()
-end
+function GNPC:GetExpression() end
 
---- Returns the eye direction of the NPC.  
+--- Returns the eye direction of the NPC.
 --- @return GVector @The eye direction.
-function GNPC:GetEyeDirection()
-end
+function GNPC:GetEyeDirection() end
 
---- Returns the Field Of View of the NPC. See NPC:SetFOV.  
+--- Returns the Field Of View of the NPC. See NPC:SetFOV.
 --- @return number @The FOV for the NPC in degrees.
-function GNPC:GetFOV()
-end
+function GNPC:GetFOV() end
 
---- Returns the position we are trying to reach, if any.  
+--- Returns the position we are trying to reach, if any.
 --- @return GVector @The position we are trying to reach.
-function GNPC:GetGoalPos()
-end
+function GNPC:GetGoalPos() end
 
---- Returns the entity we are trying to reach, if any.  
+--- Returns the entity we are trying to reach, if any.
 --- @return GEntity @The entity we are trying to reach, or `NULL`.
-function GNPC:GetGoalTarget()
-end
+function GNPC:GetGoalTarget() end
 
---- Returns the 2D head direction of the NPC.  
+--- Returns the 2D head direction of the NPC.
 --- @return GVector @The head direction.
-function GNPC:GetHeadDirection()
-end
+function GNPC:GetHeadDirection() end
 
---- Returns NPCs hull type set by NPC:SetHullType.  
+--- Returns NPCs hull type set by NPC:SetHullType.
 --- @return number @Hull type, see Enums/HULL
-function GNPC:GetHullType()
-end
+function GNPC:GetHullType() end
 
---- Returns the ideal activity the NPC currently wants to achieve.  
---- ℹ **NOTE**: By default, base NPCs will automatically attempt to play a sequence bound to the ideal activity. To prevent ideal activity from overriding NPC's active sequence, set this to `ACT_DO_NOT_DISTURB`.  
+--- Returns the ideal activity the NPC currently wants to achieve.
+--- ℹ **NOTE**: By default, base NPCs will automatically attempt to play a sequence bound to the ideal activity. To prevent ideal activity from overriding NPC's active sequence, set this to `ACT_DO_NOT_DISTURB`.
 --- @return number @The ideal activity
-function GNPC:GetIdealActivity()
-end
+function GNPC:GetIdealActivity() end
 
---- Returns the ideal move acceleration of the NPC.  
+--- Returns the ideal move acceleration of the NPC.
 --- @return number @The ideal move acceleration.
-function GNPC:GetIdealMoveAcceleration()
-end
+function GNPC:GetIdealMoveAcceleration() end
 
---- Returns the ideal move speed of the NPC.  
+--- Returns the ideal move speed of the NPC.
 --- @return number @The ideal move speed.
-function GNPC:GetIdealMoveSpeed()
-end
+function GNPC:GetIdealMoveSpeed() end
 
---- Returns the ideal sequence the NPC currently wants to achieve.  
+--- Returns the ideal sequence the NPC currently wants to achieve.
 --- @return number @The ideal sequence, specific to the NPCs model.
-function GNPC:GetIdealSequence()
-end
+function GNPC:GetIdealSequence() end
 
---- Returns the ideal yaw (left right rotation) for this NPC at this moment.  
+--- Returns the ideal yaw (left right rotation) for this NPC at this moment.
 --- @return number @The ideal yaw.
-function GNPC:GetIdealYaw()
-end
+function GNPC:GetIdealYaw() end
 
---- Returns all known enemies this NPC has.  
---- See also NPC:GetKnownEnemyCount  
+--- Returns all known enemies this NPC has.
+--- See also NPC:GetKnownEnemyCount
 --- @return table @Table of entities that this NPC knows as enemies.
-function GNPC:GetKnownEnemies()
-end
+function GNPC:GetKnownEnemies() end
 
---- Returns known enemy count of this NPC.  
---- See also NPC:GetKnownEnemies  
+--- Returns known enemy count of this NPC.
+--- See also NPC:GetKnownEnemies
 --- @return number @Amount of entities that this NPC knows as enemies.
-function GNPC:GetKnownEnemyCount()
-end
+function GNPC:GetKnownEnemyCount() end
 
---- Returns the last registered or memorized position of the NPC. When using scheduling, the NPC will focus on navigating to the last position via nodes.  
---- See NPC:SetLastPosition.  
+--- Returns the last registered or memorized position of the NPC. When using scheduling, the NPC will focus on navigating to the last position via nodes.
+--- See NPC:SetLastPosition.
 --- @return GVector @Where the NPC's last position was set to.
-function GNPC:GetLastPosition()
-end
+function GNPC:GetLastPosition() end
 
---- Returns Global.CurTime based time since this NPC last received damage from given enemy. The last damage time is set when NPC:MarkTookDamageFromEnemy is called.  
+--- Returns Global.CurTime based time since this NPC last received damage from given enemy. The last damage time is set when NPC:MarkTookDamageFromEnemy is called.
 --- @param enemy? GEntity @The enemy to test
 --- @return number @Time since this NPC last received damage from given enemy.
-function GNPC:GetLastTimeTookDamageFromEnemy(enemy)
-end
+function GNPC:GetLastTimeTookDamageFromEnemy(enemy) end
 
---- Returns NPCs max view distance. An NPC will not be able to see enemies outside of this distance.  
+--- Returns NPCs max view distance. An NPC will not be able to see enemies outside of this distance.
 --- @return number @The maximum distance the NPC can see at.
-function GNPC:GetMaxLookDistance()
-end
+function GNPC:GetMaxLookDistance() end
 
---- Returns how far should the NPC look ahead in its route.  
+--- Returns how far should the NPC look ahead in its route.
 --- @return number @How far the NPC checks ahead of its route.
-function GNPC:GetMinMoveCheckDist()
-end
+function GNPC:GetMinMoveCheckDist() end
 
---- Returns how far before the NPC can come to a complete stop.  
+--- Returns how far before the NPC can come to a complete stop.
 --- @param minResult_? number @The minimum value that will be returned by this function.
 --- @return number @The minimum stop distance.
-function GNPC:GetMinMoveStopDist(minResult_)
-end
+function GNPC:GetMinMoveStopDist(minResult_) end
 
---- Returns the movement delay for given NPC.  
---- See NPC:SetMoveDelay.  
+--- Returns the movement delay for given NPC.
+--- See NPC:SetMoveDelay.
 --- @return number @The movement delay.
-function GNPC:GetMoveDelay()
-end
+function GNPC:GetMoveDelay() end
 
---- Returns the current timestep the internal NPC motor is working on.  
+--- Returns the current timestep the internal NPC motor is working on.
 --- @return number @The current timestep.
-function GNPC:GetMoveInterval()
-end
+function GNPC:GetMoveInterval() end
 
---- Returns the current move velocity of the NPC.  
+--- Returns the current move velocity of the NPC.
 --- @return GVector @The current move velocity of the NPC.
-function GNPC:GetMoveVelocity()
-end
+function GNPC:GetMoveVelocity() end
 
---- Returns the NPC's current movement activity.  
+--- Returns the NPC's current movement activity.
 --- @return number @Current NPC movement activity, see Enums/ACT.
-function GNPC:GetMovementActivity()
-end
+function GNPC:GetMovementActivity() end
 
---- Returns the index of the sequence the NPC uses to move.  
+--- Returns the index of the sequence the NPC uses to move.
 --- @return number @The movement sequence index
-function GNPC:GetMovementSequence()
-end
+function GNPC:GetMovementSequence() end
 
---- Returns the NPC's state.  
+--- Returns the NPC's state.
 --- @return number @The NPC's current state, see Enums/NPC_STATE.
-function GNPC:GetNPCState()
-end
+function GNPC:GetNPCState() end
 
---- Returns the NPC's navigation type.  
+--- Returns the NPC's navigation type.
 --- @return number @The nav type
-function GNPC:GetNavType()
-end
+function GNPC:GetNavType() end
 
---- Returns the nearest member of the squad the NPC is in.  
+--- Returns the nearest member of the squad the NPC is in.
 --- @return GNPC @The nearest member of the squad the NPC is in.
-function GNPC:GetNearestSquadMember()
-end
+function GNPC:GetNearestSquadMember() end
 
---- Gets the NPC's next waypoint position, where NPC will be moving after reaching current waypoint, if any is available.  
+--- Gets the NPC's next waypoint position, where NPC will be moving after reaching current waypoint, if any is available.
 --- @return GVector @The position of the next NPC waypoint.
-function GNPC:GetNextWaypointPos()
-end
+function GNPC:GetNextWaypointPos() end
 
---- Returns the distance the NPC is from Target Goal.  
+--- Returns the distance the NPC is from Target Goal.
 --- @return number @The number of hammer units the NPC is away from the Goal.
-function GNPC:GetPathDistanceToGoal()
-end
+function GNPC:GetPathDistanceToGoal() end
 
---- Returns the amount of time it will take for the NPC to get to its Target Goal.  
+--- Returns the amount of time it will take for the NPC to get to its Target Goal.
 --- @return number @The amount of time to get to the target goal.
-function GNPC:GetPathTimeToGoal()
-end
+function GNPC:GetPathTimeToGoal() end
 
---- Returns the shooting position of the NPC, i.e. where their bullets would come from, etc.  
---- If the NPC does not overwrite this, it will return Entity:GetPos.  
+--- Returns the shooting position of the NPC, i.e. where their bullets would come from, etc.
+--- If the NPC does not overwrite this, it will return Entity:GetPos.
 --- @return GVector @The NPC's shooting position.
-function GNPC:GetShootPos()
-end
+function GNPC:GetShootPos() end
 
---- Returns the current squad name of the NPC, as set via NPC:SetSquad.  
+--- Returns the current squad name of the NPC, as set via NPC:SetSquad.
 --- @return string @The new squad name to set.
-function GNPC:GetSquad()
-end
+function GNPC:GetSquad() end
 
---- Returns NPC step height.  
+--- Returns NPC step height.
 --- @return number @The current step height.
-function GNPC:GetStepHeight()
-end
+function GNPC:GetStepHeight() end
 
---- Returns the NPC's current target set by NPC:SetTarget.  
---- 🦟 **BUG**: [This returns nil if the NPC has no target. You should use Global.IsValid (which accounts for nil and NULL) on the return to verify validity of the target.](https://github.com/Facepunch/garrysmod-issues/issues/3132)  
+--- Returns the NPC's current target set by NPC:SetTarget.
+--- 🦟 **BUG**: [This returns nil if the NPC has no target. You should use Global.IsValid (which accounts for nil and NULL) on the return to verify validity of the target.](https://github.com/Facepunch/garrysmod-issues/issues/3132)
 --- @return GEntity @Target entity
-function GNPC:GetTarget()
-end
+function GNPC:GetTarget() end
 
---- Returns the status of the current task.  
+--- Returns the status of the current task.
 --- @return number @The status
-function GNPC:GetTaskStatus()
-end
+function GNPC:GetTaskStatus() end
 
---- Returns Global.CurTime based time since the enemy was reacquired, meaning it is currently in Line of Sight of the NPC.  
+--- Returns Global.CurTime based time since the enemy was reacquired, meaning it is currently in Line of Sight of the NPC.
 --- @param enemy? GEntity @The enemy to test
 --- @return number @Time enemy was last reacquired.
-function GNPC:GetTimeEnemyLastReacquired(enemy)
-end
+function GNPC:GetTimeEnemyLastReacquired(enemy) end
 
---- Returns the view offset of the NPC. Set by NPC:SetViewOffset.  
+--- Returns the view offset of the NPC. Set by NPC:SetViewOffset.
 --- @return GVector @The view offset of the NPC.
-function GNPC:GetViewOffset()
-end
+function GNPC:GetViewOffset() end
 
---- Returns a specific weapon the NPC owns.  
+--- Returns a specific weapon the NPC owns.
 --- @param class string @A classname of the weapon to try to get.
 --- @return GWeapon @The weapon for the specified class, or NULL of the NPC doesn't have given weapon.
-function GNPC:GetWeapon(class)
-end
+function GNPC:GetWeapon(class) end
 
---- Returns a table of the NPC's weapons.  
+--- Returns a table of the NPC's weapons.
 --- @return GWeapon[] @A list of the weapons the NPC currently has.
-function GNPC:GetWeapons()
-end
+function GNPC:GetWeapons() end
 
---- Used to give a weapon to an already spawned NPC.  
+--- Used to give a weapon to an already spawned NPC.
 --- @param weapon string @Class name of the weapon to equip to the NPC.
 --- @return GWeapon @The weapon entity given to the NPC.
-function GNPC:Give(weapon)
-end
+function GNPC:Give(weapon) end
 
---- Returns whether or not the NPC has the given condition.  
+--- Returns whether or not the NPC has the given condition.
 --- @param condition number @The condition index, see Enums/COND.
 --- @return boolean @True if the NPC has the given condition, false otherwise.
-function GNPC:HasCondition(condition)
-end
+function GNPC:HasCondition(condition) end
 
---- Polls the enemy memory to check if the given entity has eluded us or not.  
+--- Polls the enemy memory to check if the given entity has eluded us or not.
 --- @param enemy? GEntity @The enemy to test.
 --- @return boolean @If the enemy has eluded us.
-function GNPC:HasEnemyEluded(enemy)
-end
+function GNPC:HasEnemyEluded(enemy) end
 
---- Polls the enemy memory to check if the NPC has any memory of given enemy.  
+--- Polls the enemy memory to check if the NPC has any memory of given enemy.
 --- @param enemy? GEntity @The entity to test.
 --- @return boolean @If we have any memory on given enemy.
-function GNPC:HasEnemyMemory(enemy)
-end
+function GNPC:HasEnemyMemory(enemy) end
 
---- Returns true if the current navigation has an obstacle, this is different from NPC:GetBlockingEntity, this is for virtual navigation obstacles put by AI's local navigation system to prevent movement to the marked area, forcing NPC to steer around, [for example](https://github.com/ValveSoftware/source-sdk-2013/blob/master/src/game/server/hl2/npc_playercompanion.cpp#L2897).  
+--- Returns true if the current navigation has an obstacle, this is different from NPC:GetBlockingEntity, this is for virtual navigation obstacles put by AI's local navigation system to prevent movement to the marked area, forcing NPC to steer around, [for example](https://github.com/ValveSoftware/source-sdk-2013/blob/master/src/game/server/hl2/npc_playercompanion.cpp#L2897).
 --- @return boolean @`true` if the current navigation has an obstacle.
-function GNPC:HasObstacles()
-end
+function GNPC:HasObstacles() end
 
---- Force an NPC to play their Idle sound.  
-function GNPC:IdleSound()
-end
+--- Force an NPC to play their Idle sound.
+function GNPC:IdleSound() end
 
---- Makes the NPC ignore given entity/enemy until given time.  
+--- Makes the NPC ignore given entity/enemy until given time.
 --- @param enemy GEntity @The enemy to ignore.
 --- @param until_ number @How long to ignore the enemy for
-function GNPC:IgnoreEnemyUntil(enemy, until_)
-end
+function GNPC:IgnoreEnemyUntil(enemy, until_) end
 
---- Returns whether the NPC is currently crouching or not. Citizens and Combine Soldiers are capable of this behavior by default.  
+--- Returns whether the NPC is currently crouching or not. Citizens and Combine Soldiers are capable of this behavior by default.
 --- @return boolean @Whether the NPC is currently crouching.
-function GNPC:IsCrouching()
-end
+function GNPC:IsCrouching() end
 
---- Returns whether the current navigational waypoint is the final one.  
+--- Returns whether the current navigational waypoint is the final one.
 --- @return boolean @Whether the current navigational waypoint is the final one.
-function GNPC:IsCurWaypointGoal()
-end
+function GNPC:IsCurWaypointGoal() end
 
---- Returns whether or not the NPC is performing the given schedule.  
+--- Returns whether or not the NPC is performing the given schedule.
 --- @param schedule number @The schedule number, see Enums/SCHED.
 --- @return boolean @True if the NPC is performing the given schedule, false otherwise.
-function GNPC:IsCurrentSchedule(schedule)
-end
+function GNPC:IsCurrentSchedule(schedule) end
 
---- Returns whether the NPC is facing their ideal yaw. See NPC:SetIdealYaw, NPC:GetIdealYaw and NPC:SetIdealYawAndUpdate.  
+--- Returns whether the NPC is facing their ideal yaw. See NPC:SetIdealYaw, NPC:GetIdealYaw and NPC:SetIdealYawAndUpdate.
 --- @return boolean @Whether the NPC is facing their ideal yaw.
-function GNPC:IsFacingIdealYaw()
-end
+function GNPC:IsFacingIdealYaw() end
 
---- Returns whether the NPC has an active goal.  
+--- Returns whether the NPC has an active goal.
 --- @return boolean @Whether the NPC has an active goal or not.
-function GNPC:IsGoalActive()
-end
+function GNPC:IsGoalActive() end
 
---- Tests whether a position or an NPC is in the view cone of the NPC.  
+--- Tests whether a position or an NPC is in the view cone of the NPC.
 --- @param position GVector @The position to test.
 --- @return boolean @If the given position is in the view cone.
-function GNPC:IsInViewCone(position)
-end
---- Tests whether a position or an NPC is in the view cone of the NPC.  
+function GNPC:IsInViewCone(position) end
+--- Tests whether a position or an NPC is in the view cone of the NPC.
 --- @param ent GEntity @The entity to test
 --- @return boolean @If the given position is in the view cone.
-function GNPC:IsInViewCone(ent)
-end
+function GNPC:IsInViewCone(ent) end
 
---- Returns if the current movement is locked on the Yaw axis.  
+--- Returns if the current movement is locked on the Yaw axis.
 --- @return boolean @Whether the movement is yaw locked or not.
-function GNPC:IsMoveYawLocked()
-end
+function GNPC:IsMoveYawLocked() end
 
---- Returns whether the NPC is moving or not.  
+--- Returns whether the NPC is moving or not.
 --- @return boolean @Whether the NPC is moving or not.
-function GNPC:IsMoving()
-end
+function GNPC:IsMoving() end
 
---- Checks if the NPC is running an **ai_goal**. ( e.g. An npc_citizen NPC following the Player. )  
+--- Checks if the NPC is running an **ai_goal**. ( e.g. An npc_citizen NPC following the Player. )
 --- @return boolean @Returns true if running an ai_goal, otherwise returns false.
-function GNPC:IsRunningBehavior()
-end
+function GNPC:IsRunningBehavior() end
 
---- Returns whether the current NPC is the leader of the squad it is in.  
+--- Returns whether the current NPC is the leader of the squad it is in.
 --- @return boolean @Whether the NPC is the leader of the squad or not.
-function GNPC:IsSquadLeader()
-end
+function GNPC:IsSquadLeader() end
 
---- Returns the "forgettable" status for a given enemy, as set by NPC:SetUnforgettable, or by internal logic of engine NPCs.  
+--- Returns the "forgettable" status for a given enemy, as set by NPC:SetUnforgettable, or by internal logic of engine NPCs.
 --- @param enemy GEntity @Enemy entity to check.
 --- @return boolean @Whether the given enemy is unforgettable (`true`) or not.
-function GNPC:IsUnforgettable(enemy)
-end
+function GNPC:IsUnforgettable(enemy) end
 
---- Returns true if the entity was remembered as unreachable. The memory is updated automatically from following engine tasks if they failed:  
---- * TASK_GET_CHASE_PATH_TO_ENEMY  
---- * TASK_GET_PATH_TO_ENEMY_LKP  
---- * TASK_GET_PATH_TO_INTERACTION_PARTNER  
---- * TASK_ANTLIONGUARD_GET_CHASE_PATH_ENEMY_TOLERANCE  
---- * SCHED_FAIL_ESTABLISH_LINE_OF_FIRE - Combine NPCs, also when failing to change their enemy  
+--- Returns true if the entity was remembered as unreachable. The memory is updated automatically from following engine tasks if they failed:
+--- * TASK_GET_CHASE_PATH_TO_ENEMY
+--- * TASK_GET_PATH_TO_ENEMY_LKP
+--- * TASK_GET_PATH_TO_INTERACTION_PARTNER
+--- * TASK_ANTLIONGUARD_GET_CHASE_PATH_ENEMY_TOLERANCE
+--- * SCHED_FAIL_ESTABLISH_LINE_OF_FIRE - Combine NPCs, also when failing to change their enemy
 --- @param testEntity GEntity @The entity to test.
 --- @return boolean @If the entity is reachable or not.
-function GNPC:IsUnreachable(testEntity)
-end
+function GNPC:IsUnreachable(testEntity) end
 
---- Force an NPC to play their LostEnemy sound.  
-function GNPC:LostEnemySound()
-end
+--- Force an NPC to play their LostEnemy sound.
+function GNPC:LostEnemySound() end
 
---- Tries to achieve our ideal animation state, playing any transition sequences that we need to play to get there.  
-function GNPC:MaintainActivity()
-end
+--- Tries to achieve our ideal animation state, playing any transition sequences that we need to play to get there.
+function GNPC:MaintainActivity() end
 
---- Causes the NPC to temporarily forget the current enemy and switch on to a better one.  
+--- Causes the NPC to temporarily forget the current enemy and switch on to a better one.
 --- @param enemy? GEntity @The enemy to mark
-function GNPC:MarkEnemyAsEluded(enemy)
-end
+function GNPC:MarkEnemyAsEluded(enemy) end
 
---- Marks the NPC as took damage from given entity.  
---- See also NPC:GetLastTimeTookDamageFromEnemy.  
+--- Marks the NPC as took damage from given entity.
+--- See also NPC:GetLastTimeTookDamageFromEnemy.
 --- @param enemy? GEntity @The enemy to mark
-function GNPC:MarkTookDamageFromEnemy(enemy)
-end
+function GNPC:MarkTookDamageFromEnemy(enemy) end
 
---- Executes a climb move.  
---- Related functions are NPC:MoveClimbStart and NPC:MoveClimbStop.  
+--- Executes a climb move.
+--- Related functions are NPC:MoveClimbStart and NPC:MoveClimbStop.
 --- @param destination GVector @The destination of the climb.
 --- @param dir GVector @The direction of the climb.
 --- @param distance number @The distance.
 --- @param yaw number @The yaw angle.
 --- @param left number @Amount of climb nodes left?
 --- @return EAIMR @The result
-function GNPC:MoveClimbExec(destination, dir, distance, yaw, left)
-end
+function GNPC:MoveClimbExec(destination, dir, distance, yaw, left) end
 
---- Starts a climb move.  
---- Related functions are NPC:MoveClimbExec and NPC:MoveClimbStop.  
+--- Starts a climb move.
+--- Related functions are NPC:MoveClimbExec and NPC:MoveClimbStop.
 --- @param destination GVector @The destination of the climb.
 --- @param dir GVector @The direction of the climb.
 --- @param distance number @The distance.
 --- @param yaw number @The yaw angle.
-function GNPC:MoveClimbStart(destination, dir, distance, yaw)
-end
+function GNPC:MoveClimbStart(destination, dir, distance, yaw) end
 
---- Stops a climb move.  
---- Related functions are NPC:MoveClimbExec and NPC:MoveClimbStart.  
-function GNPC:MoveClimbStop()
-end
+--- Stops a climb move.
+--- Related functions are NPC:MoveClimbExec and NPC:MoveClimbStart.
+function GNPC:MoveClimbStop() end
 
---- Similar to other `NPC:Move*` functions, invokes internal code to move the NPC to a given location.  
---- Meant to be used within ENTITY:OverrideMove.  
+--- Similar to other `NPC:Move*` functions, invokes internal code to move the NPC to a given location.
+--- Meant to be used within ENTITY:OverrideMove.
 --- @param pos GVector @The position we want to reach.
 --- @param targetEntity? GEntity @Used to test whether we hit the move target when deciding success.
 --- @param yaw? number @Target Yaw angle at the end of the move
 --- @param asFarAsCan? boolean @Whether to move as far as possible.
 --- @param testZ? boolean @Also test the Z axis of the target position and NPC position to decide success.
 --- @return number @Whether the movement succeeded or not
-function GNPC:MoveGroundStep(pos, targetEntity, yaw, asFarAsCan, testZ)
-end
+function GNPC:MoveGroundStep(pos, targetEntity, yaw, asFarAsCan, testZ) end
 
---- Executes a jump move.  
---- Related functions are NPC:MoveJumpStart and NPC:MoveJumpStop.  
+--- Executes a jump move.
+--- Related functions are NPC:MoveJumpStart and NPC:MoveJumpStop.
 --- @return EAIMR @The result
-function GNPC:MoveJumpExec()
-end
+function GNPC:MoveJumpExec() end
 
---- Starts a jump move.  
---- Related functions are NPC:MoveJumpExec and NPC:MoveJumpStop.  
+--- Starts a jump move.
+--- Related functions are NPC:MoveJumpExec and NPC:MoveJumpStop.
 --- @param vel GVector @The jump velocity.
-function GNPC:MoveJumpStart(vel)
-end
+function GNPC:MoveJumpStart(vel) end
 
---- Stops a jump move.  
---- Related functions are NPC:MoveJumpExec and NPC:MoveJumpStart.  
+--- Stops a jump move.
+--- Related functions are NPC:MoveJumpExec and NPC:MoveJumpStart.
 --- @return EAIMR @The result
-function GNPC:MoveJumpStop()
-end
+function GNPC:MoveJumpStop() end
 
---- Makes the NPC walk toward the given position. The NPC will return to the player after amount of time set by **player_squad_autosummon_time** ConVar.  
---- Only works on Citizens (npc_citizen) and is a part of the Half-Life 2 squad system.  
---- The NPC **must** be in the player's squad for this to work.  
+--- Makes the NPC walk toward the given position. The NPC will return to the player after amount of time set by **player_squad_autosummon_time** ConVar.
+--- Only works on Citizens (npc_citizen) and is a part of the Half-Life 2 squad system.
+--- The NPC **must** be in the player's squad for this to work.
 --- @param position GVector @The target position for the NPC to walk to.
-function GNPC:MoveOrder(position)
-end
+function GNPC:MoveOrder(position) end
 
---- Pauses the NPC movement?  
---- Related functions are NPC:MoveStart, NPC:MoveStop and NPC:ResetMoveCalc.  
-function GNPC:MovePause()
-end
+--- Pauses the NPC movement?
+--- Related functions are NPC:MoveStart, NPC:MoveStop and NPC:ResetMoveCalc.
+function GNPC:MovePause() end
 
---- Starts NPC movement?  
---- Related functions are NPC:MoveStop, NPC:MovePause and NPC:ResetMoveCalc.  
-function GNPC:MoveStart()
-end
+--- Starts NPC movement?
+--- Related functions are NPC:MoveStop, NPC:MovePause and NPC:ResetMoveCalc.
+function GNPC:MoveStart() end
 
---- Stops the NPC movement?  
---- Related functions are NPC:MoveStart, NPC:MovePause and NPC:ResetMoveCalc.  
-function GNPC:MoveStop()
-end
+--- Stops the NPC movement?
+--- Related functions are NPC:MoveStart, NPC:MovePause and NPC:ResetMoveCalc.
+function GNPC:MoveStop() end
 
---- Picks random node around given vector, around specified length, using dir as search direction start. Works similarly to NPC:NavSetRandomGoal, but you can decide any position you want as a search starting point rather than your NPC.  
+--- Picks random node around given vector, around specified length, using dir as search direction start. Works similarly to NPC:NavSetRandomGoal, but you can decide any position you want as a search starting point rather than your NPC.
 --- @param pos GVector @The origin to calculate a path from.
 --- @param length number @The target length of the path to calculate.
 --- @param dir GVector @The direction in which to look for a new path end goal.
 --- @return boolean @Whether path generation was successful or not.
-function GNPC:NavSetGoal(pos, length, dir)
-end
+function GNPC:NavSetGoal(pos, length, dir) end
 
---- Creates a path to closest node at given position. This won't actually force the NPC to move.  
---- ℹ **NOTE**: This will call either NPC:TaskComplete or NPC:TaskFail for the current schedule and task, forcing the current task to progress to next task or fail.  
---- See also NPC:NavSetRandomGoal.  
+--- Creates a path to closest node at given position. This won't actually force the NPC to move.
+--- ℹ **NOTE**: This will call either NPC:TaskComplete or NPC:TaskFail for the current schedule and task, forcing the current task to progress to next task or fail.
+--- See also NPC:NavSetRandomGoal.
 --- @param pos GVector @The position to calculate a path to.
 --- @return boolean @Whether path generation was successful or not.
-function GNPC:NavSetGoalPos(pos)
-end
+function GNPC:NavSetGoalPos(pos) end
 
---- Set the goal target for an NPC.  
---- This will call either NPC:TaskComplete or NPC:TaskFail for the current schedule and task, forcing the current task to progress to next task or fail.  
+--- Set the goal target for an NPC.
+--- This will call either NPC:TaskComplete or NPC:TaskFail for the current schedule and task, forcing the current task to progress to next task or fail.
 --- @param target GEntity @The targeted entity to set the goal to.
 --- @param offset? GVector @The offset to apply to the targeted entity's position.
 --- @return boolean @Whether path generation was successful or not
-function GNPC:NavSetGoalTarget(target, offset)
-end
+function GNPC:NavSetGoalTarget(target, offset) end
 
---- Creates a random path of specified minimum length between a closest start node and random node in the specified direction. This won't actually force the NPC to move.  
+--- Creates a random path of specified minimum length between a closest start node and random node in the specified direction. This won't actually force the NPC to move.
 --- @param minPathLength number @Minimum length of path in units
 --- @param dir GVector @Unit vector pointing in the direction of the target random node
 --- @return boolean @Whether path generation was successful or not
-function GNPC:NavSetRandomGoal(minPathLength, dir)
-end
+function GNPC:NavSetRandomGoal(minPathLength, dir) end
 
---- Sets a goal in x, y offsets for the NPC to wander to  
+--- Sets a goal in x, y offsets for the NPC to wander to
 --- @param xOffset number @X offset
 --- @param yOffset number @Y offset
 --- @return boolean @Whether path generation was successful or not
-function GNPC:NavSetWanderGoal(xOffset, yOffset)
-end
+function GNPC:NavSetWanderGoal(xOffset, yOffset) end
 
---- Forces the NPC to pickup an existing weapon entity. The NPC will not pick up the weapon if they already own a weapon of given type, or if the NPC could not normally have this weapon in their inventory.  
+--- Forces the NPC to pickup an existing weapon entity. The NPC will not pick up the weapon if they already own a weapon of given type, or if the NPC could not normally have this weapon in their inventory.
 --- @param wep GWeapon @The weapon to try to pick up.
 --- @return boolean @Whether the NPC succeeded in picking up the weapon or not.
-function GNPC:PickupWeapon(wep)
-end
+function GNPC:PickupWeapon(wep) end
 
---- Forces the NPC to play a sentence from scripts/sentences.txt  
+--- Forces the NPC to play a sentence from scripts/sentences.txt
 --- @param sentence string @The sentence string to speak.
 --- @param delay number @Delay in seconds until the sentence starts playing.
 --- @param volume number @The volume of the sentence, from 0 to 1.
 --- @return number @Returns the sentence index, -1 if the sentence couldn't be played.
-function GNPC:PlaySentence(sentence, delay, volume)
-end
+function GNPC:PlaySentence(sentence, delay, volume) end
 
---- Makes the NPC remember an entity or an enemy as unreachable, for a specified amount of time. Use NPC:IsUnreachable to check if an entity is still unreachable.  
+--- Makes the NPC remember an entity or an enemy as unreachable, for a specified amount of time. Use NPC:IsUnreachable to check if an entity is still unreachable.
 --- @param ent GEntity @The entity to mark as unreachable.
 --- @param time? number @For how long to remember the entity as unreachable
-function GNPC:RememberUnreachable(ent, time)
-end
+function GNPC:RememberUnreachable(ent, time) end
 
---- Removes conditions to ignore for the this NPC.  
+--- Removes conditions to ignore for the this NPC.
 --- @param conditions? table @Ignore conditions to remove, see Enums/COND
-function GNPC:RemoveIgnoreConditions(conditions)
-end
+function GNPC:RemoveIgnoreConditions(conditions) end
 
---- Resets the ideal activity of the NPC. See also NPC:SetIdealActivity.  
+--- Resets the ideal activity of the NPC. See also NPC:SetIdealActivity.
 --- @param act number @The new activity
-function GNPC:ResetIdealActivity(act)
-end
+function GNPC:ResetIdealActivity(act) end
 
---- Resets all the movement calculations.  
---- Related functions are NPC:MoveStart, NPC:MovePause and NPC:MoveStop.  
-function GNPC:ResetMoveCalc()
-end
+--- Resets all the movement calculations.
+--- Related functions are NPC:MoveStart, NPC:MovePause and NPC:MoveStop.
+function GNPC:ResetMoveCalc() end
 
---- Starts an engine task.  
---- Used internally by the ai_task.  
+--- Starts an engine task.
+--- Used internally by the ai_task.
 --- @param taskID number @The task ID, see [ai_task.h](https://github.com/ValveSoftware/source-sdk-2013/blob/55ed12f8d1eb6887d348be03aee5573d44177ffb/mp/src/game/serv
 --- @param taskData number @The task data.
-function GNPC:RunEngineTask(taskID, taskData)
-end
+function GNPC:RunEngineTask(taskID, taskData) end
 
---- Forces the NPC to switch to a specific weapon the NPC owns. See NPC:GetWeapons.  
+--- Forces the NPC to switch to a specific weapon the NPC owns. See NPC:GetWeapons.
 --- @param weapon string|GWeapon @A classname of the weapon or a Weapon entity to switch to.
-function GNPC:SelectWeapon(weapon)
-end
+function GNPC:SelectWeapon(weapon) end
 
---- Stops any sounds (speech) the NPC is currently palying.  
---- Equivalent to `Entity:EmitSound( "AI_BaseNPC.SentenceStop" )`  
-function GNPC:SentenceStop()
-end
+--- Stops any sounds (speech) the NPC is currently palying.
+--- Equivalent to `Entity:EmitSound( "AI_BaseNPC.SentenceStop" )`
+function GNPC:SentenceStop() end
 
---- Sets the NPC's current activity.  
+--- Sets the NPC's current activity.
 --- @param act number @The new activity to set, see Enums/ACT.
-function GNPC:SetActivity(act)
-end
+function GNPC:SetActivity(act) end
 
 --- @param act number @See Enums/ACT.
-function GNPC:SetArrivalActivity(act)
-end
+function GNPC:SetArrivalActivity(act) end
 
---- Sets the direction from the NPC origin to its current navigational destination.  
+--- Sets the direction from the NPC origin to its current navigational destination.
 --- @param dir GVector @The new arrival direction.
-function GNPC:SetArrivalDirection(dir)
-end
+function GNPC:SetArrivalDirection(dir) end
 
---- Sets the distance to goal at which the NPC should stop moving and continue to other business such as doing the rest of their tasks in a schedule.  
+--- Sets the distance to goal at which the NPC should stop moving and continue to other business such as doing the rest of their tasks in a schedule.
 --- @param dist number @The distance to goal that is close enough for the NPC
-function GNPC:SetArrivalDistance(dist)
-end
+function GNPC:SetArrivalDistance(dist) end
 
---- Sets the sequence to be played when the NPC arrives at its goal.  
+--- Sets the sequence to be played when the NPC arrives at its goal.
 --- @param seq number @See Entity:LookupSequence.
-function GNPC:SetArrivalSequence(seq)
-end
+function GNPC:SetArrivalSequence(seq) end
 
---- Sets the arrival speed? of the NPC  
+--- Sets the arrival speed? of the NPC
 --- @param speed number @The new arrival speed
-function GNPC:SetArrivalSpeed(speed)
-end
+function GNPC:SetArrivalSpeed(speed) end
 
---- Sets an NPC condition.  
+--- Sets an NPC condition.
 --- @param condition ECOND @The condition index, see Enums/COND.
-function GNPC:SetCondition(condition)
-end
+function GNPC:SetCondition(condition) end
 
---- Sets the weapon proficiency of an NPC (how skilled an NPC is with its current weapon).  
+--- Sets the weapon proficiency of an NPC (how skilled an NPC is with its current weapon).
 --- @param proficiency number @The proficiency for the NPC's current weapon
-function GNPC:SetCurrentWeaponProficiency(proficiency)
-end
+function GNPC:SetCurrentWeaponProficiency(proficiency) end
 
---- Sets the target for an NPC.  
+--- Sets the target for an NPC.
 --- @param enemy GEntity @The enemy that the NPC should target
 --- @param newenemy? boolean @Calls NPC:SetCondition(COND.NEW_ENEMY) if the new enemy is valid and not equal to the last enemy.
-function GNPC:SetEnemy(enemy, newenemy)
-end
+function GNPC:SetEnemy(enemy, newenemy) end
 
---- Sets the NPC's .vcd expression. Similar to Entity:PlayScene except the scene is looped until it's interrupted by default NPC behavior or NPC:ClearExpression.  
+--- Sets the NPC's .vcd expression. Similar to Entity:PlayScene except the scene is looped until it's interrupted by default NPC behavior or NPC:ClearExpression.
 --- @param m_iszExpressionScene string @The expression filepath.
 --- @return number @Default duration of assigned expression, in seconds.
-function GNPC:SetExpression(m_iszExpressionScene)
-end
+function GNPC:SetExpression(m_iszExpressionScene) end
 
---- Sets the Field Of View of the NPC, for use with such functions as NPC:IsInViewCone. it is also used internally by the NPC for enemy detection, etc.  
+--- Sets the Field Of View of the NPC, for use with such functions as NPC:IsInViewCone. it is also used internally by the NPC for enemy detection, etc.
 --- @param fov number @The new FOV for the NPC in degrees.
-function GNPC:SetFOV(fov)
-end
+function GNPC:SetFOV(fov) end
 
---- Forces given NPC to crouch, if it is able to do so. Only Citizens and Combine Soldiers can by default.  
+--- Forces given NPC to crouch, if it is able to do so. Only Citizens and Combine Soldiers can by default.
 --- @param force boolean @Whether to force the NPC to crouch or not
-function GNPC:SetForceCrouch(force)
-end
+function GNPC:SetForceCrouch(force) end
 
---- Updates the NPC's hull and physics hull in order to match its model scale. Entity:SetModelScale seems to take care of this regardless.  
-function GNPC:SetHullSizeNormal()
-end
+--- Updates the NPC's hull and physics hull in order to match its model scale. Entity:SetModelScale seems to take care of this regardless.
+function GNPC:SetHullSizeNormal() end
 
---- Sets the hull type for the NPC.  
+--- Sets the hull type for the NPC.
 --- @param hullType number @Hull type
-function GNPC:SetHullType(hullType)
-end
+function GNPC:SetHullType(hullType) end
 
---- Sets the ideal activity the NPC currently wants to achieve. This is most useful for custom SNPCs.  
+--- Sets the ideal activity the NPC currently wants to achieve. This is most useful for custom SNPCs.
 --- @param arg number @The ideal activity to set
-function GNPC:SetIdealActivity(arg)
-end
+function GNPC:SetIdealActivity(arg) end
 
---- Sets the ideal sequence the NPC currently wants to achieve. This is most useful for custom SNPCs.  
+--- Sets the ideal sequence the NPC currently wants to achieve. This is most useful for custom SNPCs.
 --- @param sequenceId number @The ideal sequence to set
-function GNPC:SetIdealSequence(sequenceId)
-end
+function GNPC:SetIdealSequence(sequenceId) end
 
---- Sets the ideal yaw angle (left-right rotation) for the NPC. Does not actually force the NPC to start turning in that direction. See NPC:UpdateYaw, NPC:GetIdealYaw and NPC:SetIdealYawAndUpdate.  
+--- Sets the ideal yaw angle (left-right rotation) for the NPC. Does not actually force the NPC to start turning in that direction. See NPC:UpdateYaw, NPC:GetIdealYaw and NPC:SetIdealYawAndUpdate.
 --- @param angle number @The aim direction to set, the `yaw` component.
-function GNPC:SetIdealYaw(angle)
-end
+function GNPC:SetIdealYaw(angle) end
 
---- Sets the ideal yaw angle (left-right rotation) for the NPC and forces them to turn to that angle.  
+--- Sets the ideal yaw angle (left-right rotation) for the NPC and forces them to turn to that angle.
 --- @param angle number @The aim direction to set, the `yaw` component.
 --- @param speed? number @The turn speed
-function GNPC:SetIdealYawAndUpdate(angle, speed)
-end
+function GNPC:SetIdealYawAndUpdate(angle, speed) end
 
---- Sets conditions to ignore, which would normally interrupt an Engine-based schedule. Specified conditions will still be set, will call ENTITY:OnCondition and can be returned by NPC:HasCondition, but they will no longer interrupt the Engine schedule.  
+--- Sets conditions to ignore, which would normally interrupt an Engine-based schedule. Specified conditions will still be set, will call ENTITY:OnCondition and can be returned by NPC:HasCondition, but they will no longer interrupt the Engine schedule.
 --- @param conditions table @Conditions to ignore, see Enums/COND
 --- @param size number @Number of conditions to include in the ignored conditions table
-function GNPC:SetIgnoreConditions(conditions, size)
-end
+function GNPC:SetIgnoreConditions(conditions, size) end
 
---- Sets the last registered or memorized position for this NPC. When using scheduling, the NPC will focus on navigating to the last position via nodes.  
---- ℹ **NOTE**: The navigation requires ground nodes to function properly, otherwise the NPC could only navigate in a small area. (https://developer.valvesoftware.com/wiki/Info_node)  
+--- Sets the last registered or memorized position for this NPC. When using scheduling, the NPC will focus on navigating to the last position via nodes.
+--- ℹ **NOTE**: The navigation requires ground nodes to function properly, otherwise the NPC could only navigate in a small area. (https://developer.valvesoftware.com/wiki/Info_node)
 --- @param position GVector @Where the NPC's last position will be set.
-function GNPC:SetLastPosition(position)
-end
+function GNPC:SetLastPosition(position) end
 
---- Sets NPC's max view distance. An NPC will not be able to see enemies outside of this distance.  
+--- Sets NPC's max view distance. An NPC will not be able to see enemies outside of this distance.
 --- @param dist number @New maximum distance the NPC can see at
-function GNPC:SetMaxLookDistance(dist)
-end
+function GNPC:SetMaxLookDistance(dist) end
 
---- Sets how long to try rebuilding path before failing task.  
+--- Sets how long to try rebuilding path before failing task.
 --- @param time number @How long to try rebuilding path before failing task
-function GNPC:SetMaxRouteRebuildTime(time)
-end
+function GNPC:SetMaxRouteRebuildTime(time) end
 
---- Sets the movement delay for given NPC.  
---- See NPC:GetMoveDelay.  
+--- Sets the movement delay for given NPC.
+--- See NPC:GetMoveDelay.
 --- @param delay number @The amount of time in seconds to delay movement by.
-function GNPC:SetMoveDelay(delay)
-end
+function GNPC:SetMoveDelay(delay) end
 
---- Sets the timestep the internal NPC motor is working on.  
+--- Sets the timestep the internal NPC motor is working on.
 --- @param time number @The new timestep.
-function GNPC:SetMoveInterval(time)
-end
+function GNPC:SetMoveInterval(time) end
 
---- Sets the move velocity of the NPC  
+--- Sets the move velocity of the NPC
 --- @param vel GVector @The new movement velocity.
-function GNPC:SetMoveVelocity(vel)
-end
+function GNPC:SetMoveVelocity(vel) end
 
---- Sets whether the current movement should locked on the Yaw axis or not.  
+--- Sets whether the current movement should locked on the Yaw axis or not.
 --- @param lock boolean @Whether the movement should yaw locked or not.
-function GNPC:SetMoveYawLocked(lock)
-end
+function GNPC:SetMoveYawLocked(lock) end
 
---- Sets the activity the NPC uses when it moves.  
+--- Sets the activity the NPC uses when it moves.
 --- @param activity number @The movement activity, see Enums/ACT.
-function GNPC:SetMovementActivity(activity)
-end
+function GNPC:SetMovementActivity(activity) end
 
---- Sets the sequence the NPC navigation path uses for speed calculation. Doesn't seem to have any visible effect on NPC movement or actively playing sequence.  
---- To be able to use this, first set NPC:SetIdealActivity to `ACT_DO_NOT_DISTURB`, set this to any sequence with root motion data and call Entity:SetSequence on your desired sequence. As long as your NPC's NPC:GetMovementSequence has root motion data, your NPC will move to navigation point even though your NPC's Entity:GetSequence doesn't have any motion.  
+--- Sets the sequence the NPC navigation path uses for speed calculation. Doesn't seem to have any visible effect on NPC movement or actively playing sequence.
+--- To be able to use this, first set NPC:SetIdealActivity to `ACT_DO_NOT_DISTURB`, set this to any sequence with root motion data and call Entity:SetSequence on your desired sequence. As long as your NPC's NPC:GetMovementSequence has root motion data, your NPC will move to navigation point even though your NPC's Entity:GetSequence doesn't have any motion.
 --- @param sequenceId number @The movement sequence index
-function GNPC:SetMovementSequence(sequenceId)
-end
+function GNPC:SetMovementSequence(sequenceId) end
 
---- Sets the state the NPC is in to help it decide on a ideal schedule.  
+--- Sets the state the NPC is in to help it decide on a ideal schedule.
 --- @param state number @New NPC state, see Enums/NPC_STATE
-function GNPC:SetNPCState(state)
-end
+function GNPC:SetNPCState(state) end
 
---- Sets the navigation type of the NPC.  
+--- Sets the navigation type of the NPC.
 --- @param navtype number @The new nav type
-function GNPC:SetNavType(navtype)
-end
+function GNPC:SetNavType(navtype) end
 
---- Sets the NPC's current schedule.  
+--- Sets the NPC's current schedule.
 --- @param schedule number @The NPC schedule, see Enums/SCHED.
-function GNPC:SetSchedule(schedule)
-end
+function GNPC:SetSchedule(schedule) end
 
---- Assigns the NPC to a new squad. A squad can have up to 16 NPCs. NPCs in a single squad should be friendly to each other.  
---- See also ai.GetSquadMembers and NPC:GetSquad.  
---- NPCs within the same squad are meant to function more effectively, tactics wise.  
+--- Assigns the NPC to a new squad. A squad can have up to 16 NPCs. NPCs in a single squad should be friendly to each other.
+--- See also ai.GetSquadMembers and NPC:GetSquad.
+--- NPCs within the same squad are meant to function more effectively, tactics wise.
 --- @param name? string @The new squad name to set
-function GNPC:SetSquad(name)
-end
+function GNPC:SetSquad(name) end
 
---- Sets the SNPC step height.  
---- ℹ **NOTE**: This only works for scripted NPCs.  
+--- Sets the SNPC step height.
+--- ℹ **NOTE**: This only works for scripted NPCs.
 --- @param height number @The new step height
-function GNPC:SetStepHeight(height)
-end
+function GNPC:SetStepHeight(height) end
 
---- Sets the NPC's target. This is used in some engine schedules.  
+--- Sets the NPC's target. This is used in some engine schedules.
 --- @param entity GEntity @The target of the NPC.
-function GNPC:SetTarget(entity)
-end
+function GNPC:SetTarget(entity) end
 
---- Sets the status of the current task.  
+--- Sets the status of the current task.
 --- @param status number @The status
-function GNPC:SetTaskStatus(status)
-end
+function GNPC:SetTaskStatus(status) end
 
---- Sets given entity as an unforgettable enemy. The state can be retrieved via NPC:IsUnforgettable.  
+--- Sets given entity as an unforgettable enemy. The state can be retrieved via NPC:IsUnforgettable.
 --- @param enemy GEntity @The enemy entity to set.
 --- @param set? boolean @The entity to set.
-function GNPC:SetUnforgettable(enemy, set)
-end
+function GNPC:SetUnforgettable(enemy, set) end
 
---- Sets the view offset of the NPC. Player alternative of Player:SetViewOffset.  
---- This affects NPC's NPC:GetShootPos.  
+--- Sets the view offset of the NPC. Player alternative of Player:SetViewOffset.
+--- This affects NPC's NPC:GetShootPos.
 --- @param arg GVector @The view offset to set.
-function GNPC:SetViewOffset(arg)
-end
+function GNPC:SetViewOffset(arg) end
 
---- Forces the NPC to start an engine task, this has different results for every NPC.  
+--- Forces the NPC to start an engine task, this has different results for every NPC.
 --- @param task number @The id of the task to start, see [ai_task.h](https://github.com/ValveSoftware/source-sdk-2013/blob/55ed12f8d1eb6887d348be03aee5573d44177ffb/
 --- @param taskData number @The task data as a float, not all tasks make use of it.
-function GNPC:StartEngineTask(task, taskData)
-end
+function GNPC:StartEngineTask(task, taskData) end
 
---- Resets the NPC's movement animation and velocity. Does not actually stop the NPC from moving.  
+--- Resets the NPC's movement animation and velocity. Does not actually stop the NPC from moving.
 --- @param immediate? boolean @Whether to stop moving even when currently active goal doesn't want us to.
-function GNPC:StopMoving(immediate)
-end
+function GNPC:StopMoving(immediate) end
 
---- Cancels NPC:MoveOrder basically.  
---- Only works on Citizens (npc_citizen) and is a part of the Half-Life 2 squad system.  
---- The NPC **must** be in the player's squad for this to work.  
+--- Cancels NPC:MoveOrder basically.
+--- Only works on Citizens (npc_citizen) and is a part of the Half-Life 2 squad system.
+--- The NPC **must** be in the player's squad for this to work.
 --- @param target GEntity @Must be a player, does nothing otherwise.
-function GNPC:TargetOrder(target)
-end
+function GNPC:TargetOrder(target) end
 
---- Marks the current NPC task as completed.  
---- This is meant to be used alongside NPC:TaskFail to complete or fail custom Lua defined tasks. (Schedule:AddTask)  
-function GNPC:TaskComplete()
-end
+--- Marks the current NPC task as completed.
+--- This is meant to be used alongside NPC:TaskFail to complete or fail custom Lua defined tasks. (Schedule:AddTask)
+function GNPC:TaskComplete() end
 
---- Marks the current NPC task as failed.  
---- This is meant to be used alongside NPC:TaskComplete to complete or fail custom Lua defined tasks. (Schedule:AddTask)  
+--- Marks the current NPC task as failed.
+--- This is meant to be used alongside NPC:TaskComplete to complete or fail custom Lua defined tasks. (Schedule:AddTask)
 --- @param failReason string @Fail reason to be passed onto ENTITY:OnTaskFailed
-function GNPC:TaskFail(failReason)
-end
+function GNPC:TaskFail(failReason) end
 
---- Force the NPC to update information on the supplied enemy, as if it had line of sight to it.  
+--- Force the NPC to update information on the supplied enemy, as if it had line of sight to it.
 --- @param enemy GEntity @The enemy to update.
 --- @param pos GVector @The last known position of the enemy.
-function GNPC:UpdateEnemyMemory(enemy, pos)
-end
+function GNPC:UpdateEnemyMemory(enemy, pos) end
 
---- Updates the turn activity. Basically applies the turn animations depending on the current turn yaw.  
-function GNPC:UpdateTurnActivity()
-end
+--- Updates the turn activity. Basically applies the turn animations depending on the current turn yaw.
+function GNPC:UpdateTurnActivity() end
 
---- Forces the NPC to turn to their ideal yaw angle. See NPC:SetIdealYaw and NPC:SetIdealYawAndUpdate.  
+--- Forces the NPC to turn to their ideal yaw angle. See NPC:SetIdealYaw and NPC:SetIdealYawAndUpdate.
 --- @param speed? number @The turn speed
-function GNPC:UpdateYaw(speed)
-end
+function GNPC:UpdateYaw(speed) end
 
---- ℹ **NOTE**: This function only works on `ai` type [SENTs](Scripted_Entities).  
+--- ℹ **NOTE**: This function only works on `ai` type [SENTs](Scripted_Entities).
 --- @return boolean @If we succeeded setting the behavior.
-function GNPC:UseActBusyBehavior()
-end
+function GNPC:UseActBusyBehavior() end
 
---- Enables the AI's [Assault Behavior](https://developer.valvesoftware.com/wiki/Assault "Assault Behavior") when an `ai_goal_assault` is set for this SENT.  
---- ℹ **NOTE**: This function only works on `ai` type [SENTs](Scripted_Entities).  
+--- Enables the AI's [Assault Behavior](https://developer.valvesoftware.com/wiki/Assault "Assault Behavior") when an `ai_goal_assault` is set for this SENT.
+--- ℹ **NOTE**: This function only works on `ai` type [SENTs](Scripted_Entities).
 --- @return boolean @Whether the action succeeded.
-function GNPC:UseAssaultBehavior()
-end
+function GNPC:UseAssaultBehavior() end
 
---- ℹ **NOTE**: This function only works on `ai` type [SENTs](Scripted_Entities).  
+--- ℹ **NOTE**: This function only works on `ai` type [SENTs](Scripted_Entities).
 --- @return boolean @If we succeeded setting the behavior.
-function GNPC:UseFollowBehavior()
-end
+function GNPC:UseFollowBehavior() end
 
---- Orders the SNPC to control any nearby `func_tank`s looking for an NPC to operate itself, if available.  
---- ℹ **NOTE**: This function only works on `ai` type [SENTs](Scripted_Entities).  
+--- Orders the SNPC to control any nearby `func_tank`s looking for an NPC to operate itself, if available.
+--- ℹ **NOTE**: This function only works on `ai` type [SENTs](Scripted_Entities).
 --- @return boolean @Whether the action succeeded.
-function GNPC:UseFuncTankBehavior()
-end
+function GNPC:UseFuncTankBehavior() end
 
---- Enables the AI's [Lead Behavior](https://developer.valvesoftware.com/wiki/ai_goal_lead "Lead Behavior") when an `ai_goal_lead` is set for this SENT.  
---- ℹ **NOTE**: This function only works on `ai` type [SENTs](Scripted_Entities).  
+--- Enables the AI's [Lead Behavior](https://developer.valvesoftware.com/wiki/ai_goal_lead "Lead Behavior") when an `ai_goal_lead` is set for this SENT.
+--- ℹ **NOTE**: This function only works on `ai` type [SENTs](Scripted_Entities).
 --- @return boolean @Whether the action succeeded.
-function GNPC:UseLeadBehavior()
-end
+function GNPC:UseLeadBehavior() end
 
---- Undoes the other `Use*Behavior` functions.  
---- ℹ **NOTE**: This function only works on `ai` type [SENTs](Scripted_Entities).  
-function GNPC:UseNoBehavior()
-end
+--- Undoes the other `Use*Behavior` functions.
+--- ℹ **NOTE**: This function only works on `ai` type [SENTs](Scripted_Entities).
+function GNPC:UseNoBehavior() end

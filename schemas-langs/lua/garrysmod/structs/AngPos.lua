@@ -1,6 +1,6 @@
 --- @meta
 
---- Table used by various functions, such as Entity:GetAttachment.  
+--- Table used by various functions, such as Entity:GetAttachment.
 --- @class SAngPos
 --- @field Ang GAngle @Angle object
 --- @field Pos GVector @Vector object

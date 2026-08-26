@@ -1,6 +1,6 @@
 --- @meta
 
---- Used for draw.Text.  
+--- Used for draw.Text.
 --- @class STextData
 --- @field text string @Text to be drawn.
 --- @field font? string @The font to draw with

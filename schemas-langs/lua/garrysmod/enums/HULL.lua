@@ -1,6 +1,6 @@
 --- @meta
 
---- Hull of a Citizen  
+--- Hull of a Citizen
 _G.HULL_HUMAN = 0
 _G.HULL_SMALL_CENTERED = 1
 _G.HULL_WIDE_HUMAN = 2
@@ -12,5 +12,5 @@ _G.HULL_LARGE = 7
 _G.HULL_LARGE_CENTERED = 8
 _G.HULL_MEDIUM_TALL = 9
 
---- Enumerations used by NPC:SetHullType and  NPC:GetHullType. Serverside only.  
+--- Enumerations used by NPC:SetHullType and  NPC:GetHullType. Serverside only.
 --- @alias EHULL `HULL_HUMAN`|`HULL_SMALL_CENTERED`|`HULL_WIDE_HUMAN`|`HULL_TINY`|`HULL_WIDE_SHORT`|`HULL_MEDIUM`|`HULL_TINY_CENTERED`|`HULL_LARGE`|`HULL_LARGE_CENTERED`|`HULL_MEDIUM_TALL`

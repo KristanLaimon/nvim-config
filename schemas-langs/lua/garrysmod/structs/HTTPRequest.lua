@@ -1,6 +1,6 @@
 --- @meta
 
---- Table used by Global.HTTP function.  
+--- Table used by Global.HTTP function.
 --- @class SHTTPRequest
 --- @field failed function @Function to be called on failure
 --- @field success function @Function to be called on success

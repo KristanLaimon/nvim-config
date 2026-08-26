@@ -1,268 +1,220 @@
 --- @meta
 
 --- @class GVehicle : GEntity
---- This is a list of all methods only available for vehicles. It is also possible to call Entity functions on vehicles.  
+--- This is a list of all methods only available for vehicles. It is also possible to call Entity functions on vehicles.
 local GVehicle = {}
---- Returns the remaining boosting time left.  
+--- Returns the remaining boosting time left.
 --- @return number @The remaining boosting time left
-function GVehicle:BoostTimeLeft()
-end
+function GVehicle:BoostTimeLeft() end
 
---- Tries to find an Exit Point for leaving vehicle, if one is unobstructed in the direction given.  
+--- Tries to find an Exit Point for leaving vehicle, if one is unobstructed in the direction given.
 --- @param yaw number @Yaw/roll from vehicle angle to check for exit
 --- @param distance number @Distance from origin to drop player
 --- @return GVector @Returns the vector for exit position or nil if cannot exit that way.
-function GVehicle:CheckExitPoint(yaw, distance)
-end
+function GVehicle:CheckExitPoint(yaw, distance) end
 
---- Sets whether the engine is enabled or disabled, i.e. can be started or not.  
+--- Sets whether the engine is enabled or disabled, i.e. can be started or not.
 --- @param enable boolean @Enable or disable the engine
-function GVehicle:EnableEngine(enable)
-end
+function GVehicle:EnableEngine(enable) end
 
---- Returns information about the ammo of the vehicle  
+--- Returns information about the ammo of the vehicle
 --- @return number @Ammo type of the vehicle ammo
 --- @return number @Clip size
 --- @return number @Count
-function GVehicle:GetAmmo()
-end
+function GVehicle:GetAmmo() end
 
---- Returns third person camera distance.  
+--- Returns third person camera distance.
 --- @return number @Camera distance
-function GVehicle:GetCameraDistance()
-end
+function GVehicle:GetCameraDistance() end
 
---- Gets the driver of the vehicle, returns `NULL` if no driver is present.  
+--- Gets the driver of the vehicle, returns `NULL` if no driver is present.
 --- @return GEntity @The driver of the vehicle.
-function GVehicle:GetDriver()
-end
+function GVehicle:GetDriver() end
 
---- Returns the current speed of the vehicle in Half-Life Hammer Units (in/s). Same as Entity:GetVelocity + Vector:Length.  
+--- Returns the current speed of the vehicle in Half-Life Hammer Units (in/s). Same as Entity:GetVelocity + Vector:Length.
 --- @return number @The speed of the vehicle
-function GVehicle:GetHLSpeed()
-end
+function GVehicle:GetHLSpeed() end
 
---- Returns the max speed of the vehicle in MPH.  
+--- Returns the max speed of the vehicle in MPH.
 --- @return number @The max speed of the vehicle in MPH
-function GVehicle:GetMaxSpeed()
-end
+function GVehicle:GetMaxSpeed() end
 
---- Returns some info about the vehicle.  
+--- Returns some info about the vehicle.
 --- @return SOperatingParams @The operating parameters.
-function GVehicle:GetOperatingParams()
-end
+function GVehicle:GetOperatingParams() end
 
---- Gets the passenger of the vehicle, returns NULL if no drivers is present.  
+--- Gets the passenger of the vehicle, returns NULL if no drivers is present.
 --- @param passenger number @The index of the passenger
 --- @return GEntity @The passenger
-function GVehicle:GetPassenger(passenger)
-end
+function GVehicle:GetPassenger(passenger) end
 
---- Returns the seat position and angle of a given passenger seat.  
+--- Returns the seat position and angle of a given passenger seat.
 --- @param role number @The passenger role
 --- @return GVector @The seat position
 --- @return GAngle @The seat angle
-function GVehicle:GetPassengerSeatPoint(role)
-end
+function GVehicle:GetPassengerSeatPoint(role) end
 
---- Returns the current RPM of the vehicle. This value is fake and doesn't actually affect the vehicle movement.  
+--- Returns the current RPM of the vehicle. This value is fake and doesn't actually affect the vehicle movement.
 --- @return number @The RPM.
-function GVehicle:GetRPM()
-end
+function GVehicle:GetRPM() end
 
---- Returns the current speed of the vehicle in MPH.  
+--- Returns the current speed of the vehicle in MPH.
 --- @return number @The speed of the vehicle in MPH
-function GVehicle:GetSpeed()
-end
+function GVehicle:GetSpeed() end
 
---- Returns the current steering of the vehicle.  
+--- Returns the current steering of the vehicle.
 --- @return number @The current steering of the vehicle.
-function GVehicle:GetSteering()
-end
+function GVehicle:GetSteering() end
 
---- Returns the maximum steering degree of the vehicle  
+--- Returns the maximum steering degree of the vehicle
 --- @return number @The maximum steering degree of the vehicle
-function GVehicle:GetSteeringDegrees()
-end
+function GVehicle:GetSteeringDegrees() end
 
---- Returns if vehicle has thirdperson mode enabled or not.  
+--- Returns if vehicle has thirdperson mode enabled or not.
 --- @return boolean @Returns true if third person mode enabled, false otherwise
-function GVehicle:GetThirdPersonMode()
-end
+function GVehicle:GetThirdPersonMode() end
 
---- Returns the current throttle of the vehicle.  
+--- Returns the current throttle of the vehicle.
 --- @return number @The current throttle of the vehicle
-function GVehicle:GetThrottle()
-end
+function GVehicle:GetThrottle() end
 
---- Returns the vehicle class name. This is only useful for Sandbox spawned vehicles or any vehicle that properly sets the vehicle class with Vehicle:SetVehicleClass.  
+--- Returns the vehicle class name. This is only useful for Sandbox spawned vehicles or any vehicle that properly sets the vehicle class with Vehicle:SetVehicleClass.
 --- @return string @The class name of the vehicle.
-function GVehicle:GetVehicleClass()
-end
+function GVehicle:GetVehicleClass() end
 
---- Returns the vehicle parameters of given vehicle.  
+--- Returns the vehicle parameters of given vehicle.
 --- @return SVehicleParams @The vehicle parameters.
-function GVehicle:GetVehicleParams()
-end
+function GVehicle:GetVehicleParams() end
 
---- Returns the view position and forward angle of a given passenger seat.  
+--- Returns the view position and forward angle of a given passenger seat.
 --- @param role? number @The passenger role
 --- @return GVector @The view position, will be 0, 0, 0 on failure
 --- @return GAngle @The view angles, will be 0, 0, 0 on failure
 --- @return number @The field of view, will be 0 on failure
-function GVehicle:GetVehicleViewPosition(role)
-end
+function GVehicle:GetVehicleViewPosition(role) end
 
---- Returns the PhysObj of given wheel.  
+--- Returns the PhysObj of given wheel.
 --- @param wheel number @The wheel to retrieve
 --- @return GPhysObj @The wheel
-function GVehicle:GetWheel(wheel)
-end
+function GVehicle:GetWheel(wheel) end
 
---- Returns the base wheel height.  
+--- Returns the base wheel height.
 --- @param wheel number @The wheel to get the base wheel height of.
 --- @return number @The base wheel height.
-function GVehicle:GetWheelBaseHeight(wheel)
-end
+function GVehicle:GetWheelBaseHeight(wheel) end
 
---- Returns the wheel contact point.  
+--- Returns the wheel contact point.
 --- @param wheel number @The wheel to check
 --- @return GVector @The contact position
 --- @return number @The Surface Properties ID of hit surface.
 --- @return boolean @Whether the wheel is on ground or not
-function GVehicle:GetWheelContactPoint(wheel)
-end
+function GVehicle:GetWheelContactPoint(wheel) end
 
---- Returns the wheel count of the vehicle  
+--- Returns the wheel count of the vehicle
 --- @return number @The amount of wheels
-function GVehicle:GetWheelCount()
-end
+function GVehicle:GetWheelCount() end
 
---- Returns the total wheel height.  
+--- Returns the total wheel height.
 --- @param wheel number @The wheel to get the base wheel height of.
 --- @return number @The total wheel height.
-function GVehicle:GetWheelTotalHeight(wheel)
-end
+function GVehicle:GetWheelTotalHeight(wheel) end
 
---- Returns whether this vehicle has boost at all.  
+--- Returns whether this vehicle has boost at all.
 --- @return boolean @Whether this vehicle has boost at all.
-function GVehicle:HasBoost()
-end
+function GVehicle:HasBoost() end
 
---- Returns whether this vehicle has a brake pedal. See Vehicle:SetHasBrakePedal.  
+--- Returns whether this vehicle has a brake pedal. See Vehicle:SetHasBrakePedal.
 --- @return boolean @Whether this vehicle has a brake pedal or not.
-function GVehicle:HasBrakePedal()
-end
+function GVehicle:HasBrakePedal() end
 
---- Returns whether this vehicle is currently boosting or not.  
+--- Returns whether this vehicle is currently boosting or not.
 --- @return boolean @Whether this vehicle is currently boosting or not.
-function GVehicle:IsBoosting()
-end
+function GVehicle:IsBoosting() end
 
---- Returns whether the engine is enabled or not, i.e. whether it can be started.  
+--- Returns whether the engine is enabled or not, i.e. whether it can be started.
 --- @return boolean @Whether the engine is enabled
-function GVehicle:IsEngineEnabled()
-end
+function GVehicle:IsEngineEnabled() end
 
---- Returns whether the engine is started or not.  
+--- Returns whether the engine is started or not.
 --- @return boolean @Whether the engine is started or not.
-function GVehicle:IsEngineStarted()
-end
+function GVehicle:IsEngineStarted() end
 
---- Determines whether a given Vehicle is fully initialized.  
---- It is possible, in uncommon circumstances, for a valid vehicle entity to be in an invalid state, such as before Entity:Spawn is called on the vehicle after creation.  
---- If this function returns `false`, then the Vehicle functions are not usable on this vehicle, while Entity functions are.  
+--- Determines whether a given Vehicle is fully initialized.
+--- It is possible, in uncommon circumstances, for a valid vehicle entity to be in an invalid state, such as before Entity:Spawn is called on the vehicle after creation.
+--- If this function returns `false`, then the Vehicle functions are not usable on this vehicle, while Entity functions are.
 --- @return boolean @`true` if the Vehicle is in a valid state, or `false` if the Vehicle is in an invalid state.
-function GVehicle:IsValidVehicle()
-end
+function GVehicle:IsValidVehicle() end
 
---- Returns whether this vehicle's engine is underwater or not. ( Internally the attachment point "engine" or "vehicle_engine" is checked )  
+--- Returns whether this vehicle's engine is underwater or not. ( Internally the attachment point "engine" or "vehicle_engine" is checked )
 --- @return boolean @Whether this vehicle's engine is underwater or not.
-function GVehicle:IsVehicleBodyInWater()
-end
+function GVehicle:IsVehicleBodyInWater() end
 
---- Releases the vehicle's handbrake (Jeep) so it can roll without any passengers.  
---- This will be overwritten if the vehicle has a driver. Same as Vehicle:SetHandbrake( false )  
-function GVehicle:ReleaseHandbrake()
-end
+--- Releases the vehicle's handbrake (Jeep) so it can roll without any passengers.
+--- This will be overwritten if the vehicle has a driver. Same as Vehicle:SetHandbrake( false )
+function GVehicle:ReleaseHandbrake() end
 
---- Sets the boost. It is possible that this function does not work while the vehicle has a valid driver in it.  
+--- Sets the boost. It is possible that this function does not work while the vehicle has a valid driver in it.
 --- @param boost number @The new boost value
-function GVehicle:SetBoost(boost)
-end
+function GVehicle:SetBoost(boost) end
 
---- Sets the third person camera distance of the vehicle.  
+--- Sets the third person camera distance of the vehicle.
 --- @param distance number @Camera distance to set to
-function GVehicle:SetCameraDistance(distance)
-end
+function GVehicle:SetCameraDistance(distance) end
 
---- Turns on or off the Jeep handbrake so it can roll without a driver inside.  
---- Does nothing while the vehicle has a driver in it.  
+--- Turns on or off the Jeep handbrake so it can roll without a driver inside.
+--- Does nothing while the vehicle has a driver in it.
 --- @param handbrake boolean @true to turn on, false to turn off.
-function GVehicle:SetHandbrake(handbrake)
-end
+function GVehicle:SetHandbrake(handbrake) end
 
---- Sets whether this vehicle has a brake pedal.  
+--- Sets whether this vehicle has a brake pedal.
 --- @param brakePedal boolean @Whether this vehicle has a brake pedal
-function GVehicle:SetHasBrakePedal(brakePedal)
-end
+function GVehicle:SetHasBrakePedal(brakePedal) end
 
---- Sets maximum reverse throttle  
+--- Sets maximum reverse throttle
 --- @param maxRevThrottle number @The new maximum throttle
-function GVehicle:SetMaxReverseThrottle(maxRevThrottle)
-end
+function GVehicle:SetMaxReverseThrottle(maxRevThrottle) end
 
---- Sets maximum forward throttle  
+--- Sets maximum forward throttle
 --- @param maxThrottle number @The new maximum throttle.
-function GVehicle:SetMaxThrottle(maxThrottle)
-end
+function GVehicle:SetMaxThrottle(maxThrottle) end
 
---- Sets spring length of given wheel  
+--- Sets spring length of given wheel
 --- @param wheel number @The wheel to change spring length of
 --- @param length number @The new spring length
-function GVehicle:SetSpringLength(wheel, length)
-end
+function GVehicle:SetSpringLength(wheel, length) end
 
---- Sets the steering of the vehicle.  
---- ⁉ **VALIDATE**: The correct range, 0 to 1 or -1 to 1  
+--- Sets the steering of the vehicle.
+--- ⁉ **VALIDATE**: The correct range, 0 to 1 or -1 to 1
 --- @param front number @Angle of the front wheels (-1 to 1)
 --- @param rear number @Angle of the rear wheels (-1 to 1)
-function GVehicle:SetSteering(front, rear)
-end
+function GVehicle:SetSteering(front, rear) end
 
---- Sets the maximum steering degrees of the vehicle  
+--- Sets the maximum steering degrees of the vehicle
 --- @param steeringDegrees number @The new maximum steering degree
-function GVehicle:SetSteeringDegrees(steeringDegrees)
-end
+function GVehicle:SetSteeringDegrees(steeringDegrees) end
 
---- Sets the third person mode state.  
+--- Sets the third person mode state.
 --- @param enable boolean @Enable or disable the third person mode for this vehicle
-function GVehicle:SetThirdPersonMode(enable)
-end
+function GVehicle:SetThirdPersonMode(enable) end
 
---- Sets the throttle of the vehicle. It is possible that this function does not work with a valid driver in it.  
+--- Sets the throttle of the vehicle. It is possible that this function does not work with a valid driver in it.
 --- @param throttle number @The new throttle.
-function GVehicle:SetThrottle(throttle)
-end
+function GVehicle:SetThrottle(throttle) end
 
---- Sets whether the entry or exit camera animation should be played or not.  
+--- Sets whether the entry or exit camera animation should be played or not.
 --- @param bOn boolean @Whether the entry or exit camera animation should be played or not.
-function GVehicle:SetVehicleEntryAnim(bOn)
-end
+function GVehicle:SetVehicleEntryAnim(bOn) end
 
---- Sets the vehicle parameters for given vehicle.  
---- ℹ **NOTE**: Not all variables from the Structures/VehicleParams can be set.  
+--- Sets the vehicle parameters for given vehicle.
+--- ℹ **NOTE**: Not all variables from the Structures/VehicleParams can be set.
 --- @param params table @The new new vehicle parameters
-function GVehicle:SetVehicleParams(params)
-end
+function GVehicle:SetVehicleParams(params) end
 
---- Sets friction of given wheel.  This function may be broken.  
+--- Sets friction of given wheel.  This function may be broken.
 --- @param wheel number @The wheel to change the friction of
 --- @param friction number @The new friction to set
-function GVehicle:SetWheelFriction(wheel, friction)
-end
+function GVehicle:SetWheelFriction(wheel, friction) end
 
---- Starts or stops the engine.  
+--- Starts or stops the engine.
 --- @param start boolean @True to start, false to stop.
-function GVehicle:StartEngine(start)
-end
+function GVehicle:StartEngine(start) end

@@ -1,6 +1,6 @@
 --- @meta
 
---- Table used by Global.FireProblem function.  
+--- Table used by Global.FireProblem function.
 --- @class SProblem
 --- @field id string @The Problem ID.
 --- @field text string @The Text to Display.

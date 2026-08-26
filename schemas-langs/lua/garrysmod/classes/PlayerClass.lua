@@ -33,48 +33,39 @@ PLAYER.AvoidPlayers = true
 PLAYER.UseVMHands = true
 
 --- Set up the network table accessors
-function PLAYER:SetupDataTables()
-end
+function PLAYER:SetupDataTables() end
 
 --- Called when the class object is created (shared)
-function PLAYER:Init()
-end
+function PLAYER:Init() end
 
 --- Called serverside only when the player spawns
-function PLAYER:Spawn()
-end
+function PLAYER:Spawn() end
 
 --- Called on spawn to give the player their default loadout
-function PLAYER:Loadout()
-end
+function PLAYER:Loadout() end
 
 --- Called to set the player's model
-function PLAYER:SetModel()
-end
+function PLAYER:SetModel() end
 
 --- Called when the player dies
 --- @param inflictor GEntity
 --- @param attacker GEntity
-function PLAYER:Death(inflictor, attacker)
-end
+function PLAYER:Death(inflictor, attacker) end
 
 -- Clientside only
 
 --- Setup the player's view
 --- @param view table
-function PLAYER:CalcView(view)
-end
+function PLAYER:CalcView(view) end
 
 --- Creates the user command on the client
 --- @param cmd GCUserCmd
 --- @return boolean|nil
-function PLAYER:CreateMove(cmd)
-end
+function PLAYER:CreateMove(cmd) end
 
 --- Return true if we should draw the local player
 --- @return boolean|nil
-function PLAYER:ShouldDrawLocal()
-end
+function PLAYER:ShouldDrawLocal() end
 
 -- Shared
 
@@ -82,41 +73,34 @@ end
 --- @param cmd GCUserCmd
 --- @param mv GCMoveData
 --- @return boolean|nil
-function PLAYER:StartMove(cmd, mv)
-end
+function PLAYER:StartMove(cmd, mv) end
 
 --- Runs the move (can run multiple times for the same client)
 --- @param mv GCMoveData
 --- @return boolean|nil
-function PLAYER:Move(mv)
-end
+function PLAYER:Move(mv) end
 
 --- Copy the results of the move back to the Player
 --- @param mv GCMoveData
 --- @return boolean|nil
-function PLAYER:FinishMove(mv)
-end
+function PLAYER:FinishMove(mv) end
 
 --- Called when the player changes their weapon to another one causing their viewmodel model to change
 --- @param vm GEntity @The viewmodel that is changing
 --- @param old string @The old model
 --- @param new string @The new model
-function PLAYER:ViewModelChanged(vm, old, new)
-end
+function PLAYER:ViewModelChanged(vm, old, new) end
 
 --- Called before the viewmodel is being drawn (clientside)
 --- @param vm GEntity @The viewmodel
 --- @param weapon GEntity @The weapon
-function PLAYER:PreDrawViewModel(vm, weapon)
-end
+function PLAYER:PreDrawViewModel(vm, weapon) end
 
 --- Called after the viewmodel has been drawn (clientside)
 --- @param vm GEntity @The viewmodel
 --- @param weapon GEntity @The weapon
-function PLAYER:PostDrawViewModel(vm, weapon)
-end
+function PLAYER:PostDrawViewModel(vm, weapon) end
 
 --- Called on player spawn to determine which hand model to use
 --- @return table|nil @A table containing model, skin and body
-function PLAYER:GetHandsModel()
-end
+function PLAYER:GetHandsModel() end

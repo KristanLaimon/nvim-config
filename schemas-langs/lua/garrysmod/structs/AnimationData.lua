@@ -1,6 +1,6 @@
 --- @meta
 
---- Table used by panel animation methods, primarily Panel:AnimationThinkInternal, and returned by Panel:NewAnimation.  
+--- Table used by panel animation methods, primarily Panel:AnimationThinkInternal, and returned by Panel:NewAnimation.
 --- @class SAnimationData
 --- @field StartTime number @The system time value returned by Global.SysTime when the animation starts/will start.
 --- @field EndTime number @The system time value returned by Global.SysTime when the animation ends/will end.

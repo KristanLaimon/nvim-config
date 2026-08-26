@@ -6,5 +6,5 @@ _G.DISPSURF_BUILDABLE = 4
 _G.DISPSURF_SURFPROP1 = 8
 _G.DISPSURF_SURFPROP2 = 16
 
---- Displacement surface flags, used by the Structures/TraceResult.  
+--- Displacement surface flags, used by the Structures/TraceResult.
 --- @alias EDISPSURF `DISPSURF_SURFACE`|`DISPSURF_WALKABLE`|`DISPSURF_BUILDABLE`|`DISPSURF_SURFPROP1`|`DISPSURF_SURFPROP2`

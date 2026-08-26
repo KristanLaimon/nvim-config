@@ -10,5 +10,5 @@ _G.ANALOG_JOY_R = 7
 _G.ANALOG_JOY_U = 8
 _G.ANALOG_JOY_V = 9
 
---- The analog axis to get the value of via input.GetAnalogValue.  
+--- The analog axis to get the value of via input.GetAnalogValue.
 --- @alias EANALOG `ANALOG_MOUSE_X`|`ANALOG_MOUSE_Y`|`ANALOG_MOUSE_WHEEL`|`ANALOG_JOY_X`|`ANALOG_JOY_Y`|`ANALOG_JOY_Z`|`ANALOG_JOY_R`|`ANALOG_JOY_U`|`ANALOG_JOY_V`

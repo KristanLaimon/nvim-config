@@ -1,6 +1,6 @@
 --- @meta
 
 --- @class DListViewLine : GPanel
---- 🚷 **INTERNAL**: Alias of DListView_Line.  
+--- 🚷 **INTERNAL**: Alias of DListView_Line.
 local PANEL = {}
-_G.DListViewLine = PANEL;
+_G.DListViewLine = PANEL

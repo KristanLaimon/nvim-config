@@ -1,6 +1,6 @@
 --- @meta
 
---- The structure used by Vehicle:GetOperatingParams.  
+--- The structure used by Vehicle:GetOperatingParams.
 --- @class SOperatingParams
 --- @field RPM number @The current RPM of the vehicle
 --- @field gear number @The current gear of the vehicle, starting from 0

@@ -1,7 +1,7 @@
 --- @meta
 
---- The table structure used for bullets that have already been fired.  
---- See GM:PostEntityFireBullets for more information.  
+--- The table structure used for bullets that have already been fired.
+--- See GM:PostEntityFireBullets for more information.
 --- @class SFiredBullet
 --- @field AmmoType? string @The type of ammo that was fired
 --- @field Attacker GEntity @The Entity that fired the bullet

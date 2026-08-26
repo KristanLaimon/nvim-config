@@ -1,6 +1,6 @@
 --- @meta
 
---- Table is one element from team.GetAllTeams.  
+--- Table is one element from team.GetAllTeams.
 --- @class STeamData
 --- @field Color GColor @Color of the team
 --- @field Joinable boolean @Whether the team is joinable or not.

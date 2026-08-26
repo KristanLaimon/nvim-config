@@ -1,8 +1,8 @@
 --- @meta
 
---- The construct library is used to control the physical properties of entities.  
+--- The construct library is used to control the physical properties of entities.
 _G.construct = {}
---- Creates a magnet.  
+--- Creates a magnet.
 --- @param ply GPlayer @Player that will have the numpad control over the magnet
 --- @param pos GVector @The position of the magnet
 --- @param ang GAngle @The angles of the magnet
@@ -19,14 +19,29 @@ _G.construct = {}
 --- @param aVel? GAngle @Angular velocity to set on spawn
 --- @param frozen? boolean @Freeze the magnet on start
 --- @return GEntity @The magnet
-function construct.Magnet(ply, pos, ang, model, material, key, maxObjects, strength, nopull, allowrot, startOn, toggle, vel, aVel, frozen)
+function construct.Magnet(
+	ply,
+	pos,
+	ang,
+	model,
+	material,
+	key,
+	maxObjects,
+	strength,
+	nopull,
+	allowrot,
+	startOn,
+	toggle,
+	vel,
+	aVel,
+	frozen
+)
 end
 
---- Sets props physical properties.  
+--- Sets props physical properties.
 --- @param ply GPlayer @The player
 --- @param ent GEntity @The entity to apply properties to
 --- @param physObjID number @You can use this or the argument below
 --- @param physObj GPhysObj @The physics object to apply the properties to
 --- @param data table @The table containing properties to apply
-function construct.SetPhysProp(ply, ent, physObjID, physObj, data)
-end
+function construct.SetPhysProp(ply, ent, physObjID, physObj, data) end

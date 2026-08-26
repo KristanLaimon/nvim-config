@@ -1,6 +1,6 @@
 --- @meta
 
---- This table is returned by surface.GetPanelPaintState.  
+--- This table is returned by surface.GetPanelPaintState.
 --- @class SPanelPaintState
 --- @field translate_x number @The X coordinate for the top-left corner of the Panel currently being drawn.
 --- @field translate_y number @The Y coordinate for the top-left corner of the Panel currently being drawn.

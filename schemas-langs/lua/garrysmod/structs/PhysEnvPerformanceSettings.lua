@@ -1,7 +1,7 @@
 --- @meta
 
---- Table used by physenv.SetPerformanceSettings and physenv.GetPerformanceSettings.  
---- When setting the settings, omitting any key will fallback to its current value. (can be retrieved via the get function)  
+--- Table used by physenv.SetPerformanceSettings and physenv.GetPerformanceSettings.
+--- When setting the settings, omitting any key will fallback to its current value. (can be retrieved via the get function)
 --- @class SPhysEnvPerformanceSettings
 --- @field LookAheadTimeObjectsVsObject? number @Maximum amount of seconds to precalculate collisions with objects
 --- @field LookAheadTimeObjectsVsWorld? number @Maximum amount of seconds to precalculate collisions with world

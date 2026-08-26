@@ -1,17 +1,17 @@
 --- @meta
 
---- Table returned by debug.getinfo.  
---- ℹ **NOTE**: If a filter is applied to debug.getinfo, some members may not exist!  
---- For functions defined in C/C++, the following members will always have the given values:  
---- * what = "C"  
---- * source = "[C]"  
---- * nparams = 0  
---- * isvararg = true  
---- * namewhat = ""  
---- * short_src = "[C]"  
---- * linedefined = -1  
---- * currentline = -1  
---- * lastlinedefined = -1  
+--- Table returned by debug.getinfo.
+--- ℹ **NOTE**: If a filter is applied to debug.getinfo, some members may not exist!
+--- For functions defined in C/C++, the following members will always have the given values:
+--- * what = "C"
+--- * source = "[C]"
+--- * nparams = 0
+--- * isvararg = true
+--- * namewhat = ""
+--- * short_src = "[C]"
+--- * linedefined = -1
+--- * currentline = -1
+--- * lastlinedefined = -1
 --- @class SDebugInfo
 --- @field func function @Reference to the function that was passed in
 --- @field linedefined number @The line where the function definiton starts (where "function" is located)

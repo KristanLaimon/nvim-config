@@ -1,22 +1,22 @@
 --- @meta
 
---- Table structure passed to SANDBOX:PlayerSpawnVehicle, describing a spawnable Vehicle in Sandbox gamemode.  
---- Example usage in defined a custom spawnable vehicle:  
---- ```  
---- list.Set( "Vehicles", "Jeep", {  
---- -- Required information  
---- Name = "Jeep",  
---- Model = "models/buggy.mdl",  
---- Class = "prop_vehicle_jeep_old",  
---- Category = "Half-Life 2",  
---- -- Optional information  
---- Author = "VALVe",  
---- Information = "The regular old jeep",  
---- KeyValues = {  
---- vehiclescript = "scripts/vehicles/jeep_test.txt"  
---- }  
---- } )  
---- ```  
+--- Table structure passed to SANDBOX:PlayerSpawnVehicle, describing a spawnable Vehicle in Sandbox gamemode.
+--- Example usage in defined a custom spawnable vehicle:
+--- ```
+--- list.Set( "Vehicles", "Jeep", {
+--- -- Required information
+--- Name = "Jeep",
+--- Model = "models/buggy.mdl",
+--- Class = "prop_vehicle_jeep_old",
+--- Category = "Half-Life 2",
+--- -- Optional information
+--- Author = "VALVe",
+--- Information = "The regular old jeep",
+--- KeyValues = {
+--- vehiclescript = "scripts/vehicles/jeep_test.txt"
+--- }
+--- } )
+--- ```
 --- @class SVehicleTable
 --- @field Class string @Entity class name for this vehicle.
 --- @field Name string @Nice name for this vehicle, for UI purposes.

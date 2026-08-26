@@ -1,12 +1,12 @@
 --- @meta
 
---- Data structure used by the duplicator to store and load entity data.  
---- It is created by duplicator.CopyEntTable and can be loaded by duplicator.CreateEntityFromTable.  
---- It also shows up in several other contexts:  
---- * duplicator.RegisterEntityClass  
---- * ENTITY:OnEntityCopyTableFinish  
---- * ENTITY:OnDuplicated  
---- ℹ **NOTE**: In addition to all fields listed here, any field saved on the entity will be saved as-is to this table. For example, if you set `ent.FavoriteFood = "Steak"` before duplicating it, this structure will also contain the field `FavoriteFood` with the value `"Steak"`.  
+--- Data structure used by the duplicator to store and load entity data.
+--- It is created by duplicator.CopyEntTable and can be loaded by duplicator.CreateEntityFromTable.
+--- It also shows up in several other contexts:
+--- * duplicator.RegisterEntityClass
+--- * ENTITY:OnEntityCopyTableFinish
+--- * ENTITY:OnDuplicated
+--- ℹ **NOTE**: In addition to all fields listed here, any field saved on the entity will be saved as-is to this table. For example, if you set `ent.FavoriteFood = "Steak"` before duplicating it, this structure will also contain the field `FavoriteFood` with the value `"Steak"`.
 --- @class SEntityCopyData
 --- @field Name string @The entity's name, see Entity:GetName.
 --- @field Class string @The entity's class name, see Entity:GetClass.

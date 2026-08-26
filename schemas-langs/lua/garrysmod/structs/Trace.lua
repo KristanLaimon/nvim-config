@@ -1,6 +1,6 @@
 --- @meta
 
---- Table structure used for util.TraceLine.  
+--- Table structure used for util.TraceLine.
 --- @class STrace
 --- @field start? GVector @The start position of the trace
 --- @field endpos? GVector @The end position of the trace

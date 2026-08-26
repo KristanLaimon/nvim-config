@@ -1,6 +1,6 @@
 --- @meta
 
---- Table structure used by steamworks.FileInfo.  
+--- Table structure used by steamworks.FileInfo.
 --- @class SUGCFileInfo
 --- @field id number @The Workshop item ID
 --- @field title string @The title of the Workshop item

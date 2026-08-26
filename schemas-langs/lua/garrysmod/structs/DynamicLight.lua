@@ -1,8 +1,8 @@
 --- @meta
 
---- Structure for Global.DynamicLight.  
---- All members are case insensitive.  
---- ℹ **NOTE**: This is an actual class named **dlight_t**, not a table.  
+--- Structure for Global.DynamicLight.
+--- All members are case insensitive.
+--- ℹ **NOTE**: This is an actual class named **dlight_t**, not a table.
 --- @class SDynamicLight
 --- @field brightness number @The brightness of the light.
 --- @field decay number @Fade out speed

@@ -1,14 +1,14 @@
 --- @meta
 
---- Passed as argument of ENTITY:PhysicsCollide, EFFECT:PhysicsCollide and used with Entity:AddCallback.  
---- ℹ **NOTE**: Sometimes, the value of `Speed` can be different from getting the length calculated from `OurOldVelocity`, even though they should be the same, or close to same. It's recommended to do `OurOldVelocity:Length()` instead.  
---- ```  
---- function ENT:PhysicsCollide( colData, collider )  
---- -- you may get two completely different values, and the second one should be more accurate.  
---- print(colData.Speed)  
---- print(colData.OurOldVelocity:Length())  
---- end  
---- ```  
+--- Passed as argument of ENTITY:PhysicsCollide, EFFECT:PhysicsCollide and used with Entity:AddCallback.
+--- ℹ **NOTE**: Sometimes, the value of `Speed` can be different from getting the length calculated from `OurOldVelocity`, even though they should be the same, or close to same. It's recommended to do `OurOldVelocity:Length()` instead.
+--- ```
+--- function ENT:PhysicsCollide( colData, collider )
+--- -- you may get two completely different values, and the second one should be more accurate.
+--- print(colData.Speed)
+--- print(colData.OurOldVelocity:Length())
+--- end
+--- ```
 --- @class SCollisionData
 --- @field HitPos GVector @The collision position
 --- @field HitEntity GEntity @The other collision entity

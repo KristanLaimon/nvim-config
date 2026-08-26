@@ -1,6 +1,6 @@
 --- @meta
 
---- Used for render.Capture.  
+--- Used for render.Capture.
 --- @class SRenderCaptureData
 --- @field format string @Format of the capture
 --- @field x number @X coordinate of the capture origin

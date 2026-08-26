@@ -1,7 +1,7 @@
 --- @meta
 
 --- @class DCategoryHeader : DButton
---- 🚷 **INTERNAL**:   
---- Used by DCollapsibleCategory  
+--- 🚷 **INTERNAL**:
+--- Used by DCollapsibleCategory
 local PANEL = {}
-_G.DCategoryHeader = PANEL;
+_G.DCategoryHeader = PANEL

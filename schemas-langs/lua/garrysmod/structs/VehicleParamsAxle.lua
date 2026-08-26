@@ -1,6 +1,6 @@
 --- @meta
 
---- The structure used by Structures/VehicleParams.  
+--- The structure used by Structures/VehicleParams.
 --- @class SVehicleParamsAxle
 --- @field brakeFactor number
 --- @field offset GVector

@@ -1,6 +1,6 @@
 --- @meta
 
---- The structure used by Vehicle:SetVehicleParams and Vehicle:GetVehicleParams.  
+--- The structure used by Vehicle:SetVehicleParams and Vehicle:GetVehicleParams.
 --- @class SVehicleParams
 --- @field wheelsPerAxle number @Wheels per axle
 --- @field axleCount number @Number of axles

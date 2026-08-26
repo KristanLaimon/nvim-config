@@ -1,6 +1,6 @@
 --- @meta
 
---- The structure used by Structures/VehicleParams.  
+--- The structure used by Structures/VehicleParams.
 --- @class SVehicleParamsEngine
 --- @field autobrakeSpeedFactor number
 --- @field autobrakeSpeedGain number

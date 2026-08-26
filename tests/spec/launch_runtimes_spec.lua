@@ -95,7 +95,9 @@ describe("runtimes.build_dap_config", function()
 	end)
 
 	it("keeps js-debug out of node internals", function()
-		expect(runtimes.build_dap_config(profile("node"), ROOT).skipFiles).toEqual(require("krs.langs.typescript").js_skip_files)
+		expect(runtimes.build_dap_config(profile("node"), ROOT).skipFiles).toEqual(
+			require("krs.langs.typescript").js_skip_files
+		)
 	end)
 
 	it("attaches deno to its inspector port", function()

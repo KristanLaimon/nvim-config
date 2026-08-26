@@ -1,14 +1,14 @@
 --- @meta
 
---- Information about the NPC data structure, used to define spawnable NPCs for the Sandbox gamemode.  
---- Example usage:  
---- ```  
---- list.Set( "NPC", "npc_tf2_ghost", {  
---- Name = "Example NPC",  
---- Class = "npc_tf2_ghost",  
---- Category = "Nextbot"  
---- } )  
---- ```  
+--- Information about the NPC data structure, used to define spawnable NPCs for the Sandbox gamemode.
+--- Example usage:
+--- ```
+--- list.Set( "NPC", "npc_tf2_ghost", {
+--- Name = "Example NPC",
+--- Class = "npc_tf2_ghost",
+--- Category = "Nextbot"
+--- } )
+--- ```
 --- @class SNPCData
 --- @field Name string @The nice name of the NPC for UI display.
 --- @field Class string @Class name of the entity to spawn.

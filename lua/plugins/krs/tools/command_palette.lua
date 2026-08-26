@@ -95,6 +95,7 @@ M.commands = {
 		category = "Git",
 	},
 	{ name = "🐙 Toggle Git Panel (Neogit)", cmd = "Neogit", category = "Git" },
+	{ name = "👤 Git Accounts Manager (Select Identity)", cmd = "GitAccounts", category = "Git" },
 
 	-- --------------------------------------------------------------------------
 	-- 🧠 LSP, Diagnostics & Type Injection

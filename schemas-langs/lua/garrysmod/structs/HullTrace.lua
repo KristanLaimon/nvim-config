@@ -1,6 +1,6 @@
 --- @meta
 
---- Table used by util.TraceHull.  
+--- Table used by util.TraceHull.
 --- @class SHullTrace
 --- @field start GVector @The start position of the trace
 --- @field endpos GVector @The end position of the trace

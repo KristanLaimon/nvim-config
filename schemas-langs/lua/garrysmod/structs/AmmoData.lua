@@ -1,7 +1,7 @@
 --- @meta
 
---- Table structure that describes a Source Engine ammo type.  
---- See game.AddAmmoType and game.GetAmmoData.  
+--- Table structure that describes a Source Engine ammo type.
+--- See game.AddAmmoType and game.GetAmmoData.
 --- @class SAmmoData
 --- @field dmgtype? EDMG @Damage type using Enums/DMG
 --- @field force? number @The force of the ammo

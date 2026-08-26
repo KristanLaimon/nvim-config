@@ -1,6 +1,6 @@
 --- @meta
 
---- The structure used by Structures/VehicleParams.  
+--- The structure used by Structures/VehicleParams.
 --- @class SVehicleParamsBody
 --- @field addGravity number @Additional gravity to be applied to the vehicle
 --- @field counterTorqueFactor number

@@ -1,6 +1,6 @@
 --- @meta
 
---- Tables used for bullets see Entity:FireBullets and GM:EntityFireBullets.  
+--- Tables used for bullets see Entity:FireBullets and GM:EntityFireBullets.
 --- @class SBullet
 --- @field Attacker? GEntity @The entity that should be reported as attacker eg
 --- @field Inflictor? GEntity @The entity that should be reported as inflictor eg

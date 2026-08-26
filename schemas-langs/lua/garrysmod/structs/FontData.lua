@@ -1,6 +1,6 @@
 --- @meta
 
---- Used for surface.CreateFont.  
+--- Used for surface.CreateFont.
 --- @class SFontData
 --- @field font? string @The font source
 --- @field extended? boolean @Allow the font to display glyphs that are outside of the Latin-1 range

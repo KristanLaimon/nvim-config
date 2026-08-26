@@ -17,7 +17,7 @@ _G.tmysql = {
 		CLIENT_RESERVED = 16384,
 		CLIENT_MULTI_STATEMENTS = 65536,
 		CLIENT_MULTI_RESULTS = 131072,
-		CLIENT_PS_MULTI_RESULTS = 262144
+		CLIENT_PS_MULTI_RESULTS = 262144,
 	},
 	--- @enum TMySQLOption
 	opts = {
@@ -61,8 +61,8 @@ _G.tmysql = {
 		MYSQL_SET_CHARSET_DIR = 0,
 		MYSQL_SET_CHARSET_NAME = 0,
 		MYSQL_SET_CLIENT_IP = 0,
-		MYSQL_SHARED_MEMORY_BASE_NAME = 0
-	}
+		MYSQL_SHARED_MEMORY_BASE_NAME = 0,
+	},
 }
 
 --- Returns all active connections
@@ -84,8 +84,7 @@ function tmysql.GetTable() end
 --- @param callback? fun(db: TMySQLDB): nil
 --- @return TMySQLDB db # The unconnected database
 --- @nodiscard
-function tmysql.Create(host, username, password, database, port, socket, flags, callback)
-end
+function tmysql.Create(host, username, password, database, port, socket, flags, callback) end
 
 --- Creates and immediately connects to a database
 --- @param host string
@@ -98,8 +97,7 @@ end
 --- @param callback? fun(db: TMySQLDB): nil
 --- @return TMySQLDB | false db, string? error # The database is returned on success otherwise, false and an error is returned
 --- @nodiscard
-function tmysql.Connect(host, username, password, database, port, socket, flags, callback)
-end
+function tmysql.Connect(host, username, password, database, port, socket, flags, callback) end
 
 --- @class TMySQLResultSuccess
 --- @field affected number The number of rows affected by the query
@@ -272,8 +270,7 @@ function db:IsValid() end
 --- @param callabck? fun(results: TMySQLResult): nil The callback to execute when the query completes
 --- @param unused? nil
 --- @param colunmNumbers? boolean Supresses the column names in the results data
-function db:Query(query, callabck, unused, colunmNumbers)
-end
+function db:Query(query, callabck, unused, colunmNumbers) end
 
 --- Immediately runs a query against the database, passing an extra value to the callback
 --- @generic T
@@ -281,8 +278,7 @@ end
 --- @param callabck fun(value: T, results: TMySQLResult): nil The callback to execute when the query completes
 --- @param value `T` A reference to provide the callback (for example the player the query is about)
 --- @param colunmNumbers? boolean Supresses the column names in the results data
-function db:Query(query, callabck, value, colunmNumbers)
-end
+function db:Query(query, callabck, value, colunmNumbers) end
 
 --- Creates a prepared statement object
 --- @param query string

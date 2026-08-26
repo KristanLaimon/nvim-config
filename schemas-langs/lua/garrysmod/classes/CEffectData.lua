@@ -1,176 +1,144 @@
 --- @meta
 
 --- @class GCEffectData
---- List of all possible functions available for effect data. This is the object returned by the EffectData function and is required for util.Effect function.  
+--- List of all possible functions available for effect data. This is the object returned by the EffectData function and is required for util.Effect function.
 local GCEffectData = {}
---- Returns the angles of the effect.  
+--- Returns the angles of the effect.
 --- @return GAngle @The angles of the effect
-function GCEffectData:GetAngles()
-end
+function GCEffectData:GetAngles() end
 
---- Returns the attachment ID for the effect.  
+--- Returns the attachment ID for the effect.
 --- @return number @The attachment ID of the effect.
-function GCEffectData:GetAttachment()
-end
+function GCEffectData:GetAttachment() end
 
---- Returns byte which represents the color of the effect.  
+--- Returns byte which represents the color of the effect.
 --- @return number @The color of the effect
-function GCEffectData:GetColor()
-end
+function GCEffectData:GetColor() end
 
---- Returns the damage type of the effect  
+--- Returns the damage type of the effect
 --- @return number @Damage type of the effect, see Enums/DMG
-function GCEffectData:GetDamageType()
-end
+function GCEffectData:GetDamageType() end
 
---- Returns the entity index of the entity set for the effect.  
+--- Returns the entity index of the entity set for the effect.
 --- @return number @The entity index of the entity set for the effect.
-function GCEffectData:GetEntIndex()
-end
+function GCEffectData:GetEntIndex() end
 
---- Returns the entity assigned to the effect.  
+--- Returns the entity assigned to the effect.
 --- @return GEntity @The entity assigned to the effect
-function GCEffectData:GetEntity()
-end
+function GCEffectData:GetEntity() end
 
---- Returns the flags of the effect.  
+--- Returns the flags of the effect.
 --- @return number @The flags of the effect.
-function GCEffectData:GetFlags()
-end
+function GCEffectData:GetFlags() end
 
---- Returns the hit box ID of the effect.  
+--- Returns the hit box ID of the effect.
 --- @return number @The hit box ID of the effect.
-function GCEffectData:GetHitBox()
-end
+function GCEffectData:GetHitBox() end
 
---- Returns the magnitude of the effect.  
+--- Returns the magnitude of the effect.
 --- @return number @The magnitude of the effect.
-function GCEffectData:GetMagnitude()
-end
+function GCEffectData:GetMagnitude() end
 
---- Returns the material ID of the effect.  
+--- Returns the material ID of the effect.
 --- @return number @The material ID of the effect.
-function GCEffectData:GetMaterialIndex()
-end
+function GCEffectData:GetMaterialIndex() end
 
---- Returns the normalized direction vector of the effect.  
+--- Returns the normalized direction vector of the effect.
 --- @return GVector @The normalized direction vector of the effect.
-function GCEffectData:GetNormal()
-end
+function GCEffectData:GetNormal() end
 
---- Returns the origin position of the effect.  
+--- Returns the origin position of the effect.
 --- @return GVector @The origin position of the effect.
-function GCEffectData:GetOrigin()
-end
+function GCEffectData:GetOrigin() end
 
---- Returns the radius of the effect.  
+--- Returns the radius of the effect.
 --- @return number @The radius of the effect.
-function GCEffectData:GetRadius()
-end
+function GCEffectData:GetRadius() end
 
---- Returns the scale of the effect.  
+--- Returns the scale of the effect.
 --- @return number @The scale of the effect
-function GCEffectData:GetScale()
-end
+function GCEffectData:GetScale() end
 
---- Returns the start position of the effect.  
+--- Returns the start position of the effect.
 --- @return GVector @The start position of the effect
-function GCEffectData:GetStart()
-end
+function GCEffectData:GetStart() end
 
---- Returns the surface property index of the effect. See util.GetSurfaceData for more details about what they are.  
---- See CEffectData:SetSurfaceProp for details about limitations of this function.  
+--- Returns the surface property index of the effect. See util.GetSurfaceData for more details about what they are.
+--- See CEffectData:SetSurfaceProp for details about limitations of this function.
 --- @return number @The surface property index of the effect.
-function GCEffectData:GetSurfaceProp()
-end
+function GCEffectData:GetSurfaceProp() end
 
---- Sets the angles of the effect.  
+--- Sets the angles of the effect.
 --- @param ang GAngle @The new angles to be set.
-function GCEffectData:SetAngles(ang)
-end
+function GCEffectData:SetAngles(ang) end
 
---- Sets the attachment id of the effect to be created with this effect data.  
---- ℹ **NOTE**: This is internally stored as an integer, but only the first 5 bits will be networked, effectively limiting this function to 0-31 range.  
+--- Sets the attachment id of the effect to be created with this effect data.
+--- ℹ **NOTE**: This is internally stored as an integer, but only the first 5 bits will be networked, effectively limiting this function to 0-31 range.
 --- @param attachment number @New attachment ID of the effect.
-function GCEffectData:SetAttachment(attachment)
-end
+function GCEffectData:SetAttachment(attachment) end
 
---- Sets the "color" of the effect.  
---- All this does is provide an addition 8 bits of data for the effect to use. What this will actually do will vary from effect to effect, depending on how a specific effect uses this given data, if at all.  
---- ℹ **NOTE**: Internally stored as an integer, but only first 8 bits are networked, effectively limiting this function to 0-255 range.  
+--- Sets the "color" of the effect.
+--- All this does is provide an addition 8 bits of data for the effect to use. What this will actually do will vary from effect to effect, depending on how a specific effect uses this given data, if at all.
+--- ℹ **NOTE**: Internally stored as an integer, but only first 8 bits are networked, effectively limiting this function to 0-255 range.
 --- @param color number @Color represented by a byte.
-function GCEffectData:SetColor(color)
-end
+function GCEffectData:SetColor(color) end
 
---- Sets the damage type of the effect to be created with this effect data.  
+--- Sets the damage type of the effect to be created with this effect data.
 --- @param damageType number @Damage type, see Enums/DMG.
-function GCEffectData:SetDamageType(damageType)
-end
+function GCEffectData:SetDamageType(damageType) end
 
---- Sets the entity of the effect via its index.  
+--- Sets the entity of the effect via its index.
 --- @param entIndex number @The entity index to be set.
-function GCEffectData:SetEntIndex(entIndex)
-end
+function GCEffectData:SetEntIndex(entIndex) end
 
---- Sets the entity of the effect to be created with this effect data.  
+--- Sets the entity of the effect to be created with this effect data.
 --- @param entity GEntity @Entity of the effect, mostly used for parenting.
-function GCEffectData:SetEntity(entity)
-end
+function GCEffectData:SetEntity(entity) end
 
---- Sets the flags for the effect. What flags do depends entirely on the effect. See Default Effects.  
---- ℹ **NOTE**: Internally stored as an integer, but only first 8 bits are networked, effectively limiting this function to `0-255` range.  
+--- Sets the flags for the effect. What flags do depends entirely on the effect. See Default Effects.
+--- ℹ **NOTE**: Internally stored as an integer, but only first 8 bits are networked, effectively limiting this function to `0-255` range.
 --- @param flags number @The flags of the effect
-function GCEffectData:SetFlags(flags)
-end
+function GCEffectData:SetFlags(flags) end
 
---- Sets the hit box index of the effect. Used by various effects for various purposes.  
---- ℹ **NOTE**: Internally stored as an integer, but only first 11 bits are networked, effectively limiting this function to 0-2047 range.  
+--- Sets the hit box index of the effect. Used by various effects for various purposes.
+--- ℹ **NOTE**: Internally stored as an integer, but only first 11 bits are networked, effectively limiting this function to 0-2047 range.
 --- @param hitBoxIndex number @The hit box index of the effect, for example from Structures/TraceResult#HitBox
-function GCEffectData:SetHitBox(hitBoxIndex)
-end
+function GCEffectData:SetHitBox(hitBoxIndex) end
 
---- Sets the magnitude of the effect.  
---- ℹ **NOTE**: Internally stored as a float with 12 bit precision for networking purposes, limited to range of 0-1023.  
+--- Sets the magnitude of the effect.
+--- ℹ **NOTE**: Internally stored as a float with 12 bit precision for networking purposes, limited to range of 0-1023.
 --- @param magnitude number @The magnitude of the effect.
-function GCEffectData:SetMagnitude(magnitude)
-end
+function GCEffectData:SetMagnitude(magnitude) end
 
---- Sets the material index of the effect.  
---- ℹ **NOTE**: Internally stored as an integer, but only first 12 bits are networked, effectively limiting this function to 0-4095 range.  
+--- Sets the material index of the effect.
+--- ℹ **NOTE**: Internally stored as an integer, but only first 12 bits are networked, effectively limiting this function to 0-4095 range.
 --- @param materialIndex number @The material index of the effect.
-function GCEffectData:SetMaterialIndex(materialIndex)
-end
+function GCEffectData:SetMaterialIndex(materialIndex) end
 
---- Sets the normalized (length=1) direction vector of the effect to be created with this effect data. This **must** be a normalized vector for networking purposes.  
+--- Sets the normalized (length=1) direction vector of the effect to be created with this effect data. This **must** be a normalized vector for networking purposes.
 --- @param normal GVector @The normalized direction vector of the effect.
-function GCEffectData:SetNormal(normal)
-end
+function GCEffectData:SetNormal(normal) end
 
---- Sets the origin of the effect to be created with this effect data.  
---- ℹ **NOTE**: Limited to world bounds (+-16386 on every axis) and has horrible networking precision. (17 bit float per component)  
+--- Sets the origin of the effect to be created with this effect data.
+--- ℹ **NOTE**: Limited to world bounds (+-16386 on every axis) and has horrible networking precision. (17 bit float per component)
 --- @param origin GVector @Origin of the effect.
-function GCEffectData:SetOrigin(origin)
-end
+function GCEffectData:SetOrigin(origin) end
 
---- Sets the radius of the effect to be created with this effect data.  
---- ℹ **NOTE**: Internally stored as a float, but networked as a 10bit float, and is clamped to 0-1023 range.  
+--- Sets the radius of the effect to be created with this effect data.
+--- ℹ **NOTE**: Internally stored as a float, but networked as a 10bit float, and is clamped to 0-1023 range.
 --- @param radius number @Radius of the effect.
-function GCEffectData:SetRadius(radius)
-end
+function GCEffectData:SetRadius(radius) end
 
---- Sets the scale of the effect to be created with this effect data.  
+--- Sets the scale of the effect to be created with this effect data.
 --- @param scale number @Scale of the effect.
-function GCEffectData:SetScale(scale)
-end
+function GCEffectData:SetScale(scale) end
 
---- Sets the start of the effect to be created with this effect data.  
---- ℹ **NOTE**: Limited to world bounds (+-16386 on every axis) and has horrible networking precision. (17 bit float per component)  
+--- Sets the start of the effect to be created with this effect data.
+--- ℹ **NOTE**: Limited to world bounds (+-16386 on every axis) and has horrible networking precision. (17 bit float per component)
 --- @param start GVector @Start of the effect.
-function GCEffectData:SetStart(start)
-end
+function GCEffectData:SetStart(start) end
 
---- Sets the surface property index of the effect. See util.GetSurfaceData for more details about what they are.  
---- ℹ **NOTE**: Internally stored as an integer, but only first 8 bits are networked, effectively limiting this function to `-1`-`254` range. (Yes, that's not a mistake, `-1` signifying an invalid value.)  
+--- Sets the surface property index of the effect. See util.GetSurfaceData for more details about what they are.
+--- ℹ **NOTE**: Internally stored as an integer, but only first 8 bits are networked, effectively limiting this function to `-1`-`254` range. (Yes, that's not a mistake, `-1` signifying an invalid value.)
 --- @param surfaceProperties number @The surface property index of the effect.
-function GCEffectData:SetSurfaceProp(surfaceProperties)
-end
+function GCEffectData:SetSurfaceProp(surfaceProperties) end

@@ -1,6 +1,6 @@
 --- @meta
 
---- Table structure used GM:CalcView and GM:CalcVehicleView hook.  
+--- Table structure used GM:CalcView and GM:CalcVehicleView hook.
 --- @class SCamData
 --- @field origin GVector @The camera's position
 --- @field angles GAngle @The camera's angles

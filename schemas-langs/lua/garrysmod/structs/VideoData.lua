@@ -1,6 +1,6 @@
 --- @meta
 
---- Table structure used by video.Record.  
+--- Table structure used by video.Record.
 --- @class SVideoData
 --- @field container string @The video container format
 --- @field video string @The video codec

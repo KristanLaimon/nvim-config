@@ -1,6 +1,6 @@
 --- @meta
 
---- Table structure used for render.SetLocalModelLights.  
+--- Table structure used for render.SetLocalModelLights.
 --- @class SLocalLight
 --- @field type? EMATERIAL_LIGHT @The type of the light source, see Enums/MATERIAL_LIGHT.
 --- @field color? GVector @The color of the light source (x is red, y is green, z is blue)

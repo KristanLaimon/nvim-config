@@ -1,7 +1,7 @@
 --- @meta
 
---- Table structure used for render.RenderView.  
---- Unless stated otherwise, the default values for all these keys would be inherited from the engine's CViewSetup and do not have static representations.  
+--- Table structure used for render.RenderView.
+--- Unless stated otherwise, the default values for all these keys would be inherited from the engine's CViewSetup and do not have static representations.
 --- @class SViewData
 --- @field origin GVector @The view's original position
 --- @field angles GAngle @The view's angles

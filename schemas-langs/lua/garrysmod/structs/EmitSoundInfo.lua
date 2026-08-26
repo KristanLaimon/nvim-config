@@ -1,6 +1,6 @@
 --- @meta
 
---- Passed as argument of GM:EntityEmitSound.  
+--- Passed as argument of GM:EntityEmitSound.
 --- @class SEmitSoundInfo
 --- @field SoundName string @The file path of the played sound
 --- @field OriginalSoundName string @The original file path or soundscript name

@@ -1,51 +1,51 @@
 --- @meta
 
---- Antlions  
+--- Antlions
 _G.MAT_ANTLION = 65
---- Similar to MAT_FLESH, only used by "bloodyflesh" surface property, has different impact sound  
+--- Similar to MAT_FLESH, only used by "bloodyflesh" surface property, has different impact sound
 _G.MAT_BLOODYFLESH = 66
---- Concrete  
+--- Concrete
 _G.MAT_CONCRETE = 67
---- Dirt  
+--- Dirt
 _G.MAT_DIRT = 68
---- The egg sacs in the antlion tunnels in HL2: EP2  
+--- The egg sacs in the antlion tunnels in HL2: EP2
 _G.MAT_EGGSHELL = 69
---- Flesh  
+--- Flesh
 _G.MAT_FLESH = 70
---- Grates, chainlink fences  
+--- Grates, chainlink fences
 _G.MAT_GRATE = 71
---- Alien flesh - headcrabs and vortigaunts  
+--- Alien flesh - headcrabs and vortigaunts
 _G.MAT_ALIENFLESH = 72
---- Unused  
+--- Unused
 _G.MAT_CLIP = 73
---- Snow  
+--- Snow
 _G.MAT_SNOW = 74
---- Plastic  
+--- Plastic
 _G.MAT_PLASTIC = 76
---- Metal  
+--- Metal
 _G.MAT_METAL = 77
---- Sand  
+--- Sand
 _G.MAT_SAND = 78
---- Plants, only used by the "foliage" surface property  
+--- Plants, only used by the "foliage" surface property
 _G.MAT_FOLIAGE = 79
---- Electronics, only used by "computer" surface property  
+--- Electronics, only used by "computer" surface property
 _G.MAT_COMPUTER = 80
---- Water, slime  
+--- Water, slime
 _G.MAT_SLOSH = 83
---- Floor tiles  
+--- Floor tiles
 _G.MAT_TILE = 84
---- Grass  
+--- Grass
 _G.MAT_GRASS = 85
---- Metallic vents  
+--- Metallic vents
 _G.MAT_VENT = 86
---- Wood  
+--- Wood
 _G.MAT_WOOD = 87
---- Skybox or nodraw texture  
+--- Skybox or nodraw texture
 _G.MAT_DEFAULT = 88
---- Glass  
+--- Glass
 _G.MAT_GLASS = 89
---- "wierd-looking jello effect for advisor shield."  
+--- "wierd-looking jello effect for advisor shield."
 _G.MAT_WARPSHIELD = 90
 
---- Enumerations used in Structures/TraceResult and by Entity:GetMaterialType.  
+--- Enumerations used in Structures/TraceResult and by Entity:GetMaterialType.
 --- @alias EMAT `MAT_ANTLION`|`MAT_BLOODYFLESH`|`MAT_CONCRETE`|`MAT_DIRT`|`MAT_EGGSHELL`|`MAT_FLESH`|`MAT_GRATE`|`MAT_ALIENFLESH`|`MAT_CLIP`|`MAT_SNOW`|`MAT_PLASTIC`|`MAT_METAL`|`MAT_SAND`|`MAT_FOLIAGE`|`MAT_COMPUTER`|`MAT_SLOSH`|`MAT_TILE`|`MAT_GRASS`|`MAT_VENT`|`MAT_WOOD`|`MAT_DEFAULT`|`MAT_GLASS`|`MAT_WARPSHIELD`

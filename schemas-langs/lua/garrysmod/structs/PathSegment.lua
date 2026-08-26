@@ -1,6 +1,6 @@
 --- @meta
 
---- Structure represents a path segment, returned by PathFollower:GetCurrentGoal, PathFollower:FirstSegment and PathFollower:LastSegment.  
+--- Structure represents a path segment, returned by PathFollower:GetCurrentGoal, PathFollower:FirstSegment and PathFollower:LastSegment.
 --- @class SPathSegment
 --- @field area GCNavArea @The navmesh area this segment occupies.
 --- @field curvature number @How much of a curve should the bot execute when navigating this segment

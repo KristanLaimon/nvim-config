@@ -1,6 +1,6 @@
 --- @meta
 
---- Table structure used for render.GetViewSetup.  
+--- Table structure used for render.GetViewSetup.
 --- @class SViewSetup
 --- @field viewid EVIEW @The current view id
 --- @field origin GVector @The view's origin/position

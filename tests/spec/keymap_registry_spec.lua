@@ -32,11 +32,11 @@ describe("keymap_registry", function()
 			vim.wait(100, function()
 				return #calls > 0
 			end)
-            if #calls ~= 1 then
-                for i, c in ipairs(calls) do
-                    print("CALL", i, c.msg)
-                end
-            end
+			if #calls ~= 1 then
+				for i, c in ipairs(calls) do
+					print("CALL", i, c.msg)
+				end
+			end
 			expect(#calls).toBe(1)
 			expect(calls[1].opts.title).toBe("Keymap collision")
 			expect(calls[1].opts.max_width).toBe(120)

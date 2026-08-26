@@ -2,25 +2,25 @@
 
 _G.KEY_FIRST = 0
 _G.KEY_NONE = 0
---- Normal number 0 key  
+--- Normal number 0 key
 _G.KEY_0 = 1
---- Normal number 1 key  
+--- Normal number 1 key
 _G.KEY_1 = 2
---- Normal number 2 key  
+--- Normal number 2 key
 _G.KEY_2 = 3
---- Normal number 3 key  
+--- Normal number 3 key
 _G.KEY_3 = 4
---- Normal number 4 key  
+--- Normal number 4 key
 _G.KEY_4 = 5
---- Normal number 5 key  
+--- Normal number 5 key
 _G.KEY_5 = 6
---- Normal number 6 key  
+--- Normal number 6 key
 _G.KEY_6 = 7
---- Normal number 7 key  
+--- Normal number 7 key
 _G.KEY_7 = 8
---- Normal number 8 key  
+--- Normal number 8 key
 _G.KEY_8 = 9
---- Normal number 9 key  
+--- Normal number 9 key
 _G.KEY_9 = 10
 _G.KEY_A = 11
 _G.KEY_B = 12
@@ -48,37 +48,37 @@ _G.KEY_W = 33
 _G.KEY_X = 34
 _G.KEY_Y = 35
 _G.KEY_Z = 36
---- Keypad number 0 key  
+--- Keypad number 0 key
 _G.KEY_PAD_0 = 37
---- Keypad number 1 key  
+--- Keypad number 1 key
 _G.KEY_PAD_1 = 38
---- Keypad number 2 key  
+--- Keypad number 2 key
 _G.KEY_PAD_2 = 39
---- Keypad number 3 key  
+--- Keypad number 3 key
 _G.KEY_PAD_3 = 40
---- Keypad number 4 key  
+--- Keypad number 4 key
 _G.KEY_PAD_4 = 41
---- Keypad number 5 key  
+--- Keypad number 5 key
 _G.KEY_PAD_5 = 42
---- Keypad number 6 key  
+--- Keypad number 6 key
 _G.KEY_PAD_6 = 43
---- Keypad number 7 key  
+--- Keypad number 7 key
 _G.KEY_PAD_7 = 44
---- Keypad number 8 key  
+--- Keypad number 8 key
 _G.KEY_PAD_8 = 45
---- Keypad number 9 key  
+--- Keypad number 9 key
 _G.KEY_PAD_9 = 46
---- Keypad division/slash key (/)  
+--- Keypad division/slash key (/)
 _G.KEY_PAD_DIVIDE = 47
---- Keypad asterisk key (*)  
+--- Keypad asterisk key (*)
 _G.KEY_PAD_MULTIPLY = 48
---- Keypad minus key  
+--- Keypad minus key
 _G.KEY_PAD_MINUS = 49
---- Keypad plus key  
+--- Keypad plus key
 _G.KEY_PAD_PLUS = 50
---- Keypad enter key  
+--- Keypad enter key
 _G.KEY_PAD_ENTER = 51
---- Keypad dot key (.)  
+--- Keypad dot key (.)
 _G.KEY_PAD_DECIMAL = 52
 _G.KEY_LBRACKET = 53
 _G.KEY_RBRACKET = 54
@@ -106,16 +106,16 @@ _G.KEY_END = 75
 _G.KEY_PAGEUP = 76
 _G.KEY_PAGEDOWN = 77
 _G.KEY_BREAK = 78
---- The left Shift key, has been seen to be triggered by Right Shift in PANEL:OnKeyCodePressed  
+--- The left Shift key, has been seen to be triggered by Right Shift in PANEL:OnKeyCodePressed
 _G.KEY_LSHIFT = 79
 _G.KEY_RSHIFT = 80
 _G.KEY_LALT = 81
 _G.KEY_RALT = 82
 _G.KEY_LCONTROL = 83
 _G.KEY_RCONTROL = 84
---- The left Windows key or the Command key on Mac OSX  
+--- The left Windows key or the Command key on Mac OSX
 _G.KEY_LWIN = 85
---- The right Windows key or the Command key on Mac OSX  
+--- The right Windows key or the Command key on Mac OSX
 _G.KEY_RWIN = 86
 _G.KEY_APP = 87
 _G.KEY_UP = 88
@@ -129,7 +129,7 @@ _G.KEY_F4 = 95
 _G.KEY_F5 = 96
 _G.KEY_F6 = 97
 _G.KEY_F7 = 98
---- ⚠ **WARNING**: By default, it serves as bind "load quick", which loads the save by forcing the player to exit the server.  
+--- ⚠ **WARNING**: By default, it serves as bind "load quick", which loads the save by forcing the player to exit the server.
 _G.KEY_F8 = 99
 _G.KEY_F9 = 100
 _G.KEY_F10 = 101
@@ -165,15 +165,15 @@ _G.KEY_XSTICK2_LEFT = 157
 _G.KEY_XSTICK2_DOWN = 158
 _G.KEY_XSTICK2_UP = 159
 
---- Enumerations used by:  
---- * input.IsKeyDown  
---- * input.WasKeyPressed  
---- * input.WasKeyReleased  
---- * input.WasKeyTyped  
---- * input.IsKeyTrapping  
---- * input.GetKeyName  
---- * input.LookupBinding  
---- * PANEL:OnKeyCodePressed  
---- * PANEL:OnKeyCodeReleased  
---- It's also part of the Enums/BUTTON_CODE.  
+--- Enumerations used by:
+--- * input.IsKeyDown
+--- * input.WasKeyPressed
+--- * input.WasKeyReleased
+--- * input.WasKeyTyped
+--- * input.IsKeyTrapping
+--- * input.GetKeyName
+--- * input.LookupBinding
+--- * PANEL:OnKeyCodePressed
+--- * PANEL:OnKeyCodeReleased
+--- It's also part of the Enums/BUTTON_CODE.
 --- @alias EKEY `KEY_FIRST`|`KEY_NONE`|`KEY_0`|`KEY_1`|`KEY_2`|`KEY_3`|`KEY_4`|`KEY_5`|`KEY_6`|`KEY_7`|`KEY_8`|`KEY_9`|`KEY_A`|`KEY_B`|`KEY_C`|`KEY_D`|`KEY_E`|`KEY_F`|`KEY_G`|`KEY_H`|`KEY_I`|`KEY_J`|`KEY_K`|`KEY_L`|`KEY_M`|`KEY_N`|`KEY_O`|`KEY_P`|`KEY_Q`|`KEY_R`|`KEY_S`|`KEY_T`|`KEY_U`|`KEY_V`|`KEY_W`|`KEY_X`|`KEY_Y`|`KEY_Z`|`KEY_PAD_0`|`KEY_PAD_1`|`KEY_PAD_2`|`KEY_PAD_3`|`KEY_PAD_4`|`KEY_PAD_5`|`KEY_PAD_6`|`KEY_PAD_7`|`KEY_PAD_8`|`KEY_PAD_9`|`KEY_PAD_DIVIDE`|`KEY_PAD_MULTIPLY`|`KEY_PAD_MINUS`|`KEY_PAD_PLUS`|`KEY_PAD_ENTER`|`KEY_PAD_DECIMAL`|`KEY_LBRACKET`|`KEY_RBRACKET`|`KEY_SEMICOLON`|`KEY_APOSTROPHE`|`KEY_BACKQUOTE`|`KEY_COMMA`|`KEY_PERIOD`|`KEY_SLASH`|`KEY_BACKSLASH`|`KEY_MINUS`|`KEY_EQUAL`|`KEY_ENTER`|`KEY_SPACE`|`KEY_BACKSPACE`|`KEY_TAB`|`KEY_CAPSLOCK`|`KEY_NUMLOCK`|`KEY_ESCAPE`|`KEY_SCROLLLOCK`|`KEY_INSERT`|`KEY_DELETE`|`KEY_HOME`|`KEY_END`|`KEY_PAGEUP`|`KEY_PAGEDOWN`|`KEY_BREAK`|`KEY_LSHIFT`|`KEY_RSHIFT`|`KEY_LALT`|`KEY_RALT`|`KEY_LCONTROL`|`KEY_RCONTROL`|`KEY_LWIN`|`KEY_RWIN`|`KEY_APP`|`KEY_UP`|`KEY_LEFT`|`KEY_DOWN`|`KEY_RIGHT`|`KEY_F1`|`KEY_F2`|`KEY_F3`|`KEY_F4`|`KEY_F5`|`KEY_F6`|`KEY_F7`|`KEY_F8`|`KEY_F9`|`KEY_F10`|`KEY_F11`|`KEY_F12`|`KEY_CAPSLOCKTOGGLE`|`KEY_NUMLOCKTOGGLE`|`KEY_LAST`|`KEY_SCROLLLOCKTOGGLE`|`KEY_COUNT`|`KEY_XBUTTON_A`|`KEY_XBUTTON_B`|`KEY_XBUTTON_X`|`KEY_XBUTTON_Y`|`KEY_XBUTTON_LEFT_SHOULDER`|`KEY_XBUTTON_RIGHT_SHOULDER`|`KEY_XBUTTON_BACK`|`KEY_XBUTTON_START`|`KEY_XBUTTON_STICK1`|`KEY_XBUTTON_STICK2`|`KEY_XBUTTON_UP`|`KEY_XBUTTON_RIGHT`|`KEY_XBUTTON_DOWN`|`KEY_XBUTTON_LEFT`|`KEY_XSTICK1_RIGHT`|`KEY_XSTICK1_LEFT`|`KEY_XSTICK1_DOWN`|`KEY_XSTICK1_UP`|`KEY_XBUTTON_LTRIGGER`|`KEY_XBUTTON_RTRIGGER`|`KEY_XSTICK2_RIGHT`|`KEY_XSTICK2_LEFT`|`KEY_XSTICK2_DOWN`|`KEY_XSTICK2_UP`

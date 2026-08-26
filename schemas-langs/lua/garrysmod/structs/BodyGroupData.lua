@@ -1,6 +1,6 @@
 --- @meta
 
---- The tables that make up the values of the table returned by Entity:GetBodyGroups.  
+--- The tables that make up the values of the table returned by Entity:GetBodyGroups.
 --- @class SBodyGroupData
 --- @field id number @The Body Group's ID
 --- @field name string @The name of the Body Group.

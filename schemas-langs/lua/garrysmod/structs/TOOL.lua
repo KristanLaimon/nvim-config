@@ -1,10 +1,10 @@
 --- @meta
 
---- The **TOOL** table is used in Sandbox tool creation. You can find a list of callbacks on the  page and a list of methods on the  page. Do note that some of the fields below have no effect on server-side operations.  
---- The tool information box drawn on the HUD while your tool is selected has 2 values that are set by language.Add.  
---- * `tool.[tool mode].name` - The tool name (Note this is NOT the same as TOOL.Name)  
---- * `tool.[tool mode].desc` - The tool description  
---- Ensure that all tool file names are entirely lowercase.  Including capital letters can lead to unintended behavior.  
+--- The **TOOL** table is used in Sandbox tool creation. You can find a list of callbacks on the  page and a list of methods on the  page. Do note that some of the fields below have no effect on server-side operations.
+--- The tool information box drawn on the HUD while your tool is selected has 2 values that are set by language.Add.
+--- * `tool.[tool mode].name` - The tool name (Note this is NOT the same as TOOL.Name)
+--- * `tool.[tool mode].desc` - The tool description
+--- Ensure that all tool file names are entirely lowercase.  Including capital letters can lead to unintended behavior.
 --- @class STOOL : GWeapon
 --- @field AddToMenu? boolean @If set to false, the tool won't be added to the tool menu and players will have to access it by other means.
 --- @field Category? string @The tool menu category under which the tool should be listed.
@@ -22,57 +22,47 @@
 --- @field RightClickAutomatic? boolean @When enabled the game tries to run the right mouse click as soon as possible
 _G.TOOL = {}
 
---- Called when the tool's control panel needs to be rebuilt.  
---- ⚠ **WARNING**: Due to historical reasons, this hook does not provide the tool object as `self`! See examples.  
+--- Called when the tool's control panel needs to be rebuilt.
+--- ⚠ **WARNING**: Due to historical reasons, this hook does not provide the tool object as `self`! See examples.
 --- @param cpanel GPanel @The DForm control panel to add settings to.
-function TOOL:BuildCPanel(cpanel)
-end
+function TOOL:BuildCPanel(cpanel) end
 
---- Called when WEAPON:Deploy of the toolgun is called.  
---- This is also called when switching from another tool on the server.  
+--- Called when WEAPON:Deploy of the toolgun is called.
+--- This is also called when switching from another tool on the server.
 --- @return boolean @Return true to allow switching away from the toolgun using lastinv command
-function TOOL:Deploy()
-end
+function TOOL:Deploy() end
 
---- Called when WEAPON:DrawHUD of the toolgun is called, only when the user has this tool selected.  
-function TOOL:DrawHUD()
-end
+--- Called when WEAPON:DrawHUD of the toolgun is called, only when the user has this tool selected.
+function TOOL:DrawHUD() end
 
---- Called after the default tool screen has been drawn from WEAPON:RenderScreen.  
---- ℹ **NOTE**: If this method exists on the TOOL object table, the default scrolling text will not be drawn  
---- ℹ **NOTE**: Materials rendered in this hook require $ignorez parameter to draw properly.  
+--- Called after the default tool screen has been drawn from WEAPON:RenderScreen.
+--- ℹ **NOTE**: If this method exists on the TOOL object table, the default scrolling text will not be drawn
+--- ℹ **NOTE**: Materials rendered in this hook require $ignorez parameter to draw properly.
 --- @param width number @The width of the tool's screen in pixels.
 --- @param height number @The height of the tool's screen in pixels.
-function TOOL:DrawToolScreen(width, height)
-end
+function TOOL:DrawToolScreen(width, height) end
 
---- Called when WEAPON:Think of the toolgun is called, only when the user has this tool selected.  
+--- Called when WEAPON:Think of the toolgun is called, only when the user has this tool selected.
 --- @return boolean @Return true to freeze the player
-function TOOL:FreezeMovement()
-end
+function TOOL:FreezeMovement() end
 
---- Called when WEAPON:Holster of the toolgun is called, when switching between different toolguns.  
-function TOOL:Holster()
-end
+--- Called when WEAPON:Holster of the toolgun is called, when switching between different toolguns.
+function TOOL:Holster() end
 
---- Called when the user left clicks with the tool.  
+--- Called when the user left clicks with the tool.
 --- @param tr table @A trace from user's eyes to wherever they aim at
 --- @return boolean @Return `true` to draw the tool gun beam and play fire animations, `false` otherwise.
-function TOOL:LeftClick(tr)
-end
+function TOOL:LeftClick(tr) end
 
---- Called when the user presses the reload key with the tool out.  
+--- Called when the user presses the reload key with the tool out.
 --- @param tr table @A trace from user's eyes to wherever they aim at
 --- @return boolean @Return `true` to draw the tool gun beam and play fire animations, `false` otherwise
-function TOOL:Reload(tr)
-end
+function TOOL:Reload(tr) end
 
---- Called when the user right clicks with the tool.  
+--- Called when the user right clicks with the tool.
 --- @param tr table @A trace from user's eyes to wherever they aim at
 --- @return boolean @Return `true` to draw the tool gun beam and play fire animations, `false` otherwise
-function TOOL:RightClick(tr)
-end
+function TOOL:RightClick(tr) end
 
---- Called when WEAPON:Think of the toolgun is called. This only happens when the tool gun is currently equipped/selected by the player and the selected tool is this tool.  
-function TOOL:Think()
-end
+--- Called when WEAPON:Think of the toolgun is called. This only happens when the tool gun is currently equipped/selected by the player and the selected tool is this tool.
+function TOOL:Think() end

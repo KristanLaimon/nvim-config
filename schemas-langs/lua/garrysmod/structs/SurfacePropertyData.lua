@@ -1,6 +1,6 @@
 --- @meta
 
---- Table returned by util.GetSurfaceData.  
+--- Table returned by util.GetSurfaceData.
 --- @class SSurfacePropertyData
 --- @field name string @The name of the surface property, identical to util.GetSurfacePropName.
 --- @field hardnessFactor number @How hard a surface is

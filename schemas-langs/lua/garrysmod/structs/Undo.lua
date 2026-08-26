@@ -1,6 +1,6 @@
 --- @meta
 
---- Table structure used by undo.Do_Undo and GM:CanUndo.  
+--- Table structure used by undo.Do_Undo and GM:CanUndo.
 --- @class SUndo
 --- @field Owner GPlayer @The player responsible who owns the undo
 --- @field Name string @The name of the text to report to the player

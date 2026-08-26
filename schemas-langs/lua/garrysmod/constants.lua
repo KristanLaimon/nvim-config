@@ -19,7 +19,6 @@ _G.MENU = true
 --- @type GEntity
 _G.NULL = nil
 
-
 --- @type unknown
 _G.BaseClass = {}
 

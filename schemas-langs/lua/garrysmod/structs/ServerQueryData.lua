@@ -1,6 +1,6 @@
 --- @meta
 
---- Used for serverlist.Query.  
+--- Used for serverlist.Query.
 --- @class SServerQueryData
 --- @field GameDir? string @The game directory to get the servers for
 --- @field Type string @Type of servers to retrieve

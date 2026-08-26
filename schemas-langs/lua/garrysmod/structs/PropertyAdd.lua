@@ -1,6 +1,6 @@
 --- @meta
 
---- Structure used for properties.Add.  
+--- Structure used for properties.Add.
 --- @class SPropertyAdd
 --- @field Type? string @Can be set to "toggle" to make this property a toggle property.
 --- @field MenuLabel string @Label to show on opened menu

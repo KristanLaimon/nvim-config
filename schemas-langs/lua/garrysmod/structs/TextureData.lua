@@ -1,6 +1,6 @@
 --- @meta
 
---- Used for draw.TexturedQuad.  
+--- Used for draw.TexturedQuad.
 --- @class STextureData
 --- @field texture number @surface.GetTextureID number of the texture to be drawn.
 --- @field x number @The x Coordinate.
