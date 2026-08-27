@@ -135,6 +135,36 @@ describe("wsl recent projects", function()
 	end)
 end)
 
+describe("PHP tool checks", function()
+	local original_has, original_executable, original_system
+
+	afterEach(function()
+		vim.fn.has, vim.fn.executable, vim.fn.system = original_has, original_executable, original_system
+	end)
+
+	it("only probes WSL when explicitly requested", function()
+		local modal = require("plugins.krs.tools.php_tools_modal")
+		original_has, original_executable, original_system = vim.fn.has, vim.fn.executable, vim.fn.system
+		local calls = 0
+
+		vim.fn.has = function(feature)
+			return feature == "win32" and 1 or original_has(feature)
+		end
+		vim.fn.executable = function(command)
+			return (command == "wsl.exe" or command == "wsl") and 1 or 0
+		end
+		vim.fn.system = function()
+			calls = calls + 1
+			return ""
+		end
+
+		modal.check_tools(true)
+		expect(calls).toBe(0)
+		modal.check_tools(true, true)
+		expect(calls).toBe(2)
+	end)
+end)
+
 describe("git.cmd.build with WSL paths", function()
 	local git = require("krs.git.cmd")
 

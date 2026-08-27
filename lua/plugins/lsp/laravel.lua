@@ -64,7 +64,7 @@ return {
 			local modal = php.modal
 
 			vim.api.nvim_create_user_command("PHPCheckTools", function()
-				modal.check_tools(false)
+				modal.check_tools(false, true)
 			end, { desc = "Check PHP & Laravel CLI environment status" })
 
 			local checked = false

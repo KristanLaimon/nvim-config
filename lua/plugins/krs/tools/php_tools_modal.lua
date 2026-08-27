@@ -70,8 +70,9 @@ M.settings = {
 --- is missing.
 ---
 --- @param silent boolean|nil Suppress the modal and only return the status.
+--- @param check_wsl boolean|nil Probe WSL when native tools are missing. Off by default.
 --- @return table status `{ php, composer, win_php, wsl_php, ..., has_wsl }`
-function M.check_tools(silent)
+function M.check_tools(silent, check_wsl)
 	local is_win = vim.fn.has("win32") == 1
 	local has_wsl = is_win and (vim.fn.executable("wsl.exe") == 1 or vim.fn.executable("wsl") == 1)
 
@@ -82,7 +83,7 @@ function M.check_tools(silent)
 		local on_windows = vim.fn.executable(tool.executable) == 1
 		local on_wsl = false
 
-		if has_wsl and not on_windows then
+		if check_wsl and has_wsl and not on_windows then
 			local out = vim.fn.system(tool.wsl_probe)
 			on_wsl = type(out) == "string" and out:match(tool.wsl_match) ~= nil
 		end

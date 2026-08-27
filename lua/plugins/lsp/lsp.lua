@@ -127,6 +127,7 @@ return {
 			require("mason").setup()
 			require("mason-lspconfig").setup({
 				automatic_installation = false,
+				automatic_enable = false,
 				ensure_installed = {},
 				handlers = {
 					function(server_name)
@@ -137,6 +138,15 @@ return {
 						if has_blink then
 							config.capabilities = blink.get_lsp_capabilities(config.capabilities)
 						end
+
+						if vim.fn.has("win32") == 1 then
+							config.capabilities = config.capabilities or vim.lsp.protocol.make_client_capabilities()
+							config.capabilities.workspace = config.capabilities.workspace or {}
+							config.capabilities.workspace.didChangeWatchedFiles = config.capabilities.workspace.didChangeWatchedFiles
+								or {}
+							config.capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false
+						end
+
 						vim.lsp.config(server_name, config)
 						vim.lsp.enable(server_name)
 					end,
@@ -150,6 +160,14 @@ return {
 					if has_blink then
 						cfg.capabilities = blink.get_lsp_capabilities(cfg.capabilities)
 					end
+
+					if vim.fn.has("win32") == 1 then
+						cfg.capabilities = cfg.capabilities or vim.lsp.protocol.make_client_capabilities()
+						cfg.capabilities.workspace = cfg.capabilities.workspace or {}
+						cfg.capabilities.workspace.didChangeWatchedFiles = cfg.capabilities.workspace.didChangeWatchedFiles or {}
+						cfg.capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false
+					end
+
 					vim.lsp.config(server_name, cfg)
 					vim.lsp.enable(server_name)
 				end

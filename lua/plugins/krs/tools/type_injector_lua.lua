@@ -9,7 +9,7 @@ local function get_luarocks_paths()
 		return _cached_luarocks_paths
 	end
 	_cached_luarocks_paths = {}
-	if vim.fn.executable("luarocks") == 1 then
+	if vim.fn.executable("luarocks") == 1 and vim.fn.executable("lua") == 1 then
 		local out = vim.fn.system({ "luarocks", "path", "--lr-path" })
 		if vim.v.shell_error == 0 and out then
 			for _, p in ipairs(vim.split(out, ";", { trimempty = true })) do

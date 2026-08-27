@@ -540,6 +540,8 @@ function M:get_completions(context, callback)
 		callback({ items = items or {}, is_incomplete_forward = false, is_incomplete_backward = false })
 	end
 
+	local buf = context.bufnr or vim.api.nvim_get_current_buf()
+	local name = vim.api.nvim_buf_get_name(buf)
 	local ft = vim.bo[buf].filetype
 	if not (ft == "lua" or ft == "krsnvim" or name:match(M.settings.file_pattern) or name:match("%.lua$") ~= nil) then
 		return respond({})
