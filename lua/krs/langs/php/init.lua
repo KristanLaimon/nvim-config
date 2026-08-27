@@ -91,6 +91,7 @@ M.treesitter = { "php", "phpdoc", "blade" }
 --- Xdebug connects to the editor, not the other way round: nvim listens on this
 --- port and the request being debugged attaches to it.
 M.dap_debug_port = 9003
+M.php_debug_port = M.dap_debug_port
 
 --- Filetypes the DAP configurations below attach to.
 M.dap_filetypes = { "php", "blade" }

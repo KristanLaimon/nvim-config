@@ -448,7 +448,13 @@ function M.test(test_name, test_fn)
 end
 
 --- Alias for `test()`.
-M.it = M.test
+M.it = setmetatable({
+	skip = function() end,
+}, {
+	__call = function(_, ...)
+		return M.test(...)
+	end,
+})
 
 --- Registers a setup hook to run before each test case in the current suite.
 --- @param fn function

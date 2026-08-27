@@ -5,11 +5,9 @@
 local t = require("krs.lib.krsnvim.test")
 local describe, it, expect = t.describe, t.it, t.expect
 
-describe("KrsStartupNotification", function()
-	it("executes lazy setup and verifies startup stats formatting", function()
+describe("lazy startup stats", function()
+	it("executes lazy setup and exposes startup stats", function()
 		pcall(require, "lazy_init")
-		local autocmds = vim.api.nvim_get_autocmds({ group = "KrsStartupNotification" })
-		expect(#autocmds > 0).toBe(true)
 
 		local ok, lazy = pcall(require, "lazy")
 		if ok then

@@ -99,36 +99,3 @@ require("lazy").setup({
 		rtp = { disabled_plugins = settings.disabled_builtins },
 	},
 })
-
--- ============================================================================
--- STARTUP NOTIFICATION
--- ============================================================================
--- Displays a toast notification on startup with elapsed time and loaded/total plugin count.
-vim.api.nvim_create_autocmd("VimEnter", {
-	group = vim.api.nvim_create_augroup("KrsStartupNotification", { clear = true }),
-	callback = function()
-		vim.schedule(function()
-			local ok, lazy = pcall(require, "lazy")
-			if not ok then
-				return
-			end
-			local stats = lazy.stats()
-			local ms = stats.startuptime
-			if not ms or ms == 0 then
-				if stats.times and stats.times.LazyDone then
-					ms = stats.times.LazyDone - (stats.times.LazyStart or 0)
-				elseif stats.time then
-					ms = stats.time
-				else
-					ms = 0
-				end
-			end
-			ms = math.floor(ms * 100 + 0.5) / 100
-		end)
-	end,
-})
-
--- Initialize KRS Automated Incremental System Setup
-vim.schedule(function()
-	require("krs.core.installer").init()
-end)

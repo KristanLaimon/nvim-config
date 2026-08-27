@@ -231,11 +231,4 @@ describe("plugins.krs.dev.sneak_peek", function()
 		vim.cmd("SneakPeekClose")
 		expect(peek.is_open()).toBeFalsy()
 	end)
-
-	-- skipped
-		
-		file_explorer.open_desktop_explorer = original_open
-
-		expect(captured_opts.path).toBe(current_cwd)
-	end)
 end)

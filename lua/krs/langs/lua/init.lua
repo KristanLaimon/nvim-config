@@ -21,6 +21,10 @@ M.lsp_server = { "lua_ls" }
 M.lsp_config = {
 	lua_ls = {
 		filetypes = { "lua", "krsnvim" },
+		before_init = function(_, config)
+			config.settings.Lua.workspace.library =
+				require("plugins.krs.tools.type_injector").get_active_lua_libraries(config.root_dir)
+		end,
 		settings = {
 			Lua = {
 				runtime = {
@@ -31,7 +35,6 @@ M.lsp_config = {
 				},
 				workspace = {
 					checkThirdParty = false,
-					library = require("plugins.krs.tools.type_injector").get_active_lua_libraries(),
 				},
 				completion = {
 					callSnippet = "Replace",
