@@ -84,12 +84,12 @@ local settings = {
 
 return {
 	"ahmedkhalf/project.nvim",
-	cmd = { "Telescope projects", "ProjectRoot", "RecentProjects" },
+	cmd = { "ProjectRoot", "RecentProjects" },
 	keys = {
-		{ "<C-S-r>", "<cmd>Telescope projects<CR>", mode = { "n", "i", "v", "t" }, desc = "Open Recent Projects UI" },
-		{ "<C-S-R>", "<cmd>Telescope projects<CR>", mode = { "n", "i", "v", "t" }, desc = "Open Recent Projects UI" },
-		{ "<C-r>", "<cmd>Telescope projects<CR>", mode = { "n", "i", "v", "t" }, desc = "Open Recent Projects UI" },
-		{ "<leader>fp", "<cmd>Telescope projects<CR>", mode = { "n", "i", "v", "t" }, desc = "Open Recent Projects UI" },
+		{ "<C-S-r>", "<cmd>RecentProjects<CR>", mode = { "n", "i", "v", "t" }, desc = "Open Recent Projects UI" },
+		{ "<C-S-R>", "<cmd>RecentProjects<CR>", mode = { "n", "i", "v", "t" }, desc = "Open Recent Projects UI" },
+		{ "<C-r>", "<cmd>RecentProjects<CR>", mode = { "n", "i", "v", "t" }, desc = "Open Recent Projects UI" },
+		{ "<leader>fp", "<cmd>RecentProjects<CR>", mode = { "n", "i", "v", "t" }, desc = "Open Recent Projects UI" },
 	},
 	dependencies = {
 		"nvim-telescope/telescope.nvim",
@@ -314,7 +314,7 @@ return {
 			end
 
 			pcall(vim.cmd, "Neotree close")
-			pcall(vim.cmd, "only")
+			vim.cmd("silent! only")
 
 			vim.cmd("enew")
 			local new_buf = vim.api.nvim_get_current_buf()
@@ -325,6 +325,11 @@ return {
 			end
 
 			pcall(vim.api.nvim_set_current_dir, dir)
+			local pinned_tabs = require("plugins.krs.ui.pinned_tabs")
+			local has_pins = #pinned_tabs.load_pins() > 0
+			if not has_pins then
+				vim.cmd("Alpha")
+			end
 
 			local wsl = wsl_module()
 			if wsl and wsl.add_recent_project and is_wsl_path(dir) then
@@ -348,7 +353,14 @@ return {
 				_G.AddOpenedFolder(dir)
 			end
 
-			pcall(vim.cmd, "Neotree show dir=" .. vim.fn.fnameescape(dir))
+			pcall(vim.cmd, "Neotree focus dir=" .. vim.fn.fnameescape(dir))
+			if has_pins then
+				vim.schedule(function()
+					vim.schedule(function()
+						pinned_tabs.restore_pins({ focus = true })
+					end)
+				end)
+			end
 			vim.notify("📁 Switched to project: " .. dir, vim.log.levels.INFO)
 		end
 
@@ -468,7 +480,9 @@ return {
 								local entry = selected()
 								actions.close(prompt_bufnr)
 								if entry then
-									open_project(entry.path)
+									vim.schedule(function()
+										open_project(entry.path)
+									end)
 								end
 							end)
 

@@ -159,7 +159,19 @@ vim.api.nvim_create_autocmd("VimEnter", {
 	callback = function(data)
 		local file = data.file
 		if file ~= "" and vim.fn.isdirectory(file) == 1 then
-			vim.cmd("silent! Neotree show dir=" .. vim.fn.fnameescape(file))
+			vim.schedule(function()
+				local pinned_tabs = require("plugins.krs.ui.pinned_tabs")
+				local has_pins = #pinned_tabs.load_pins() > 0
+				if not has_pins then
+					vim.cmd("Alpha")
+				end
+				vim.cmd("silent! Neotree focus dir=" .. vim.fn.fnameescape(file))
+				if has_pins then
+					vim.schedule(function()
+						pinned_tabs.restore_pins({ focus = true })
+					end)
+				end
+			end)
 		end
 	end,
 })

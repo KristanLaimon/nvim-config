@@ -243,7 +243,7 @@ end
 --- @param target string Directory to adopt.
 local function set_project_root(target)
 	pcall(vim.cmd, "Neotree close")
-	pcall(vim.cmd, "only")
+	vim.cmd("silent! only")
 
 	vim.cmd("enew")
 	local new_buf = vim.api.nvim_get_current_buf()
@@ -254,6 +254,11 @@ local function set_project_root(target)
 	end
 
 	pcall(vim.api.nvim_set_current_dir, target)
+	local pinned_tabs = require("plugins.krs.ui.pinned_tabs")
+	local has_pins = #pinned_tabs.load_pins() > 0
+	if not has_pins then
+		vim.cmd("Alpha")
+	end
 
 	local history_ok, history = pcall(require, "project_nvim.utils.history")
 	if history_ok and history.recent_projects then
@@ -264,7 +269,14 @@ local function set_project_root(target)
 		require("plugins.krs.tools.wsl").add_recent_project(target)
 	end)
 
-	pcall(vim.cmd, "Neotree show dir=" .. vim.fn.fnameescape(target))
+	pcall(vim.cmd, "Neotree focus dir=" .. vim.fn.fnameescape(target))
+	if has_pins then
+		vim.schedule(function()
+			vim.schedule(function()
+				pinned_tabs.restore_pins({ focus = true })
+			end)
+		end)
+	end
 	vim.notify("📁 Project root changed to:\n" .. target, vim.log.levels.INFO, { title = "Active Project" })
 end
 

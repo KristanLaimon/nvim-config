@@ -370,6 +370,6 @@ _G.BufferCleaner = M
 return setmetatable({
 	name = "krs_buffer_cleaner",
 	dir = require("krs.core.lazyspec").for_module(),
-	event = "VeryLazy",
+	event = "VimEnter",
 	config = M.setup,
 }, { __index = M })

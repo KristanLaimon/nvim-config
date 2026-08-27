@@ -11,7 +11,7 @@ local settings = {
 	--- Menu entries, in order: { key, icon, label, command }.
 	buttons = {
 		{ "f", "📁", "File Explorer", ":TelescopeFileBrowserDesktop<CR>" },
-		{ "p", "💼", "Recent projects", ":Telescope projects<CR>" },
+		{ "p", "💼", "Recent projects", ":RecentProjects<CR>" },
 		{ "s", "📦", "Dependencies & Toolchains", ":KrsInstallDependencies<CR>" },
 		{ "h", "🩺", "Health Check", ":KrsHealthCheck<CR>" },
 		{ "w", "📚", "Wiki & Docs (Ctrl+Shift+D)", ":KrsWiki<CR>" },
@@ -120,29 +120,46 @@ return {
 
 		alpha.setup(dashboard.opts)
 
+		vim.api.nvim_create_autocmd("VimEnter", {
+			callback = function()
+				if vim.fn.argc() == 0 then
+					vim.schedule(function()
+						vim.cmd("Alpha")
+					end)
+				end
+			end,
+		})
+
+		local function show_dashboard()
+			for _, win in ipairs(vim.api.nvim_list_wins()) do
+				local buf = vim.api.nvim_win_get_buf(win)
+				if vim.bo[buf].filetype ~= "neo-tree" and vim.bo[buf].buftype ~= "terminal" then
+					vim.api.nvim_win_call(win, function()
+						vim.cmd("Alpha")
+					end)
+					return
+				end
+			end
+
+			-- Neo-tree is the only pane left: keep it and add the dashboard beside it.
+			vim.cmd("vsplit | Alpha")
+		end
+
+		local function has_pins()
+			local ok, pinned_tabs = pcall(require, "plugins.krs.ui.pinned_tabs")
+			return ok and #pinned_tabs.load_pins() > 0
+		end
+
 		-- Closing the last real buffer shows the dashboard instead of quitting.
 		vim.api.nvim_create_autocmd("BufDelete", {
 			callback = function()
 				vim.schedule(function()
-					local win = vim.api.nvim_get_current_win()
-					if not vim.api.nvim_win_is_valid(win) then
-						return
-					end
-					local buf = vim.api.nvim_win_get_buf(win)
-					local buftype = vim.bo[buf].buftype
-					local filetype = vim.bo[buf].filetype
-
-					-- Focus is in a terminal or a panel: leave it alone.
-					if buftype == "terminal" or vim.tbl_contains(settings.protected_filetypes, filetype) then
-						return
-					end
-
 					local listed = vim.tbl_filter(function(b)
 						return vim.fn.buflisted(b) == 1 and vim.api.nvim_buf_get_name(b) ~= ""
 					end, vim.api.nvim_list_bufs())
 
-					if #listed == 0 then
-						vim.cmd("Alpha")
+					if #listed == 0 and not has_pins() then
+						show_dashboard()
 					end
 				end)
 			end,

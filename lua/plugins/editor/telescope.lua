@@ -421,7 +421,7 @@ return {
 			end
 
 			pcall(vim.cmd, "Neotree close")
-			pcall(vim.cmd, "only")
+			vim.cmd("silent! only")
 
 			vim.cmd("enew")
 			local new_buf = vim.api.nvim_get_current_buf()
@@ -432,12 +432,24 @@ return {
 			end
 
 			pcall(vim.api.nvim_set_current_dir, dir)
+			local pinned_tabs = require("plugins.krs.ui.pinned_tabs")
+			local has_pins = #pinned_tabs.load_pins() > 0
+			if not has_pins then
+				vim.cmd("Alpha")
+			end
 			remember_project(dir)
 			if _G.AddOpenedFolder then
 				_G.AddOpenedFolder(dir)
 			end
 
-			pcall(vim.cmd, "Neotree show dir=" .. vim.fn.fnameescape(dir))
+			pcall(vim.cmd, "Neotree focus dir=" .. vim.fn.fnameescape(dir))
+			if has_pins then
+				vim.schedule(function()
+					vim.schedule(function()
+						pinned_tabs.restore_pins({ focus = true })
+					end)
+				end)
+			end
 			vim.notify("📁 Opened folder: " .. dir, vim.log.levels.INFO)
 		end
 

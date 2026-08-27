@@ -196,7 +196,7 @@ map_all_modes({ "<C-r>", "<C-R>", "<C-S-r>", "<C-S-R>", "<leader>fp" }, function
 	if _G.OpenRecentProjects then
 		_G.OpenRecentProjects()
 	else
-		pcall(vim.cmd, "Telescope projects")
+		pcall(vim.cmd, "RecentProjects")
 	end
 end, "Open Recent Projects UI")
 

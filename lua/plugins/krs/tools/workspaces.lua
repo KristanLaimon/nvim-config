@@ -212,7 +212,7 @@ end
 --- Re-opens neo-tree on a directory and refreshes it.
 --- @param dir string Directory to show.
 local function show_neotree(dir)
-	pcall(vim.cmd, "Neotree show dir=" .. vim.fn.fnameescape(dir))
+	pcall(vim.cmd, "Neotree focus dir=" .. vim.fn.fnameescape(dir))
 	pcall(function()
 		require("neo-tree.sources.manager").refresh("filesystem")
 	end)
