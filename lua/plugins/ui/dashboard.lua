@@ -124,7 +124,9 @@ return {
 			callback = function()
 				if vim.fn.argc() == 0 then
 					vim.schedule(function()
-						vim.cmd("Alpha")
+						if vim.bo.filetype ~= "alpha" then
+							vim.cmd("Alpha")
+						end
 					end)
 				end
 			end,
@@ -134,6 +136,9 @@ return {
 			for _, win in ipairs(vim.api.nvim_list_wins()) do
 				local buf = vim.api.nvim_win_get_buf(win)
 				if vim.bo[buf].filetype ~= "neo-tree" and vim.bo[buf].buftype ~= "terminal" then
+					if vim.bo[buf].filetype == "alpha" then
+						return
+					end
 					vim.api.nvim_win_call(win, function()
 						vim.cmd("Alpha")
 					end)
@@ -141,7 +146,19 @@ return {
 				end
 			end
 
-			-- Neo-tree is the only pane left: keep it and add the dashboard beside it.
+			-- If we reach here, there are no normal code windows, only neo-tree or terminals.
+			-- Find neo-tree and split it to the right, so we don't accidentally split the terminal dock.
+			for _, win in ipairs(vim.api.nvim_list_wins()) do
+				local buf = vim.api.nvim_win_get_buf(win)
+				if vim.bo[buf].filetype == "neo-tree" then
+					vim.api.nvim_win_call(win, function()
+						vim.cmd("rightbelow vsplit | Alpha")
+					end)
+					return
+				end
+			end
+
+			-- Fallback if not even neo-tree exists
 			vim.cmd("vsplit | Alpha")
 		end
 

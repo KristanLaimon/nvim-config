@@ -328,7 +328,9 @@ return {
 			local pinned_tabs = require("plugins.krs.ui.pinned_tabs")
 			local has_pins = #pinned_tabs.load_pins() > 0
 			if not has_pins then
-				vim.cmd("Alpha")
+				if vim.bo.filetype ~= "alpha" then
+					vim.cmd("Alpha")
+				end
 			end
 
 			local wsl = wsl_module()
