@@ -17,7 +17,7 @@ See [Module Architecture](module-architecture.md) for how the custom ones are wi
 | **Git Control Center** | `git_center.lua` | Floating Git UI: stage/unstage, live diff, commit form (title/description/tag), restore, push. | `<C-S-g>`, `:GitCenter` |
 | **Launch Profiles** | `launch_profiles.lua` | Per-project entry points with runtime, args, env, pre-launch tasks and a run/debug mode. Card picker + single-screen form editor. | `<C-S-s>`, `<C-S-q>` |
 | **Dev Server Bridge** | `dev_server.lua` | Starts (or reuses) the project's Vite/Astro/SvelteKit/Next/Angular dev server and yields its URL to browser debug configs. | used by debug configs |
-| **Persistent Breakpoints** | `dap_breakpoints.lua` | Saves/restores breakpoints per project, adds disabled breakpoints (a concept nvim-dap doesn't have). | `<C-b>`, `<A-h>`, `:DapBreakpoints*` |
+| **Persistent Breakpoints** | `dap_breakpoints.lua` | Saves/restores breakpoints per project, adds disabled breakpoints (a concept nvim-dap doesn't have). | `<A-b>`, `<A-h>`, `:DapBreakpoints*` |
 | **Bun Debug Adapter** | `bun_dap.lua` | Sparse-checks-out Bun's own debug adapter and writes the stdio entry point the VSCode extension never shipped. | `:KrsBunDapInstall` |
 | **Task & Script Manager** | `tasks.lua` | Per-project tasks in `.krsnvim/tasks.json`; run, chain, set a default detected from `Makefile`/`package.json`/etc. Up to 4 background slots. | `<C-S-t>`, `<C-S-a>`, `<C-1>`..`<C-4>` |
 | **Multi-Terminal Manager** | `terminal.lua` | 9 lazily-spawned terminals, toggled independently. A `cwd` inside a WSL distro path launches `wsl.exe` there instead of the Windows shell. | `<A-1>`..`<A-9>`, `<C-;>` |

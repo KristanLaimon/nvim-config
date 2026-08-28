@@ -2,7 +2,7 @@
 -- KEYMAPS: Debugging (DAP).
 -- ============================================================================
 -- KEYS
---   <C-b>   Toggle breakpoint            <F5>   Start / continue
+--   <A-b>   Toggle breakpoint            <F5>   Start / continue
 --   <F10>   Step over                    <F11>  Step into
 --   <F12>   Step out                     <S-F5> Terminate
 --   <leader>du  Toggle the debugger UI
@@ -24,7 +24,7 @@ local M = {}
 
 M.settings = {
 	keys = {
-		toggle_breakpoint = "<C-b>",
+		toggle_breakpoint = "<A-b>",
 		continue = "<F5>",
 		step_over = "<F10>",
 		step_into = "<F11>",

@@ -41,4 +41,4 @@ Press `<F5>` (`:DapContinue`) to launch the Debug Adapter Protocol (DAP) launche
 3. **`🚀 Debug Laravel Artisan Command`**: Prompts for artisan command (e.g., `migrate`, `queue:work`) and executes under Xdebug.
 4. **`🌐 Debug Laravel App (artisan serve)`**: Launches `php artisan serve` with Xdebug enabled.
 
-> 🔴 **Blade Breakpoints**: Breakpoints can be toggled inside `.blade.php` files (`<C-b>` or `:DapToggleBreakpoint`), and Xdebug will pause execution during view rendering.
+> 🔴 **Blade Breakpoints**: Breakpoints can be toggled inside `.blade.php` files (`<A-b>` or `:DapToggleBreakpoint`), and Xdebug will pause execution during view rendering.

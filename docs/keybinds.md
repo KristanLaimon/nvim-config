@@ -67,7 +67,7 @@ Forgot a shortcut? Press `?` or `<F1>` to see context-aware help, or press `<C-S
 
 | Shortcut | Mode | Action |
 | :--- | :---: | :--- |
-| `<C-b>` | n, i, v | Toggle breakpoint |
+| `<A-b>` | n, i, v | Toggle breakpoint |
 | `<A-h>` / `<M-h>` / `<C-S-h>` | n, i, v | Enable ⇄ disable breakpoint under the cursor |
 | `<C-S-s>` | n, i, v | Run the default launch profile — or stop the running session |
 | `<C-S-q>` | n, i, v | Launch profile manager |

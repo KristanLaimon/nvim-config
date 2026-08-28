@@ -10,7 +10,7 @@ Breakpoints survive restarts, and can be *disabled* without being deleted — a 
 
 | Shortcut / Command | Action |
 | :--- | :--- |
-| `<C-b>` | Toggle breakpoint on the current line |
+| `<A-b>` | Toggle breakpoint on the current line |
 | `<A-h>` / `<M-h>` / `<C-S-h>` | Enable ⇄ disable the breakpoint under the cursor, keeping it in place |
 | `:DapBreakpointToggleEnabled` | Same, as a command |
 | `:DapBreakpointsDisableAll` | Disable every breakpoint (keeps them all) |
