@@ -18,7 +18,7 @@
 --
 -- SIDEBAR KEYS
 --   a / <C-n> new file    A / <C-S-n> new folder    r rename    m move
---   <C-/> find files (gitignore)   <C-S-/> find all files
+--   <C-/> find files (gitignore)   <C-S-/> find all files   <C-;> terminal
 -- ============================================================================
 
 local lazy_req = require("krs.core.lazy_require")
@@ -64,6 +64,9 @@ local settings = {
 		["<C-?>"] = "search_all_files",
 		["<C-S-CR>"] = "open_with_system_app",
 		["<C-S-Enter>"] = "open_with_system_app",
+		-- Neo-tree defaults this key to `clear_selection`, which shadows the
+		-- editor-wide terminal binding while focus is in the sidebar.
+		["<C-;>"] = "toggle_selected_terminal",
 		["H"] = "toggle_custom_hidden",
 		["gh"] = "toggle_custom_hidden",
 	},
@@ -502,6 +505,11 @@ return {
 					mappings = settings.mappings,
 				},
 				commands = {
+					toggle_selected_terminal = function()
+						-- Calling the command lets lazy.nvim load the terminal manager on
+						-- demand if Neo-tree is the first component opened this session.
+						vim.cmd("TerminalToggle")
+					end,
 					refresh_neotree = function()
 						refresh_neotree_with_notify()
 					end,
