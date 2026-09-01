@@ -28,6 +28,11 @@ return {
 		ft = { "blade", "php" },
 		opts = {
 			close_tag_on_complete = true,
+			-- Keep `K` available for the LSP hover mapping. BladeNav's annotation
+			-- feature otherwise installs a buffer-local `K` mapping for PHP files.
+			annotations = {
+				create_keymaps = false,
+			},
 			-- Blink is registered below as a direct source provider. Disable the
 			-- optional nvim-cmp/coq integrations so blade-nav does not emit a
 			-- misleading "nvim-cmp not found" warning on every Blade buffer.
