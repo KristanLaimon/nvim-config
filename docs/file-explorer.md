@@ -20,6 +20,7 @@ KRS Neovim includes native floating file explorers for Desktop, WSL, folder pick
    - Hidden items are visually excluded from the Neo-tree sidebar UI.
    - Toggle visibility of all marked hidden items via Command Palette (`<C-S-p>` -> `NeotreeToggleCustomHiddenVisibility`) or `:NeotreeToggleCustomHiddenVisibility`.
    - When marked items are set to visible, they are rendered using a theme-derived color (`NeoTreeCustomHidden`, linked to active theme's `Comment` group).
+7. **Terminal from Neo-tree (`<C-;>`)**: Opens or toggles the selected multi-terminal slot. This intentionally replaces Neo-tree's default `clear_selection` action for that key.
 
 ---
 
@@ -33,5 +34,6 @@ KRS Neovim includes native floating file explorers for Desktop, WSL, folder pick
 - `r` (in Neo-tree): Rename file/folder via `input_modal`
 - `a` (in Neo-tree): Create new file or folder via `input_modal`
 - `H` / `gh` (in Neo-tree): Mark selected file/folder as visually hidden
+- `<C-;>` (in Neo-tree): Toggle the selected terminal panel
 - `<C-k>` / `<C-/>`: Search files respecting `.gitignore`
 - `<C-A-k>` / `<C-S-/>`: Search all files ignoring `.gitignore`

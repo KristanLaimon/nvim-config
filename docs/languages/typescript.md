@@ -10,7 +10,7 @@ KrsVim provides a high-performance **TypeScript / JavaScript** environment suppo
 
 | Feature | Tool / Package | Details |
 | :--- | :--- | :--- |
-| **Language Server (LSP)** | `vtsls`, `eslint`, `biome` | Fast TypeScript/JavaScript language server with auto-imports and inlay hints |
+| **Language Server (LSP)** | `tsc`, `eslint`, `biome` | TypeScript/JavaScript language server with auto-imports and inlay hints |
 | **Formatters (Conform)** | `prettierd`, `prettier`, `biome` | Priority chain: `prettierd` → `prettier` → `biome` (`stop_after_first = true`) |
 | **Treesitter Parsers** | `typescript`, `javascript`, `tsx`, `jsx` | Complete syntax parsing for TS, JS, and React |
 | **Autocompletion** | `blink.cmp` | LSP completions, snippets, path autocompletion, and Tailwind CSS color previews |
@@ -27,7 +27,7 @@ Accessible via **Command Palette** (`<C-S-p>` / `:CommandPalette`):
 * `:TailwindOrganize` – Re-order Tailwind CSS classes in JSX/TSX/HTML according to standard class sorting guidelines.
 * `:TailwindOrganizerToggle` – Toggle auto-organizing Tailwind CSS classes on save.
 * `:FormatDocument` – Format active file using Prettier/Prettierd/Biome.
-* `:LanguageManager` – Install or uninstall the TypeScript / JavaScript bundle.
+* `:LanguageManager` – Install the shared TypeScript components from the **Web UI (Svelte, Angular, React)** bundle.
 
 ---
 

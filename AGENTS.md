@@ -2,7 +2,7 @@ j 🤖 AGENTS.md — KrsVim AI Assistant Guidelines & Compact Wiki Reference
 
 This file defines mandatory guidelines and reference links for AI coding assistants working in or customizing this Neovim distribution (**KrsVim**).
 
-> 🌐 **Per-Language Documentation Reference**: Individual language toolchain guides, debug profiles, and LSP/formatter commands are documented under [`docs/languages/`](docs/languages/) (e.g., [`php.md`](docs/languages/php.md), [`typescript.md`](docs/languages/typescript.md), [`csharp.md`](docs/languages/csharp.md), [`go.md`](docs/languages/go.md), [`python.md`](docs/languages/python.md), [`lua.md`](docs/languages/lua.md), [`web.md`](docs/languages/web.md), [`angular.md`](docs/languages/angular.md), [`docker-proto.md`](docs/languages/docker-proto.md), [`bash.md`](docs/languages/bash.md)).
+> 🌐 **Per-Language Documentation Reference**: Individual language toolchain guides, debug profiles, and LSP/formatter commands are documented under [`docs/languages/`](docs/languages/) (e.g., [`php.md`](docs/languages/php.md), [`typescript.md`](docs/languages/typescript.md), [`web.md`](docs/languages/web.md), [`astro.md`](docs/languages/astro.md), [`web-ui.md`](docs/languages/web-ui.md), [`rust.md`](docs/languages/rust.md), [`csharp.md`](docs/languages/csharp.md), [`go.md`](docs/languages/go.md), [`python.md`](docs/languages/python.md), [`lua.md`](docs/languages/lua.md), [`docker-proto.md`](docs/languages/docker-proto.md), [`bash.md`](docs/languages/bash.md)).
 
 ---
 
@@ -10,11 +10,11 @@ This file defines mandatory guidelines and reference links for AI coding assista
 
 ### 🌐 1.1 Language Additions & Tooling Registration Rule
 
-**Centralized-config pattern**: everything specific to one language -- LSP server settings, Mason package names, formatter assignment, indentation defaults -- lives in that language's own `lua/krs/langs/<language>/init.lua`, never scattered across `lsp.lua`/`formatting.lua`/`installer.lua`. Those three files only *aggregate* what each language module exports; swapping a tool (e.g. `vtsls` -> `tsgo`) or changing its settings is a one-file edit. See `lua/krs/langs/typescript/init.lua` for the fullest example. A language module exports whichever of these fields it needs:
+**Centralized-config pattern**: everything specific to one language -- LSP server settings, Mason package names, formatter assignment, indentation defaults -- lives in that language's own `lua/krs/langs/<language>/init.lua`, never scattered across `lsp.lua`/`formatting.lua`/`installer.lua`. Those three files only *aggregate* what each language module exports; swapping a tool (e.g. `tsc` -> `tsgo`) or changing its settings is a one-file edit. See `lua/krs/langs/typescript/init.lua` for the fullest example. A language module exports whichever of these fields it needs:
 
 | Field | Shape | Consumed by |
 |---|---|---|
-| `M.lsp_server` | array of lspconfig server names (`{"vtsls"}`, even for a single server -- rare multi-server languages just list more) | `installer.lua` bundles, cross-refs from other modules |
+| `M.lsp_server` | array of lspconfig server names (`{"tsc"}`, even for a single server -- rare multi-server languages just list more) | `installer.lua` bundles, cross-refs from other modules |
 | `M.lsp_config` | `{ [server_name] = <lspconfig opts: root_dir, settings, filetypes, ...> }` | `lua/plugins/lsp/lsp.lua` merges every language's `lsp_config` into `opts.servers` |
 | `M.mason` | `{ [tool_name] = { mason=, cmd=, lang=/name=, type="lsp"\|"formatter"\|"dap" } }` | `lua/krs/core/installer.lua` merges every language's `mason` into `M.tools` |
 | `M.mason_order` | array of tool-name strings, this language's Mason install/display order | `installer.lua` concatenates these into `M.mason_packages` |
@@ -109,13 +109,15 @@ Refer to the specific wiki documentation page for each feature or development us
 Detailed setup, Ex commands, DAP debug profiles, and plugin integrations for each supported language:
 
 * 🐘 [**PHP & Laravel Guide**](docs/languages/php.md) — Intelephense, Pint, PHP-CS-Fixer, blade-formatter, `blade-nav.nvim`, Xdebug (`:PHPCheckTools`, `:BladeNavClearCache`, `:FormatDocument`).
-* 🟨 [**TypeScript & JavaScript Guide**](docs/languages/typescript.md) — `vtsls`, ESLint, Biome, Prettier/Prettierd, `js-debug-adapter`, `type-injector`, `tailwind-organizer`.
+* 🟨 [**TypeScript & JavaScript Guide**](docs/languages/typescript.md) — `tsc`, ESLint, Biome, Prettier/Prettierd, `js-debug-adapter`, `type-injector`, `tailwind-organizer`.
 * 🎯 [**C# / .NET / Blazor Guide**](docs/languages/csharp.md) — OmniSharp, `csharp-ls`, CSharpier, `netcoredbg` (Blazor Server & DLL debugging), `:DotnetNew`, `:NugetManager`.
 * 🟦 [**Go Guide**](docs/languages/go.md) — `gopls`, `delve` DAP (`nvim-dap-go`), `gofumpt`, `goimports`.
 * 🐍 [**Python Guide**](docs/languages/python.md) — `pyright`, `debugpy` DAP, `black`, `isort`, `ruff`.
 * 🌙 [**Lua & KrsVim Scripts Guide**](docs/languages/lua.md) — `lua_ls`, `stylua`, `type_injector`, `krsnvimtranspiler` (`:KrsTranspile`).
-* 🌐 [**Web Frontend Guide**](docs/languages/web.md) — HTML, CSS, Svelte, Astro, Tailwind CSS, Emmet, `autotag`, `:TailwindOrganize`.
-* 🅰️ [**Angular Guide**](docs/languages/angular.md) — `angular-language-server`, SCSS diagnostics via `css-lsp`, HTML/SCSS Treesitter parsers.
+* 🌐 [**Web Frontend Vanilla Guide**](docs/languages/web.md) — HTML, CSS, Tailwind CSS, Emmet, and snippets.
+* 🪐 [**Astro Guide**](docs/languages/astro.md) — Astro LSP and Prettier formatting.
+* 🧩 [**Web UI Guide**](docs/languages/web-ui.md) — Svelte, Angular, React/TSX, and the shared TypeScript toolchain.
+* 🦀 [**Rust Guide**](docs/languages/rust.md) — rust-analyzer, rustfmt, Cargo, and Treesitter.
 * 🐳 [**Docker & Proto Guide**](docs/languages/docker-proto.md) — `dockerls`, `dockerfmt`, `protolint`.
 * 🐚 [**Shell & Bash Guide**](docs/languages/bash.md) — `bashls`, `bash-debug-adapter`, `beautysh`, ShellCheck.
 
@@ -163,4 +165,3 @@ Both must be on `PATH`. The scripts exit 1 with an install hint if either is mis
 > 3. **Prefer Command Palette options** over assigning `<leader>` keymaps.
 > 4. **Reference dedicated wiki pages** under [`docs/languages/`](docs/languages/) for language-specific toolchain details.
 > 5. **Place ALL per-language config** -- LSP settings, Mason metadata, formatter assignment, debugger config, launch-profile runtimes, indentation defaults -- in `lua/krs/langs/<language>/init.lua` (see §1.1's field table) and register the module in `lua/krs/langs/init.lua`. `lsp.lua`/`formatting.lua`/`installer.lua`/`dap.lua`/`runtimes.lua` only aggregate; never hardcode a language's settings there.
-

@@ -14,11 +14,10 @@ Nothing below installs automatically on first start: `mason-lspconfig` is config
 |---|---|---|---|---|
 | **Lua** | `lua_ls` | `stylua` | `lua` | — |
 | **JSON** | `jsonls` *(SchemaStore + local schemas)* | `prettierd` → `prettier` → `biome` | `json` | — |
-| **JavaScript / TS / React** | `vtsls` | `prettierd` → `prettier` → `biome` | `typescript`, `javascript`, `tsx`, `jsx` | `js-debug-adapter` (`pwa-node`), Bun adapter |
-| **HTML / CSS** | `html`, `cssls`, `emmet_ls`, `tailwindcss` | `prettierd` → `prettier` → `biome` | `html`, `css` | browser adapters |
-| **Svelte** | `svelte` | `prettierd` → `prettier` → `biome` | `svelte` | browser adapters |
-| **Astro** | `astro` | `prettier` (always) | `astro` | browser adapters |
-| **Angular** | `angularls` | `prettierd` → `prettier` → `biome` | `html`, `scss` | browser adapters |
+| **Web Frontend Vanilla** | `html`, `cssls`, `emmet_ls`, `tailwindcss` | `prettierd` → `prettier` → `biome` | `html`, `css` | browser adapters |
+| **Web Frameworks (Astro)** | `astro` | `prettier` (always) | `astro` | browser adapters |
+| **Web UI (Svelte / Angular / React)** | `svelte`, `angularls`, `tsc` | `prettierd` → `prettier` → `biome` | `svelte`, `html`, `scss`, `typescript`, `javascript`, `tsx`, `jsx` | `js-debug-adapter`, Bun adapter |
+| **Rust** | `rust_analyzer` | `rustfmt` | `rust` | — |
 | **Go** | `gopls` | `goimports`, `gofumpt` | `go`, `gomod`, `gowork`, `gosum` | `delve` (via `nvim-dap-go`) |
 | **Python** | — (debug only) | — | `python` | `debugpy` |
 | **PHP / Blade** | `intelephense` | `pint` → `php_cs_fixer`; Blade uses `blade-formatter` → `pint` | `php`, `phpdoc`, `blade` | `php-debug-adapter` (Xdebug) |
@@ -33,11 +32,11 @@ Nothing below installs automatically on first start: `mason-lspconfig` is config
 
 ## 🧠 Server notes
 
-**TypeScript runs on `vtsls`.** Its name is defined once, in `lua/krs/langs/typescript/init.lua`'s `M.lsp_server` — swap TS servers (e.g. to `tsgo`) by changing that one value; `lsp.lua` and `installer.lua` both read it from there. It gets a custom `root_dir` (nvim 0.11+ `(bufnr, on_dir)` signature, which must *call* `on_dir`): it roots at `tsconfig.json` / `jsconfig.json` / `package.json`, and falls back to the file's own directory when the only match would be `$HOME` — otherwise opening a stray script indexes the whole home directory. Automatic type acquisition is off; types come from the [Type Injector](type-injector.md) instead.
+**TypeScript and React run on `tsc`.** Its settings live in `lua/krs/langs/typescript/init.lua`; its installable LSP, formatter, parser, and debug-adapter components are grouped under **Web UI (Svelte, Angular, React)** in `:LanguageManager`. It roots at `tsconfig.json` / `jsconfig.json` / `package.json`, and falls back to the file's own directory when the only match would be `$HOME` — otherwise opening a stray script indexes the whole home directory. Automatic type acquisition is off; types come from the [Type Injector](type-injector.md) instead.
 
-**Diagnostics are native.** `vtsls` advertises `diagnosticProvider`, so Neovim pulls and refreshes diagnostics itself. An earlier hand-rolled fetch into a private namespace froze whatever the server knew a few hundred ms after attach — usually before `node_modules` was indexed — and never refreshed.
+**Diagnostics are native.** The configured TypeScript server advertises `diagnosticProvider`, so Neovim pulls and refreshes diagnostics itself.
 
-**PHP** — `intelephense` with a large stub set and `maxSize = 1000000`. `pint` and `php_cs_fixer` are conditional formatters: they only run when the binary is on `PATH` **or** `vendor/bin/pint(.bat)` / `vendor/bin/php-cs-fixer(.bat)` exists upward from the file. `.blade.php` is remapped to the `blade` filetype. `:PHPCheckTools` reports which PHP tools are missing on the host and inside WSL, with install steps.
+**PHP** — `intelephense` with a large stub set and `maxSize = 5000000`, allowing Laravel's larger Composer class-map files to be indexed. `pint` and `php_cs_fixer` are conditional formatters: they only run when the binary is on `PATH` **or** `vendor/bin/pint(.bat)` / `vendor/bin/php-cs-fixer(.bat)` exists upward from the file. `.blade.php` is remapped to the `blade` filetype. `:PHPCheckTools` reports which PHP tools are missing on the host and inside WSL, with install steps.
 
 **Astro and biome** — biome cannot format `.astro` templates at all, so those files are pinned to `prettier` (the project needs `prettier-plugin-astro` installed). Everywhere else the chain is `prettierd` → `prettier` → `biome`, `stop_after_first`.
 
@@ -67,7 +66,7 @@ KrsVim displays reference counts (`󰌹 3 references`, `1 reference`) above func
 - **Default State**: **ON** by default.
 - **Toggle Command**: Run `:KrsToggleReferences` or press `<leader>tr`.
 - **Command Palette**: Accessible inside Command Palette (`<C-Shift-P>`) under `👁️ Toggle LSP Reference Counts / CodeLens (Default: ON)`.
-- **Zero Complexity for New Languages**: Any language server attached to Neovim (such as `vtsls`/`tsserver`, `gopls`, `rust-analyzer`, `intelephense`, `pyright`, `clangd`, `omnisharp`, `lua_ls`) automatically streams code lenses according to standard LSP specs.
+- **Zero Complexity for New Languages**: Any language server attached to Neovim (such as `tsc`, `gopls`, `rust_analyzer`, `intelephense`, `pyright`, `clangd`, `omnisharp`, `lua_ls`) automatically streams code lenses according to standard LSP specs.
 
 ---
 

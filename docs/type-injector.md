@@ -44,9 +44,9 @@ Adding one is just adding a directory — `scan_available_schemas()` reads the f
 
 **Lua (`lua_ls`).** Active schema directories are appended to `Lua.workspace.library`, and the running client is notified with `workspace/didChangeConfiguration` — so toggling a schema takes effect immediately, no restart.
 
-**TypeScript (`vtsls`).** All active schemas are collapsed into a *single* generated file, `.krsnvim/types.d.ts`, holding one `/// <reference path="…" />` per schema. The project's TS config is patched to include it. One generated file instead of N `typeRoots` entries keeps `tsconfig.json` readable and makes "what types are on?" a single file to look at.
+**TypeScript (`tsc`).** All active schemas are collapsed into a *single* generated file, `.krsnvim/types.d.ts`, holding one `/// <reference path="…" />` per schema. The project's TS config is patched to include it. One generated file instead of N `typeRoots` entries keeps `tsconfig.json` readable and makes "what types are on?" a single file to look at.
 
-Automatic type acquisition is disabled on `vtsls` (see [Languages](languages.md)), so what you toggle here is exactly what the server sees. The client name notified after a change is resolved from `lua/krs/langs/typescript/init.lua`'s `M.lsp_server`, not hardcoded — it stays correct if that server is ever swapped.
+Automatic type acquisition is disabled on `tsc` (see [Languages](languages.md)), so what you toggle here is exactly what the server sees. The client name notified after a change is resolved from `lua/krs/langs/typescript/init.lua`'s `M.lsp_server`, not hardcoded — it stays correct if that server is ever swapped.
 
 ---
 

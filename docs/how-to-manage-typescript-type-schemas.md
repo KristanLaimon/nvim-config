@@ -103,7 +103,7 @@ The extracted `package.json` already has a real `"version"` field — keep it (d
 
 ## ✅ Register (activate) a schema for a project
 
-**Through the picker (recommended):** open the target project in Neovim, run `:KrsTypes` (or `:TypeInjector`) from a `.ts`/`.js`/`.tsx`/`.jsx` buffer, toggle the schema on. This writes `.krsnvim/types.json`, regenerates `.krsnvim/types.d.ts` (one `/// <reference path>` per active schema), patches `tsconfig.json`'s `include` if needed, and notifies the running `vtsls` client — no restart.
+**Through the picker (recommended):** open the target project in Neovim, run `:KrsTypes` (or `:TypeInjector`) from a `.ts`/`.js`/`.tsx`/`.jsx` buffer, toggle the schema on. This writes `.krsnvim/types.json`, regenerates `.krsnvim/types.d.ts` (one `/// <reference path>` per active schema), patches `tsconfig.json`'s `include` if needed, and notifies the running `tsc` client — no restart.
 
 **By hand:** create/edit `.krsnvim/types.json` at the project root:
 
@@ -122,7 +122,7 @@ Then either run `:KrsTypes` once (toggle a schema off/on, or just open/close the
 ```
 
 ```jsonc
-// tsconfig.json -- must include the generated file, or vtsls ignores it entirely
+// tsconfig.json -- must include the generated file, or the TS language server ignores it entirely
 { "include": ["**/*", ".krsnvim/**/*.d.ts"] }
 ```
 
@@ -139,7 +139,7 @@ rm -rf "$CFG"/*
 # ...repeat Step 2's curl/tar/cp against the new version...
 ```
 
-Any project with the schema active picks it up the next time `vtsls` re-reads the referenced files (usually automatic on save; `:LspRestart` if not).
+Any project with the schema active picks it up the next time `tsc` re-reads the referenced files (usually automatic on save; `:LspRestart` if not).
 
 ---
 

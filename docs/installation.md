@@ -53,6 +53,7 @@ If you skip running `setup.ps1` or `setup.sh`, KrsVim handles missing external C
 | **`node` / `npm`** | JS/TS LSP, Prettier, HTML/CSS | Mason servers requiring Node.js wait until Node is installed on your `PATH`. |
 | **`bun`** | Bun debug adapter & profiles | Bun launch profiles notify if `bun` binary is not found. |
 | **`go`** | Go LSP (`gopls`) & Delve | Go features activate automatically once Go is present. |
+| **`rustc` / `cargo` / `rustfmt`** | Rust LSP and formatting | The Rust bundle needs the Rust toolchain; install it with rustup before selecting the bundle. |
 | **`dotnet`** | C# LSP & Nuget manager | Nuget manager (`:NugetManager`) notifies if `dotnet` CLI is missing. |
 
 > 💡 **Tip:** You can run `setup.ps1` or `setup.sh` at any time after using Neovim to instantly fill in any missing dependencies!
@@ -86,6 +87,7 @@ For manual installation or custom package managers, here is the complete tool ch
 | **Node.js & npm** | JS/TS LSP, Prettier, JSON/HTML LSPs | `scoop install nodejs-lts` | `nodejs npm` |
 | **Bun** *(optional)* | Bun launch profiles & fast JS runtime | `scoop install bun` | `curl -fsSL https://bun.sh/install \| bash` |
 | **Go** *(optional)* | Go LSP (`gopls`), `gofumpt`, Delve debugger | `scoop install go` | `golang` |
+| **Rust** *(optional)* | rust-analyzer, rustfmt, Cargo | `scoop install rustup` then `rustup default stable` | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
 | **.NET SDK** *(optional)*| C# LSP, Nuget manager (`:NugetManager`), `netcoredbg` | `scoop install dotnet-sdk` | `dotnet-sdk-8.0` |
 | **WSL** *(optional)* | WSL file explorer (`:TelescopeFileBrowserWSL`), auto-WSL terminal | `wsl --install` | — |
 

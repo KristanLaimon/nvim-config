@@ -89,7 +89,7 @@ Forgot a shortcut? Press `?` or `<F1>` to see context-aware help, or press `<C-S
 | `<F7>` | n, i, v, t | Toggle the last-focused task output window |
 | `:TaskRestart` / `:TaskKill` | Cmd | Restart / kill the active task |
 | `<A-1>`..`<A-9>` | n, i, t | Select & switch to terminal #1-#9 (spawned on first use) |
-| `<C-;>` / `<C-S-;>` / `<C-S-:>` / `<A-;>` / `<C-A-;>` | n, i, t | Toggle the selected terminal panel |
+| `<C-;>` / `<C-S-;>` / `<C-S-:>` / `<A-;>` / `<C-A-;>` | n, i, t | Toggle the selected terminal panel; `<C-;>` also works from Neo-tree |
 | `<C-w>c` | n (terminal) | Close the active terminal window |
 
 ---
