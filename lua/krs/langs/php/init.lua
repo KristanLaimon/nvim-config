@@ -33,7 +33,9 @@ M.lsp_config = {
 		settings = {
 			intelephense = {
 				files = {
-					maxSize = 1000000,
+					-- Laravel's Composer class map exceeds the default 1 MB limit.
+					-- Keep it indexed so vendor classes resolve in this project.
+					maxSize = 5000000,
 				},
 				stubs = {
 					"bcmath",

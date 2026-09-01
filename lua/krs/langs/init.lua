@@ -119,14 +119,15 @@ M.langs = {
 	php = require("krs.langs.php"),
 	typescript = require("krs.langs.typescript"),
 	web = require("krs.langs.web"),
-	angular = require("krs.langs.angular"),
+	astro = require("krs.langs.astro"),
+	web_ui = require("krs.langs.web_ui"),
 	csharp = require("krs.langs.csharp"),
 	go = require("krs.langs.go"),
+	rust = require("krs.langs.rust"),
 	python = require("krs.langs.python"),
 	lua = require("krs.langs.lua"),
 	bash = require("krs.langs.bash"),
 	docker_proto = require("krs.langs.docker_proto"),
-	mermaid = require("krs.langs.mermaid"),
 }
 
 --- Display order for `M.langs` in the Language Tooling Manager (`:LanguageManager`)
@@ -135,7 +136,7 @@ M.langs = {
 --- (name, requires, Mason packages, Treesitter parsers) comes from the module
 --- itself, see lua/krs/core/installer.lua's `M.language_bundles`.
 M.lang_order =
-	{ "lua", "php", "typescript", "go", "python", "csharp", "web", "angular", "docker_proto", "bash", "mermaid" }
+	{ "lua", "php", "go", "rust", "python", "csharp", "web", "astro", "web_ui", "docker_proto", "bash" }
 
 --- Initialize all per-language configuration submodules.
 function M.setup()

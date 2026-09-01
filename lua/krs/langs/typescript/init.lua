@@ -144,15 +144,9 @@ M.mason["js-debug-adapter"] = {
 	cmd = "js-debug-adapter",
 }
 
---- Preferred Mason install/display order for this language's tools.
-M.mason_order = { M.lsp_server[1], "jsonls", "biome", "eslint", "prettierd", "prettier", "js-debug-adapter" }
-
---- Language Tooling Manager bundle metadata (see lua/krs/core/installer.lua).
-M.bundle_name = "🟨 TypeScript / JavaScript"
-M.requires = {
-	{ cmd = "node", name = "Node.js", hint = "https://nodejs.org" },
-}
-M.treesitter = { "typescript", "javascript", "tsx", "jsx" }
+-- Tool installation is grouped with Svelte, Angular, and React in the Web UI
+-- bundle. This module remains the single source of truth for JS/TS settings,
+-- formatting, and debugger helpers used throughout the configuration.
 
 --- Paths js-debug must never step into, so the debugger does not stop inside node
 --- internals or the tsx loader. Shared with lua/plugins/krs/debuggers/_shared.lua.

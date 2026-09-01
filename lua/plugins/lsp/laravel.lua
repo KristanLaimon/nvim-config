@@ -28,6 +28,14 @@ return {
 		ft = { "blade", "php" },
 		opts = {
 			close_tag_on_complete = true,
+			-- Blink is registered below as a direct source provider. Disable the
+			-- optional nvim-cmp/coq integrations so blade-nav does not emit a
+			-- misleading "nvim-cmp not found" warning on every Blade buffer.
+			integrations = {
+				gf = true,
+				cmp = false,
+				coq = false,
+			},
 		},
 	},
 
