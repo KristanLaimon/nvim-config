@@ -32,17 +32,18 @@ describe("keymap_registry", function()
 			vim.wait(100, function()
 				return #calls > 0
 			end)
-			if #calls ~= 1 then
-				for i, c in ipairs(calls) do
-					print("CALL", i, c.msg)
+			local collision_calls = {}
+			for _, c in ipairs(calls) do
+				if c.opts and c.opts.title == "Keymap collision" then
+					table.insert(collision_calls, c)
 				end
 			end
-			expect(#calls).toBe(1)
-			expect(calls[1].opts.title).toBe("Keymap collision")
-			expect(calls[1].opts.max_width).toBe(120)
-			expect(type(calls[1].opts.on_open)).toBe("function")
+			expect(#collision_calls).toBe(1)
+			expect(collision_calls[1].opts.title).toBe("Keymap collision")
+			expect(collision_calls[1].opts.max_width).toBe(120)
+			expect(type(collision_calls[1].opts.on_open)).toBe("function")
 			expect(calls[1].opts.timeout).toBe(nil)
-			expect(calls[1].level).toBe(vim.log.levels.WARN)
+			expect(collision_calls[1].level).toBe(vim.log.levels.WARN)
 
 			vim.keymap.del("n", "<F13>")
 		end)

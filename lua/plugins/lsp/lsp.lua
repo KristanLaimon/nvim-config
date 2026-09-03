@@ -490,10 +490,18 @@ return {
 						-- always rank snippets (LSP kind 15) below real completions, regardless of fuzzy score
 						function(a, b)
 							local a_snip, b_snip = a.kind == 15, b.kind == 15
-							if a_snip == b_snip then
-								return nil
+							if a_snip ~= b_snip then
+								return b_snip
 							end
-							return b_snip
+						end,
+						-- always rank struct fields, properties, enums, enum members & constants (LSP kinds 5, 10, 13, 20, 21) at top
+						function(a, b)
+							local priority_kinds = { [5] = true, [10] = true, [13] = true, [20] = true, [21] = true }
+							local a_prio = priority_kinds[a.kind] == true
+							local b_prio = priority_kinds[b.kind] == true
+							if a_prio ~= b_prio then
+								return a_prio
+							end
 						end,
 						"score",
 						"sort_text",
