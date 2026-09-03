@@ -99,7 +99,7 @@ Forgot a shortcut? Press `?` or `<F1>` to see context-aware help, or press `<C-S
 | Shortcut / Command | Mode | Action |
 | :--- | :---: | :--- |
 | `<C-S-w>` | n, i, v, t | Open the Workspaces picker |
-| `<C-S-m>` | n, i, v, t | Close the session and return to the dashboard (with save prompt) |
+| `<leader>wm` | n | Close the session and return to the dashboard (with save prompt) |
 | `:WorkspaceSave [name]` / `:WorkspaceLoad [name\|slot]` | Cmd | Save / load workspace by name or slot |
 | `:WorkspaceDelete` / `:WorkspaceRename` | Cmd | Delete / rename workspace |
 | `:Workspaces` / `:WorkspaceSelect` | Cmd | Open the Workspaces picker |

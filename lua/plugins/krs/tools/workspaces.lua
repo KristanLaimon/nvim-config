@@ -7,7 +7,7 @@
 --      single `index.json` holding names, project paths, dates and open buffers.
 --   3. Offers a Telescope picker (`<C-S-w>`) to load, delete, rename, overwrite,
 --      or filter workspaces, plus Harpoon-style slots 1..9.
---   4. Returns to the dashboard with `<C-S-m>`, optionally saving first.
+--   4. Returns to the dashboard with `<leader>wm`, optionally saving first.
 --
 -- PICKER KEYS
 --   <CR> load   d delete   r rename   a new   s overwrite   g all/current   1-9 slot
@@ -73,7 +73,7 @@ M.settings = {
 		--- Open the workspace picker.
 		select = { "<C-S-w>", "<C-S-W>", "<leader>ws" },
 		--- Close everything and return to the dashboard.
-		menu = { "<C-S-m>", "<C-S-M>", "<leader>wm" },
+		menu = { "<leader>wm" },
 		--- Leader mappings: save, select, back to menu.
 		leader_save = nil,
 		leader_select = nil,
@@ -916,7 +916,6 @@ return setmetatable({
 	cmd = { "WorkspaceSelect", "Workspaces", "WorkspaceSave", "WorkspaceManage", "WorkspaceClose", "WorkspaceMenu" },
 	keys = {
 		{ "<C-S-w>", mode = { "n", "i" }, desc = "Select Workspace" },
-		{ "<C-S-m>", mode = { "n", "i" }, desc = "Close Workspace" },
 		{ "<leader>ws", mode = { "n" }, desc = "Select Workspace" },
 		{ "<leader>wm", mode = { "n" }, desc = "Close Workspace" },
 	},

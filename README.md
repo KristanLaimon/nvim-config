@@ -38,7 +38,7 @@ The start screen. One letter per entry:
 | `m` | LSPs & languages (`:Mason`) |
 | `q` | Quit |
 
-Return to the dashboard from anywhere with `<C-S-m>`; closing the last open buffer also lands here.
+Return to the dashboard from anywhere with `<leader>wm`; closing the last open buffer also lands here.
 
 ---
 

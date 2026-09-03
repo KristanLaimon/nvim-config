@@ -131,7 +131,7 @@ If you have just installed or launched KrsVim for the first time, follow these s
 ### 🎛️ Floating Panels & General Tools
 | Shortcut | Action | Details |
 | :--- | :--- | :--- |
-| `<C-S-m>` | **Main Menu / Dashboard** | Open landing dashboard |
+| `<leader>wm` | **Main Menu / Dashboard** | Open landing dashboard |
 | `<C-S-p>` | **Command Palette** | Fuzzy-searchable action runner for all commands & tools |
 | `<C-S-f>` | **File Explorer** | Floating desktop & WSL file explorer and project picker |
 | `<C-S-w>` | **Workspaces & Sessions** | Manage per-project session slots and buffer states |
