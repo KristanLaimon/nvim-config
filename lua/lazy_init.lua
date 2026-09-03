@@ -57,7 +57,15 @@ local settings = {
 -- BOOTSTRAP
 -- ============================================================================
 
-if not (vim.uv or vim.loop).fs_stat(settings.install_path) then
+local lazy_entrypoint = settings.install_path .. "/lua/lazy/init.lua"
+if not (vim.uv or vim.loop).fs_stat(lazy_entrypoint) then
+	-- A canceled or failed clone can leave the target directory behind without
+	-- lazy.nvim's Lua entrypoint. Treat that as an incomplete installation,
+	-- rather than skipping the bootstrap merely because the directory exists.
+	if (vim.uv or vim.loop).fs_stat(settings.install_path) then
+		vim.fn.delete(settings.install_path, "rf")
+	end
+
 	local out = vim.fn.system({
 		"git",
 		"clone",
