@@ -25,16 +25,44 @@
 --   in blink_sources.lua and editorconfig.lua.
 -- ============================================================================
 
--- MSBuild project/props files are XML; registering them makes lemminx attach and
--- give IntelliSense inside .csproj and friends. `.blade.php` needs a pattern
--- rather than an extension, because the filetype depends on the double suffix.
 local langs = require("krs.langs").langs
+
+local function get_schema_uri(category, filename)
+	local path = vim.fs.normalize(vim.fn.stdpath("config") .. "/schemas/" .. category .. "/" .. filename)
+	return vim.uri_from_fname(path)
+end
 
 --- Generic, language-agnostic servers with no owning lua/krs/langs/<lang> module.
 local function generic_servers()
 	return {
-		taplo = {},
-		yamlls = {},
+		taplo = {
+			settings = {
+				even_better_toml = {
+					schema = {
+						enabled = true,
+						repository = false,
+						associations = {
+							["^bunfig\\.toml$"] = get_schema_uri("toml", "bunfig.json"),
+							["^revive\\.toml$"] = get_schema_uri("toml", "revive.json"),
+							["revive\\.toml$"] = get_schema_uri("toml", "revive.json"),
+						},
+					},
+				},
+			},
+		},
+		yamlls = {
+			settings = {
+				yaml = {
+					schemaStore = {
+						enable = false,
+						url = "",
+					},
+					schemas = {
+						[get_schema_uri("yaml", "golangci.json")] = { ".golangci.yml", ".golangci.yaml", ".golangci.example.yml" },
+					},
+				},
+			},
+		},
 		lemminx = {
 			settings = {
 				xml = {
@@ -290,13 +318,11 @@ return {
 			-- whatever the server happened to know a few hundred ms after attach --
 			-- typically before node_modules was loaded -- and never refreshed it.
 
-			local function get_schema_uri(category, filename)
-				local path = vim.fs.normalize(vim.fn.stdpath("config") .. "/schemas/" .. category .. "/" .. filename)
-				return vim.uri_from_fname(path)
-			end
-
 			local ok_schemastore, schemastore = pcall(require, "schemastore")
 			if ok_schemastore then
+				local yaml_schemas = schemastore.yaml.schemas()
+				yaml_schemas[get_schema_uri("yaml", "golangci.json")] = { ".golangci.yml", ".golangci.yaml", ".golangci.example.yml" }
+
 				opts.servers.yamlls = opts.servers.yamlls or {}
 				opts.servers.yamlls.settings = {
 					yaml = {
@@ -304,7 +330,7 @@ return {
 							enable = false,
 							url = "",
 						},
-						schemas = schemastore.yaml.schemas(),
+						schemas = yaml_schemas,
 					},
 				}
 
@@ -357,18 +383,6 @@ return {
 					},
 				}
 			end
-
-			opts.servers.taplo.settings = {
-				even_better_toml = {
-					schema = {
-						enabled = true,
-						repository = false,
-						associations = {
-							["^bunfig\\.toml$"] = get_schema_uri("toml", "bunfig.json"),
-						},
-					},
-				},
-			}
 
 			-- Stop all active LSP clients whenever the working directory/project changes.
 			-- When you open a file in the new project, Neovim will automatically launch only the needed LSP.

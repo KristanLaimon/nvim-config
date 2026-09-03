@@ -18,6 +18,7 @@ This guide explains how offline, 100% local TOML schema validation and autocompl
 | Tool / Target File | Local Schema File | Applied File Pattern |
 |---|---|---|
 | **Bun Configuration (`bunfig.toml`)** | `schemas/toml/bunfig.json` | `^bunfig\\.toml$` |
+| **Revive Linter (`revive.toml`)** | `schemas/toml/revive.json` | `^revive\\.toml$` |
 
 ---
 

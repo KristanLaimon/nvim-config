@@ -10,7 +10,8 @@ KrsVim provides a dedicated **Go** environment powered by `gopls`, `gofumpt`, `g
 
 | Feature | Tool / Package | Details |
 | :--- | :--- | :--- |
-| **Language Server (LSP)** | `gopls` | Official Go language server with staticcheck analysis, inlay hints, and code lenses |
+| **Language Server (LSP)** | `gopls` | Official Go language server with integrated staticcheck analysis, inlay hints, and code lenses |
+| **Linters** | `staticcheck`, `revive`, `golangci-lint` | Advanced static analysis & code style (SA/ST/QF/U rules) running alongside `go vet` |
 | **Formatters (Conform)** | `goimports`, `gofumpt` | Automatic import organization and strict Go code formatting |
 | **Treesitter Parsers** | `go`, `gomod`, `gowork`, `gosum` | Highlighting for Go source, `go.mod`, `go.work`, `go.sum` |
 | **Autocompletion** | `blink.cmp` | Type completion, struct field hints, and snippet completion |

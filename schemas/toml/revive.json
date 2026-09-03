@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://json.schemastore.org/revive.json",
+  "title": "Revive Configuration",
+  "description": "Revive configuration schema for `revive.toml`. Fast, configurable, extensible, flexible, and intuitive linter for Go. See https://revive.run/",
+  "additionalProperties": true,
+  "type": "object",
+  "properties": {
+    "ignoreGeneratedHeader": {
+      "description": "When set to true, revive will ignore files that have a 'GENERATED' header comment.",
+      "type": "boolean",
+      "default": false
+    },
+    "severity": {
+      "description": "Default severity level for reported failures ('warning' or 'error').",
+      "type": "string",
+      "enum": ["warning", "error"],
+      "default": "warning"
+    },
+    "confidence": {
+      "description": "Minimum confidence score for reporting issues (0.0 to 1.0).",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.8
+    },
+    "errorCode": {
+      "description": "Exit code returned when revive encounters error-level failures.",
+      "type": "integer",
+      "default": 1
+    },
+    "warningCode": {
+      "description": "Exit code returned when revive encounters warning-level failures.",
+      "type": "integer",
+      "default": 0
+    },
+    "formatter": {
+      "description": "Format for output reports.",
+      "type": "string",
+      "enum": [
+        "default",
+        "json",
+        "ndjson",
+        "checkstyle",
+        "code-climate",
+        "junit",
+        "unix",
+        "sarif",
+        "plain",
+        "friendly"
+      ],
+      "default": "default"
+    },
+    "rule": {
+      "description": "Revive rules configurations table (`[rule.<rule_name>]`).",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "disabled": {
+            "description": "Set true to disable this rule.",
+            "type": "boolean"
+          },
+          "severity": {
+            "description": "Severity level for this specific rule.",
+            "type": "string",
+            "enum": ["warning", "error"]
+          },
+          "arguments": {
+            "description": "Arguments passed to the rule logic.",
+            "type": "array",
+            "items": {}
+          }
+        }
+      }
+    },
+    "rules": {
+      "description": "Alternative array of rule configurations.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the rule (e.g. exported, package-comments, indent-error-flow)."
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["warning", "error"]
+          },
+          "arguments": {
+            "type": "array"
+          }
+        },
+        "required": ["name"]
+      }
+    },
+    "directive": {
+      "description": "Revive directives configuration.",
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}
