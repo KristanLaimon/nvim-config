@@ -10,7 +10,7 @@ The **Web UI (Svelte, Angular, React)** bundle combines component-framework tool
 
 | Feature | Tool / Package | Details |
 | :--- | :--- | :--- |
-| **React / TypeScript** | `tsc`, `jsonls`, `eslint`, `biome` | JSX/TSX completion, diagnostics, auto-imports, and project-aware TypeScript support |
+| **React / TypeScript** | `vtsls`, `jsonls`, `eslint`, `biome` | JSX/TSX completion, diagnostics, auto-imports, and project-aware TypeScript support |
 | **Svelte** | `svelte` | Completion and diagnostics for `.svelte` components |
 | **Angular** | `angularls`, `cssls` | Angular templates plus CSS/SCSS diagnostics |
 | **Formatters** | `prettierd`, `prettier`, `biome` | `prettierd` → `prettier` → `biome`; Svelte uses the same chain |

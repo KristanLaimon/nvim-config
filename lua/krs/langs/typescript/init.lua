@@ -22,7 +22,7 @@ local M = {}
 --- The lspconfig/mason server name(s) backing TypeScript & JavaScript. An array even
 --- though there is normally one: swap TS servers (e.g. vtsls -> tsgo) by changing
 --- this one value, or list more than one for the rare case a language needs several.
-M.lsp_server = { "tsc" }
+M.lsp_server = { "vtsls" }
 
 --- Formatter and tool configuration files that indicate a project-managed code style.
 M.PRETTIER_CONFIG_FILES = {

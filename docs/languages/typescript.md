@@ -10,7 +10,7 @@ KrsVim provides a high-performance **TypeScript / JavaScript** environment suppo
 
 | Feature | Tool / Package | Details |
 | :--- | :--- | :--- |
-| **Language Server (LSP)** | `tsc`, `eslint`, `biome` | TypeScript/JavaScript language server with auto-imports and inlay hints |
+| **Language Server (LSP)** | `vtsls`, `eslint`, `biome` | TypeScript/JavaScript language server with auto-imports and inlay hints |
 | **Formatters (Conform)** | `prettierd`, `prettier`, `biome` | Priority chain: `prettierd` → `prettier` → `biome` (`stop_after_first = true`) |
 | **Treesitter Parsers** | `typescript`, `javascript`, `tsx`, `jsx` | Complete syntax parsing for TS, JS, and React |
 | **Autocompletion** | `blink.cmp` | LSP completions, snippets, path autocompletion, and Tailwind CSS color previews |

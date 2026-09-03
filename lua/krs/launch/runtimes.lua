@@ -87,6 +87,29 @@ end
 --- @return table ctx `{ root, entry, full_entry, is_ts, args, args_str, profile }`
 function M.context(profile, root)
 	local entry = profile.entry_point or ""
+	local rt = profile.runtime or M.default_runtime
+
+	-- Safety fallback for incompatible/legacy entry points (e.g. src/index.ts on a Go profile)
+	if rt == "go" and (entry == "" or (entry:match("%.go$") == nil and entry ~= "." and not path.is_file(path.join(root, entry)))) then
+		if path.is_file(path.join(root, "main.go")) then
+			entry = "main.go"
+		elseif path.is_file(path.join(root, "cmd/main.go")) then
+			entry = "cmd/main.go"
+		elseif path.is_file(path.join(root, "go.mod")) then
+			entry = "."
+		end
+	elseif rt == "python" and (entry == "" or (entry:match("%.py$") == nil and not path.is_file(path.join(root, entry)))) then
+		if path.is_file(path.join(root, "main.py")) then
+			entry = "main.py"
+		elseif path.is_file(path.join(root, "app.py")) then
+			entry = "app.py"
+		end
+	elseif rt == "dotnet" and (entry == "" or (entry:match("%.cs$") == nil and entry:match("%.csproj$") == nil and entry:match("%.dll$") == nil and not path.is_file(path.join(root, entry)))) then
+		if path.is_file(path.join(root, "Program.cs")) then
+			entry = "Program.cs"
+		end
+	end
+
 	local args = profile.args or {}
 	return {
 		profile = profile,

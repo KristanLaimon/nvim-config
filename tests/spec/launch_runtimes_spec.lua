@@ -20,7 +20,7 @@ local function profile(runtime, overrides)
 		runtime = runtime,
 		entry_point = "src/index.js",
 		args = {},
-		mode = "run",
+		mode = "debug",
 	}, overrides or {})
 end
 
@@ -28,9 +28,24 @@ describe("runtimes.build_command", function()
 	it("prefixes the entry point with the runtime executable", function()
 		expect(runtimes.build_command(profile("bun"), ROOT)).toBe("bun src/index.js")
 		expect(runtimes.build_command(profile("python"), ROOT)).toBe("python src/index.js")
-		expect(runtimes.build_command(profile("go"), ROOT)).toBe("go run src/index.js")
+		expect(runtimes.build_command(profile("go", { entry_point = "main.go" }), ROOT)).toBe("go run main.go")
 		expect(runtimes.build_command(profile("php"), ROOT)).toBe("php src/index.js")
 		expect(runtimes.build_command(profile("deno"), ROOT)).toBe("deno run -A src/index.js")
+	end)
+
+	it("normalizes incompatible entry points for Go", function()
+		local tmp = vim.fn.tempname()
+		vim.fn.mkdir(tmp, "p")
+		local main_go = tmp .. "/main.go"
+		local f = io.open(main_go, "w")
+		if f then
+			f:write("package main\nfunc main() {}\n")
+			f:close()
+		end
+
+		local cmd = runtimes.build_command(profile("go", { entry_point = "src/index.ts" }), tmp)
+		expect(cmd).toBe("go run main.go")
+		vim.fn.delete(tmp, "rf")
 	end)
 
 	it("targets the project, not the file, for dotnet", function()

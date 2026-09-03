@@ -100,19 +100,124 @@ M.settings = {
 	},
 }
 
+--- Detects default runtime and entry point based on project root files.
+--- @param root string|nil Project root.
+--- @return string runtime, string entry_point
+function M.detect_project_entry(root)
+	root = root or M.get_project_root()
+	if not root or root == "" then
+		return "bun", "src/index.ts"
+	end
+
+	-- Go project
+	if path.is_file(path.join(root, "go.mod"))
+		or path.is_file(path.join(root, "main.go"))
+		or path.is_file(path.join(root, "cmd/main.go"))
+		or #vim.fn.globpath(root, "*.go", false, true) > 0
+	then
+		local entry = "main.go"
+		if path.is_file(path.join(root, "main.go")) then
+			entry = "main.go"
+		elseif path.is_file(path.join(root, "cmd/main.go")) then
+			entry = "cmd/main.go"
+		elseif path.is_file(path.join(root, "go.mod")) then
+			entry = "."
+		end
+		return "go", entry
+	end
+
+	-- Python project
+	if path.is_file(path.join(root, "main.py"))
+		or path.is_file(path.join(root, "app.py"))
+		or path.is_file(path.join(root, "pyproject.toml"))
+		or path.is_file(path.join(root, "requirements.txt"))
+		or #vim.fn.globpath(root, "*.py", false, true) > 0
+	then
+		local entry = "main.py"
+		if path.is_file(path.join(root, "main.py")) then
+			entry = "main.py"
+		elseif path.is_file(path.join(root, "app.py")) then
+			entry = "app.py"
+		end
+		return "python", entry
+	end
+
+	-- C# / .NET project
+	if path.is_file(path.join(root, "Program.cs"))
+		or #vim.fn.globpath(root, "*.csproj", false, true) > 0
+		or #vim.fn.globpath(root, "*.sln", false, true) > 0
+	then
+		local entry = "Program.cs"
+		if path.is_file(path.join(root, "Program.cs")) then
+			entry = "Program.cs"
+		end
+		return "dotnet", entry
+	end
+
+	-- PHP project
+	if path.is_file(path.join(root, "composer.json"))
+		or path.is_file(path.join(root, "index.php"))
+		or path.is_file(path.join(root, "public/index.php"))
+	then
+		local entry = "index.php"
+		if path.is_file(path.join(root, "public/index.php")) then
+			entry = "public/index.php"
+		elseif path.is_file(path.join(root, "index.php")) then
+			entry = "index.php"
+		end
+		return "php", entry
+	end
+
+	-- Lua project
+	if path.is_file(path.join(root, "init.lua"))
+		or path.is_file(path.join(root, "main.lua"))
+		or #vim.fn.globpath(root, "*.lua", false, true) > 0
+	then
+		local entry = "init.lua"
+		if path.is_file(path.join(root, "init.lua")) then
+			entry = "init.lua"
+		elseif path.is_file(path.join(root, "main.lua")) then
+			entry = "main.lua"
+		end
+		return "lua", entry
+	end
+
+	-- TS / JS project
+	if path.is_file(path.join(root, "package.json"))
+		or path.is_file(path.join(root, "tsconfig.json"))
+		or path.is_file(path.join(root, "src/index.ts"))
+		or path.is_file(path.join(root, "src/main.ts"))
+		or path.is_file(path.join(root, "index.js"))
+	then
+		local entry = "src/index.ts"
+		if path.is_file(path.join(root, "src/main.ts")) then
+			entry = "src/main.ts"
+		elseif path.is_file(path.join(root, "src/index.ts")) then
+			entry = "src/index.ts"
+		elseif path.is_file(path.join(root, "index.js")) then
+			entry = "index.js"
+		end
+		return "bun", entry
+	end
+
+	return "bun", "src/index.ts"
+end
+
 --- Fresh profile used by the creation form.
 --- @param root string Project root, used for the default name.
 --- @return table profile
 function M.new_profile(root)
+	root = root or M.get_project_root()
+	local runtime, entry_point = M.detect_project_entry(root)
 	return {
 		id = "profile-" .. os.time(),
 		name = "Run " .. vim.fn.fnamemodify(root, ":t"),
-		runtime = "bun",
-		entry_point = "src/index.ts",
+		runtime = runtime,
+		entry_point = entry_point,
 		args = {},
 		env = {},
 		pre_launch_tasks = {},
-		mode = "run",
+		mode = "debug",
 		is_default = false,
 		auto_build = false,
 	}
@@ -375,8 +480,12 @@ local function start_debug_session(profile, root)
 		return
 	end
 
+	M.last_launch_time = os.time()
+	local rt = profile.runtime or "node"
+	local hint = (rt == "go" or rt == "dotnet") and " (compiling & starting adapter...)" or " (starting adapter...)"
+
 	notify(
-		"🐞 Launching DAP Debugger for " .. (profile.name or profile.id) .. " (" .. (profile.runtime or "node") .. ")",
+		"⏳ Launching DAP Debugger for " .. (profile.name or profile.id) .. " [" .. rt:upper() .. "]" .. hint,
 		vim.log.levels.INFO,
 		M.settings.debug_notify_title
 	)
@@ -539,7 +648,25 @@ function M.open_form_editor(root, existing_profile, on_saved)
 					break
 				end
 			end
-			profile[field.key] = runtimes.order[(cur % #runtimes.order) + 1]
+			local next_rt = runtimes.order[(cur % #runtimes.order) + 1]
+			profile[field.key] = next_rt
+
+			local is_ts_default = profile.entry_point == "src/index.ts"
+				or profile.entry_point == "src/main.ts"
+				or profile.entry_point == "index.js"
+			if next_rt == "go" and (is_ts_default or profile.entry_point == "") then
+				profile.entry_point = path.is_file(path.join(root, "main.go")) and "main.go" or "."
+			elseif next_rt == "python" and (is_ts_default or profile.entry_point == "") then
+				profile.entry_point = path.is_file(path.join(root, "main.py")) and "main.py" or "app.py"
+			elseif next_rt == "dotnet" and (is_ts_default or profile.entry_point == "") then
+				profile.entry_point = path.is_file(path.join(root, "Program.cs")) and "Program.cs" or "."
+			elseif next_rt == "php" and (is_ts_default or profile.entry_point == "") then
+				profile.entry_point = path.is_file(path.join(root, "public/index.php")) and "public/index.php" or "index.php"
+			elseif next_rt == "lua" and (is_ts_default or profile.entry_point == "") then
+				profile.entry_point = path.is_file(path.join(root, "init.lua")) and "init.lua" or "main.lua"
+			elseif (next_rt == "bun" or next_rt == "node" or next_rt == "deno") and (profile.entry_point:match("%.go$") or profile.entry_point == ".") then
+				profile.entry_point = "src/index.ts"
+			end
 			render()
 		elseif field.edit == "list" then
 			local current = profile[field.key] or {}
@@ -878,11 +1005,26 @@ function M.open_management_menu(root)
 		:find()
 end
 
+--- Timestamp of the last debugger launch, used to prevent accidental early termination.
+M.last_launch_time = 0
+
 --- The `<C-S-s>` behaviour: stop a live debug session, else run the default
 --- profile, else offer the picker (or the creation form when there are none).
 function M.handle_smart_launch()
 	local has_dap, dap = pcall(require, "dap")
+	local now = os.time()
+
 	if has_dap and dap.session() then
+		-- Prevent accidental termination if user pressed <C-S-s> while session is compiling/starting (within 4 seconds)
+		if (now - (M.last_launch_time or 0)) < 4 then
+			notify(
+				"⏳ Debugger is compiling & starting up... Please wait a moment.",
+				vim.log.levels.WARN,
+				M.settings.debug_notify_title
+			)
+			return
+		end
+
 		dap.terminate()
 		notify("⏹️ Debug session terminated")
 		return

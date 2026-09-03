@@ -16,23 +16,23 @@ Nothing below installs automatically on first start: `mason-lspconfig` is config
 | **JSON** | `jsonls` *(SchemaStore + local schemas)* | `prettierd` → `prettier` → `biome` | `json` | — |
 | **Web Frontend Vanilla** | `html`, `cssls`, `emmet_ls`, `tailwindcss` | `prettierd` → `prettier` → `biome` | `html`, `css` | browser adapters |
 | **Web Frameworks (Astro)** | `astro` | `prettier` (always) | `astro` | browser adapters |
-| **Web UI (Svelte / Angular / React)** | `svelte`, `angularls`, `tsc` | `prettierd` → `prettier` → `biome` | `svelte`, `html`, `scss`, `typescript`, `javascript`, `tsx`, `jsx` | `js-debug-adapter`, Bun adapter |
+| **Web UI (Svelte / Angular / React)** | `svelte`, `angularls`, `vtsls` | `prettierd` → `prettier` → `biome` | `svelte`, `html`, `scss`, `typescript`, `javascript`, `tsx`, `jsx` | `js-debug-adapter`, Bun adapter |
+| **Python** | `basedpyright`, `ruff` | `black` → `isort` → `ruff` | `python` | `debugpy` DAP |
+| **Go** | `gopls` | `gofumpt` → `goimports` | `go`, `gomod`, `gowork`, `gotmpl` | `delve` DAP (`nvim-dap-go`) |
+| **C# / .NET / Blazor** | `omnisharp` | `csharpier` | `csharp` | `netcoredbg` |
+| **PHP & Laravel** | `intelephense` | `pint` → `php_cs_fixer` → `blade-formatter` | `php`, `blade` | Xdebug |
 | **Rust** | `rust_analyzer` | `rustfmt` | `rust` | — |
-| **Go** | `gopls` | `goimports`, `gofumpt` | `go`, `gomod`, `gowork`, `gosum` | `delve` (via `nvim-dap-go`) |
-| **Python** | — (debug only) | — | `python` | `debugpy` |
-| **PHP / Blade** | `intelephense` | `pint` → `php_cs_fixer`; Blade uses `blade-formatter` → `pint` | `php`, `phpdoc`, `blade` | `php-debug-adapter` (Xdebug) |
-| **C# / `.csproj`** | `omnisharp` (`.cs`), `lemminx` (`.csproj`, `.props`, `.targets` as XML) | `csharpier` | `c_sharp` | `netcoredbg` (`coreclr`) |
-| **Docker** | `dockerls` | `dockerfmt` | — | — |
-| **YAML / TOML** | `yamlls`, `taplo` | — | `yaml`, `toml` | — |
-| **Linting (JS/TS)** | `eslint`, `biome` | — | — | — |
-| **Markdown / editorconfig** | — | — | `markdown`, `markdown_inline`, `editorconfig` | — |
-| **Vim / config** | — | — | `vim`, `vimdoc` | — |
+| **Shell / Bash** | `bashls` | `beautysh` | `bash` | `bash-debug-adapter` |
+| **Docker & Proto** | `dockerls`, `buf_ls` | `dockerfmt`, `protolint` | `dockerfile`, `proto` | — |
 
 ---
 
 ## 🧠 Server notes
 
-**TypeScript and React run on `tsc`.** Its settings live in `lua/krs/langs/typescript/init.lua`; its installable LSP, formatter, parser, and debug-adapter components are grouped under **Web UI (Svelte, Angular, React)** in `:LanguageManager`. It roots at `tsconfig.json` / `jsconfig.json` / `package.json`, and falls back to the file's own directory when the only match would be `$HOME` — otherwise opening a stray script indexes the whole home directory. Automatic type acquisition is off; types come from the [Type Injector](type-injector.md) instead.
+## 🟨 Language Details & Documentation Sitemap
+
+### 🌐 [TypeScript / JavaScript / Web UI](languages/web-ui.md) & [TypeScript Suite](languages/typescript.md)
+**TypeScript and React run on `vtsls`.** Its settings live in `lua/krs/langs/typescript/init.lua`; its installable LSP, formatter, parser, and debug-adapter components are grouped under **Web UI (Svelte, Angular, React)** in `:LanguageManager`. It roots at `tsconfig.json` / `jsconfig.json` / `package.json`, and falls back to the file's own directory when the only match would be `$HOME` — otherwise opening a stray script indexes the whole home directory. Automatic type acquisition is off; types come from the [Type Injector](type-injector.md) instead.
 
 **Diagnostics are native.** The configured TypeScript server advertises `diagnosticProvider`, so Neovim pulls and refreshes diagnostics itself.
 

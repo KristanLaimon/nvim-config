@@ -251,8 +251,14 @@ return {
 			dap.listeners.before.attach["dapui_config"] = function()
 				dapui.open()
 			end
+			dap.listeners.after.event_initialized["krs_notify_status"] = function()
+				vim.notify("✅ Debugger connected! Session active.", vim.log.levels.INFO, { title = "DAP Debugger" })
+			end
 			dap.listeners.before.event_terminated["dapui_config"] = function()
 				dapui.close()
+			end
+			dap.listeners.before.event_terminated["krs_notify_status"] = function()
+				vim.notify("🏁 Debug session terminated.", vim.log.levels.INFO, { title = "DAP Debugger" })
 			end
 			dap.listeners.before.event_exited["dapui_config"] = function()
 				dapui.close()
