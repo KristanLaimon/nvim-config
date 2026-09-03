@@ -91,9 +91,9 @@ M.lsp_config = {
 			typescript = {
 				tsserver = { maxTsServerMemory = 8192 },
 				inlayHints = {
-					parameterNames = { enabled = "all" },
+					parameterNames = { enabled = "literals", suppressWhenArgumentMatchesName = true },
 					parameterTypes = { enabled = true },
-					variableTypes = { enabled = true },
+					variableTypes = { enabled = false },
 					propertyDeclarationTypes = { enabled = true },
 					functionLikeReturnTypes = { enabled = true },
 					enumMemberValues = { enabled = true },
@@ -101,9 +101,9 @@ M.lsp_config = {
 			},
 			javascript = {
 				inlayHints = {
-					parameterNames = { enabled = "all" },
+					parameterNames = { enabled = "literals", suppressWhenArgumentMatchesName = true },
 					parameterTypes = { enabled = true },
-					variableTypes = { enabled = true },
+					variableTypes = { enabled = false },
 					propertyDeclarationTypes = { enabled = true },
 					functionLikeReturnTypes = { enabled = true },
 					enumMemberValues = { enabled = true },

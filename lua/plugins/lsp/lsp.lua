@@ -215,15 +215,12 @@ return {
 					local env = env_ok and env_mod.detect() or {}
 					local is_mobile_or_proot = env.is_termux or env.is_proot or env.is_mobile or (vim.env.TERMUX_VERSION ~= nil)
 
-					if
-						not is_mobile_or_proot
-						and client
-						and client.supports_method
-						and client:supports_method("textDocument/inlayHint")
-					then
-						if vim.lsp.inlay_hint then
-							pcall(vim.lsp.inlay_hint.enable, true, { bufnr = args.buf })
-						end
+					-- Inlay hints are kept disabled on attach by default to prevent Neovim 0.10's upstream
+					-- runtime decoration provider bug (/usr/share/nvim/runtime/lua/vim/lsp/inlay_hint.lua:362)
+					-- from throwing "Invalid 'col': out of range" during active edits/imports.
+					-- Toggle on-demand via :ToggleInlayHints.
+					if vim.lsp.inlay_hint then
+						pcall(vim.lsp.inlay_hint.enable, false, { bufnr = args.buf })
 					end
 				end,
 			})
@@ -275,6 +272,18 @@ return {
 					vim.keymap.set("n", key, "<cmd>close<CR>", { buffer = float_buf, silent = true })
 				end
 			end, { desc = "Show active LSP clients for the current buffer" })
+
+			local function toggle_inlay_hints()
+				if vim.lsp.inlay_hint then
+					local current = vim.lsp.inlay_hint.is_enabled({ bufnr = 0 })
+					vim.lsp.inlay_hint.enable(not current, { bufnr = 0 })
+					local status_msg = not current and "enabled 💡" or "disabled 🙈"
+					require("krs.core.notify").notify("Inlay hints " .. status_msg, vim.log.levels.INFO, "LSP")
+				end
+			end
+
+			pcall(vim.api.nvim_create_user_command, "ToggleInlayHints", toggle_inlay_hints, { desc = "Toggle LSP Inlay Hints" })
+			pcall(vim.api.nvim_create_user_command, "KrsToggleInlayHints", toggle_inlay_hints, { desc = "Toggle LSP Inlay Hints" })
 
 			-- The TS server advertises `diagnosticProvider`, so nvim pulls and refreshes
 			-- diagnostics natively. A hand-rolled fetch into a private namespace only froze

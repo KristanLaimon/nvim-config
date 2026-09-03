@@ -206,6 +206,7 @@ M.commands = {
 	{ name = "🔍 Increase Font Size", cmd = "FontSizeIncrease", category = "UI" },
 	{ name = "🔍 Decrease Font Size", cmd = "FontSizeDecrease", category = "UI" },
 	{ name = "🔍 Reset Font Size", cmd = "FontSizeReset", category = "UI" },
+	{ name = "💡 Toggle LSP Inlay Hints", cmd = "ToggleInlayHints", category = "LSP" },
 	{ name = "🧩 Plugin Manager (Lazy)", cmd = "Lazy", category = "Config" },
 	{ name = "🔄 Reload Neovim Configuration", cmd = "ReloadConfig", category = "Config" },
 	{ name = "🚪 Quit Neovim (Quit All)", cmd = "qa", category = "System" },

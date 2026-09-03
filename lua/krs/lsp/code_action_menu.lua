@@ -228,7 +228,33 @@ function M.request()
 		M.select(items, opts, on_choice)
 	end
 
-	pcall(vim.lsp.buf.code_action)
+	local bufnr = vim.api.nvim_get_current_buf()
+	local cur_line = vim.api.nvim_win_get_cursor(0)[1] - 1
+	local line_diags = vim.diagnostic.get(bufnr, { lnum = cur_line })
+
+	local lsp_diags = {}
+	for _, item in ipairs(line_diags) do
+		if item.user_data and item.user_data.lsp then
+			table.insert(lsp_diags, item.user_data.lsp)
+		else
+			table.insert(lsp_diags, {
+				range = {
+					start = { line = item.lnum, character = item.col },
+					["end"] = { line = item.end_lnum or item.lnum, character = item.end_col or item.col },
+				},
+				severity = item.severity,
+				code = item.code,
+				source = item.source,
+				message = item.message,
+			})
+		end
+	end
+
+	if #lsp_diags > 0 then
+		pcall(vim.lsp.buf.code_action, { context = { diagnostics = lsp_diags } })
+	else
+		pcall(vim.lsp.buf.code_action)
+	end
 end
 
 return M
