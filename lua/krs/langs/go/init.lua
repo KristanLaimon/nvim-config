@@ -20,7 +20,7 @@ else
 end
 
 --- The lspconfig/mason server name(s) this language owns.
-M.lsp_server = { "gopls", "golangci_lint_ls" }
+M.lsp_server = { "gopls" }
 
 --- lspconfig server settings, keyed by server name (see M.lsp_server).
 ---@type table<string, vim.lsp.Config>
@@ -58,11 +58,11 @@ M.lsp_config = {
 				},
 				analyses = {
 					unusedparams = true,
-					shadow = true,
+					shadow = false,
 					nilness = true,
 					unusedwrite = true,
 				},
-				staticcheck = not is_low_resource,
+				staticcheck = false,
 				gofumpt = true,
 				completeUnimported = true,
 				deepCompletion = true,
@@ -71,31 +71,16 @@ M.lsp_config = {
 			},
 		},
 	},
-	golangci_lint_ls = {
-		cmd = { "golangci-lint-langserver" },
-		filetypes = { "go", "gomod" },
-		init_options = {
-			command = { "golangci-lint", "run", "--show-stats=false", "--output.json.path", "stdout", "--issues-exit-code=1" },
-		},
-	},
 }
 
 --- Mason package metadata, keyed by lspconfig/formatter name.
 M.mason = {
 	gopls = { mason = "gopls", lang = "Go", type = "lsp", cmd = "gopls" },
-	golangci_lint_ls = {
-		mason = "golangci-lint-langserver",
-		lang = "Go",
-		type = "lsp",
-		cmd = "golangci-lint-langserver",
-	},
 	gofumpt = { mason = "gofumpt", name = "gofumpt", type = "formatter", cmd = "gofumpt" },
 	goimports = { mason = "goimports", name = "goimports", type = "formatter", cmd = "goimports" },
-	staticcheck = { mason = "staticcheck", name = "staticcheck", type = "linter", cmd = "staticcheck" },
-	revive = { mason = "revive", name = "revive", type = "linter", cmd = "revive" },
 }
 
-M.mason_order = { "gopls", "golangci_lint_ls", "gofumpt", "goimports", "staticcheck", "revive" }
+M.mason_order = { "gopls", "gofumpt", "goimports" }
 
 --- Language Tooling Manager bundle metadata (see lua/krs/core/installer.lua).
 M.bundle_name = "🟦 Go"
@@ -103,10 +88,7 @@ M.requires = {
 	{ cmd = "go", name = "Go runtime", hint = "https://go.dev/dl" },
 }
 M.treesitter = { "go", "gomod", "gowork", "gosum" }
---- Extra Mason packages the bundle installs that aren't part of `M.mason`:
---- `delve` is normally installed via mason-nvim-dap (see `M.dap_tool` below),
---- and `golangci-lint` / `staticcheck` / `revive` are standalone linters.
-M.bundle_extra_mason_pkgs = { "delve", "golangci-lint", "staticcheck", "revive" }
+M.bundle_extra_mason_pkgs = { "delve" }
 
 --- conform.nvim formatter list per filetype.
 M.formatters_by_ft = {
