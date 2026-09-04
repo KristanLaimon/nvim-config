@@ -6,9 +6,13 @@
 
 local M = {}
 
+local _cached_env = nil
+
 --- Detects active execution environment layers.
---- @return table env `{ is_tmux, is_termux, is_proot, is_ubuntu, is_wsl, is_windows, is_mac, is_linux, is_mobile, label }`
+--- @return table env `{ is_tmux, is_termux, is_proot, is_ubuntu, is_wsl, is_windows, is_mac, is_linux, is_mobile, is_omarchy, label }`
 function M.detect()
+	if _cached_env then return _cached_env end
+
 	local env = {
 		is_tmux = vim.env.TMUX ~= nil,
 		is_termux = false,
@@ -19,6 +23,7 @@ function M.detect()
 		is_mac = vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1,
 		is_linux = vim.fn.has("unix") == 1 and vim.fn.has("mac") == 0 and vim.fn.has("macunix") == 0,
 		is_mobile = false,
+		is_omarchy = false,
 		label = "",
 	}
 
@@ -42,6 +47,10 @@ function M.detect()
 
 	if os_release:lower():match("ubuntu") then
 		env.is_ubuntu = true
+	end
+
+	if os_release:match('ID="?omarchy"?') or os_release:match('ID_LIKE="?.*omarchy.*"?') then
+		env.is_omarchy = true
 	end
 
 	if env.is_termux or (vim.uv or vim.loop).fs_stat("/data/data/com.termux") then
@@ -84,6 +93,8 @@ function M.detect()
 		table.insert(layers, "Termux Native (Android)")
 	elseif env.is_wsl then
 		table.insert(layers, "WSL Linux")
+	elseif env.is_omarchy then
+		table.insert(layers, "Omarchy")
 	elseif env.is_ubuntu then
 		table.insert(layers, "Ubuntu Linux")
 	elseif env.is_windows then
@@ -95,6 +106,7 @@ function M.detect()
 	end
 
 	env.label = table.concat(layers, " > ")
+	_cached_env = env
 	return env
 end
 

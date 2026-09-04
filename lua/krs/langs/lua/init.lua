@@ -22,8 +22,21 @@ M.lsp_config = {
 	lua_ls = {
 		filetypes = { "lua", "krsnvim" },
 		before_init = function(_, config)
-			config.settings.Lua.workspace.library =
-				require("plugins.krs.tools.type_injector").get_active_lua_libraries(config.root_dir)
+			local libs = require("plugins.krs.tools.type_injector").get_active_lua_libraries(config.root_dir)
+
+			-- Detect Omarchy and inject hyprland and omarchy types
+			local env = require("krs.core.environment").detect()
+			if env.is_omarchy then
+				table.insert(libs, "/usr/share/hypr")
+				table.insert(libs, "/usr/share/omarchy")
+				-- Optionally also append to globals if not done in the diagnostics below
+				local globals = config.settings.Lua.diagnostics.globals or {}
+				table.insert(globals, "hl")
+				table.insert(globals, "omarchy")
+				config.settings.Lua.diagnostics.globals = globals
+			end
+
+			config.settings.Lua.workspace.library = libs
 		end,
 		settings = {
 			Lua = {
