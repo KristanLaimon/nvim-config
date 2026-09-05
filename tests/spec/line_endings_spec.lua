@@ -52,4 +52,47 @@ describe("plugins.krs.editor.line_endings", function()
 		line_endings.change_repo("dos", dir)
 		expect(read_file(f1)).toBe("hello\r\nworld\r\n")
 	end)
+
+	it("normalizes mixed line endings by majority vote (LF majority)", function()
+		local buf = vim.api.nvim_create_buf(true, false)
+		vim.bo[buf].fileformat = "unix"
+		vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "line1\r", "line2", "line3" })
+
+		line_endings.normalize_mixed_endings(buf)
+
+		expect(vim.bo[buf].fileformat).toBe("unix")
+		local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+		expect(lines[1]).toBe("line1")
+		expect(lines[2]).toBe("line2")
+		expect(lines[3]).toBe("line3")
+		vim.api.nvim_buf_delete(buf, { force = true })
+	end)
+
+	it("normalizes mixed line endings by majority vote (CRLF majority)", function()
+		local buf = vim.api.nvim_create_buf(true, false)
+		vim.bo[buf].fileformat = "unix"
+		vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "line1\r", "line2\r", "line3" })
+
+		line_endings.normalize_mixed_endings(buf)
+
+		expect(vim.bo[buf].fileformat).toBe("dos")
+		local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+		expect(lines[1]).toBe("line1")
+		expect(lines[2]).toBe("line2")
+		expect(lines[3]).toBe("line3")
+		vim.api.nvim_buf_delete(buf, { force = true })
+	end)
+
+	it("skips unmodifiable buffers cleanly when converting repo", function()
+		local dir, f1 = make_tmp_files()
+		local unmod_buf = vim.api.nvim_create_buf(true, false)
+		vim.api.nvim_buf_set_name(unmod_buf, f1)
+		vim.bo[unmod_buf].modifiable = false
+
+		expect(function()
+			line_endings.change_repo("unix", dir)
+		end).not_.toThrow()
+
+		vim.api.nvim_buf_delete(unmod_buf, { force = true })
+	end)
 end)

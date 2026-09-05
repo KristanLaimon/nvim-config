@@ -56,7 +56,7 @@ end
 --- @param target_fmt string|nil Optional target format ("unix", "dos", "mac").
 function M.change_current_file(target_fmt)
 	local buf = vim.api.nvim_get_current_buf()
-	if not vim.api.nvim_buf_is_valid(buf) then
+	if not vim.api.nvim_buf_is_valid(buf) or not vim.bo[buf].modifiable or vim.bo[buf].buftype ~= "" then
 		return
 	end
 
@@ -197,10 +197,14 @@ function M.change_repo(target_fmt, root_dir)
 		-- Sync open Neovim buffers in memory
 		for _, buf in ipairs(vim.api.nvim_list_bufs()) do
 			if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
-				local name = vim.api.nvim_buf_get_name(buf)
-				if name and name ~= "" and is_subpath(root_dir, name) then
-					vim.bo[buf].fileformat = fmt
-					pcall(vim.cmd, "silent! checktime " .. buf)
+				if vim.bo[buf].modifiable and vim.bo[buf].buftype == "" then
+					local name = vim.api.nvim_buf_get_name(buf)
+					if name and name ~= "" and is_subpath(root_dir, name) then
+						pcall(function()
+							vim.bo[buf].fileformat = fmt
+						end)
+						pcall(vim.cmd, "silent! checktime " .. buf)
+					end
 				end
 			end
 		end
@@ -235,12 +239,77 @@ function M.change_repo(target_fmt, root_dir)
 	end)
 end
 
+--- Normalizes line endings for mixed buffers by majority vote.
+--- If CRLF lines > LF-only lines: set fileformat = "dos" (removes ^M visually, formats all as CRLF).
+--- Otherwise (LF majority or equal): set fileformat = "unix" and strip all \r.
+--- @param buf number|nil Optional buffer handle (defaults to current buffer).
+function M.normalize_mixed_endings(buf)
+	buf = buf or vim.api.nvim_get_current_buf()
+	if not vim.api.nvim_buf_is_valid(buf) or not vim.bo[buf].modifiable then
+		return
+	end
+	local buftype = vim.bo[buf].buftype
+	if buftype ~= "" then
+		return
+	end
+
+	-- Only check if buffer is in unix mode (where \r displays as ^M)
+	if vim.bo[buf].fileformat ~= "unix" then
+		return
+	end
+
+	local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+	if #lines == 0 then
+		return
+	end
+
+	local crlf_count = 0
+	local lf_count = 0
+	local cleaned_lines = {}
+	local has_cr = false
+
+	for _, line in ipairs(lines) do
+		if line:sub(-1) == "\r" then
+			crlf_count = crlf_count + 1
+			has_cr = true
+			table.insert(cleaned_lines, line:sub(1, -2))
+		else
+			lf_count = lf_count + 1
+			table.insert(cleaned_lines, line)
+		end
+	end
+
+	-- If there are no stray \r, the buffer is pure Unix LF already
+	if not has_cr then
+		return
+	end
+
+	-- Mixed line endings detected!
+	if crlf_count > lf_count then
+		-- Majority CRLF -> convert buffer to dos format
+		vim.bo[buf].fileformat = "dos"
+	else
+		-- Majority LF -> convert buffer to unix format
+		vim.bo[buf].fileformat = "unix"
+	end
+
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, cleaned_lines)
+end
+
 --- Binds user commands and sets up line endings manager.
 function M.setup()
 	if M._did_setup then
 		return
 	end
 	M._did_setup = true
+
+	local group = vim.api.nvim_create_augroup("KrsLineEndings", { clear = true })
+	vim.api.nvim_create_autocmd("BufReadPost", {
+		group = group,
+		callback = function(ev)
+			M.normalize_mixed_endings(ev.buf)
+		end,
+	})
 
 	local user_commands = {
 		ChangeLineEndings = {
@@ -275,6 +344,7 @@ end
 return setmetatable({
 	name = "krs_line_endings",
 	dir = require("krs.core.lazyspec").for_module(),
+	event = { "BufReadPost" },
 	cmd = { "ChangeLineEndings", "ChangeRepoLineEndings" },
 	config = M.setup,
 }, { __index = M })
