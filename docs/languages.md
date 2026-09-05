@@ -12,7 +12,13 @@ Nothing below installs automatically on first start: `mason-lspconfig` is config
 
 | Language / Environment | LSP server | Formatter (Conform) | Treesitter parser | Debug adapter |
 |---|---|---|---|---|
-| **Lua** | `lua_ls` | `stylua` | `lua` | — |
+| **Lua Core** | `lua_ls` | `stylua` | `lua` | — |
+| **Lua Extras & Teal** | `teal_ls` | `luacheck`, `selene` | `teal` | — |
+| **C / C++** | `clangd` | `clang-format`, `cppcheck`, `cpplint` | `c`, `cpp`, `make`, `cmake` | `codelldb` |
+| **Zig** | `zls` | `zigfmt` | `zig` | — |
+| **Ruby** | `solargraph` | `rubocop` | `ruby` | — |
+| **Haskell** | `hls` | `fourmolu`, `hlint` | `haskell` | — |
+| **GitHub Actions** | `gh_actions_ls` | `actionlint` | `yaml` | — |
 | **JSON** | `jsonls` *(SchemaStore + local schemas)* | `prettierd` → `prettier` → `biome` | `json` | — |
 | **Web Frontend Vanilla** | `html`, `cssls`, `emmet_ls`, `tailwindcss` | `prettierd` → `prettier` → `biome` | `html`, `css` | browser adapters |
 | **Web Frameworks (Astro)** | `astro` | `prettier` (always) | `astro` | browser adapters |

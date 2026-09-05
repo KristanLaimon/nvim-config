@@ -9,11 +9,11 @@
 --     formatters: settings, Mason package names, and filetype assignment.
 -- ============================================================================
 
---- @class PHPLangModule : KrsLangModule
---- @field composer table
---- @field modal table
-
----@type PHPLangModule
+---@class PHPLangModule : KrsLangModule
+---@field composer table
+---@field modal table
+---@field dap_debug_port? integer
+---@field php_debug_port? integer
 local M = {
 	composer = require("krs.langs.php.composer"),
 	modal = require("plugins.krs.tools.php_tools_modal"),

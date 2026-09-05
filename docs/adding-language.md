@@ -8,10 +8,100 @@ This guide outlines the exact step-by-step procedure for adding new programming 
 
 ---
 
+## 🧠 Understanding Property Origins & Specifications
+
+When authoring a language module, fields come from standard Neovim APIs and community plugin specs:
+
+1. **`M.lsp_config`** *(Standard Neovim `vim.lsp.Config` & `nvim-lspconfig`)*:
+   - `filetypes = { "c", "cpp" }`: Neovim buffer filetypes that trigger this server.
+   - `cmd = { "clangd", "--background-index" }`: Command array executed to launch the server.
+   - `root_dir`: Function or `root_pattern(...)` determining the project workspace root.
+   - `settings`: Table of server-specific options sent via LSP `workspace/didChangeConfiguration`.
+   - `capabilities`: LSP client capabilities (e.g. `capabilities = { offsetEncoding = { "utf-16" } }` for `clangd`).
+
+2. **`M.formatters_by_ft` & `M.conform_formatters`** *(Standard `conform.nvim`)*:
+   - `M.formatters_by_ft`: Maps filetypes to formatter names (e.g. `php = { "pint", "php_cs_fixer", stop_after_first = true }`).
+   - `M.conform_formatters`: Overrides formatter execution:
+     - `condition = function(self, ctx)`: Returns `true` if formatter should run (e.g. checking binary existence or `.prettierrc`).
+     - `command`: Overrides the CLI executable name.
+     - `args`: Array or callback returning arguments passed to the CLI binary.
+     - `stdin`: Boolean, whether tool reads code from stdin (default `true`).
+
+3. **`M.dap_configs` & `M.dap_setup`** *(Standard `nvim-dap`)*:
+   - `type`: Adapter name registered in `dap.adapters` (e.g., `"codelldb"`, `"php"`, `"python"`).
+   - `request`: `"launch"` or `"attach"`.
+   - `program`: Path to executable or script.
+   - `cwd`: Working directory.
+
+4. **`M.mason`** *(KrsVim Language Tooling Manager)*:
+   - `mason`: Mason registry package name.
+   - `type`: `"lsp"` | `"formatter"` | `"dap"` | `"extra"` (drives UI grouping).
+   - `cmd`: Binary name used to detect an already-installed tool via `executable()`.
+   - `lang` / `name`: Human-readable label displayed in `:LanguageManager`.
+
+---
+
+## ⚖️ Vanilla Neovim vs. KrsVim Architecture
+
+To appreciate why KrsVim uses single-file language modules, here is a comparison of how **pure vanilla Neovim (0.10+)** configures tools versus how **KrsVim** centralizes them:
+
+### 1. Vanilla Neovim Way (No Framework or Plugins)
+In vanilla Neovim, you write autocmds to spawn `vim.lsp.start`, handle formatting with `vim.fn.system()`, and set keymaps on `LspAttach`:
+
+```lua
+-- Vanilla Neovim (0.10+) LSP start
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "c", "cpp" },
+	callback = function(args)
+		vim.lsp.start({
+			name = "clangd",
+			cmd = { "clangd", "--background-index" },
+			root_dir = vim.fs.root(args.buf, { "compile_commands.json", "CMakeLists.txt", ".git" }),
+			capabilities = vim.lsp.protocol.make_client_capabilities(),
+		})
+	end,
+})
+
+-- Vanilla Format-on-Save via raw CLI binary (clang-format)
+vim.api.nvim_create_autocmd("BufWritePre", {
+	pattern = { "*.c", "*.cpp" },
+	callback = function(args)
+		local lines = vim.api.nvim_buf_get_lines(args.buf, 0, -1, false)
+		local formatted = vim.fn.system("clang-format", table.concat(lines, "\n"))
+		if vim.v.shell_error == 0 then
+			vim.api.nvim_buf_set_lines(args.buf, 0, -1, false, vim.split(formatted, "\n"))
+		end
+	end,
+})
+```
+
+### 2. KrsVim Centralized Architecture
+Instead of scattering manual autocmds across multiple config files, KrsVim puts all LSP settings, formatters, Mason packages, DAP debuggers, and runtimes into **one single file per language** (`lua/krs/langs/<language>/init.lua`).
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        KRSVIM AGGREGATION MODEL                        │
+│                                                                        │
+│  lua/krs/langs/cpp/init.lua ──────► M.lsp_config  ──► lsp.lua        │
+│                             ──────► M.formatters ──► formatting.lua │
+│                             ──────► M.mason      ──► installer.lua  │
+│                             ──────► M.dap        ──► dap.lua        │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+| Domain | Pure Vanilla Neovim | KrsVim Architecture |
+|---|---|---|
+| **LSP Setup** | Manual `vim.lsp.start()` or raw `lspconfig` | `M.lsp_config` in `lua/krs/langs/<lang>/init.lua` |
+| **Tool Installs** | Manual OS package commands (`apt`/`brew`) | Opt-in bundle installer via `:LanguageManager` UI |
+| **Formatting** | Manual `system()` or `vim.lsp.buf.format` | Async preference chains (`prettierd` -> `prettier`) via `conform.nvim` |
+| **Completion** | Hand-rolled `omnifunc` | NvChad layout with CSS color preview badges via `blink.cmp` |
+
+---
+
 ## 🛠️ Step-by-Step Guide
 
 ### Step 1: Create (or extend) `lua/krs/langs/<language>/init.lua`
-Every field is optional — only add what the language needs. See [`lua/krs/langs/csharp/init.lua`](../lua/krs/langs/csharp/init.lua) for the fullest example.
+Every field is optional — only add what the language needs. You can copy the interactive template file [`lua/krs/langs/init_template.lua`](../lua/krs/langs/init_template.lua) or see [`lua/krs/langs/csharp/init.lua`](../lua/krs/langs/csharp/init.lua) for the fullest example.
 
 ```lua
 local M = {}

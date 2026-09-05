@@ -104,7 +104,7 @@ return {
 			-- unordered table, so it can't be walked directly here.
 			local shared = require("plugins.krs.debuggers._shared")
 			local langs = require("krs.langs").langs
-			for _, key in ipairs({ "python", "csharp", "php", "bash", "go", "lua" }) do
+			for _, key in ipairs({ "python", "csharp", "php", "bash", "go", "lua", "cpp" }) do
 				local lang = langs[key]
 				if lang then
 					if lang.dap_setup then
@@ -140,6 +140,7 @@ return {
 				go = { "go" },
 				bashdb = langs.bash.lsp_config.bashls.filetypes,
 				bash = langs.bash.lsp_config.bashls.filetypes,
+				codelldb = langs.cpp and langs.cpp.dap_filetypes or { "c", "cpp" },
 			}
 
 			dapui.setup({

@@ -116,6 +116,8 @@ M.health_categories = {
 			{ cmd = "python", name = "Python", alt = "python3" },
 			{ cmd = "php", name = "PHP" },
 			{ cmd = "composer", name = "Composer", note = "PHP package manager" },
+			{ cmd = "ruby", name = "Ruby", note = "Ruby toolchain" },
+			{ cmd = "ghc", name = "GHC", note = "Haskell compiler" },
 		},
 	},
 	{

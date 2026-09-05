@@ -28,33 +28,79 @@
 --- language module's `M.mason` table.
 ---@class KrsMasonToolInfo
 ---@field mason string Mason package/registry name.
----@field type "lsp"|"formatter"|"dap" Drives the Language Tooling Manager UI grouping.
+---@field type "lsp"|"formatter"|"dap"|"extra" Drives the Language Tooling Manager UI grouping.
 ---@field cmd string CLI binary used to detect an already-installed tool.
 ---@field lang? string Human-readable language label (lsp/dap tools).
 ---@field name? string Human-readable tool label (formatter tools).
+
+--- System CLI binary requirement needed before Mason packages can install.
+---@class KrsLangRequirement
+---@field cmd string CLI command binary name checked via executable().
+---@field name string Human-readable requirement name displayed in UI.
+---@field alt? string Alternative binary name checked if cmd is missing.
+---@field hint? string Helpful installation hint message displayed if missing.
+
+--- Launch profile runtime definition owned by a language module.
+---@class KrsLaunchRuntime
+---@field command string|fun(ctx: table): string Executable prefix or builder callback.
+---@field dap? fun(profile: table, root: string, ctx: table): table|nil DAP configuration builder callback.
+---@field execute? fun(ctx: table): boolean Custom launch handler callback.
+
+--- conform.nvim per-formatter options override table.
+---@class KrsConformFormatterOpts
+---@field condition? fun(self: table, ctx: { filename: string, buf: integer }): boolean Condition callback deciding if formatter runs.
+---@field command? string|fun(self: table, ctx: table): string Formatter binary command override.
+---@field args? string[]|fun(self: table, ctx: table): string[] Formatter CLI arguments list or builder callback.
+---@field stdin? boolean Whether formatter takes code input via stdin (default: true).
+---@field cwd? fun(self: table, ctx: table): string Working directory callback.
+
+--- Static nvim-dap launch/attach configuration table.
+---@class KrsDapConfig
+---@field type string Debug adapter name (e.g. "codelldb", "php", "coreclr", "python", "go").
+---@field request "launch"|"attach" DAP request mode.
+---@field name string Display name for debugger picker menu.
+---@field program? string|fun(): string Path to executable or main file.
+---@field cwd? string Working directory.
+---@field port? integer|string Debugger port.
+---@field args? string[]|fun(): string[] Command line arguments.
+---@field stopOnEntry? boolean Whether to pause execution on entry point.
+---@field runtimeArgs? string[] Extra runtime flags passed to runtime executable.
+---@field pathMappings? table<string, string> Remote-to-local path mapping dictionary.
 
 --- Shape every `lua/krs/langs/<lang>/init.lua` submodule may export. Every
 --- field is optional -- see docs/adding-language.md for which ones a new
 --- language actually needs.
 ---@class KrsLangModule
 ---@field lsp_server? string[] lspconfig/mason server name(s) this language owns.
----@field lsp_config? table<string, vim.lsp.Config> lspconfig opts, keyed by server name; merged into lsp.lua's opts.servers. Annotate each module's own `M.lsp_config` the same way for field-level completion/hover while authoring it.
+---@field lsp_config? table<string, vim.lsp.Config> lspconfig opts, keyed by server name; merged into lsp.lua's opts.servers.
 ---@field mason? table<string, KrsMasonToolInfo> Mason package metadata, keyed by lspconfig/formatter/tool name.
 ---@field mason_order? string[] Preferred Mason install/display order for this language's tools.
 ---@field formatters_by_ft? table<string, table> conform.nvim formatter list, keyed by filetype.
----@field conform_formatters? table<string, table> conform.nvim per-formatter option overrides, keyed by formatter name.
+---@field conform_formatters? table<string, KrsConformFormatterOpts> conform.nvim per-formatter option overrides, keyed by formatter name.
 ---@field formatter_configs? string[] Formatter/tool config filenames that indicate a project-managed code style.
 ---@field defaults? table<string, any> Fallback `vim.bo` options applied when no project formatter config exists.
 ---@field apply_defaults? fun(buf: integer) Applies `defaults` to `buf` unless a project config overrides them.
 ---@field setup? fun() Registers this language's autocmds; called once by `M.setup()` below.
----@field dap_setup? fun(dap: table) Registers this language's DAP adapter(s).
----@field launch_runtimes? table<string, table> Launch-profile runtimes this language owns (see lua/krs/launch/runtimes.lua).
+---@field dap_filetypes? string[] Array of filetypes this language's static DAP configs apply to.
+---@field dap_configs? KrsDapConfig[] Array of static nvim-dap config tables.
+---@field dap_setup? fun(dap: table) Registers this language's DAP adapter(s) dynamically at runtime.
+---@field dap_debug_port? integer Custom DAP debug port if used by language adapter (e.g. 9003 for Xdebug).
+---@field launch_runtimes? table<string, KrsLaunchRuntime> Launch-profile runtimes this language owns (see lua/krs/launch/runtimes.lua).
 ---@field bundle_name? string Display name (with icon) for this language's entry in the Language Tooling Manager (`:LanguageManager`).
 ---@field is_minimal? boolean Marks the always-on core bundle (Lua only); pre-selected and excluded from the "pending" count.
----@field requires? { cmd: string, name: string, alt?: string, hint?: string }[] System runtimes the bundle needs before Mason packages can install; missing ones block the bundle with a lock icon.
+---@field requires? KrsLangRequirement[] System runtimes the bundle needs before Mason packages can install; missing ones block the bundle with a lock icon.
 ---@field treesitter? string[] Treesitter parser names the Language Tooling Manager installs alongside this language's Mason packages.
 ---@field bundle_extra_mason_pkgs? string[] Mason package names the bundle installs beyond what `mason_order` resolves -- for tools intentionally absent from `M.mason` (e.g. a DAP tool installed through a different mechanism, a standalone linter).
----@field dotnet_tools? string[] `dotnet tool install -g` package names the Language Tooling Manager installs for this language.
+---@field PRETTIER_CONFIG_FILES? string[] Prettier config file patterns indicating project-managed formatting style.
+---@field BIOME_CONFIG_FILES? string[] Biome config file patterns.
+---@field ESLINT_CONFIG_FILES? string[] ESLint config file patterns.
+---@field DENO_CONFIG_FILES? string[] Deno config file patterns.
+---@field FORMATTER_CONFIG_FILES? string[] Aggregated formatter config file patterns checked by project detection.
+---@field js_debug_config? fun(profile: table, root: string, ctx: table): table Helper function building js-debug adapter launch configs.
+---@field dap_tool? string Custom DAP tool name override (e.g. "delve").
+---@field composer? table Submodule reference (e.g. PHP composer helper).
+---@field modal? table Submodule reference (e.g. PHP tools modal helper).
+---@field php_debug_port? integer Custom PHP debug port alias.
 
 local M = {}
 
@@ -129,6 +175,12 @@ M.langs = {
 	bash = require("krs.langs.bash"),
 	docker = require("krs.langs.docker"),
 	proto = require("krs.langs.proto"),
+	cpp = require("krs.langs.cpp"),
+	ruby = require("krs.langs.ruby"),
+	haskell = require("krs.langs.haskell"),
+	teal = require("krs.langs.teal"),
+	github = require("krs.langs.github"),
+	zig = require("krs.langs.zig"),
 }
 
 --- Display order for `M.langs` in the Language Tooling Manager (`:LanguageManager`)
@@ -136,8 +188,26 @@ M.langs = {
 --- language-agnostic thing left to declare once; everything else per bundle
 --- (name, requires, Mason packages, Treesitter parsers) comes from the module
 --- itself, see lua/krs/core/installer.lua's `M.language_bundles`.
-M.lang_order =
-	{ "lua", "php", "go", "rust", "python", "csharp", "web", "astro", "web_ui", "docker", "proto", "bash" }
+M.lang_order = {
+	"lua",
+	"php",
+	"go",
+	"rust",
+	"python",
+	"csharp",
+	"cpp",
+	"zig",
+	"ruby",
+	"haskell",
+	"teal",
+	"github",
+	"web",
+	"astro",
+	"web_ui",
+	"docker",
+	"proto",
+	"bash",
+}
 
 --- Initialize all per-language configuration submodules.
 function M.setup()

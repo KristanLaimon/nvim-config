@@ -2,7 +2,7 @@ j 🤖 AGENTS.md — KrsVim AI Assistant Guidelines & Compact Wiki Reference
 
 This file defines mandatory guidelines and reference links for AI coding assistants working in or customizing this Neovim distribution (**KrsVim**).
 
-> 🌐 **Per-Language Documentation Reference**: Individual language toolchain guides, debug profiles, and LSP/formatter commands are documented under [`docs/languages/`](docs/languages/) (e.g., [`php.md`](docs/languages/php.md), [`typescript.md`](docs/languages/typescript.md), [`web.md`](docs/languages/web.md), [`astro.md`](docs/languages/astro.md), [`web-ui.md`](docs/languages/web-ui.md), [`rust.md`](docs/languages/rust.md), [`csharp.md`](docs/languages/csharp.md), [`go.md`](docs/languages/go.md), [`python.md`](docs/languages/python.md), [`lua.md`](docs/languages/lua.md), [`docker.md`](docs/languages/docker.md), [`proto.md`](docs/languages/proto.md), [`bash.md`](docs/languages/bash.md)).
+> 🌐 **Per-Language Documentation Reference**: Individual language toolchain guides, debug profiles, and LSP/formatter commands are documented under [`docs/languages/`](docs/languages/) (e.g., [`php.md`](docs/languages/php.md), [`typescript.md`](docs/languages/typescript.md), [`cpp.md`](docs/languages/cpp.md), [`zig.md`](docs/languages/zig.md), [`ruby.md`](docs/languages/ruby.md), [`haskell.md`](docs/languages/haskell.md), [`teal.md`](docs/languages/teal.md), [`github.md`](docs/languages/github.md), [`web.md`](docs/languages/web.md), [`astro.md`](docs/languages/astro.md), [`web-ui.md`](docs/languages/web-ui.md), [`rust.md`](docs/languages/rust.md), [`csharp.md`](docs/languages/csharp.md), [`go.md`](docs/languages/go.md), [`python.md`](docs/languages/python.md), [`lua.md`](docs/languages/lua.md), [`docker.md`](docs/languages/docker.md), [`proto.md`](docs/languages/proto.md), [`bash.md`](docs/languages/bash.md)).
 
 ---
 
@@ -110,6 +110,12 @@ Detailed setup, Ex commands, DAP debug profiles, and plugin integrations for eac
 
 * 🐘 [**PHP & Laravel Guide**](docs/languages/php.md) — Intelephense, Pint, PHP-CS-Fixer, blade-formatter, `blade-nav.nvim`, Xdebug (`:PHPCheckTools`, `:BladeNavClearCache`, `:FormatDocument`).
 * 🟨 [**TypeScript & JavaScript Guide**](docs/languages/typescript.md) — `tsc`, ESLint, Biome, Prettier/Prettierd, `js-debug-adapter`, `type-injector`, `tailwind-organizer`.
+* ⚡ [**C / C++ Guide**](docs/languages/cpp.md) — `clangd`, `clang-format`, `cppcheck`, `cpplint`, `codelldb` DAP.
+* ⚡ [**Zig Guide**](docs/languages/zig.md) — `zls` (Zig Language Server), `zigfmt` (`zig fmt`).
+* 💎 [**Ruby Guide**](docs/languages/ruby.md) — `solargraph`, `rubocop`.
+* 🔮 [**Haskell Guide**](docs/languages/haskell.md) — `haskell-language-server` (hls), `fourmolu`, `hlint`.
+* 🩵 [**Lua Extras & Teal Guide**](docs/languages/teal.md) — `teal-language-server` (`teal_ls`), `luacheck`, `selene`.
+* 🐙 [**GitHub Actions Guide**](docs/languages/github.md) — `gh-actions-language-server`, `actionlint`.
 * 🎯 [**C# / .NET / Blazor Guide**](docs/languages/csharp.md) — OmniSharp, `csharp-ls`, CSharpier, `netcoredbg` (Blazor Server & DLL debugging), `:DotnetNew`, `:NugetManager`.
 * 🟦 [**Go Guide**](docs/languages/go.md) — `gopls`, `delve` DAP (`nvim-dap-go`), `gofumpt`, `goimports`.
 * 🐍 [**Python Guide**](docs/languages/python.md) — `pyright`, `debugpy` DAP, `black`, `isort`, `ruff`.
