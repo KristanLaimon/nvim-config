@@ -126,7 +126,7 @@ Detailed setup, Ex commands, DAP debug profiles, and plugin integrations for eac
 * 🦀 [**Rust Guide**](docs/languages/rust.md) — rust-analyzer, rustfmt, Cargo, and Treesitter.
 * 🐳 [**Docker Guide**](docs/languages/docker.md) — `dockerls`, `dockerfmt`.
 * 📜 [**Protocol Buffers Guide**](docs/languages/proto.md) — `buf_ls`, `protols`, `protolint`.
-* 🐚 [**Shell & Bash Guide**](docs/languages/bash.md) — `bashls`, `bash-debug-adapter`, `beautysh`, ShellCheck.
+* 🐚 [**Shell / Bash & PowerShell Guide**](docs/languages/bash.md) — `bashls`, `powershell_es`, `bash-debug-adapter`, `beautysh`, ShellCheck.
 
 ---
 

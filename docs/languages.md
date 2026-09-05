@@ -28,7 +28,7 @@ Nothing below installs automatically on first start: `mason-lspconfig` is config
 | **C# / .NET / Blazor** | `omnisharp` | `csharpier` | `csharp` | `netcoredbg` |
 | **PHP & Laravel** | `intelephense` | `pint` → `php_cs_fixer` → `blade-formatter` | `php`, `blade` | Xdebug |
 | **Rust** | `rust_analyzer` | `rustfmt` | `rust` | — |
-| **Shell / Bash** | `bashls` | `beautysh` | `bash` | `bash-debug-adapter` |
+| **Shell / Bash & PowerShell** | `bashls`, `powershell_es` | `beautysh` | `bash`, `powershell` | `bash-debug-adapter` |
 | **Docker** | `dockerls` | `dockerfmt` | `dockerfile` | — |
 | **Protocol Buffers** | `buf_ls`, `protols` | `protolint` | `proto` | — |
 
