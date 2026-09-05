@@ -28,7 +28,7 @@ M.mason = {
 
 M.mason_order = { "teal_ls", "luacheck", "selene" }
 
-M.bundle_name = "🩵 Lua Extras & Teal (luacheck, selene, teal-language-server)"
+M.bundle_name = "🩵 Lua Extras & Teal"
 M.requires = {}
 M.treesitter = { "teal" }
 

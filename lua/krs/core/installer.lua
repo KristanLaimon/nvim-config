@@ -1459,7 +1459,7 @@ function M.render_language_manager_buffer()
 
 		local arrow = item.expanded and "▾" or "▸"
 		local tag = item.bundle.is_minimal and " (Core)" or ""
-		local line_str = string.format("  %s %s  %-40s %s%s", arrow, checkbox, item.bundle.name, status.badge, tag)
+		local line_str = string.format("  %s %s  %-26s %s%s", arrow, checkbox, item.bundle.name, status.badge, tag)
 		table.insert(lines, line_str)
 		lang_line_map[#lines] = { kind = "bundle", item = item }
 

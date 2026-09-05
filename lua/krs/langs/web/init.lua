@@ -125,7 +125,7 @@ M.mason = {
 M.mason_order = { "html", "cssls", "tailwindcss", "emmet_ls" }
 
 --- Language Tooling Manager bundle metadata (see lua/krs/core/installer.lua).
-M.bundle_name = "🌐 Web Frontend Vanilla (HTML, CSS, Snippets)"
+M.bundle_name = "🌐 Web Frontend"
 M.requires = {
 	{ cmd = "node", name = "Node.js", hint = "https://nodejs.org" },
 }

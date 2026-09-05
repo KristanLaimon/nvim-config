@@ -30,7 +30,7 @@ M.mason = {
 
 M.mason_order = { "gh_actions_ls", "actionlint" }
 
-M.bundle_name = "🐙 GitHub Actions (gh-actions-ls, actionlint)"
+M.bundle_name = "🐙 GitHub Actions"
 M.requires = {
 	{ cmd = "node", name = "Node.js runtime", hint = "https://nodejs.org" },
 }

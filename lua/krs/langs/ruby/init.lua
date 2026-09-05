@@ -30,7 +30,7 @@ M.mason = {
 
 M.mason_order = { "solargraph", "rubocop" }
 
-M.bundle_name = "💎 Ruby (solargraph, rubocop)"
+M.bundle_name = "💎 Ruby"
 M.requires = {
   { cmd = "ruby", name = "Ruby runtime", hint = "https://www.ruby-lang.org" },
 }

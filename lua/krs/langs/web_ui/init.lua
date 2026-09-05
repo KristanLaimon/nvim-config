@@ -50,7 +50,7 @@ M.mason_order = {
 	"cssls",
 }
 
-M.bundle_name = "🧩 Web UI (Svelte, Angular, React)"
+M.bundle_name = "🧩 Web UI"
 M.requires = {
 	{ cmd = "node", name = "Node.js", hint = "https://nodejs.org" },
 }

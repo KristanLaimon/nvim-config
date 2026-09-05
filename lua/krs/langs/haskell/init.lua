@@ -31,7 +31,7 @@ M.mason = {
 
 M.mason_order = { "hls", "fourmolu", "hlint" }
 
-M.bundle_name = "🔮 Haskell (haskell-language-server, fourmolu, hlint)"
+M.bundle_name = "🔮 Haskell"
 M.requires = {
 	{ cmd = "ghc", name = "GHC Compiler", hint = "https://www.haskell.org/ghcup/" },
 	{ cmd = "cabal", name = "Cabal / Stack build tool", alt = "stack", hint = "https://www.haskell.org/ghcup/" },

@@ -80,7 +80,7 @@ M.mason = {
 M.mason_order = { "lua_ls", "stylua" }
 
 --- Language Tooling Manager bundle metadata (see lua/krs/core/installer.lua).
-M.bundle_name = "🌙 Minimal Core (Lua & Neovim Editing)"
+M.bundle_name = "🌙 Minimal Core"
 M.is_minimal = true
 M.requires = {} -- lua-language-server ships as a self-contained binary via Mason
 M.treesitter = { "lua", "vim", "vimdoc", "markdown", "markdown_inline" }

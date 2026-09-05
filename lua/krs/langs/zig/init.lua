@@ -30,7 +30,7 @@ M.mason = {
 
 M.mason_order = { "zls" }
 
-M.bundle_name = "⚡ Zig (zls, zigfmt)"
+M.bundle_name = "⚡ Zig"
 M.requires = {
 	{ cmd = "zig", name = "Zig compiler & toolchain", hint = "https://ziglang.org/download/" },
 }

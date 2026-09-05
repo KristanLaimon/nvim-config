@@ -59,7 +59,7 @@ M.mason = {
 M.mason_order = { "bashls", "powershell_es", "beautysh", "bash-debug-adapter" }
 
 --- Language Tooling Manager bundle metadata (see lua/krs/core/installer.lua).
-M.bundle_name = "🐚 Shell / Bash & PowerShell"
+M.bundle_name = "🐚 Shell & Bash"
 M.requires = {} -- standalone Mason binaries
 M.treesitter = { "bash", "powershell" }
 

@@ -33,7 +33,7 @@ M.mason = {
 }
 
 M.mason_order = { "astro" }
-M.bundle_name = "🪐 Web Frameworks (Astro)"
+M.bundle_name = "🪐 Astro"
 M.requires = {
 	{ cmd = "node", name = "Node.js", hint = "https://nodejs.org" },
 }

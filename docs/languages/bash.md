@@ -6,7 +6,7 @@ This document provides setup instructions, LSP server settings, formatting pipel
 
 ## 🛠️ Toolchain Summary
 
-The **Shell / Bash & PowerShell** bundle (`🐚 Shell / Bash & PowerShell`) is an optional opt-in bundle in the Language Tooling Manager (`:LanguageManager`).
+The **Shell & Bash** bundle (`🐚 Shell & Bash`) is an optional opt-in bundle in the Language Tooling Manager (`:LanguageManager`).
 
 | Feature | Tool / Package | Details |
 | :--- | :--- | :--- |

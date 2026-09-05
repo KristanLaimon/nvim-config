@@ -31,7 +31,7 @@ M.mason = {
 
 M.mason_order = { "clangd", "clang-format", "cpplint", "cppcheck", "codelldb" }
 
-M.bundle_name = "⚡ C / C++ (clangd, clang-format, cppcheck, cpplint, codelldb)"
+M.bundle_name = "⚡ C / C++"
 M.requires = {
 	{ cmd = "gcc", name = "C/C++ Compiler (gcc/clang)", alt = "clang", hint = "apt install build-essential / brew install gcc" },
 	{ cmd = "make", name = "Make / CMake build tools", alt = "cmake", hint = "apt install make cmake" },
