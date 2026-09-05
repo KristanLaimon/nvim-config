@@ -309,39 +309,111 @@ function M.render_tab_bar(left_w)
 	end
 end
 
+M.ns_panel = vim.api.nvim_create_namespace("krs_git_panel_hl")
+
+--- Sets up panel highlight groups in Lazygit aesthetic style.
+function M.setup_panel_highlights()
+	vim.api.nvim_set_hl(0, "KRSGitHeaderBranch", { fg = "#89b4fa", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitHeaderAdded", { fg = "#a6e3a1", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitHeaderDeleted", { fg = "#f38ba8", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitSectionStaged", { fg = "#a6e3a1", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitSectionUnstaged", { fg = "#f38ba8", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitSectionCommit", { fg = "#cba6f7", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitSectionActions", { fg = "#f9e2af", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitKeyBadge", { fg = "#89dceb", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitFileStaged", { fg = "#a6e3a1", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitFileModified", { fg = "#f9e2af", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitFileUntracked", { fg = "#89dceb", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitFileDeleted", { fg = "#f38ba8", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitSeparator", { fg = "#45475a", default = true })
+	vim.api.nvim_set_hl(0, "KRSGitCommitDraft", { fg = "#cdd6f4", italic = true, default = true })
+end
+
+--- Applies extmark highlights to the main Git Center panel buffer.
+--- @param bufnr integer
+--- @param highlights table List of `{ row, col_start, col_end, hl_group }`
+function M.apply_panel_highlights(bufnr, highlights)
+	if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
+		return
+	end
+	M.setup_panel_highlights()
+	vim.api.nvim_buf_clear_namespace(bufnr, M.ns_panel, 0, -1)
+	for _, h in ipairs(highlights or {}) do
+		vim.api.nvim_buf_add_highlight(bufnr, M.ns_panel, h.hl_group, h.row, h.col_start, h.col_end or -1)
+	end
+end
+
 --- @param info table Repository snapshot.
 --- @param width integer Panel width, used for the separators.
 --- @return string[] lines Panel text.
 --- @return table line_map Line number -> `{ type, file }` for file rows.
 --- @return table section_lines Section number (1-4) -> line number.
+--- @return table highlights Extmark highlight specs for Lazygit styling.
 function M.build_panel_content(info, width)
-	local lines, line_map, section_lines = {}, {}, {}
+	local lines, line_map, section_lines, highlights = {}, {}, {}, {}
 
-	local function add(text)
+	local function add(text, hl_group)
+		local start_idx = #lines
 		if type(text) == "string" and (text:find("\n") or text:find("\r")) then
 			local split_lines = vim.split(text:gsub("\r\n", "\n"):gsub("\r", "\n"), "\n", { plain = true })
 			for _, l in ipairs(split_lines) do
 				table.insert(lines, l)
+				if hl_group then
+					table.insert(highlights, { row = #lines - 1, col_start = 0, col_end = -1, hl_group = hl_group })
+				end
 			end
 		else
 			table.insert(lines, text)
+			if hl_group then
+				table.insert(highlights, { row = #lines - 1, col_start = 0, col_end = -1, hl_group = hl_group })
+			end
 		end
 		return #lines
 	end
 
+	local function add_hl(row, c_start, c_end, hl)
+		table.insert(highlights, { row = row, col_start = c_start, col_end = c_end, hl_group = hl })
+	end
+
+	local function highlight_brackets(row, line_str)
+		for s_pos, e_pos in line_str:gmatch("()%[[%w%+%-%/ %<%>]+%]()") do
+			add_hl(row, s_pos - 1, e_pos - 1, "KRSGitKeyBadge")
+		end
+	end
+
 	local function separator(char)
-		add(string.rep(char, width - 2))
+		add(string.rep(char, math.max(10, width - 2)), "KRSGitSeparator")
 	end
 
-	local function add_file(prefix, file, file_type)
-		line_map[add("   " .. prefix .. " " .. file)] = { type = file_type, file = file }
+	local function add_file(prefix, file, file_type, icon_hl)
+		local line_text = "   " .. prefix .. " " .. file
+		local row = add(line_text) - 1
+		line_map[row + 1] = { type = file_type, file = file }
+		if icon_hl then
+			add_hl(row, 3, 3 + #prefix, icon_hl)
+		end
 	end
 
-	add(string.format(" 🌿 Branch: %s%s", info.branch, info.upstream and (" (Tracking " .. info.upstream .. ")") or ""))
-	add(string.format(" 📊 Changes: +%d -%d lines", info.added, info.deleted))
+	local branch_line = string.format("  Branch: %s%s", info.branch, info.upstream and (" (Tracking " .. info.upstream .. ")") or "")
+	local r0 = add(branch_line) - 1
+	add_hl(r0, 0, -1, "KRSGitHeaderBranch")
+
+	local changes_line = string.format(" 📊 Changes: +%d -%d lines", info.added, info.deleted)
+	local r1 = add(changes_line) - 1
+	local plus_pos = changes_line:find("%+")
+	local minus_pos = changes_line:find("%-")
+	if plus_pos then
+		local end_plus = changes_line:find(" ", plus_pos) or (plus_pos + 4)
+		add_hl(r1, plus_pos - 1, end_plus - 1, "KRSGitHeaderAdded")
+	end
+	if minus_pos then
+		local end_minus = changes_line:find(" ", minus_pos) or (minus_pos + 4)
+		add_hl(r1, minus_pos - 1, end_minus - 1, "KRSGitHeaderDeleted")
+	end
+
 	add(
 		string.format(
-			" 🟢 Staged: %d  |  🔴 Unstaged: %d  |  ❓ Untracked: %d",
+			" 🟢 Staged: %d  │  🔴 Unstaged: %d  │  ❓ Untracked: %d",
 			#info.staged,
 			#info.unstaged,
 			#info.untracked
@@ -349,32 +421,47 @@ function M.build_panel_content(info, width)
 	)
 	separator("═")
 
-	section_lines[1] = add(" 📝 [SECTION 1: COMMIT BOX & TAG] (Press 1)")
-	local title_display = config.commit_data.title ~= "" and config.commit_data.title or "<Press c to edit in Vim>"
-	add("   [c] Title:       " .. title_display)
+	section_lines[1] = add(" 󰜘 [SECTION 1: COMMIT BOX & TAG] (Press 1)")
+	add_hl(section_lines[1] - 1, 0, -1, "KRSGitSectionCommit")
+	highlight_brackets(section_lines[1] - 1, lines[section_lines[1]])
+
+	local title_display = config.commit_data.title ~= "" and config.commit_data.title or "<Press c to edit title>"
+	local r_title = add("   [c] Title:       " .. title_display) - 1
+	add_hl(r_title, 3, 6, "KRSGitKeyBadge")
+	if config.commit_data.title ~= "" then
+		add_hl(r_title, 20, -1, "KRSGitCommitDraft")
+	end
 
 	if config.commit_data.description ~= "" then
 		local desc_lines = vim.split(config.commit_data.description:gsub("\r\n", "\n"):gsub("\r", "\n"), "\n", { plain = true })
 		for i, dline in ipairs(desc_lines) do
 			if i == 1 then
-				add("   [m] Description: " .. dline)
+				local r_desc = add("   [m] Description: " .. dline) - 1
+				add_hl(r_desc, 3, 6, "KRSGitKeyBadge")
 			else
 				add("                    " .. dline)
 			end
 		end
 	else
-		add("   [m] Description: <Optional - Press m>")
+		local r_desc = add("   [m] Description: <Optional - Press m>") - 1
+		add_hl(r_desc, 3, 6, "KRSGitKeyBadge")
 	end
 
 	local tag_display = config.commit_data.tag ~= "" and config.commit_data.tag or "<Optional - Press t>"
-	add("   [t] Tag:         " .. tag_display)
-	add("   🚀 [C] Execute Commit & Tag  |  [P] Push Remote")
+	local r_tag = add("   [t] Tag:         " .. tag_display) - 1
+	add_hl(r_tag, 3, 6, "KRSGitKeyBadge")
+
+	local r_exec = add("   🚀 [C] Execute Commit & Tag  │  [P] Push Remote") - 1
+	highlight_brackets(r_exec, lines[r_exec + 1])
 	separator("─")
 
 	section_lines[2] =
-		add(string.format(" 🟢 [SECTION 2: STAGED FILES (%d)] (Press 2 | [u] Unstage / [U] Unstage All)", #info.staged))
+		add(string.format(" 󰈔 [SECTION 2: STAGED FILES (%d)] (Press 2 | [u] Unstage / [U] Unstage All)", #info.staged))
+	add_hl(section_lines[2] - 1, 0, -1, "KRSGitSectionStaged")
+	highlight_brackets(section_lines[2] - 1, lines[section_lines[2]])
+
 	for _, file in ipairs(info.staged) do
-		add_file("✓", file, "staged")
+		add_file("✓", file, "staged", "KRSGitFileStaged")
 	end
 	if #info.staged == 0 then
 		add("   (no files staged)")
@@ -383,33 +470,39 @@ function M.build_panel_content(info, width)
 
 	local pending = #info.unstaged + #info.untracked
 	section_lines[3] = add(
-		string.format(" 🔴 [SECTION 3: UNSTAGED & UNTRACKED FILES (%d)] (Press 3 | [s] Stage / [S] Stage All)", pending)
+		string.format(" 󰈔 [SECTION 3: UNSTAGED & UNTRACKED FILES (%d)] (Press 3 | [s] Stage / [S] Stage All)", pending)
 	)
+	add_hl(section_lines[3] - 1, 0, -1, "KRSGitSectionUnstaged")
+	highlight_brackets(section_lines[3] - 1, lines[section_lines[3]])
+
 	for _, file in ipairs(info.unstaged) do
-		add_file("M", file, "unstaged")
+		add_file("M", file, "unstaged", "KRSGitFileModified")
 	end
 	for _, file in ipairs(info.untracked) do
-		add_file("?", file, "untracked")
+		add_file("?", file, "untracked", "KRSGitFileUntracked")
 	end
 	if pending == 0 then
 		add("   (working tree clean)")
 	end
 	separator("─")
 
-	section_lines[4] = add(" ⚡ [SECTION 4: QUICK ACTIONS & SHORTCUTS] (Press 4)")
+	section_lines[4] = add(" 󰜴 [SECTION 4: QUICK ACTIONS & SHORTCUTS] (Press 4)")
+	add_hl(section_lines[4] - 1, 0, -1, "KRSGitSectionActions")
+
 	for _, help in ipairs({
-		"   [Alt+h / Alt+l] Switch Submodule Tab  |  [< / >] Resize Split Width",
+		"   [Alt+h / Alt+l] Switch Submodule Tab  │  [< / >] Resize Split Width",
 		"   [b] Branch Manager (Create / Delete / Switch / Rename)",
 		"   [l / L] Commit Log & History Viewer (--all)",
-		"   [s] Stage file  |  [S] Stage All  |  [u] Unstage file  |  [U] Unstage All",
-		"   [r] Restore File  |  [R] Restore Section  |  [d] Side-by-Side Diff Modal",
-		"   [c] Commit Title  |  [C] Execute Commit & Tag  |  [P] Push to Remote",
-		"   [Tab] Switch panel focus  |  [Ctrl+Shift+J/K] Scroll preview",
+		"   [s] Stage file  │  [S] Stage All  │  [u] Unstage file  │  [U] Unstage All",
+		"   [r] Restore File  │  [R] Restore Section  │  [d] Side-by-Side Diff Modal",
+		"   [c] Commit Title  │  [C] Execute Commit & Tag  │  [P] Push to Remote",
+		"   [Tab] Switch panel focus  │  [Ctrl+Shift+J/K] Scroll preview",
 	}) do
-		add(help)
+		local r_h = add(help) - 1
+		highlight_brackets(r_h, help)
 	end
 
-	return lines, line_map, section_lines
+	return lines, line_map, section_lines, highlights
 end
 
 return M

@@ -23,7 +23,8 @@ Nothing below installs automatically on first start: `mason-lspconfig` is config
 | **PHP & Laravel** | `intelephense` | `pint` → `php_cs_fixer` → `blade-formatter` | `php`, `blade` | Xdebug |
 | **Rust** | `rust_analyzer` | `rustfmt` | `rust` | — |
 | **Shell / Bash** | `bashls` | `beautysh` | `bash` | `bash-debug-adapter` |
-| **Docker & Proto** | `dockerls`, `buf_ls` | `dockerfmt`, `protolint` | `dockerfile`, `proto` | — |
+| **Docker** | `dockerls` | `dockerfmt` | `dockerfile` | — |
+| **Protocol Buffers** | `buf_ls`, `protols` | `protolint` | `proto` | — |
 
 ---
 

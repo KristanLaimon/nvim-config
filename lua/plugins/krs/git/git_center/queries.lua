@@ -61,13 +61,21 @@ end
 
 --- Raw diff lines for one file, or its contents when it is untracked.
 --- @param file string Path relative to the repository.
---- @param file_type string "staged" | "unstaged" | "untracked".
+--- @param file_type string "staged" | "unstaged" | "untracked" | "commit".
 --- @param cwd string|nil Repository directory.
+--- @param commit_hash string|nil Optional commit hash for commit diffs.
 --- @return string[] lines
 --- @return boolean is_untracked
-function M.raw_diff_for(file, file_type, cwd)
+function M.raw_diff_for(file, file_type, cwd, commit_hash)
 	local target = config.get_active_target()
 	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+
+	if commit_hash or file_type == "commit" then
+		local hash = commit_hash or (file_type ~= "commit" and file_type or nil)
+		if hash then
+			return git.lines({ "show", "--color=never", hash, "--", file }, cwd), false
+		end
+	end
 
 	if target and target.is_secondary and target.repo_alias then
 		local sec_ok, sec = pcall(require, "krs.git.secondary")

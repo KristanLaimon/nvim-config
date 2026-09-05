@@ -109,4 +109,25 @@ describe("krs.core.project.root", function()
 
 		project.root_markers = orig
 	end)
+
+	it("prefers project root (cwd) over subfolder markers when inside cwd", function()
+		local orig_cwd = vim.fn.getcwd()
+		local base = path.normalize(vim.fn.tempname())
+		local subfolder = path.join(base, "subfolder")
+		path.ensure_dir(subfolder)
+		vim.fn.writefile({ "{}" }, path.join(base, "go.mod"))
+		vim.fn.writefile({ "all:" }, path.join(subfolder, "Makefile"))
+
+		vim.cmd("cd " .. vim.fn.fnameescape(base))
+
+		local buf = vim.api.nvim_create_buf(false, true)
+		vim.api.nvim_buf_set_name(buf, path.join(subfolder, "main.go"))
+
+		local resolved = path.normalize(project.root(buf))
+		vim.cmd("cd " .. vim.fn.fnameescape(orig_cwd))
+		vim.api.nvim_buf_delete(buf, { force = true })
+		vim.fn.delete(base, "rf")
+
+		expect(resolved).toBe(base)
+	end)
 end)

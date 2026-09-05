@@ -57,13 +57,41 @@ M.config_dirs = { ".krsnvim", ".vscode", ".krslocal", ".nvimkrs" }
 function M.root(bufnr)
 	local current = bufnr and path.buffer_dir(bufnr) or vim.fn.expand("%:p:h")
 	if current == "" then
-		current = vim.fn.getcwd()
+		return path.normalize(vim.fn.getcwd())
 	end
+
+	current = path.normalize(current)
+	local cwd = path.normalize(vim.fn.getcwd())
+
+	-- If current is inside cwd, search for root markers up to cwd first
+	local rel = path.relative_to(current, cwd)
+	if rel then
+		local match = vim.fs.find(M.root_markers, { upward = true, path = current, stop = cwd })
+		if match and #match > 0 then
+			local found_dir = path.normalize(vim.fs.dirname(match[1]))
+			if found_dir ~= cwd then
+				-- Check if cwd itself has a project root marker (.git, .krsnvim, go.mod, package.json, etc.)
+				local cwd_match = vim.fs.find(M.root_markers, { upward = false, path = cwd, limit = 1 })
+				if cwd_match and #cwd_match > 0 then
+					-- If found_dir is a git repository/submodule of its own, respect found_dir.
+					-- Otherwise, the main project workspace root (cwd) wins over subfolder markers.
+					local is_git_repo = path.is_dir(path.join(found_dir, ".git")) or path.is_file(path.join(found_dir, ".git"))
+					if not is_git_repo then
+						return cwd
+					end
+				end
+			end
+			return found_dir
+		end
+		return cwd
+	end
+
+	-- If current is outside cwd, search upward freely
 	local match = vim.fs.find(M.root_markers, { upward = true, path = current })
 	if match and #match > 0 then
-		return vim.fs.dirname(match[1])
+		return path.normalize(vim.fs.dirname(match[1]))
 	end
-	return vim.fn.getcwd()
+	return cwd
 end
 
 --- Resolves a per-project config file, e.g. `tasks.json` or `launch.json`.

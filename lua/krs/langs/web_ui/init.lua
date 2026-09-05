@@ -20,7 +20,15 @@ M.lsp_config = {
 			})
 		end,
 	},
-	angularls = {},
+	angularls = {
+		root_dir = function(bufnr, on_dir)
+			local path = vim.api.nvim_buf_get_name(bufnr)
+			local root = vim.fs.root(path ~= "" and path or bufnr, { "angular.json", "project.json", "nx.json" })
+			if root then
+				on_dir(root)
+			end
+		end,
+	},
 }
 
 M.mason = vim.tbl_deep_extend("force", {}, typescript.mason, {

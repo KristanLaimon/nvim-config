@@ -2,7 +2,7 @@ j 🤖 AGENTS.md — KrsVim AI Assistant Guidelines & Compact Wiki Reference
 
 This file defines mandatory guidelines and reference links for AI coding assistants working in or customizing this Neovim distribution (**KrsVim**).
 
-> 🌐 **Per-Language Documentation Reference**: Individual language toolchain guides, debug profiles, and LSP/formatter commands are documented under [`docs/languages/`](docs/languages/) (e.g., [`php.md`](docs/languages/php.md), [`typescript.md`](docs/languages/typescript.md), [`web.md`](docs/languages/web.md), [`astro.md`](docs/languages/astro.md), [`web-ui.md`](docs/languages/web-ui.md), [`rust.md`](docs/languages/rust.md), [`csharp.md`](docs/languages/csharp.md), [`go.md`](docs/languages/go.md), [`python.md`](docs/languages/python.md), [`lua.md`](docs/languages/lua.md), [`docker-proto.md`](docs/languages/docker-proto.md), [`bash.md`](docs/languages/bash.md)).
+> 🌐 **Per-Language Documentation Reference**: Individual language toolchain guides, debug profiles, and LSP/formatter commands are documented under [`docs/languages/`](docs/languages/) (e.g., [`php.md`](docs/languages/php.md), [`typescript.md`](docs/languages/typescript.md), [`web.md`](docs/languages/web.md), [`astro.md`](docs/languages/astro.md), [`web-ui.md`](docs/languages/web-ui.md), [`rust.md`](docs/languages/rust.md), [`csharp.md`](docs/languages/csharp.md), [`go.md`](docs/languages/go.md), [`python.md`](docs/languages/python.md), [`lua.md`](docs/languages/lua.md), [`docker.md`](docs/languages/docker.md), [`proto.md`](docs/languages/proto.md), [`bash.md`](docs/languages/bash.md)).
 
 ---
 
@@ -118,7 +118,8 @@ Detailed setup, Ex commands, DAP debug profiles, and plugin integrations for eac
 * 🪐 [**Astro Guide**](docs/languages/astro.md) — Astro LSP and Prettier formatting.
 * 🧩 [**Web UI Guide**](docs/languages/web-ui.md) — Svelte, Angular, React/TSX, and the shared TypeScript toolchain.
 * 🦀 [**Rust Guide**](docs/languages/rust.md) — rust-analyzer, rustfmt, Cargo, and Treesitter.
-* 🐳 [**Docker & Proto Guide**](docs/languages/docker-proto.md) — `dockerls`, `dockerfmt`, `protolint`.
+* 🐳 [**Docker Guide**](docs/languages/docker.md) — `dockerls`, `dockerfmt`.
+* 📜 [**Protocol Buffers Guide**](docs/languages/proto.md) — `buf_ls`, `protols`, `protolint`.
 * 🐚 [**Shell & Bash Guide**](docs/languages/bash.md) — `bashls`, `bash-debug-adapter`, `beautysh`, ShellCheck.
 
 ---

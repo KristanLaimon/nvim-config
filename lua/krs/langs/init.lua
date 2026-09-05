@@ -127,7 +127,8 @@ M.langs = {
 	python = require("krs.langs.python"),
 	lua = require("krs.langs.lua"),
 	bash = require("krs.langs.bash"),
-	docker_proto = require("krs.langs.docker_proto"),
+	docker = require("krs.langs.docker"),
+	proto = require("krs.langs.proto"),
 }
 
 --- Display order for `M.langs` in the Language Tooling Manager (`:LanguageManager`)
@@ -136,7 +137,7 @@ M.langs = {
 --- (name, requires, Mason packages, Treesitter parsers) comes from the module
 --- itself, see lua/krs/core/installer.lua's `M.language_bundles`.
 M.lang_order =
-	{ "lua", "php", "go", "rust", "python", "csharp", "web", "astro", "web_ui", "docker_proto", "bash" }
+	{ "lua", "php", "go", "rust", "python", "csharp", "web", "astro", "web_ui", "docker", "proto", "bash" }
 
 --- Initialize all per-language configuration submodules.
 function M.setup()

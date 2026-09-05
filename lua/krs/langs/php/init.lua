@@ -30,12 +30,19 @@ M.lsp_server = { "intelephense" }
 M.lsp_config = {
 	intelephense = {
 		filetypes = { "php", "blade" },
+		get_language_id = function(_, filetype)
+			if filetype == "blade" then
+				return "php"
+			end
+			return filetype
+		end,
 		settings = {
 			intelephense = {
 				files = {
 					-- Laravel's Composer class map exceeds the default 1 MB limit.
 					-- Keep it indexed so vendor classes resolve in this project.
 					maxSize = 5000000,
+					associations = { "*.php", "*.phtml", "*.blade.php" },
 				},
 				stubs = {
 					"bcmath",

@@ -630,6 +630,36 @@ function M.open_commit_log_modal(target_cwd)
 		toggle_log_focus()
 	end
 
+	local function open_left_commit_diff()
+		local row = vim.api.nvim_win_get_cursor(left_win)[1]
+		local commit = commits[row]
+		if commit then
+			M.open_diff_modal(nil, "commit", active_cwd, commit.hash)
+		end
+	end
+
+	local function handle_right_enter()
+		if
+			not (right_win and vim.api.nvim_win_is_valid(right_win) and right_buf and vim.api.nvim_buf_is_valid(right_buf))
+		then
+			return
+		end
+		local row = vim.api.nvim_win_get_cursor(left_win)[1]
+		local commit = commits[row]
+
+		local cursor_line = vim.api.nvim_win_get_cursor(right_win)[1]
+		local line_text = vim.api.nvim_buf_get_lines(right_buf, cursor_line - 1, cursor_line, false)[1] or ""
+
+		local filepath = line_text:match("•%s*%[[A-Z%d]+%]%s+(.+)$") or line_text:match("•%s*(.+)$")
+		if filepath then
+			filepath = filepath:gsub("^%s*", ""):gsub("%s*$", "")
+			M.open_diff_modal(filepath, "commit", active_cwd, commit and commit.hash)
+			return
+		end
+
+		toggle_log_focus()
+	end
+
 	local function current_right_file()
 		if
 			not (right_win and vim.api.nvim_win_is_valid(right_win) and right_buf and vim.api.nvim_buf_is_valid(right_buf))
@@ -646,9 +676,11 @@ function M.open_commit_log_modal(target_cwd)
 	end
 
 	local function open_right_file_diff()
+		local row = vim.api.nvim_win_get_cursor(left_win)[1]
+		local commit = commits[row]
 		local filepath = current_right_file()
-		if filepath then
-			M.open_diff_modal(filepath, nil, active_cwd)
+		if commit then
+			M.open_diff_modal(filepath, "commit", active_cwd, commit.hash)
 		end
 	end
 
@@ -662,6 +694,7 @@ function M.open_commit_log_modal(target_cwd)
 	end
 
 	vim.keymap.set("n", "K", checkout_commit, opts)
+	vim.keymap.set("n", "d", open_left_commit_diff, opts)
 
 	vim.keymap.set("n", "<CR>", focus_log_right, opts)
 	vim.keymap.set("n", "<CR>", handle_right_enter, right_opts)
@@ -728,28 +761,52 @@ end
 
 --- Full-screen side-by-side diff viewer with file rotation and hunk navigation.
 --- @param target_file string|nil File to open on. Defaults to the first changed file.
---- @param _target_type string|nil Unused; kept for call-site compatibility.
+--- @param target_type string|nil "staged" | "unstaged" | "untracked" | "commit" (or commit hash).
 --- @param target_cwd string|nil Repository directory to view diffs for.
-function M.open_diff_modal(target_file, _target_type, target_cwd)
+--- @param commit_hash string|nil Optional commit hash for viewing past commit diffs.
+function M.open_diff_modal(target_file, target_type, target_cwd, commit_hash)
 	local prev_win = vim.api.nvim_get_current_win()
 	local orig_cwd = vim.fn.getcwd()
 	local active_cwd = target_cwd or (get_active_target() and get_active_target().full_path) or orig_cwd
 
-	local info = queries.get_git_info(active_cwd)
-	if not info then
-		notify("Not a valid Git repository", vim.log.levels.WARN)
-		return
+	local hash = commit_hash
+	if not hash and target_type and type(target_type) == "string" and target_type:match("^%x+$") and #target_type >= 7 then
+		hash = target_type
 	end
 
 	local files = {}
-	for _, file_type in ipairs({ "staged", "unstaged", "untracked" }) do
-		for _, file in ipairs(info[file_type]) do
-			table.insert(files, { file = file, type = file_type })
+
+	if hash then
+		local raw_stat = git_lines({ "show", "--name-status", "--pretty=format:", hash }, active_cwd)
+		for _, line in ipairs(raw_stat) do
+			local status_char, filepath = line:match("^([A-Z%d]+)%s+(.+)$")
+			if status_char and filepath then
+				table.insert(files, { file = filepath, type = "commit", commit_hash = hash, status = status_char:sub(1, 1) })
+			end
 		end
 	end
+
+	if #files == 0 and not hash then
+		local info = queries.get_git_info(active_cwd)
+		if not info then
+			notify("Not a valid Git repository", vim.log.levels.WARN)
+			return
+		end
+
+		for _, file_type in ipairs({ "staged", "unstaged", "untracked" }) do
+			for _, file in ipairs(info[file_type]) do
+				table.insert(files, { file = file, type = file_type })
+			end
+		end
+	end
+
 	if #files == 0 then
-		notify("No changed files to show diff", vim.log.levels.INFO)
-		return
+		if target_file then
+			table.insert(files, { file = target_file, type = hash and "commit" or "unstaged", commit_hash = hash })
+		else
+			notify("No changed files to show diff", vim.log.levels.INFO)
+			return
+		end
 	end
 
 	local index = 1
@@ -825,19 +882,19 @@ function M.open_diff_modal(target_file, _target_type, target_cwd)
 		index = ((idx - 1) % #files) + 1
 		local item = files[index]
 
-		local raw_lines, is_untracked = queries.raw_diff_for(item.file, item.type, active_cwd)
+		local raw_lines, is_untracked = queries.raw_diff_for(item.file, item.type, active_cwd, item.commit_hash or hash)
 		local l_lines, l_kinds, r_lines, r_kinds = diff.format_side_by_side_dual(raw_lines, is_untracked)
 
-		local label = item.type == "staged" and "🟢 Staged"
-			or (item.type == "unstaged" and "🔴 Unstaged" or "❓ Untracked")
+		local label = (item.commit_hash or hash) and ("📌 Commit " .. (item.commit_hash or hash):sub(1, 7))
+			or (item.type == "staged" and "🟢 Staged" or (item.type == "unstaged" and "🔴 Unstaged" or "❓ Untracked"))
 
 		pcall(vim.api.nvim_win_set_config, left_win, {
-			title = string.format(" 🔴 BEFORE (%d/%d): %s [%s] | [Ctrl+h/l]: Focus ", index, #files, item.file, label),
+			title = string.format(" 🔴 BEFORE (%d/%d): %s [%s] │ [Ctrl+h/l]: Focus ", index, #files, item.file, label),
 			title_pos = "center",
 		})
 		pcall(vim.api.nvim_win_set_config, right_win, {
 			title = string.format(
-				" 🟢 AFTER (%d/%d): %s | [q/Esc]: Close | [Tab/S-Tab]: Switch File | [Ctrl+h/l]: Focus ",
+				" 🟢 AFTER (%d/%d): %s │ [q/Esc]: Close │ [Tab/S-Tab]: Switch File │ [Ctrl+h/l]: Focus ",
 				index,
 				#files,
 				item.file

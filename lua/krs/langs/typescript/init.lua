@@ -43,9 +43,15 @@ M.ESLINT_CONFIG_FILES = {
 	"eslint.config.js",
 	"eslint.config.mjs",
 	"eslint.config.cjs",
+	"eslint.config.ts",
+	"eslint.config.mts",
+	"eslint.config.cts",
 	".eslintrc",
 	".eslintrc.json",
 	".eslintrc.js",
+	".eslintrc.cjs",
+	".eslintrc.yml",
+	".eslintrc.yaml",
 }
 M.DENO_CONFIG_FILES = { "deno.json", "deno.jsonc" }
 
@@ -120,7 +126,15 @@ M.lsp_config = {
 			end
 		end,
 	},
-	eslint = {},
+	eslint = {
+		root_dir = function(bufnr, on_dir)
+			local path = vim.api.nvim_buf_get_name(bufnr)
+			local root = vim.fs.root(path ~= "" and path or bufnr, M.ESLINT_CONFIG_FILES)
+			if root then
+				on_dir(root)
+			end
+		end,
+	},
 }
 
 --- Mason package metadata, keyed by lspconfig/formatter name.

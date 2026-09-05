@@ -46,9 +46,10 @@ M.lsp_config = {
 			"html",
 			"css",
 			"scss",
-			"javascript",
+			"sass",
+			"less",
+			"html.angular",
 			"javascriptreact",
-			"typescript",
 			"typescriptreact",
 			"svelte",
 			"vue",
@@ -57,14 +58,18 @@ M.lsp_config = {
 			"blade",
 		},
 		root_dir = function(bufnr, on_dir)
-			local root = vim.fs.root(bufnr, {
+			local path = vim.api.nvim_buf_get_name(bufnr)
+			local root = vim.fs.root(path ~= "" and path or bufnr, {
 				"tailwind.config.js",
 				"tailwind.config.cjs",
 				"tailwind.config.mjs",
 				"tailwind.config.ts",
 				"postcss.config.js",
+				"postcss.config.cjs",
+				"postcss.config.mjs",
+				"postcss.config.ts",
 				"astro.config.mjs",
-				"package.json",
+				"astro.config.ts",
 			})
 			if root then
 				on_dir(root)

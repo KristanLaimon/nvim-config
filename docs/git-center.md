@@ -13,7 +13,8 @@ The **Git Control Center** (`<C-S-g>`) is a high-speed, interactive floating Git
 - **Persistent Active Tab**: Active submodule tab is saved per-project in `.krsnvim/git-center.json` so re-opening Git Center returns directly to the last active submodule repository.
 - **VSCode Live Side-by-Side Diff Preview**: Right-hand preview window and full-screen diff modal (`d`) display side-by-side comparisons (left = before with soft red `-` highlights, right = after with soft green `+` highlights).
 - **Branch Management & Checkout (`b`)**: Switch/checkout branches, create new branches, delete branches (with `-D` force delete fallback), and rename branches (`b`).
-- **Commit Log & History Viewer (`l`/`L`)**: Optional shortcut to launch a floating commit history modal showing `git log --all` with commit author, date, full description body, and side-by-side commit diffs.
+- **Lazygit-Style Visual Aesthetics**: Vibrant section headers, status badges (`✓` staged green, `M` modified yellow, `?` untracked cyan, `D` deleted red), color-coded keybind badges `[c]`, `[s]`, `[u]`, `[P]`, `[b]`, `[l]`, and capsule repository tab indicators.
+- **Commit Log & History Viewer (`l`/`L`) & Full-Page Commit Diff**: Open floating commit history showing `git log --all`. Pressing `<CR>` or `d` on any file listed under "Files Changed" opens the full-screen side-by-side diff modal (`open_diff_modal`) showing that commit file's diff full page!
 - **Staging & Unstaging**: Single file staging/unstaging (`s`/`u`) and bulk staging/unstaging (`S`/`U`) scoped to the selected submodule repository.
 - **File & Section Restore**: Discard changes for single file (`r`) or entire section (`R`) with confirmation dialogs.
 - **Remote Push**: Execute `git push` (`P`) with automatic upstream tracking detection or interactive remote branch selection.

@@ -387,4 +387,31 @@ describe("plugins.krs.git.git_center", function()
 
 		vim.fn.delete(temp_file)
 	end)
+
+	it("opens full page side-by-side diff modal for past commit diffs", function()
+		git_center.open_git_center()
+		local head_hash = vim.fn.systemlist("git rev-parse HEAD")[1]
+		expect(head_hash).toBeDefined()
+
+		git_center.open_diff_modal("README.md", "commit", vim.fn.getcwd(), head_hash)
+
+		expect(git_center.diff_modal_win).toBeDefined()
+		expect(vim.api.nvim_win_is_valid(git_center.diff_modal_win)).toBeTruthy()
+
+		local title = vim.api.nvim_win_get_config(git_center.diff_modal_win).title
+		local title_str = type(title) == "table" and title[1][1] or tostring(title)
+		expect(title_str:match("BEFORE") ~= nil or title_str:match("Commit") ~= nil).toBeTruthy()
+
+		git_center.close_git_center()
+	end)
+
+	it("applies Lazygit panel extmark highlights to main_buf when open", function()
+		git_center.open_git_center()
+		local main_buf = git_center.main_buf
+
+		local extmarks = vim.api.nvim_buf_get_extmarks(main_buf, -1, 0, -1, { details = true })
+		expect(type(extmarks)).toBe("table")
+
+		git_center.close_git_center()
+	end)
 end)

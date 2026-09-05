@@ -364,11 +364,12 @@ function M.open_git_center()
 		end
 	end, opts_tab)
 
-	local lines, line_map, section_lines = render.build_panel_content(info, left_width)
+	local lines, line_map, section_lines, highlights = render.build_panel_content(info, left_width)
 	config.line_map = line_map
 
 	vim.bo[main_buf].modifiable = true
 	vim.api.nvim_buf_set_lines(main_buf, 0, -1, false, lines)
+	render.apply_panel_highlights(main_buf, highlights)
 	vim.api.nvim_set_option_value("filetype", "markdown", { buf = main_buf })
 	vim.api.nvim_set_option_value("cursorline", true, { win = config.main_win })
 	vim.bo[main_buf].modifiable = false
@@ -457,13 +458,14 @@ function M.open_git_center()
 
 		local l_width = (config.main_win and vim.api.nvim_win_is_valid(config.main_win)) and vim.api.nvim_win_get_width(config.main_win)
 			or left_width
-		local new_lines, new_line_map, new_sections = render.build_panel_content(current, l_width)
+		local new_lines, new_line_map, new_sections, new_highlights = render.build_panel_content(current, l_width)
 		config.line_map = new_line_map
 		section_lines = new_sections
 
 		local cursor = vim.api.nvim_win_get_cursor(config.main_win)
 		vim.bo[main_buf].modifiable = true
 		vim.api.nvim_buf_set_lines(main_buf, 0, -1, false, new_lines)
+		render.apply_panel_highlights(main_buf, new_highlights)
 		vim.bo[main_buf].modifiable = false
 		pcall(vim.api.nvim_win_set_cursor, config.main_win, { math.min(cursor[1], #new_lines), cursor[2] })
 
