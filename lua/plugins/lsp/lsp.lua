@@ -151,6 +151,74 @@ return {
 		config = function(_, opts)
 			local has_blink, blink = pcall(require, "blink.cmp")
 
+			-- 0. Enrich jsonls / yamlls with SchemaStore and local schemas
+			local ok_schemastore, schemastore = pcall(require, "schemastore")
+			if ok_schemastore then
+				local yaml_schemas = schemastore.yaml.schemas()
+				yaml_schemas[get_schema_uri("yaml", "golangci.json")] =
+					{ ".golangci.yml", ".golangci.yaml", ".golangci.example.yml" }
+
+				opts.servers.yamlls = opts.servers.yamlls or {}
+				opts.servers.yamlls.settings = {
+					yaml = {
+						schemaStore = {
+							enable = false,
+							url = "",
+						},
+						schemas = yaml_schemas,
+					},
+				}
+
+				opts.servers.jsonls = opts.servers.jsonls or {}
+				opts.servers.jsonls.settings = {
+					json = {
+						schemas = schemastore.json.schemas({
+							select = {
+								"tsconfig.json",
+								"package.json",
+								"prettierrc.json",
+								".eslintrc",
+								"jsconfig.json",
+								"babelrc.json",
+								"Turborepo",
+								"biome.json",
+								"KrsVim Snippets Schema",
+							},
+							replace = {
+								["tsconfig.json"] = get_schema_uri("json", "tsconfig.json"),
+								["package.json"] = get_schema_uri("json", "package.json"),
+								-- ["prettierrc.json"] = get_schema_uri("json", "prettierrc.json"),
+								[".eslintrc"] = get_schema_uri("json", "eslintrc.json"),
+								["jsconfig.json"] = get_schema_uri("json", "jsconfig.json"),
+								["babelrc.json"] = get_schema_uri("json", "babelrc.json"),
+								["Turborepo"] = get_schema_uri("json", "turbo.json"),
+							},
+							extra = {
+								{
+									name = "prettierrc.json",
+									description = "Prettier configuration schema",
+									fileMatch = { "prettierrc.json", "prettier.config.json", ".prettierrc.astro.json" },
+									url = get_schema_uri("json", "prettierrc.json"),
+								},
+								{
+									name = "biome.json",
+									description = "Biome configuration schema",
+									fileMatch = { "biome.json", "biome.jsonc" },
+									url = get_schema_uri("json", "biome.json"),
+								},
+								{
+									name = "KrsVim Snippets Schema",
+									description = "VSCode-compatible snippet file schema",
+									fileMatch = { "snippets/*.json", "snippets/**/*.json" },
+									url = vim.uri_from_fname(vim.fn.stdpath("config") .. "/snippets/snippets.schema.json"),
+								},
+							},
+						}),
+						validate = { enable = true },
+					},
+				}
+			end
+
 			-- 1. Initialize Mason
 			require("mason").setup()
 			require("mason-lspconfig").setup({
@@ -324,76 +392,6 @@ return {
 			)
 
 			-- The TS server advertises `diagnosticProvider`, so nvim pulls and refreshes
-			-- diagnostics natively. A hand-rolled fetch into a private namespace only froze
-			-- whatever the server happened to know a few hundred ms after attach --
-			-- typically before node_modules was loaded -- and never refreshed it.
-
-			local ok_schemastore, schemastore = pcall(require, "schemastore")
-			if ok_schemastore then
-				local yaml_schemas = schemastore.yaml.schemas()
-				yaml_schemas[get_schema_uri("yaml", "golangci.json")] =
-					{ ".golangci.yml", ".golangci.yaml", ".golangci.example.yml" }
-
-				opts.servers.yamlls = opts.servers.yamlls or {}
-				opts.servers.yamlls.settings = {
-					yaml = {
-						schemaStore = {
-							enable = false,
-							url = "",
-						},
-						schemas = yaml_schemas,
-					},
-				}
-
-				opts.servers.jsonls = opts.servers.jsonls or {}
-				opts.servers.jsonls.settings = {
-					json = {
-						schemas = schemastore.json.schemas({
-							select = {
-								"tsconfig.json",
-								"package.json",
-								"prettierrc.json",
-								".eslintrc",
-								"jsconfig.json",
-								"babelrc.json",
-								"Turborepo",
-								"biome.json",
-								"KrsVim Snippets Schema",
-							},
-							replace = {
-								["tsconfig.json"] = get_schema_uri("json", "tsconfig.json"),
-								["package.json"] = get_schema_uri("json", "package.json"),
-								-- ["prettierrc.json"] = get_schema_uri("json", "prettierrc.json"),
-								[".eslintrc"] = get_schema_uri("json", "eslintrc.json"),
-								["jsconfig.json"] = get_schema_uri("json", "jsconfig.json"),
-								["babelrc.json"] = get_schema_uri("json", "babelrc.json"),
-								["Turborepo"] = get_schema_uri("json", "turbo.json"),
-							},
-							extra = {
-								{
-									name = "prettierrc.json",
-									description = "Prettier configuration schema",
-									fileMatch = { "prettierrc.json", "prettier.config.json", ".prettierrc.astro.json" },
-									url = get_schema_uri("json", "prettierrc.json"),
-								},
-								{
-									name = "biome.json",
-									description = "Biome configuration schema",
-									fileMatch = { "biome.json", "biome.jsonc" },
-									url = get_schema_uri("json", "biome.json"),
-								},
-								{
-									name = "KrsVim Snippets Schema",
-									description = "VSCode-compatible snippet file schema",
-									fileMatch = { "snippets/*.json", "snippets/**/*.json" },
-									url = vim.uri_from_fname(vim.fn.stdpath("config") .. "/snippets/snippets.schema.json"),
-								},
-							},
-						}),
-						validate = { enable = true },
-					},
-				}
-			end
 
 			-- Stop all active LSP clients whenever the working directory/project changes.
 			-- When you open a file in the new project, Neovim will automatically launch only the needed LSP.
