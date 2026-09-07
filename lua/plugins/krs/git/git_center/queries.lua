@@ -47,16 +47,60 @@ function M.git_run(args, on_done, cwd)
 	git.run(args, on_done, cwd)
 end
 
+--- Gets list of local branches.
+--- @param cwd string|nil
+--- @return table[] branches
+function M.get_local_branches(cwd)
+	local target = config.get_active_target()
+	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+	local raw = M.git_lines({ "branch", "--sort=-committerdate" }, cwd)
+	local branches = {}
+	for _, line in ipairs(raw) do
+		local is_current = line:sub(1, 1) == "*"
+		local name = line:gsub("^%*%s*", ""):gsub("^%s*", ""):gsub("%s*$", "")
+		if name ~= "" and not name:match("HEAD detached") and not name:match("no branch") then
+			table.insert(branches, { name = name, is_current = is_current })
+		end
+	end
+	return branches
+end
+
+--- Gets recent commit history graph lines with ANSI colors, author and relative date.
+--- @param cwd string|nil
+--- @param limit integer|nil
+--- @return string[] lines
+function M.get_commit_graph(cwd, limit)
+	local target = config.get_active_target()
+	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+	limit = limit or 15
+	return M.git_lines({
+		"log",
+		"--all",
+		"--graph",
+		"--color=always",
+		"--pretty=format:%C(yellow)%h%C(reset)%C(auto)%d%C(reset) %C(cyan)%an%C(reset) %C(green)(%cr)%C(reset) %s",
+		"-n",
+		tostring(limit),
+	}, cwd)
+end
+
 --- Snapshot of the repository at `cwd` (defaults to active submodule/root).
 --- @param cwd string|nil Target repository directory.
 --- @return table|nil info nil when the working directory is not a repository.
 function M.get_git_info(cwd)
 	local target = config.get_active_target()
 	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+	local info
 	if target and target.is_secondary and target.repo_alias then
-		return status.info(cwd, target.repo_alias)
+		info = status.info(cwd, target.repo_alias)
+	else
+		info = status.info(cwd)
 	end
-	return status.info(cwd)
+	if info then
+		info.local_branches = M.get_local_branches(cwd)
+		info.commit_graph = M.get_commit_graph(cwd, 10)
+	end
+	return info
 end
 
 --- Raw diff lines for one file, or its contents when it is untracked.

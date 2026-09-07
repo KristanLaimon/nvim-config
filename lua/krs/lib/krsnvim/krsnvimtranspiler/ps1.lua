@@ -37,14 +37,11 @@ function M.to_ps1(code)
 			or trimmed:match("^import%(")
 		then
 			table.insert(lines, indent .. "# [krsnvim] " .. trimmed .. " (mapped to native PowerShell cmdlets)")
-
 		elseif trimmed:sub(1, 2) == "--" then
 			local comment_text = trimmed:sub(3):match("^%s*(.-)%s*$")
 			table.insert(lines, indent .. "# " .. comment_text)
-
 		elseif trimmed == "" then
 			table.insert(lines, "")
-
 		elseif
 			trimmed:match("^[%w_]*%.?beforeAll%s*%(")
 			or trimmed:match("^[%w_]*%.?afterAll%s*%(")
@@ -52,17 +49,14 @@ function M.to_ps1(code)
 			or trimmed:match("^[%w_]*%.?afterEach%s*%(")
 		then
 			table.insert(block_stack, "noop")
-
 		elseif trimmed:match("^describe%s*%(") or trimmed:match("^[%w_]+%.describe%s*%(") then
 			local suite_name = trimmed:match('describe%s*%("%s*(.-)%s*"')
 				or trimmed:match("describe%s*%('%s*(.-)%s*'")
 				or "Test Suite"
 			table.insert(block_stack, "noop")
 			table.insert(lines, indent .. 'Write-Host "📦 Suite: ' .. suite_name .. '"')
-
 		elseif trimmed:match("^[%w_]+%.run%s*%(") or trimmed:match("^run%s*%(") then
 			table.insert(lines, indent .. "# [krsnvim] " .. trimmed)
-
 		elseif
 			trimmed:match("^it%s*%(")
 			or trimmed:match("^test%s*%(")
@@ -76,7 +70,6 @@ function M.to_ps1(code)
 				or "Test"
 			table.insert(block_stack, "noop")
 			table.insert(lines, indent .. 'Write-Host "  ✓ ' .. test_name .. '"')
-
 		elseif trimmed:match("^expect%s*%(") then
 			local is_inv = trimmed:find("%.isNot%.")
 				or trimmed:find('%["not"%]')
@@ -284,7 +277,6 @@ function M.to_ps1(code)
 					)
 				end
 			end
-
 		elseif
 			trimmed:match("^function%s+([%w_]+)%s*%((.*)%)")
 			or trimmed:match("^local%s+function%s+([%w_]+)%s*%((.*)%)")
@@ -305,7 +297,6 @@ function M.to_ps1(code)
 				end
 			end
 			table.insert(lines, indent .. "function " .. fn_name .. "(" .. table.concat(ps_params, ", ") .. ") {")
-
 		elseif trimmed:match("^return%s*(.*)$") then
 			local ret_expr = trimmed:match("^return%s*(.*)$"):match("^%s*(.-)%s*$")
 			if ret_expr ~= "" then
@@ -332,7 +323,6 @@ function M.to_ps1(code)
 			else
 				table.insert(lines, indent .. "return")
 			end
-
 		elseif trimmed:match("^coroutine%.yield%((.*)%)") then
 			local args = trimmed:match("^coroutine%.yield%((.*)%)")
 			local parts = {}
@@ -340,7 +330,6 @@ function M.to_ps1(code)
 				table.insert(parts, format_ps1_val(part))
 			end
 			table.insert(lines, indent .. "Write-Output " .. table.concat(parts, " "))
-
 		elseif trimmed:match("^local%s+([%a_][%w_]*)%s*,%s*([%a_][%w_]*)%s*=%s*(.-)%((.*)%)") then
 			local var_ok, var_res, fn_call, fn_args =
 				trimmed:match("^local%s+([%a_][%w_]*)%s*,%s*([%a_][%w_]*)%s*=%s*(.-)%((.*)%)")
@@ -371,7 +360,6 @@ function M.to_ps1(code)
 				table.insert(lines, indent .. "  $" .. var_ok .. " = $false")
 				table.insert(lines, indent .. "}")
 			end
-
 		elseif trimmed:match("^print%((.*)%)") then
 			local args = trimmed:match("^print%((.*)%)")
 			local parts = {}
@@ -379,7 +367,6 @@ function M.to_ps1(code)
 				table.insert(parts, format_ps1_val(part))
 			end
 			table.insert(lines, indent .. "Write-Host " .. table.concat(parts, " "))
-
 		elseif trimmed:match("^console%.[%w_]+%((.*)%)%s*$") then
 			local args = trimmed:match("^console%.[%w_]+%((.*)%)%s*$")
 			local parts = {}
@@ -391,24 +378,20 @@ function M.to_ps1(code)
 				end
 			end
 			table.insert(lines, indent .. "Write-Host " .. table.concat(parts, " "))
-
 		elseif trimmed:match("^error%((.*)%)") then
 			local err_msg = trimmed:match("^error%((.*)%)")
 			table.insert(lines, indent .. "throw " .. format_ps1_val(err_msg))
-
 		elseif trimmed:match("^assert%((.*)%)") then
 			local args = split_args(trimmed:match("^assert%((.*)%)"))
 			local cond = args[1] or "true"
 			local msg = args[2] or '"Assertion failed"'
 			table.insert(lines, indent .. "if (-not (" .. to_ps1_expr(cond) .. ")) { throw " .. format_ps1_val(msg) .. " }")
-
 		elseif trimmed:match("^fs%.mkdir%((.*)%)") then
 			local path_arg = trimmed:match("^fs%.mkdir%((.*)%)")
 			table.insert(
 				lines,
 				indent .. "New-Item -ItemType Directory -Force -Path " .. format_ps1_val(path_arg) .. " | Out-Null"
 			)
-
 		elseif trimmed:match("^fs%.write%((.*)%)") then
 			local args = split_args(trimmed:match("^fs%.write%((.*)%)"))
 			local path_arg = args[1]
@@ -417,11 +400,9 @@ function M.to_ps1(code)
 				lines,
 				indent .. "Set-Content -Path " .. format_ps1_val(path_arg) .. " -Value " .. format_ps1_val(content_arg)
 			)
-
 		elseif trimmed:match("^fs%.remove%((.*)%)") or trimmed:match("^fs%.delete%((.*)%)") then
 			local path_arg = trimmed:match("%((.*)%)")
 			table.insert(lines, indent .. "Remove-Item -Recurse -Force -Path " .. format_ps1_val(path_arg))
-
 		elseif
 			trimmed:match("^%s*%$%s*%((.*)%)")
 			or trimmed:match("^%s*terminal%.exec%((.*)%)")
@@ -430,7 +411,6 @@ function M.to_ps1(code)
 			local cmd_arg = trimmed:match("%((.*)%)")
 			cmd_arg = cmd_arg:gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 			table.insert(lines, indent .. cmd_arg)
-
 		elseif trimmed:match("^local%s+[%a_][%w_]*%s*=%s*") or trimmed:match("^[%a_][%w_]*%s*=%s*") then
 			local is_local, var, val
 			if trimmed:match("^local%s+") then
@@ -443,23 +423,19 @@ function M.to_ps1(code)
 
 			if val:sub(1, 1) == "{" and val:sub(-1) == "}" then
 				table.insert(lines, indent .. "$" .. var .. " = " .. lua_tbl_to_ps1(val))
-
 			elseif val:match("^fs%.read%((.*)%)") then
 				local path_arg = val:match("^fs%.read%((.*)%)")
 				table.insert(lines, indent .. "$" .. var .. " = Get-Content -Raw " .. format_ps1_val(path_arg))
-
 			elseif val:match("^json%.encode%((.*)%)") then
 				local obj_arg = val:match("^json%.encode%((.*)%)")
 				local ps1_obj = obj_arg:sub(1, 1) == "{" and lua_tbl_to_ps1(obj_arg) or format_ps1_val(obj_arg)
 				table.insert(lines, indent .. "$" .. var .. " = (" .. ps1_obj .. " | ConvertTo-Json -Compress)")
-
 			elseif val:match("^json%.load%((.*)%)") then
 				local path_arg = val:match("^json%.load%((.*)%)")
 				table.insert(
 					lines,
 					indent .. "$" .. var .. " = (Get-Content -Raw " .. format_ps1_val(path_arg) .. " | ConvertFrom-Json)"
 				)
-
 			elseif val:match("^fetch%.get%((.*)%)") then
 				local url_arg = val:match("^fetch%.get%((.*)%)")
 				table.insert(
@@ -471,15 +447,12 @@ function M.to_ps1(code)
 						.. format_ps1_val(url_arg)
 						.. " -UseBasicParsing).Content"
 				)
-
 			elseif val:match("^fetch%.json%((.*)%)") then
 				local url_arg = val:match("^fetch%.json%((.*)%)")
 				table.insert(lines, indent .. "$" .. var .. " = Invoke-RestMethod -Uri " .. format_ps1_val(url_arg))
-
 			elseif val:match("^terminal%..-%((.*)%)") or val:match("^%s*%$%s*%((.*)%)") then
 				local cmd_arg = val:match("%((.*)%)"):gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 				table.insert(lines, indent .. "$" .. var .. " = (" .. cmd_arg .. ")")
-
 			elseif val:match("^[%a_][%w_]*%s*%((.*)%)") then
 				local fn_name, fn_args = val:match("^([%a_][%w_]*)%s*%((.*)%)")
 				if
@@ -496,16 +469,13 @@ function M.to_ps1(code)
 					end
 					table.insert(lines, indent .. "$" .. var .. " = (" .. fn_name .. " " .. table.concat(ps_args, " ") .. ")")
 				end
-
 			else
 				table.insert(lines, indent .. "$" .. var .. " = " .. format_ps1_val(val))
 			end
-
 		elseif trimmed:match("^async%.sleep%s*%((.*)%)") or trimmed:match("^sleep%s*%((.*)%)") then
 			local ms_arg = trimmed:match("^async%.sleep%s*%((.*)%)") or trimmed:match("^sleep%s*%((.*)%)")
 			local ms_val = format_ps1_val(ms_arg)
 			table.insert(lines, indent .. "Start-Sleep -Milliseconds " .. ms_val)
-
 		elseif
 			trimmed:match("^setTimeout%s*%(")
 			or trimmed:match("^setInterval%s*%(")
@@ -513,10 +483,8 @@ function M.to_ps1(code)
 			or trimmed:match("^clearInterval%s*%(")
 		then
 			table.insert(lines, indent .. "# " .. trimmed)
-
 		elseif trimmed:match("^async%..-%((.*)%)") then
 			table.insert(lines, indent .. "# " .. trimmed)
-
 		elseif trimmed:match("^dofile%s*%((.*)%)") or trimmed:match("^loadfile%s*%((.*)%)") then
 			local file_arg = trimmed:match("^dofile%s*%((.*)%)") or trimmed:match("^loadfile%s*%((.*)%)")
 			local clean_arg = file_arg:gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
@@ -536,20 +504,16 @@ function M.to_ps1(code)
 			else
 				table.insert(lines, indent .. 'nvim -l "' .. clean_arg .. '"')
 			end
-
 		elseif trimmed:match("^os%.exit%s*%((.*)%)") then
 			local code_arg = trimmed:match("^os%.exit%s*%((.*)%)") or "0"
 			table.insert(lines, indent .. "exit " .. format_ps1_val(code_arg))
-
 		elseif trimmed:match("^os%.execute%s*%((.*)%)") then
 			local cmd_arg = trimmed:match("^os%.execute%s*%((.*)%)")
 			local clean_cmd = cmd_arg:gsub('^"', ""):gsub('"$', ""):gsub("^'", ""):gsub("'$", "")
 			table.insert(lines, indent .. clean_cmd)
-
 		elseif trimmed:match("^os%.remove%s*%((.*)%)") then
 			local path_arg = trimmed:match("^os%.remove%s*%((.*)%)")
 			table.insert(lines, indent .. "Remove-Item -Force " .. format_ps1_val(path_arg))
-
 		elseif trimmed:match("^[%a_][%w_%.%:]*%s*%((.*)%)%s*$") then
 			local fn_name, fn_args = trimmed:match("^([%a_][%w_%.%:]*)%s*%((.*)%)%s*$")
 			if
@@ -573,7 +537,6 @@ function M.to_ps1(code)
 					table.insert(lines, indent .. fn_name .. " " .. table.concat(ps_args, " "))
 				end
 			end
-
 		elseif
 			trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s+do$")
 			or trimmed:match("^for%s+([%a_][%w_]*)%s*=%s*(.-)%s*,%s*(.-)%s*,%s*(.-)%s+do$")
@@ -603,15 +566,12 @@ function M.to_ps1(code)
 					.. format_ps1_val(step_val)
 					.. ") {"
 			)
-
 		elseif trimmed:match("^for%s+[%w_]+%s*,%s*([%a_][%w_]*)%s+in%s+ipairs%(([%a_][%w_]*)%)%s+do$") then
 			local item_var, list_var = trimmed:match("^for%s+[%w_]+%s*,%s*([%a_][%w_]*)%s+in%s+ipairs%(([%a_][%w_]*)%)%s+do$")
 			table.insert(lines, indent .. "foreach ($" .. item_var .. " in $" .. list_var .. ") {")
-
 		elseif trimmed:match("^while%s+(.-)%s+do$") then
 			local cond = trimmed:match("^while%s+(.-)%s+do$")
 			table.insert(lines, indent .. "while (" .. to_ps1_expr(cond) .. ") {")
-
 		elseif trimmed:match("^if%s+(.-)%s+then$") then
 			local cond = trimmed:match("^if%s+(.-)%s+then$")
 			if cond:match("^not%s+fs%.exists%((.*)%)") then
@@ -623,7 +583,6 @@ function M.to_ps1(code)
 			else
 				table.insert(lines, indent .. "if (" .. to_ps1_expr(cond) .. ") {")
 			end
-
 		elseif trimmed:match("^elseif%s+(.-)%s+then$") then
 			local cond = trimmed:match("^elseif%s+(.-)%s+then$")
 			if cond:match("^not%s+fs%.exists%((.*)%)") then
@@ -635,10 +594,8 @@ function M.to_ps1(code)
 			else
 				table.insert(lines, indent .. "} elseif (" .. to_ps1_expr(cond) .. ") {")
 			end
-
 		elseif trimmed == "else" then
 			table.insert(lines, indent .. "} else {")
-
 		elseif trimmed == "end" or trimmed:match("^end%)?") or trimmed == "}" then
 			local last_block = table.remove(block_stack)
 			if last_block ~= "noop" then

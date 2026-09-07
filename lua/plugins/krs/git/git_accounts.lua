@@ -68,7 +68,11 @@ function M.apply_account_to_project(account)
 	if account.ssh_key and account.ssh_key ~= "" then
 		local ssh_cmd = "ssh -i " .. account.ssh_key .. " -F /dev/null"
 		vim.fn.system({ "git", "-C", root, "config", "--local", "core.sshCommand", ssh_cmd })
-		vim.notify("Git connection auth set to SSH key: " .. account.ssh_key, vim.log.levels.INFO, { title = "Git Accounts" })
+		vim.notify(
+			"Git connection auth set to SSH key: " .. account.ssh_key,
+			vim.log.levels.INFO,
+			{ title = "Git Accounts" }
+		)
 	else
 		-- Remove if previously set
 		vim.fn.system({ "git", "-C", root, "config", "--local", "--unset", "core.sshCommand" })
@@ -209,20 +213,26 @@ function M.open_menu()
 									vim.ui.input({ prompt = "Server URL (optional): " }, function(server)
 										vim.ui.input({ prompt = "SSH Key Path (optional, e.g. ~/.ssh/id_rsa_gitlab): " }, function(ssh_key)
 											vim.ui.input({ prompt = "HTTP Username (for Token Auth, optional): " }, function(http_username)
-												vim.ui.input({ prompt = "Disable SSL Verify? (true/false, default: false): " }, function(disable_ssl)
-													local ssl_val = disable_ssl == "true" or disable_ssl == "y" or disable_ssl == "yes" or disable_ssl == "1"
-													table.insert(data.accounts, {
-														alias = alias,
-														user_name = name,
-														user_email = email,
-														server = server ~= "" and server or nil,
-														ssh_key = ssh_key ~= "" and ssh_key or nil,
-														http_username = http_username ~= "" and http_username or nil,
-														disable_ssl = ssl_val
-													})
-													M.save_accounts(data)
-													M.open_menu()
-												end)
+												vim.ui.input(
+													{ prompt = "Disable SSL Verify? (true/false, default: false): " },
+													function(disable_ssl)
+														local ssl_val = disable_ssl == "true"
+															or disable_ssl == "y"
+															or disable_ssl == "yes"
+															or disable_ssl == "1"
+														table.insert(data.accounts, {
+															alias = alias,
+															user_name = name,
+															user_email = email,
+															server = server ~= "" and server or nil,
+															ssh_key = ssh_key ~= "" and ssh_key or nil,
+															http_username = http_username ~= "" and http_username or nil,
+															disable_ssl = ssl_val,
+														})
+														M.save_accounts(data)
+														M.open_menu()
+													end
+												)
 											end)
 										end)
 									end)
@@ -253,24 +263,33 @@ function M.open_menu()
 									end
 									vim.ui.input({ prompt = "Edit Server URL: ", default = value.server or "" }, function(server)
 										vim.ui.input({ prompt = "Edit SSH Key Path: ", default = value.ssh_key or "" }, function(ssh_key)
-											vim.ui.input({ prompt = "Edit HTTP Username: ", default = value.http_username or "" }, function(http_username)
-												local cur_ssl = value.disable_ssl and "true" or "false"
-												vim.ui.input({ prompt = "Disable SSL Verify? (true/false): ", default = cur_ssl }, function(disable_ssl)
-													local ssl_val = disable_ssl == "true" or disable_ssl == "y" or disable_ssl == "yes" or disable_ssl == "1"
-													if data.default_account == value.alias then
-														data.default_account = alias
-													end
-													value.alias = alias
-													value.user_name = name
-													value.user_email = email
-													value.server = server ~= "" and server or nil
-													value.ssh_key = ssh_key ~= "" and ssh_key or nil
-													value.http_username = http_username ~= "" and http_username or nil
-													value.disable_ssl = ssl_val
-													M.save_accounts(data)
-													M.open_menu()
-												end)
-											end)
+											vim.ui.input(
+												{ prompt = "Edit HTTP Username: ", default = value.http_username or "" },
+												function(http_username)
+													local cur_ssl = value.disable_ssl and "true" or "false"
+													vim.ui.input(
+														{ prompt = "Disable SSL Verify? (true/false): ", default = cur_ssl },
+														function(disable_ssl)
+															local ssl_val = disable_ssl == "true"
+																or disable_ssl == "y"
+																or disable_ssl == "yes"
+																or disable_ssl == "1"
+															if data.default_account == value.alias then
+																data.default_account = alias
+															end
+															value.alias = alias
+															value.user_name = name
+															value.user_email = email
+															value.server = server ~= "" and server or nil
+															value.ssh_key = ssh_key ~= "" and ssh_key or nil
+															value.http_username = http_username ~= "" and http_username or nil
+															value.disable_ssl = ssl_val
+															M.save_accounts(data)
+															M.open_menu()
+														end
+													)
+												end
+											)
 										end)
 									end)
 								end)

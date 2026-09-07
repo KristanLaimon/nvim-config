@@ -309,6 +309,82 @@ function M.render_tab_bar(left_w)
 	end
 end
 
+--- Parses ANSI color escape sequences from raw text and converts them to plain text + extmarks.
+--- @param raw_line string
+--- @return string clean_text
+--- @return table spans List of `{ col_start, col_end, hl_group }`
+function M.parse_ansi_line(raw_line)
+	local clean = ""
+	local spans = {}
+	local pos = 1
+	local len = #raw_line
+	local current_hl = nil
+
+	local color_map = {
+		["2"] = "KRSGitGraphDim",
+		["30"] = "KRSGitGraphDim",
+		["90"] = "KRSGitGraphDim",
+		["31"] = "KRSGitGraphRed",
+		["91"] = "KRSGitGraphRed",
+		["32"] = "KRSGitGraphGreen",
+		["92"] = "KRSGitGraphGreen",
+		["33"] = "KRSGitGraphYellow",
+		["93"] = "KRSGitGraphYellow",
+		["34"] = "KRSGitGraphBlue",
+		["94"] = "KRSGitGraphBlue",
+		["35"] = "KRSGitGraphMagenta",
+		["95"] = "KRSGitGraphMagenta",
+		["36"] = "KRSGitGraphCyan",
+		["96"] = "KRSGitGraphCyan",
+		["37"] = "KRSGitGraphWhite",
+		["97"] = "KRSGitGraphWhite",
+	}
+
+	while pos <= len do
+		local esc_start, esc_end, seq = raw_line:find("\27%[([%d;]*)m", pos)
+		if esc_start then
+			if esc_start > pos then
+				local chunk = raw_line:sub(pos, esc_start - 1)
+				local c_start = #clean
+				clean = clean .. chunk
+				local c_end = #clean
+				if current_hl then
+					table.insert(spans, { col_start = c_start, col_end = c_end, hl_group = current_hl })
+				end
+			end
+
+			local has_reset = (seq == "" or seq == "m")
+			local next_hl = nil
+			for code in seq:gmatch("%d+") do
+				if code == "0" or code == "39" then
+					has_reset = true
+					next_hl = nil
+				elseif color_map[code] then
+					next_hl = color_map[code]
+				end
+			end
+			if next_hl then
+				current_hl = next_hl
+			elseif has_reset then
+				current_hl = nil
+			end
+
+			pos = esc_end + 1
+		else
+			local chunk = raw_line:sub(pos)
+			local c_start = #clean
+			clean = clean .. chunk
+			local c_end = #clean
+			if current_hl then
+				table.insert(spans, { col_start = c_start, col_end = c_end, hl_group = current_hl })
+			end
+			break
+		end
+	end
+
+	return clean, spans
+end
+
 M.ns_panel = vim.api.nvim_create_namespace("krs_git_panel_hl")
 
 --- Sets up panel highlight groups in Lazygit aesthetic style.
@@ -319,6 +395,7 @@ function M.setup_panel_highlights()
 	vim.api.nvim_set_hl(0, "KRSGitSectionStaged", { fg = "#a6e3a1", bold = true, default = true })
 	vim.api.nvim_set_hl(0, "KRSGitSectionUnstaged", { fg = "#f38ba8", bold = true, default = true })
 	vim.api.nvim_set_hl(0, "KRSGitSectionCommit", { fg = "#cba6f7", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitSectionBranch", { fg = "#89b4fa", bold = true, default = true })
 	vim.api.nvim_set_hl(0, "KRSGitSectionActions", { fg = "#f9e2af", bold = true, default = true })
 	vim.api.nvim_set_hl(0, "KRSGitKeyBadge", { fg = "#89dceb", bold = true, default = true })
 	vim.api.nvim_set_hl(0, "KRSGitFileStaged", { fg = "#a6e3a1", bold = true, default = true })
@@ -327,6 +404,14 @@ function M.setup_panel_highlights()
 	vim.api.nvim_set_hl(0, "KRSGitFileDeleted", { fg = "#f38ba8", bold = true, default = true })
 	vim.api.nvim_set_hl(0, "KRSGitSeparator", { fg = "#45475a", default = true })
 	vim.api.nvim_set_hl(0, "KRSGitCommitDraft", { fg = "#cdd6f4", italic = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitGraphRed", { fg = "#f38ba8", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitGraphGreen", { fg = "#a6e3a1", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitGraphYellow", { fg = "#f9e2af", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitGraphBlue", { fg = "#89b4fa", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitGraphMagenta", { fg = "#cba6f7", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitGraphCyan", { fg = "#89dceb", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSGitGraphWhite", { fg = "#cdd6f4", default = true })
+	vim.api.nvim_set_hl(0, "KRSGitGraphDim", { fg = "#6c7086", default = true })
 end
 
 --- Applies extmark highlights to the main Git Center panel buffer.
@@ -347,7 +432,7 @@ end
 --- @param width integer Panel width, used for the separators.
 --- @return string[] lines Panel text.
 --- @return table line_map Line number -> `{ type, file }` for file rows.
---- @return table section_lines Section number (1-4) -> line number.
+--- @return table section_lines Section number (1-6) -> line number.
 --- @return table highlights Extmark highlight specs for Lazygit styling.
 function M.build_panel_content(info, width)
 	local lines, line_map, section_lines, highlights = {}, {}, {}, {}
@@ -394,7 +479,8 @@ function M.build_panel_content(info, width)
 		end
 	end
 
-	local branch_line = string.format("  Branch: %s%s", info.branch, info.upstream and (" (Tracking " .. info.upstream .. ")") or "")
+	local branch_line =
+		string.format("  Branch: %s%s", info.branch, info.upstream and (" (Tracking " .. info.upstream .. ")") or "")
 	local r0 = add(branch_line) - 1
 	add_hl(r0, 0, -1, "KRSGitHeaderBranch")
 
@@ -433,7 +519,8 @@ function M.build_panel_content(info, width)
 	end
 
 	if config.commit_data.description ~= "" then
-		local desc_lines = vim.split(config.commit_data.description:gsub("\r\n", "\n"):gsub("\r", "\n"), "\n", { plain = true })
+		local desc_lines =
+			vim.split(config.commit_data.description:gsub("\r\n", "\n"):gsub("\r", "\n"), "\n", { plain = true })
 		for i, dline in ipairs(desc_lines) do
 			if i == 1 then
 				local r_desc = add("   [m] Description: " .. dline) - 1
@@ -486,8 +573,62 @@ function M.build_panel_content(info, width)
 	end
 	separator("─")
 
-	section_lines[4] = add(" 󰜴 [SECTION 4: QUICK ACTIONS & SHORTCUTS] (Press 4)")
-	add_hl(section_lines[4] - 1, 0, -1, "KRSGitSectionActions")
+	local local_branches = info.local_branches or {}
+	section_lines[4] = add(
+		string.format(
+			" 🌿 [SECTION 4: LOCAL BRANCHES (%d)] (Press 4 | [Enter] Switch / [c] Create / [d] Delete / [r] Rename)",
+			#local_branches
+		)
+	)
+	add_hl(section_lines[4] - 1, 0, -1, "KRSGitSectionBranch")
+	highlight_brackets(section_lines[4] - 1, lines[section_lines[4]])
+
+	for _, b in ipairs(local_branches) do
+		local prefix = b.is_current and "✓" or " "
+		local line_text = string.format("   %s %s%s", prefix, b.name, b.is_current and " [HEAD]" or "")
+		local r = add(line_text) - 1
+		line_map[r + 1] = { type = "branch", branch = b.name, is_current = b.is_current }
+		if b.is_current then
+			add_hl(r, 3, 4, "KRSGitFileStaged")
+			add_hl(r, 5, 5 + #b.name, "KRSGitHeaderBranch")
+			local head_pos = line_text:find("%[HEAD%]")
+			if head_pos then
+				add_hl(r, head_pos - 1, head_pos + 5, "KRSGitKeyBadge")
+			end
+		else
+			add_hl(r, 5, 5 + #b.name, "KRSGitGraphWhite")
+		end
+	end
+	if #local_branches == 0 then
+		add("   (no local branches)")
+	end
+	separator("─")
+
+	local graph_raw = info.commit_graph or {}
+	section_lines[5] =
+		add(string.format(" 📜 [SECTION 5: COMMIT HISTORY LOG] (Press 5 | [Enter/d] Details / [K] Checkout)", #graph_raw))
+	add_hl(section_lines[5] - 1, 0, -1, "KRSGitSectionCommit")
+	highlight_brackets(section_lines[5] - 1, lines[section_lines[5]])
+
+	for _, raw_line in ipairs(graph_raw) do
+		local clean_text, spans = M.parse_ansi_line(raw_line)
+		local line_text = "   " .. clean_text
+		local r = add(line_text) - 1
+
+		local hash = clean_text:match("(%x%x%x%x%x%x%x+)")
+		line_map[r + 1] = { type = "commit", commit_hash = hash, subject = clean_text }
+
+		for _, s in ipairs(spans) do
+			add_hl(r, s.col_start + 3, s.col_end + 3, s.hl_group)
+		end
+	end
+	if #graph_raw == 0 then
+		add("   (no commit history)")
+	end
+	separator("─")
+
+	section_lines[6] = add(" 󰜴 [SECTION 6: QUICK ACTIONS & SHORTCUTS] (Press 6)")
+	add_hl(section_lines[6] - 1, 0, -1, "KRSGitSectionActions")
 
 	for _, help in ipairs({
 		"   [Alt+h / Alt+l] Switch Submodule Tab  │  [< / >] Resize Split Width",
@@ -496,7 +637,7 @@ function M.build_panel_content(info, width)
 		"   [s] Stage file  │  [S] Stage All  │  [u] Unstage file  │  [U] Unstage All",
 		"   [r] Restore File  │  [R] Restore Section  │  [d] Side-by-Side Diff Modal",
 		"   [c] Commit Title  │  [C] Execute Commit & Tag  │  [P] Push to Remote",
-		"   [Tab] Switch panel focus  │  [Ctrl+Shift+J/K] Scroll preview",
+		"   [1-6] Jump to Section 1-6  │  [Tab] Focus preview  │  [Ctrl+Shift+J/K] Scroll preview",
 	}) do
 		local r_h = add(help) - 1
 		highlight_brackets(r_h, help)

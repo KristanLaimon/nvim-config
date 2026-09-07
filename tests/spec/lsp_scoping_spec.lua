@@ -78,7 +78,7 @@ describe("LSP server scoping", function()
 	it("excludes plain TS/JS filetypes and package.json from Tailwind CSS LSP auto-activation", function()
 		expect(web.lsp_config.tailwindcss).toBeDefined()
 		local filetypes = web.lsp_config.tailwindcss.filetypes or {}
-		
+
 		expect(vim.tbl_contains(filetypes, "typescript")).toBe(false)
 		expect(vim.tbl_contains(filetypes, "javascript")).toBe(false)
 		expect(vim.tbl_contains(filetypes, "html")).toBe(true)

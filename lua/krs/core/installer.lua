@@ -89,6 +89,11 @@ M.heavy_runtimes = {
 	{ cmd = "bun", name = "Bun runtime" },
 	{ cmd = "go", name = "Go programming language" },
 	{ cmd = "dotnet", name = ".NET SDK" },
+	{ cmd = "python", name = "Python runtime", alt = "python3" },
+	{ cmd = "php", name = "PHP runtime" },
+	{ cmd = "ruby", name = "Ruby runtime" },
+	{ cmd = "zig", name = "Zig compiler & toolchain" },
+	{ cmd = "cargo", name = "Rust toolchain (cargo)", alt = "rustc" },
 }
 
 --- Full health-check catalogue, grouped by category. Single source of truth
@@ -117,6 +122,8 @@ M.health_categories = {
 			{ cmd = "php", name = "PHP" },
 			{ cmd = "composer", name = "Composer", note = "PHP package manager" },
 			{ cmd = "ruby", name = "Ruby", note = "Ruby toolchain" },
+			{ cmd = "zig", name = "Zig", note = "Zig compiler & toolchain" },
+			{ cmd = "cargo", name = "Cargo (Rust)", alt = "rustc", note = "Rust toolchain" },
 			{ cmd = "ghc", name = "GHC", note = "Haskell compiler" },
 		},
 	},

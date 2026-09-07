@@ -310,8 +310,18 @@ return {
 				end
 			end
 
-			pcall(vim.api.nvim_create_user_command, "ToggleInlayHints", toggle_inlay_hints, { desc = "Toggle LSP Inlay Hints" })
-			pcall(vim.api.nvim_create_user_command, "KrsToggleInlayHints", toggle_inlay_hints, { desc = "Toggle LSP Inlay Hints" })
+			pcall(
+				vim.api.nvim_create_user_command,
+				"ToggleInlayHints",
+				toggle_inlay_hints,
+				{ desc = "Toggle LSP Inlay Hints" }
+			)
+			pcall(
+				vim.api.nvim_create_user_command,
+				"KrsToggleInlayHints",
+				toggle_inlay_hints,
+				{ desc = "Toggle LSP Inlay Hints" }
+			)
 
 			-- The TS server advertises `diagnosticProvider`, so nvim pulls and refreshes
 			-- diagnostics natively. A hand-rolled fetch into a private namespace only froze
@@ -321,7 +331,8 @@ return {
 			local ok_schemastore, schemastore = pcall(require, "schemastore")
 			if ok_schemastore then
 				local yaml_schemas = schemastore.yaml.schemas()
-				yaml_schemas[get_schema_uri("yaml", "golangci.json")] = { ".golangci.yml", ".golangci.yaml", ".golangci.example.yml" }
+				yaml_schemas[get_schema_uri("yaml", "golangci.json")] =
+					{ ".golangci.yml", ".golangci.yaml", ".golangci.example.yml" }
 
 				opts.servers.yamlls = opts.servers.yamlls or {}
 				opts.servers.yamlls.settings = {

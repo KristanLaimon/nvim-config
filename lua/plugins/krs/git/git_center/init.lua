@@ -16,6 +16,8 @@ M.git_run = queries.git_run
 M.get_git_info = queries.get_git_info
 M.raw_diff_for = queries.raw_diff_for
 M.stage_all_with_modal = queries.stage_all_with_modal
+M.get_local_branches = queries.get_local_branches
+M.get_commit_graph = queries.get_commit_graph
 
 -- Re-export render
 M.submodule_statuses = render.submodule_statuses

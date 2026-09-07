@@ -414,4 +414,188 @@ describe("plugins.krs.git.git_center", function()
 
 		git_center.close_git_center()
 	end)
+
+	it("parses ANSI color codes into plain text and extmark spans cleanly", function()
+		local render = require("plugins.krs.git.git_center.render")
+		local raw_line =
+			"\27[31m* \27[m\27[33me506b06\27[m \27[1;32m(HEAD -> \27[1;36mmain\27[1;32m)\27[m feat: commit title"
+		local clean, spans = render.parse_ansi_line(raw_line)
+
+		expect(clean).toBe("* e506b06 (HEAD -> main) feat: commit title")
+		expect(#spans).toBeGreaterThan(0)
+		expect(spans[1].hl_group).toBe("KRSGitGraphRed")
+		expect(spans[2].hl_group).toBe("KRSGitGraphYellow")
+	end)
+
+	it("retrieves local branches and commit graph output via queries", function()
+		local queries = require("plugins.krs.git.git_center.queries")
+		local branches = queries.get_local_branches(vim.fn.getcwd())
+		expect(type(branches)).toBe("table")
+		expect(#branches).toBeGreaterThan(0)
+
+		local graph = queries.get_commit_graph(vim.fn.getcwd(), 5)
+		expect(type(graph)).toBe("table")
+		expect(#graph).toBeGreaterThan(0)
+	end)
+
+	it("renders section 4 (branches), section 5 (commits log), and section 6 (shortcuts) in main panel", function()
+		git_center.open_git_center()
+		local main_buf = git_center.main_buf
+		local lines = vim.api.nvim_buf_get_lines(main_buf, 0, -1, false)
+		local full_text = table.concat(lines, "\n")
+
+		expect(full_text:match("SECTION 4: LOCAL BRANCHES") ~= nil).toBeTruthy()
+		expect(full_text:match("SECTION 5: COMMIT HISTORY LOG") ~= nil).toBeTruthy()
+		expect(full_text:match("SECTION 6: QUICK ACTIONS & SHORTCUTS") ~= nil).toBeTruthy()
+
+		-- Check section jumping keymaps 1 to 6
+		for sec = 1, 6 do
+			local map = vim.api.nvim_buf_call(main_buf, function()
+				return vim.fn.maparg(tostring(sec), "n", false, true)
+			end)
+			expect({ key = tostring(sec), bound = (map.buffer == 1) }).toEqual({
+				key = tostring(sec),
+				bound = true,
+			})
+		end
+
+		git_center.close_git_center()
+	end)
+
+	it("retrieves commit graph with author info and relative date", function()
+		local queries = require("plugins.krs.git.git_center.queries")
+		local graph = queries.get_commit_graph(vim.fn.getcwd(), 3)
+		expect(#graph).toBeGreaterThan(0)
+		local render = require("plugins.krs.git.git_center.render")
+		local clean = render.parse_ansi_line(graph[1])
+		-- Clean text should contain commit hash, author and relative date (e.g. ago)
+		expect(clean:match("%x%x%x%x%x%x") ~= nil).toBeTruthy()
+		expect(clean:match("ago") ~= nil).toBeTruthy()
+	end)
+
+	it("previews branch commit history when cursor is placed on a branch in section 4", function()
+		git_center.open_git_center()
+		local main_win = git_center.main_win
+		local preview_buf = git_center.preview_buf
+
+		-- Find line corresponding to a branch in line_map
+		local branch_row = nil
+		for row, item in pairs(git_center.line_map or {}) do
+			if item.type == "branch" and item.branch then
+				branch_row = row
+				break
+			end
+		end
+
+		if branch_row then
+			vim.api.nvim_win_set_cursor(main_win, { branch_row, 0 })
+			if git_center.update_preview then
+				git_center.update_preview(true)
+			end
+
+			expect(vim.api.nvim_buf_is_valid(preview_buf)).toBeTruthy()
+			local p_lines = vim.api.nvim_buf_get_lines(preview_buf, 0, -1, false)
+			local p_text = table.concat(p_lines, "\n")
+			expect(p_text:match("Branch:") ~= nil).toBeTruthy()
+			expect(p_text:match("Hash") ~= nil).toBeTruthy()
+			expect(p_text:match("Author") ~= nil).toBeTruthy()
+		end
+
+		git_center.close_git_center()
+	end)
+
+	it("previews full commit details when cursor is placed on a commit in section 5", function()
+		git_center.open_git_center()
+		local main_win = git_center.main_win
+		local preview_buf = git_center.preview_buf
+
+		-- Find line corresponding to a commit in line_map
+		local commit_row = nil
+		for row, item in pairs(git_center.line_map or {}) do
+			if item.type == "commit" and item.commit_hash then
+				commit_row = row
+				break
+			end
+		end
+
+		if commit_row then
+			vim.api.nvim_win_set_cursor(main_win, { commit_row, 0 })
+			if git_center.update_preview then
+				git_center.update_preview(true)
+			end
+
+			expect(vim.api.nvim_buf_is_valid(preview_buf)).toBeTruthy()
+			local p_lines = vim.api.nvim_buf_get_lines(preview_buf, 0, -1, false)
+			local p_text = table.concat(p_lines, "\n")
+			expect(p_text:match("commit ") ~= nil).toBeTruthy()
+			expect(p_text:match("Author:") ~= nil).toBeTruthy()
+			expect(vim.bo[preview_buf].filetype).toBe("git")
+		end
+
+		git_center.close_git_center()
+	end)
+
+	it("previews file diff when cursor is placed on a staged or unstaged file in section 2 or 3", function()
+		git_center.open_git_center()
+		local main_win = git_center.main_win
+		local preview_buf = git_center.preview_buf
+
+		local file_row = nil
+		for row, item in pairs(git_center.line_map or {}) do
+			if item.file and (item.type == "staged" or item.type == "unstaged" or item.type == "untracked") then
+				file_row = row
+				break
+			end
+		end
+
+		if file_row then
+			vim.api.nvim_win_set_cursor(main_win, { file_row, 0 })
+			if git_center.update_preview then
+				git_center.update_preview(true)
+			end
+
+			expect(vim.api.nvim_buf_is_valid(preview_buf)).toBeTruthy()
+			local p_lines = vim.api.nvim_buf_get_lines(preview_buf, 0, -1, false)
+			expect(#p_lines).toBeGreaterThan(0)
+			expect(vim.bo[preview_buf].filetype).toBe("")
+		end
+
+		git_center.close_git_center()
+	end)
+
+	it("opens create branch dialog when pressing c in section 4", function()
+		git_center.open_git_center()
+		local main_win = git_center.main_win
+		local main_buf = git_center.main_buf
+
+		local branch_row = nil
+		for row, item in pairs(git_center.line_map or {}) do
+			if item.type == "branch" and item.branch then
+				branch_row = row
+				break
+			end
+		end
+
+		if branch_row then
+			vim.api.nvim_win_set_cursor(main_win, { branch_row, 0 })
+			local input_modal = require("plugins.krs.ui.input_modal")
+			local orig_open = input_modal.open
+			local opened_label = nil
+			input_modal.open = function(opts)
+				opened_label = opts.label
+			end
+
+			local c_map = vim.api.nvim_buf_call(main_buf, function()
+				return vim.fn.maparg("c", "n", false, true)
+			end)
+			if c_map and c_map.callback then
+				c_map.callback()
+			end
+
+			input_modal.open = orig_open
+			expect(opened_label).toBe("Create & Checkout New Branch")
+		end
+
+		git_center.close_git_center()
+	end)
 end)

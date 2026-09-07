@@ -340,7 +340,7 @@ function M.to_sh(code)
 			for param in (params_str or ""):gmatch("[^,]+") do
 				param = param:match("^%s*(.-)%s*$")
 				if param ~= "" then
-					table.insert(lines, indent .. '  local ' .. param .. '="$' .. idx .. '"')
+					table.insert(lines, indent .. "  local " .. param .. '="$' .. idx .. '"')
 					idx = idx + 1
 				end
 			end
@@ -536,7 +536,7 @@ function M.to_sh(code)
 					indent
 						.. prefix
 						.. var
-						.. '=$(echo '
+						.. "=$(echo "
 						.. json_str
 						.. ' | (python3 -c "import sys, json; print(json.dumps(json.load(sys.stdin)))" 2>/dev/null || jq -c .))'
 				)
@@ -690,7 +690,7 @@ function M.to_sh(code)
 		elseif trimmed:match("^for%s+[%w_]+%s*,%s*([%a_][%w_]*)%s+in%s+ipairs%(([%a_][%w_]*)%)%s+do$") then
 			local item_var, list_var = trimmed:match("^for%s+[%w_]+%s*,%s*([%a_][%w_]*)%s+in%s+ipairs%(([%a_][%w_]*)%)%s+do$")
 			table.insert(block_stack, "for")
-			table.insert(lines, indent .. 'for ' .. item_var .. ' in "${' .. list_var .. '[@]}"; do')
+			table.insert(lines, indent .. "for " .. item_var .. ' in "${' .. list_var .. '[@]}"; do')
 
 		-- Loops: while cond do
 		elseif trimmed:match("^while%s+(.-)%s+do$") then

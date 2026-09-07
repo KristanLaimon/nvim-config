@@ -73,9 +73,24 @@ M.lsp_config = {
 --- `mason`, `type` ("lsp"|"formatter"|"dap"|"extra"), `cmd`, `lang`, and `name`
 --- from `KrsMasonToolInfo` in `KrsLangModule`.
 M.mason = {
-	example_ls = { mason = "example-language-server", lang = "Example Lang", type = "lsp", cmd = "example-language-server" },
-	example_fmt = { mason = "example-formatter", name = "example-formatter", type = "formatter", cmd = "example-formatter" },
-	example_dap = { mason = "example-debug-adapter", lang = "Example Debugger", type = "dap", cmd = "example-debug-adapter" },
+	example_ls = {
+		mason = "example-language-server",
+		lang = "Example Lang",
+		type = "lsp",
+		cmd = "example-language-server",
+	},
+	example_fmt = {
+		mason = "example-formatter",
+		name = "example-formatter",
+		type = "formatter",
+		cmd = "example-formatter",
+	},
+	example_dap = {
+		mason = "example-debug-adapter",
+		lang = "Example Debugger",
+		type = "dap",
+		cmd = "example-debug-adapter",
+	},
 }
 
 --- Installation and display order for the Mason packages listed above.

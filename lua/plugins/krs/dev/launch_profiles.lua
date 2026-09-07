@@ -110,7 +110,8 @@ function M.detect_project_entry(root)
 	end
 
 	-- Go project
-	if path.is_file(path.join(root, "go.mod"))
+	if
+		path.is_file(path.join(root, "go.mod"))
 		or path.is_file(path.join(root, "main.go"))
 		or path.is_file(path.join(root, "cmd/main.go"))
 		or #vim.fn.globpath(root, "*.go", false, true) > 0
@@ -127,7 +128,8 @@ function M.detect_project_entry(root)
 	end
 
 	-- Python project
-	if path.is_file(path.join(root, "main.py"))
+	if
+		path.is_file(path.join(root, "main.py"))
 		or path.is_file(path.join(root, "app.py"))
 		or path.is_file(path.join(root, "pyproject.toml"))
 		or path.is_file(path.join(root, "requirements.txt"))
@@ -143,7 +145,8 @@ function M.detect_project_entry(root)
 	end
 
 	-- C# / .NET project
-	if path.is_file(path.join(root, "Program.cs"))
+	if
+		path.is_file(path.join(root, "Program.cs"))
 		or #vim.fn.globpath(root, "*.csproj", false, true) > 0
 		or #vim.fn.globpath(root, "*.sln", false, true) > 0
 	then
@@ -155,7 +158,8 @@ function M.detect_project_entry(root)
 	end
 
 	-- PHP project
-	if path.is_file(path.join(root, "composer.json"))
+	if
+		path.is_file(path.join(root, "composer.json"))
 		or path.is_file(path.join(root, "index.php"))
 		or path.is_file(path.join(root, "public/index.php"))
 	then
@@ -169,7 +173,8 @@ function M.detect_project_entry(root)
 	end
 
 	-- Lua project
-	if path.is_file(path.join(root, "init.lua"))
+	if
+		path.is_file(path.join(root, "init.lua"))
 		or path.is_file(path.join(root, "main.lua"))
 		or #vim.fn.globpath(root, "*.lua", false, true) > 0
 	then
@@ -183,7 +188,8 @@ function M.detect_project_entry(root)
 	end
 
 	-- TS / JS project
-	if path.is_file(path.join(root, "package.json"))
+	if
+		path.is_file(path.join(root, "package.json"))
 		or path.is_file(path.join(root, "tsconfig.json"))
 		or path.is_file(path.join(root, "src/index.ts"))
 		or path.is_file(path.join(root, "src/main.ts"))
@@ -664,7 +670,10 @@ function M.open_form_editor(root, existing_profile, on_saved)
 				profile.entry_point = path.is_file(path.join(root, "public/index.php")) and "public/index.php" or "index.php"
 			elseif next_rt == "lua" and (is_ts_default or profile.entry_point == "") then
 				profile.entry_point = path.is_file(path.join(root, "init.lua")) and "init.lua" or "main.lua"
-			elseif (next_rt == "bun" or next_rt == "node" or next_rt == "deno") and (profile.entry_point:match("%.go$") or profile.entry_point == ".") then
+			elseif
+				(next_rt == "bun" or next_rt == "node" or next_rt == "deno")
+				and (profile.entry_point:match("%.go$") or profile.entry_point == ".")
+			then
 				profile.entry_point = "src/index.ts"
 			end
 			render()

@@ -770,7 +770,13 @@ function M.open_diff_modal(target_file, target_type, target_cwd, commit_hash)
 	local active_cwd = target_cwd or (get_active_target() and get_active_target().full_path) or orig_cwd
 
 	local hash = commit_hash
-	if not hash and target_type and type(target_type) == "string" and target_type:match("^%x+$") and #target_type >= 7 then
+	if
+		not hash
+		and target_type
+		and type(target_type) == "string"
+		and target_type:match("^%x+$")
+		and #target_type >= 7
+	then
 		hash = target_type
 	end
 

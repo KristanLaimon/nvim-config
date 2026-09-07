@@ -11,7 +11,9 @@ local _cached_env = nil
 --- Detects active execution environment layers.
 --- @return table env `{ is_tmux, is_termux, is_proot, is_ubuntu, is_wsl, is_windows, is_mac, is_linux, is_mobile, is_omarchy, label }`
 function M.detect()
-	if _cached_env then return _cached_env end
+	if _cached_env then
+		return _cached_env
+	end
 
 	local env = {
 		is_tmux = vim.env.TMUX ~= nil,
