@@ -149,7 +149,6 @@ function _G.Smart_Close_Buffer(target_buf, force)
 
 	local ft = vim.bo[target_buf].filetype
 	if ft == M.settings.dashboard_filetype then
-		vim.cmd(force and "qa!" or "qa")
 		return
 	end
 	if ft == "neo-tree" then
@@ -252,7 +251,7 @@ end
 --- Closes the current tab/buffer, matching VS Code / browser tab close semantics (<C-w>).
 --- If inside neo-tree, focuses the code window instead of closing neo-tree.
 --- If inside a terminal, closes the terminal window (unless in terminal insert mode).
---- If inside the dashboard, exits Neovim.
+--- If inside the dashboard, does nothing (never exits Neovim; use <C-q> or :q to quit).
 --- If inside a code buffer, closes the buffer tab (landing on the next tab, previous tab if last, or dashboard if only 1 tab).
 --- Never closes the code window and never lets neo-tree expand to full width.
 --- @param force boolean|nil
@@ -288,8 +287,8 @@ function _G.Smart_Close_Tab(force)
 		return
 	end
 
+	-- On the dashboard, closing a tab (<C-w>) has nothing to close; keep dashboard open.
 	if ft == M.settings.dashboard_filetype then
-		vim.cmd(force and "qa!" or "qa")
 		return
 	end
 
@@ -313,7 +312,13 @@ function _G.Neotree_Smart_Quit(force)
 	local ft = vim.bo[cur_buf].filetype
 	local buftype = vim.bo[cur_buf].buftype
 
-	if ft == "neo-tree" or ft == "NvimTree" or ft == M.settings.dashboard_filetype or buftype == "terminal" then
+	-- In the dashboard, :q or <C-q> should exit Neovim.
+	if ft == M.settings.dashboard_filetype then
+		vim.cmd(force and "qa!" or "qa")
+		return
+	end
+
+	if ft == "neo-tree" or ft == "NvimTree" or buftype == "terminal" then
 		return _G.Smart_Close_Tab(force)
 	end
 

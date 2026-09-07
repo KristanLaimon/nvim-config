@@ -43,6 +43,29 @@ M.settings = {
 	--- Where the last used terminal height is remembered.
 	height_file = vim.fn.stdpath("state") .. "/terminal_height",
 
+	--- Where the last used centered floating terminal height is remembered.
+	float_height_file = vim.fn.stdpath("state") .. "/terminal_float_height",
+
+	--- Where the last used bottom floating terminal height is remembered.
+	bottom_float_height_file = vim.fn.stdpath("state") .. "/terminal_bottom_float_height",
+
+	--- Default layout mode on fresh install: "dock" (bottom split dock).
+	--- Can be changed to "float" (centered floating popup) or "bottom_float" (bottom overlay).
+	layout = "dock",
+
+	--- Where the last used layout preference is remembered across sessions.
+	layout_file = vim.fn.stdpath("state") .. "/terminal_layout",
+
+	--- Step size in rows for stretching / shrinking terminal height (<C-Up> / <C-Down>).
+	resize_step = 2,
+
+	--- Floating window dimensions & border options (used when layout is "float" or "bottom_float")
+	float = {
+		width = 0.85,
+		height = 0.80,
+		border = "rounded",
+	},
+
 	--- Top border row threshold for mouse height resizing/dragging (in rows).
 	--- Clicking within this top threshold allows dragging the window height instead of entering terminal insert mode.
 	resize_drag_threshold = 2,
@@ -54,6 +77,10 @@ M.settings = {
 		toggle = { "<C-t>", "<C-T>", "<C-\\>", "<leader>t", "<leader>ft", "<F4>", "<C-;>", "<A-;>" },
 		--- Close the terminal window from inside terminal mode.
 		close = "<C-w>",
+		--- Stretch terminal bigger (<C-Up>).
+		resize_up = { "<C-Up>", "<C-S-Up>" },
+		--- Shrink terminal smaller (<C-Down>).
+		resize_down = { "<C-Down>", "<C-S-Down>" },
 		--- Clipboard bridges, because a terminal has no access to registers.
 		paste = { "<C-v>", "<C-S-v>" },
 		copy = { "<C-c>", "<C-S-c>" },
@@ -111,6 +138,95 @@ local function save_height(height)
 	store.write_file(M.settings.height_file, tostring(height))
 end
 
+local function load_saved_float_height()
+	local raw = store.read_file(M.settings.float_height_file)
+	local height = raw and tonumber(vim.trim(raw)) or nil
+	if height and height >= M.settings.min_height and height <= M.settings.max_height then
+		return height
+	end
+	local total_h = vim.o.lines or 24
+	return math.max(5, math.floor(total_h * (M.settings.float.height or 0.80)))
+end
+
+local function get_float_height()
+	if not _G._krs_terminal_float_height then
+		_G._krs_terminal_float_height = load_saved_float_height()
+	end
+	return _G._krs_terminal_float_height
+end
+
+local function save_float_height(height)
+	if type(height) ~= "number" or height < M.settings.min_height or height > M.settings.max_height then
+		return
+	end
+	if height == get_float_height() then
+		return
+	end
+	_G._krs_terminal_float_height = height
+	store.write_file(M.settings.float_height_file, tostring(height))
+end
+
+local function load_saved_bottom_float_height()
+	local raw = store.read_file(M.settings.bottom_float_height_file)
+	local height = raw and tonumber(vim.trim(raw)) or nil
+	if height and height >= M.settings.min_height and height <= M.settings.max_height then
+		return height
+	end
+	return get_terminal_height()
+end
+
+local function get_bottom_float_height()
+	if not _G._krs_terminal_bottom_float_height then
+		_G._krs_terminal_bottom_float_height = load_saved_bottom_float_height()
+	end
+	return _G._krs_terminal_bottom_float_height
+end
+
+local function save_bottom_float_height(height)
+	if type(height) ~= "number" or height < M.settings.min_height or height > M.settings.max_height then
+		return
+	end
+	if height == get_bottom_float_height() then
+		return
+	end
+	_G._krs_terminal_bottom_float_height = height
+	store.write_file(M.settings.bottom_float_height_file, tostring(height))
+end
+
+-- ============================================================================
+-- LAYOUT PERSISTENCE
+-- ============================================================================
+
+--- Reads the remembered layout ("dock", "float", "bottom_float"), falling back to default ("dock").
+--- @return string layout
+local function load_saved_layout()
+	local raw = store.read_file(M.settings.layout_file)
+	if raw then
+		raw = vim.trim(raw)
+	end
+	if raw and (raw == "dock" or raw == "float" or raw == "bottom_float") then
+		return raw
+	end
+	return M.settings.layout or "dock"
+end
+
+local function get_terminal_layout()
+	if not _G._krs_terminal_layout then
+		_G._krs_terminal_layout = load_saved_layout()
+	end
+	return _G._krs_terminal_layout
+end
+
+--- Remembers a new layout preference.
+--- @param layout string
+local function save_layout(layout)
+	if layout ~= "dock" and layout ~= "float" and layout ~= "bottom_float" then
+		return
+	end
+	_G._krs_terminal_layout = layout
+	store.write_file(M.settings.layout_file, layout)
+end
+
 -- ============================================================================
 -- SLOT BOOKKEEPING
 -- ============================================================================
@@ -125,6 +241,24 @@ end
 --- @return boolean
 local function is_valid_buf(buf)
 	return type(buf) == "number" and vim.api.nvim_buf_is_valid(buf)
+end
+
+--- True when bufnr belongs to a terminal.
+--- @param bufnr integer|nil
+--- @return boolean
+local function is_term_buf(bufnr)
+	return is_valid_buf(bufnr) and (vim.bo[bufnr].buftype == "terminal" or vim.b[bufnr].krs_is_multi_term)
+end
+
+--- True when win displays a terminal buffer.
+--- @param win integer|nil
+--- @return boolean
+local function is_term_win(win)
+	if not is_valid_win(win) then
+		return false
+	end
+	local buf = vim.api.nvim_win_get_buf(win)
+	return is_term_buf(buf)
 end
 
 --- Slot record for terminal `n`, created on demand.
@@ -265,6 +399,94 @@ local function fill_window(t, n, win)
 end
 
 -- ============================================================================
+-- FLOATING WINDOW HELPERS
+-- ============================================================================
+
+--- Checks if a window is a floating window.
+--- @param win integer|nil
+--- @return boolean
+local function is_floating_win(win)
+	if not win or type(win) ~= "number" or not vim.api.nvim_win_is_valid(win) then
+		return false
+	end
+	local cfg = vim.api.nvim_win_get_config(win)
+	return cfg and cfg.relative and cfg.relative ~= ""
+end
+
+--- Opens a floating window for terminal `n`.
+--- @param t table Slot record.
+--- @param n integer Slot number.
+--- @param layout string "float" or "bottom_float".
+--- @return integer win Window handle.
+local function open_floating_window(t, n, layout)
+	local z_ok, z_index = pcall(require, "krs.core.z_index")
+	local zidx = z_ok and z_index.next_zindex("terminal") or 50
+
+	local total_w = vim.o.columns or 80
+	local total_h = vim.o.lines or 24
+
+	local w, h, r, c
+	if layout == "bottom_float" then
+		w = math.max(20, total_w - 2)
+		h = math.min(total_h - 4, get_bottom_float_height())
+		r = math.max(1, total_h - h - 3)
+		c = 1
+	else
+		w = math.max(20, math.floor(total_w * (M.settings.float.width or 0.85)))
+		h = math.min(total_h - 4, get_float_height())
+		r = math.max(1, math.floor((total_h - h) / 2) - 1)
+		c = math.max(1, math.floor((total_w - w) / 2))
+	end
+
+	local target_buf = is_valid_buf(t.buf) and t.buf or nil
+	local scratch = nil
+	if not target_buf then
+		scratch = vim.api.nvim_create_buf(false, true)
+		target_buf = scratch
+	end
+
+	local win = vim.api.nvim_open_win(target_buf, true, {
+		relative = "editor",
+		width = w,
+		height = h,
+		row = r,
+		col = c,
+		border = M.settings.float.border or "rounded",
+		title = " 🖥️ Terminal #" .. n .. " ",
+		title_pos = "center",
+		zindex = zidx,
+	})
+
+	vim.wo[win].number = false
+	vim.wo[win].relativenumber = false
+	vim.wo[win].signcolumn = "no"
+
+	if z_ok and z_index.register then
+		z_index.register("terminal", win, { zindex = zidx })
+	end
+
+	fill_window(t, n, win)
+
+	if scratch and is_valid_buf(scratch) and scratch ~= t.buf then
+		pcall(vim.api.nvim_buf_delete, scratch, { force = true })
+	end
+
+	return win
+end
+
+--- Updates the title of a floating terminal window to reflect slot `n`.
+--- @param win integer Window handle.
+--- @param n integer Slot number.
+local function update_float_title(win, n)
+	if is_floating_win(win) then
+		pcall(vim.api.nvim_win_set_config, win, {
+			title = " 🖥️ Terminal #" .. n .. " ",
+			title_pos = "center",
+		})
+	end
+end
+
+-- ============================================================================
 -- PUBLIC API
 -- ============================================================================
 
@@ -292,6 +514,9 @@ function M.select_terminal(n)
 		t.win = active_win
 		vim.api.nvim_set_current_win(t.win)
 		fill_window(t, n, t.win)
+		if is_floating_win(t.win) then
+			update_float_title(t.win, n)
+		end
 		vim.api.nvim_set_current_win(t.win)
 		vim.cmd("startinsert")
 	else
@@ -301,7 +526,7 @@ function M.select_terminal(n)
 	vim.notify("🖥️ Terminal #" .. n .. " active", vim.log.levels.INFO, { title = "Multi-Terminal" })
 end
 
---- Opens terminal `n`, creating the dock pane when there is none.
+--- Opens terminal `n`, creating the dock pane or floating window when there is none.
 --- @param n integer|nil Slot number. Defaults to the selected terminal.
 function M.open_terminal(n)
 	sync_terminals()
@@ -329,15 +554,23 @@ function M.open_terminal(n)
 		t.win = active_win
 		vim.api.nvim_set_current_win(t.win)
 		fill_window(t, n, t.win)
+		if is_floating_win(t.win) then
+			update_float_title(t.win, n)
+		end
 		vim.api.nvim_set_current_win(t.win)
 		vim.cmd("startinsert")
 		return
 	end
 
-	t.win = dock.open({ prefer = "terminal", height = get_terminal_height() })
-	vim.api.nvim_set_current_win(t.win)
-	fill_window(t, n, t.win)
-	dock.style(t.win)
+	local layout = get_terminal_layout()
+	if layout == "float" or layout == "bottom_float" then
+		t.win = open_floating_window(t, n, layout)
+	else
+		t.win = dock.open({ prefer = "terminal", height = get_terminal_height() })
+		vim.api.nvim_set_current_win(t.win)
+		fill_window(t, n, t.win)
+		dock.style(t.win)
+	end
 	vim.api.nvim_set_current_win(t.win)
 	vim.cmd("startinsert")
 end
@@ -377,6 +610,158 @@ function M.toggle_selected_terminal()
 	end
 
 	M.open_terminal(n)
+end
+
+--- Gets current terminal layout ("dock", "float", or "bottom_float").
+--- @return string
+function M.get_layout()
+	return get_terminal_layout()
+end
+
+--- Sets terminal layout mode and shows terminal in the new layout.
+--- @param layout "dock"|"float"|"bottom_float"
+function M.set_layout(layout)
+	if layout ~= "dock" and layout ~= "float" and layout ~= "bottom_float" then
+		return
+	end
+	save_layout(layout)
+
+	local cur_n = _G._krs_selected_terminal or 1
+	local active_win = get_active_terminal_win()
+	if active_win and is_valid_win(active_win) then
+		pcall(vim.cmd, "stopinsert")
+		pcall(vim.api.nvim_win_close, active_win, true)
+		for _, term in pairs(terminals) do
+			if term.win == active_win then
+				term.win = nil
+			end
+		end
+	end
+	M.open_terminal(cur_n)
+
+	local label = layout == "dock" and "Docked Split (Bottom)"
+		or (layout == "bottom_float" and "Bottom Floating Overlay" or "Centered Floating Popup")
+	vim.notify("🖥️ Terminal layout set to: " .. label, vim.log.levels.INFO, { title = "Multi-Terminal" })
+end
+
+--- Toggles terminal layout cycling through: dock -> bottom_float -> float -> dock.
+function M.toggle_layout()
+	local cur = get_terminal_layout()
+	local target
+	if cur == "dock" then
+		target = "bottom_float"
+	elseif cur == "bottom_float" then
+		target = "float"
+	else
+		target = "dock"
+	end
+	M.set_layout(target)
+end
+
+M.is_term_buf = is_term_buf
+M.is_term_win = is_term_win
+
+--- Resizes the terminal height.
+--- In bottom floating mode: stretches or shrinks from the top edge, keeping bottom edge anchored.
+--- In centered floating mode: stretches or shrinks top and bottom edges simultaneously (centered).
+--- In docked split mode: adjusts the split window height upwards or downwards.
+--- Persists the new height globally across sessions in stdpath("state").
+--- @param delta integer Positive to grow, negative to shrink.
+--- @return boolean resized Whether resizing took place.
+function M.resize_height(delta)
+	delta = delta or M.settings.resize_step or 2
+	local win = vim.api.nvim_get_current_win()
+	local active_win = get_active_terminal_win()
+	local target_win = nil
+
+	if is_valid_win(win) and is_term_win(win) then
+		target_win = win
+	elseif is_valid_win(active_win) then
+		target_win = active_win
+	end
+
+	if not target_win or not is_valid_win(target_win) then
+		return false
+	end
+
+	local total_lines = vim.o.lines or 24
+	local is_float = is_floating_win(target_win)
+
+	if is_float then
+		local cfg = vim.api.nvim_win_get_config(target_win)
+		local cur_h = cfg.height
+		local cur_r = type(cfg.row) == "table" and (cfg.row[false] or 1) or (tonumber(cfg.row) or 1)
+
+		local layout = get_terminal_layout()
+		local is_bottom = (layout == "bottom_float") or (cur_r + cur_h >= total_lines - 4)
+
+		if is_bottom then
+			-- Bottom floating: bottom edge is anchored; stretch or shrink from top edge
+			local bottom_edge = cur_r + cur_h
+			local max_h = math.max(M.settings.min_height, bottom_edge - 1)
+			local new_h = math.min(max_h, math.max(M.settings.min_height, cur_h + delta))
+			local new_r = bottom_edge - new_h
+
+			if new_h ~= cur_h or new_r ~= cur_r then
+				local ok = pcall(vim.api.nvim_win_set_config, target_win, {
+					relative = cfg.relative or "editor",
+					row = new_r,
+					col = cfg.col,
+					width = cfg.width,
+					height = new_h,
+				})
+				if ok then
+					save_bottom_float_height(new_h)
+					return true
+				end
+			end
+		else
+			-- Centered floating: stretches or shrinks top and bottom edge at the same time (stays centered)
+			local max_h = math.max(M.settings.min_height, total_lines - 4)
+			local new_h = math.min(max_h, math.max(M.settings.min_height, cur_h + delta))
+			local new_r = math.max(1, math.floor((total_lines - new_h) / 2) - 1)
+
+			if new_h ~= cur_h or new_r ~= cur_r then
+				local ok = pcall(vim.api.nvim_win_set_config, target_win, {
+					relative = cfg.relative or "editor",
+					row = new_r,
+					col = cfg.col,
+					width = cfg.width,
+					height = new_h,
+				})
+				if ok then
+					save_float_height(new_h)
+					return true
+				end
+			end
+		end
+		return false
+	end
+
+	-- Docked bottom split: increasing height stretches from top edge upwards!
+	local cur_h = vim.api.nvim_win_get_height(target_win)
+	local max_h = math.max(M.settings.min_height, total_lines - 4)
+	local new_h = math.min(max_h, math.max(M.settings.min_height, cur_h + delta))
+
+	if new_h ~= cur_h then
+		pcall(vim.api.nvim_win_set_height, target_win, new_h)
+		save_height(new_h)
+		return true
+	end
+
+	return false
+end
+
+--- Stretches the terminal height larger (<C-Up>).
+function M.increase_height()
+	local step = M.settings.resize_step or 2
+	M.resize_height(step)
+end
+
+--- Shrinks the terminal height smaller (<C-Down>).
+function M.decrease_height()
+	local step = M.settings.resize_step or 2
+	M.resize_height(-step)
 end
 
 --- Re-exported for callers that relied on this module owning the dock order.
@@ -433,6 +818,32 @@ function M.setup()
 		M.toggle_selected_terminal()
 	end, { desc = "Toggle selected terminal window" })
 
+	vim.api.nvim_create_user_command("TerminalToggleLayout", function()
+		M.toggle_layout()
+	end, { desc = "Toggle terminal layout between Docked Split and Floating Overlay" })
+
+	vim.api.nvim_create_user_command("TerminalLayout", function(opts)
+		if opts.args and opts.args ~= "" then
+			M.set_layout(opts.args)
+		else
+			M.toggle_layout()
+		end
+	end, {
+		nargs = "?",
+		complete = function()
+			return { "dock", "float", "bottom_float" }
+		end,
+		desc = "Set or toggle terminal layout (dock, float, bottom_float)",
+	})
+
+	vim.api.nvim_create_user_command("TerminalIncreaseHeight", function()
+		M.increase_height()
+	end, { desc = "Increase terminal height (<C-Up>)" })
+
+	vim.api.nvim_create_user_command("TerminalDecreaseHeight", function()
+		M.decrease_height()
+	end, { desc = "Decrease terminal height (<C-Down>)" })
+
 	vim.api.nvim_create_user_command("TerminalSelect", function(opts)
 		local num = tonumber(opts.args)
 		if num then
@@ -487,14 +898,31 @@ function M.setup()
 	-- automatically puts Neovim into terminal (insert) mode (`startinsert`).
 	local auto_insert_group = vim.api.nvim_create_augroup("KrsTerminalAutoInsert", { clear = true })
 
-	local function is_term_buf(bufnr)
-		return is_valid_buf(bufnr) and (vim.bo[bufnr].buftype == "terminal" or vim.b[bufnr].krs_is_multi_term)
-	end
-
 	local threshold = M.settings.resize_drag_threshold or 2
 
 	local function setup_term_buffer(bufnr)
 		if is_term_buf(bufnr) then
+			for _, k in ipairs(M.settings.keys.resize_up or {}) do
+				pcall(vim.keymap.set, { "n", "t", "i" }, k, function()
+					M.increase_height()
+				end, {
+					buffer = bufnr,
+					noremap = true,
+					silent = true,
+					desc = "Terminal Stretch Bigger (Increase Height)",
+				})
+			end
+			for _, k in ipairs(M.settings.keys.resize_down or {}) do
+				pcall(vim.keymap.set, { "n", "t", "i" }, k, function()
+					M.decrease_height()
+				end, {
+					buffer = bufnr,
+					noremap = true,
+					silent = true,
+					desc = "Terminal Shrink Smaller (Decrease Height)",
+				})
+			end
+
 			pcall(vim.keymap.set, "n", "<LeftMouse>", function()
 				local mouse = vim.fn.getmousepos()
 				-- If click is on statusline, winbar, separator, border, or within the top threshold zone
@@ -557,6 +985,7 @@ end
 
 -- Legacy global kept for user scripts and older keybinds that reference it.
 _G.TerminalManager = M
+package.loaded["plugins.krs.dev.terminal"] = M
 
 -- ============================================================================
 -- LAZY.NVIM SPEC
@@ -566,8 +995,18 @@ return setmetatable({
 	name = "krs_terminal",
 	dir = require("krs.core.lazyspec").for_module(),
 	event = { "TermOpen", "BufEnter" },
-	cmd = { "TerminalToggle", "TerminalSelect" },
+	cmd = {
+		"TerminalToggle",
+		"TerminalSelect",
+		"TerminalToggleLayout",
+		"TerminalLayout",
+		"TerminalIncreaseHeight",
+		"TerminalDecreaseHeight",
+	},
 	keys = {
+		{ "<C-;>", mode = { "n", "i", "t" }, desc = "Toggle Selected Terminal" },
+		{ "<A-;>", mode = { "n", "i", "t" }, desc = "Toggle Selected Terminal" },
+		{ "<M-;>", mode = { "n", "i", "t" }, desc = "Toggle Selected Terminal" },
 		{ "<C-t>", mode = { "n", "i", "t" }, desc = "Toggle Selected Terminal (Mobile)" },
 		{ "<C-T>", mode = { "n", "i", "t" }, desc = "Toggle Selected Terminal (Mobile)" },
 		{ "<C-\\>", mode = { "n", "i", "t" }, desc = "Toggle Selected Terminal (Mobile)" },

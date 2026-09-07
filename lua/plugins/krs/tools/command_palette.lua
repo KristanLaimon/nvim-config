@@ -240,6 +240,39 @@ M.commands = {
 	{ name = "🗑️ Remove All Breakpoints", cmd = "DapBreakpointsRemoveAll", category = "Debug" },
 
 	-- --------------------------------------------------------------------------
+	-- 🖥️ Terminal
+	-- --------------------------------------------------------------------------
+	{ name = "🖥️ Toggle Multi-Terminal (<Ctrl+;>)", cmd = "TerminalToggle", category = "Terminal" },
+	{
+		name = "🖥️ Toggle Terminal Layout (Docked Split ↔ Floating Overlay)",
+		cmd = "TerminalToggleLayout",
+		category = "Terminal",
+	},
+	{
+		name = "🖥️ Set Terminal Layout to Floating (Centered Popup)",
+		fn = function()
+			require("plugins.krs.dev.terminal").set_layout("float")
+		end,
+		category = "Terminal",
+	},
+	{
+		name = "🖥️ Set Terminal Layout to Floating (Bottom Overlay)",
+		fn = function()
+			require("plugins.krs.dev.terminal").set_layout("bottom_float")
+		end,
+		category = "Terminal",
+	},
+	{
+		name = "🖥️ Set Terminal Layout to Docked (Bottom Split - Default)",
+		fn = function()
+			require("plugins.krs.dev.terminal").set_layout("dock")
+		end,
+		category = "Terminal",
+	},
+	{ name = "🖥️ Stretch Terminal Bigger (<Ctrl+Up>)", cmd = "TerminalIncreaseHeight", category = "Terminal" },
+	{ name = "🖥️ Shrink Terminal Smaller (<Ctrl+Down>)", cmd = "TerminalDecreaseHeight", category = "Terminal" },
+
+	-- --------------------------------------------------------------------------
 	-- 🛠️ Tasks & Code Execution
 	-- --------------------------------------------------------------------------
 	{ name = "🔄 Restart Current Task (Kill & Rerun)", cmd = "TaskRestart", category = "Tasks" },

@@ -273,6 +273,18 @@ local resize_modes = { "n", "i", "t" }
 local function resize_dir(direction)
 	return function()
 		local win = vim.api.nvim_get_current_win()
+
+		-- When inside a terminal window (split or floating), Ctrl+Up/Down stretches or shrinks terminal height
+		if is_terminal_win(win) and (direction == "up" or direction == "down") then
+			local ok, term = pcall(require, "plugins.krs.dev.terminal")
+			if ok and term and term.resize_height then
+				local delta = (direction == "up") and step or -step
+				if term.resize_height(delta) then
+					return
+				end
+			end
+		end
+
 		local is_float = vim.api.nvim_win_get_config(win).relative ~= ""
 		if is_float then
 			local cfg = vim.api.nvim_win_get_config(win)

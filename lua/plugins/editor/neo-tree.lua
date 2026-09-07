@@ -251,6 +251,10 @@ vim.api.nvim_create_autocmd("WinResized", {
 				end
 			end
 		end
+
+		if _G.Alpha_Refresh_Header then
+			vim.schedule(_G.Alpha_Refresh_Header)
+		end
 	end,
 })
 
