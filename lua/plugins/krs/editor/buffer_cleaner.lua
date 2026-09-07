@@ -59,19 +59,64 @@ _G.OpenedFolders = _G.OpenedFolders or {}
 --- @param buf integer
 --- @return boolean
 local function is_ui_buffer(buf)
-	return vim.tbl_contains(M.settings.ui_filetypes, vim.bo[buf].filetype)
+	if not buf or not vim.api.nvim_buf_is_valid(buf) then
+		return true
+	end
+	local ft = vim.bo[buf].filetype
+	if vim.tbl_contains(M.settings.ui_filetypes, ft) then
+		return true
+	end
+	if ft == "qf" or ft == "help" or ft == "TaskRunner" or ft == "lazy" or ft == "mason" then
+		return true
+	end
+	local bt = vim.bo[buf].buftype
+	if bt == "terminal" or bt == "nofile" or bt == "quickfix" or bt == "prompt" then
+		return true
+	end
+	return false
+end
+
+--- Returns the ordered list of buffer IDs as visually displayed in the tab bar from left to right.
+--- @return integer[]
+local function get_visual_tabs()
+	local tabs = {}
+	local has_bl, bl = pcall(require, "bufferline")
+	if has_bl and type(bl.get_elements) == "function" then
+		local res = bl.get_elements()
+		if not res or not res.elements or #res.elements == 0 then
+			pcall(vim.api.nvim_eval_statusline, vim.o.tabline, {})
+			res = bl.get_elements()
+		end
+		local elements = res and res.elements
+		if elements and type(elements) == "table" and #elements > 0 then
+			for _, elem in ipairs(elements) do
+				if elem and elem.id and vim.api.nvim_buf_is_valid(elem.id) then
+					table.insert(tabs, elem.id)
+				end
+			end
+			if #tabs > 0 then
+				return tabs
+			end
+		end
+	end
+
+	-- Fallback to listed real file buffers if bufferline didn't provide elements
+	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+		if vim.api.nvim_buf_is_valid(buf) and vim.fn.buflisted(buf) == 1 then
+			local ft = vim.bo[buf].filetype
+			local bt = vim.bo[buf].buftype
+			if not is_ui_buffer(buf) and bt == "" and ft ~= "alpha" and ft ~= "dashboard" then
+				table.insert(tabs, buf)
+			end
+		end
+	end
+	return tabs
 end
 
 --- Listed buffers that hold actual work.
 --- @return integer[] buffers
 local function real_buffers()
-	local out = {}
-	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-		if vim.api.nvim_buf_is_valid(buf) and vim.fn.buflisted(buf) == 1 and not is_ui_buffer(buf) then
-			table.insert(out, buf)
-		end
-	end
-	return out
+	return get_visual_tabs()
 end
 
 -- ============================================================================
@@ -147,39 +192,32 @@ function _G.Smart_Close_Buffer(target_buf, force)
 	end
 
 	-- 1. Identify the visually next/prev buffer to land on
+	local tabs = get_visual_tabs()
 	local next_buf = nil
-	local has_bl, bl = pcall(require, "bufferline")
-	if has_bl and type(bl.get_elements) == "function" then
-		local res = bl.get_elements()
-		local elements = res and res.elements
-		if elements and type(elements) == "table" then
-			local idx = nil
-			for i, e in ipairs(elements) do
-				if e.id == target_buf then
-					idx = i
-					break
-				end
-			end
-			if idx then
-				if idx < #elements then
-					next_buf = elements[idx + 1].id
-				elseif idx > 1 then
-					next_buf = elements[idx - 1].id
-				end
-			end
+	local idx = nil
+	for i, b in ipairs(tabs) do
+		if b == target_buf then
+			idx = i
+			break
 		end
 	end
 
-	-- Fallback to Neovim's buffer list if bufferline didn't help
-	if not next_buf then
-		local real = real_buffers()
-		for i, b in ipairs(real) do
-			if b == target_buf then
-				if i < #real then
-					next_buf = real[i + 1]
-				elseif i > 1 then
-					next_buf = real[i - 1]
-				end
+	if idx then
+		if #tabs <= 1 then
+			-- Only 1 tab active, closing it should show the dashboard
+			next_buf = nil
+		elseif idx == #tabs then
+			-- Last tab (rightest): open the left tab
+			next_buf = tabs[idx - 1]
+		else
+			-- Tab 1 to totaltabs - 1: open its right tab
+			next_buf = tabs[idx + 1]
+		end
+	else
+		-- If target_buf was not found in tabs, fallback to any other valid buffer
+		for _, b in ipairs(tabs) do
+			if b ~= target_buf and vim.api.nvim_buf_is_valid(b) then
+				next_buf = b
 				break
 			end
 		end
@@ -188,7 +226,7 @@ function _G.Smart_Close_Buffer(target_buf, force)
 	-- 2. Switch all windows showing this buffer to the next buffer (or dashboard)
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
 		if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == target_buf then
-			if next_buf then
+			if next_buf and vim.api.nvim_buf_is_valid(next_buf) then
 				pcall(vim.api.nvim_win_set_buf, win, next_buf)
 			else
 				vim.api.nvim_win_call(win, function()
@@ -202,11 +240,23 @@ function _G.Smart_Close_Buffer(target_buf, force)
 
 	-- 3. Delete the buffer
 	pcall(vim.api.nvim_buf_delete, target_buf, { force = force or is_deleted })
+
+	-- 4. Re-enforce neo-tree layout and pinned width so neo-tree NEVER becomes full width
+	vim.schedule(function()
+		pcall(function()
+			require("krs.core.dock").enforce_neotree_layout()
+		end)
+	end)
 end
 
---- Smart quit: closes the smallest sensible thing (see the header for the ladder).
---- @param force boolean|nil Discard unsaved changes.
-function _G.Neotree_Smart_Quit(force)
+--- Closes the current tab/buffer, matching VS Code / browser tab close semantics (<C-w>).
+--- If inside neo-tree, focuses the code window instead of closing neo-tree.
+--- If inside a terminal, closes the terminal window (unless in terminal insert mode).
+--- If inside the dashboard, exits Neovim.
+--- If inside a code buffer, closes the buffer tab (landing on the next tab, previous tab if last, or dashboard if only 1 tab).
+--- Never closes the code window and never lets neo-tree expand to full width.
+--- @param force boolean|nil
+function _G.Smart_Close_Tab(force)
 	local cur_buf = vim.api.nvim_get_current_buf()
 	local ft = vim.bo[cur_buf].filetype
 	local buftype = vim.bo[cur_buf].buftype
@@ -214,19 +264,23 @@ function _G.Neotree_Smart_Quit(force)
 	-- Never close/delete neo-tree sidebar when Ctrl+W is pressed inside neo-tree;
 	-- shift focus back to code window to preserve UI layout.
 	if ft == "neo-tree" or ft == "NvimTree" then
-		local target_win = nil
-		for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-			if vim.api.nvim_win_is_valid(win) then
-				local b = vim.api.nvim_win_get_buf(win)
-				local bft = vim.bo[b].filetype
-				local btype = vim.bo[b].buftype
-				if bft ~= "neo-tree" and bft ~= "NvimTree" and btype == "" then
-					target_win = win
-					break
+		local dock_ok, dock = pcall(require, "krs.core.dock")
+		local target_win = dock_ok and dock.find_code_win and dock.find_code_win()
+		if not target_win then
+			for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+				if vim.api.nvim_win_is_valid(win) then
+					local b = vim.api.nvim_win_get_buf(win)
+					local bft = vim.bo[b].filetype
+					local cfg = vim.api.nvim_win_get_config(win)
+					local is_float = cfg and cfg.relative and cfg.relative ~= ""
+					if bft ~= "neo-tree" and bft ~= "NvimTree" and not is_float then
+						target_win = win
+						break
+					end
 				end
 			end
 		end
-		if target_win then
+		if target_win and vim.api.nvim_win_is_valid(target_win) then
 			vim.api.nvim_set_current_win(target_win)
 		else
 			pcall(vim.cmd, "Neotree close")
@@ -248,19 +302,49 @@ function _G.Neotree_Smart_Quit(force)
 		return
 	end
 
-	-- More than one code window in this tab: close just that split.
+	-- In normal code buffers, close the buffer tab. Never close the window!
+	_G.Smart_Close_Buffer(cur_buf, force)
+end
+
+--- Smart quit: closes the smallest sensible thing (see the header for the ladder).
+--- @param force boolean|nil Discard unsaved changes.
+function _G.Neotree_Smart_Quit(force)
+	local cur_buf = vim.api.nvim_get_current_buf()
+	local ft = vim.bo[cur_buf].filetype
+	local buftype = vim.bo[cur_buf].buftype
+
+	if ft == "neo-tree" or ft == "NvimTree" or ft == M.settings.dashboard_filetype or buftype == "terminal" then
+		return _G.Smart_Close_Tab(force)
+	end
+
+	-- Check how many REAL non-floating, non-dock code windows are open in this tabpage
+	local dock_ok, dock = pcall(require, "krs.core.dock")
 	local code_wins = 0
 	for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-		if vim.api.nvim_win_is_valid(win) and not is_ui_buffer(vim.api.nvim_win_get_buf(win)) then
-			code_wins = code_wins + 1
+		if vim.api.nvim_win_is_valid(win) then
+			if dock_ok and dock.is_code_win then
+				if dock.is_code_win(win) then
+					code_wins = code_wins + 1
+				end
+			else
+				local cfg = vim.api.nvim_win_get_config(win)
+				local is_float = cfg and cfg.relative and cfg.relative ~= ""
+				if not is_float and not is_ui_buffer(vim.api.nvim_win_get_buf(win)) then
+					code_wins = code_wins + 1
+				end
+			end
 		end
 	end
+
+	-- If there are multiple real split code windows, :q closes the split.
+	-- If there is only one code window, :q must NOT close the window (which would leave Neo-tree full width).
+	-- Instead, it delegates to Smart_Close_Tab (closing buffer tab -> dashboard -> quit).
 	if code_wins > 1 then
 		pcall(vim.cmd, force and "close!" or "close")
 		return
 	end
 
-	_G.Smart_Close_Buffer(cur_buf, force)
+	_G.Smart_Close_Tab(force)
 end
 
 -- ============================================================================

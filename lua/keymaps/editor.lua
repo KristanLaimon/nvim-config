@@ -256,7 +256,9 @@ set_window_keymaps(M.settings.keys.window_down, focus_window_down, "Move to lowe
 -- Ctrl+W closes the smallest sensible thing in normal/insert/visual modes.
 -- In terminal insert mode ('t'), Ctrl+W is preserved for shell word deletion.
 vim.keymap.set({ "n", "i", "v" }, M.settings.keys.close, function()
-	if _G.Neotree_Smart_Quit then
+	if _G.Smart_Close_Tab then
+		_G.Smart_Close_Tab()
+	elseif _G.Neotree_Smart_Quit then
 		_G.Neotree_Smart_Quit()
 	else
 		pcall(vim.cmd, "bdelete")

@@ -149,10 +149,48 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+--- Ensures Neo-tree never occupies the full editor width alone.
+--- If Neo-tree is the only non-floating window in the tabpage,
+--- restores a code window displaying Alpha dashboard to keep the editor usable.
+local function ensure_neotree_not_alone()
+	local wins = vim.api.nvim_tabpage_list_wins(0)
+	local neotree_win = nil
+	local non_float_count = 0
+	for _, win in ipairs(wins) do
+		if vim.api.nvim_win_is_valid(win) then
+			local cfg = vim.api.nvim_win_get_config(win)
+			local is_float = cfg and cfg.relative and cfg.relative ~= ""
+			if not is_float then
+				non_float_count = non_float_count + 1
+				local buf = vim.api.nvim_win_get_buf(win)
+				if buf and vim.bo[buf].filetype == "neo-tree" then
+					neotree_win = win
+				end
+			end
+		end
+	end
+
+	if neotree_win and non_float_count <= 1 then
+		vim.api.nvim_win_call(neotree_win, function()
+			vim.cmd("silent! rightbelow vsplit")
+			if not pcall(vim.cmd, "Alpha") then
+				pcall(vim.cmd, "enew")
+			end
+		end)
+		pin_width()
+		pcall(function()
+			require("krs.core.dock").enforce_neotree_layout()
+		end)
+	end
+end
+
 vim.api.nvim_create_autocmd("WinClosed", {
 	group = fix_group,
 	callback = function()
-		vim.schedule(pin_width)
+		vim.schedule(function()
+			ensure_neotree_not_alone()
+			pin_width()
+		end)
 	end,
 })
 
@@ -185,6 +223,7 @@ vim.api.nvim_create_autocmd({ "BufWinEnter", "BufWinLeave" }, {
 	group = vim.api.nvim_create_augroup("NeoTreeEqualize", { clear = true }),
 	callback = function()
 		vim.schedule(function()
+			ensure_neotree_not_alone()
 			pin_width()
 			pcall(function()
 				require("krs.core.dock").enforce_neotree_layout()
@@ -197,9 +236,10 @@ vim.api.nvim_create_autocmd("WinResized", {
 	group = vim.api.nvim_create_augroup("NeoTreeWidthSaver", { clear = true }),
 	callback = function()
 		local wins = vim.api.nvim_tabpage_list_wins(0)
-		-- A single window means the sidebar is full-screen; that is not a width
-		-- worth remembering.
+		-- A single window means the sidebar is full-screen; restore code window
+		-- and do not save full width.
 		if #wins <= 1 then
+			vim.schedule(ensure_neotree_not_alone)
 			return
 		end
 
