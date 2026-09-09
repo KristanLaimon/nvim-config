@@ -247,8 +247,7 @@ function M.update_winbars()
 	end
 
 	if M.state.result_win and vim.api.nvim_win_is_valid(M.state.result_win) then
-		local status_str = remaining > 0
-			and string.format("%%#KRSConflictPending# ⚠️ %d remaining %%*", remaining)
+		local status_str = remaining > 0 and string.format("%%#KRSConflictPending# ⚠️ %d remaining %%*", remaining)
 			or "%#KRSConflictResolved# ✅ All resolved (0) │ Press [s] to Stage %*"
 		pcall(function()
 			vim.wo[M.state.result_win].winbar = string.format(
@@ -331,10 +330,33 @@ local function unmap_result_keymaps(buf)
 		return
 	end
 	for _, k in ipairs({
-		"co", "1", "ct", "2", "cb", "3", "cB", "4",
-		"]c", "[c", "]x", "[x", "s",
-		"gc", "<A-c>", "gi", "<A-i>", "gs", "<A-s>",
-		"<Tab>", "<S-Tab>", "?", "q", "<Esc>", "<C-h>", "<C-k>", "<C-l>",
+		"co",
+		"1",
+		"ct",
+		"2",
+		"cb",
+		"3",
+		"cB",
+		"4",
+		"]c",
+		"[c",
+		"]x",
+		"[x",
+		"s",
+		"gc",
+		"<A-c>",
+		"gi",
+		"<A-i>",
+		"gs",
+		"<A-s>",
+		"<Tab>",
+		"<S-Tab>",
+		"?",
+		"q",
+		"<Esc>",
+		"<C-h>",
+		"<C-k>",
+		"<C-l>",
 	}) do
 		pcall(vim.keymap.del, "n", k, { buffer = buf })
 	end
@@ -1105,7 +1127,11 @@ function M.close()
 	M.state.result_win = nil
 	M.state.result_buf = nil
 
-	if M.state.prev_win and pcall(vim.api.nvim_win_is_valid, M.state.prev_win) and vim.api.nvim_win_is_valid(M.state.prev_win) then
+	if
+		M.state.prev_win
+		and pcall(vim.api.nvim_win_is_valid, M.state.prev_win)
+		and vim.api.nvim_win_is_valid(M.state.prev_win)
+	then
 		pcall(vim.api.nvim_set_current_win, M.state.prev_win)
 	end
 end

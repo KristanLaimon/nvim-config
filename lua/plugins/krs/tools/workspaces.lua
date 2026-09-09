@@ -354,6 +354,36 @@ function M.save_workspace(name, callback)
 	}, function(input_name)
 		if input_name and input_name ~= "" then
 			perform_save(input_name)
+		elseif callback then
+			callback()
+		end
+	end)
+end
+
+--- Prompts for a new workspace name and saves the current layout as a new workspace.
+--- @param callback function|nil Called after saving or cancelling.
+function M.new_workspace(callback)
+	local cwd = vim.fn.getcwd()
+	local cwd_name = vim.fn.fnamemodify(cwd, ":t")
+	local index = load_index()
+
+	local count = 1
+	for _, item in ipairs(index) do
+		if item.cwd == cwd then
+			count = count + 1
+		end
+	end
+	local default_name = count > 1 and string.format("%s (Workspace %d)", cwd_name, count)
+		or string.format("%s - %s", cwd_name, os.date("%H:%M"))
+
+	pcall(vim.ui.input, {
+		prompt = "New Workspace Name: ",
+		default = default_name,
+	}, function(input_name)
+		if input_name and input_name ~= "" then
+			M.save_workspace(input_name, callback)
+		elseif callback then
+			callback()
 		end
 	end)
 end
@@ -475,10 +505,16 @@ function M.delete_workspace(ws_or_id, callback)
 
 	if not target then
 		notify("Workspace not found to delete", vim.log.levels.WARN)
+		if callback then
+			callback()
+		end
 		return
 	end
 
 	if vim.fn.confirm("Delete workspace '" .. target.name .. "'?", "&Yes\n&No", 2) ~= 1 then
+		if callback then
+			callback()
+		end
 		return
 	end
 
@@ -740,9 +776,9 @@ function M.select_workspace()
 						map_all({ { "i", "<C-d>" }, { "n", "d" }, { "n", "D" }, { "i", "<Del>" } }, function()
 							local value = selected()
 							if value then
-								M.delete_workspace(value, function()
-									actions.close(prompt_bufnr)
-									reopen()
+								actions.close(prompt_bufnr)
+								vim.schedule(function()
+									M.delete_workspace(value, M.select_workspace)
 								end)
 							end
 						end)
@@ -760,7 +796,7 @@ function M.select_workspace()
 						map_all({ { "i", "<C-a>" }, { "n", "a" }, { "n", "A" } }, function()
 							actions.close(prompt_bufnr)
 							vim.schedule(function()
-								M.save_workspace()
+								M.new_workspace(M.select_workspace)
 							end)
 						end)
 
@@ -769,7 +805,7 @@ function M.select_workspace()
 							if value then
 								actions.close(prompt_bufnr)
 								vim.schedule(function()
-									M.save_workspace(value.name)
+									M.save_workspace(value.name, M.select_workspace)
 								end)
 							end
 						end)
@@ -816,6 +852,12 @@ function M.setup()
 				M.save_workspace(opts.args ~= "" and opts.args or nil)
 			end,
 			opts = { nargs = "?", desc = "Save state as workspace" },
+		},
+		WorkspaceNew = {
+			fn = function()
+				M.new_workspace()
+			end,
+			opts = { desc = "Create a new workspace prompt" },
 		},
 		WorkspaceLoad = {
 			fn = function(opts)
@@ -913,7 +955,15 @@ _G.Workspaces = M
 return setmetatable({
 	name = "krs_workspaces",
 	dir = require("krs.core.lazyspec").for_module(),
-	cmd = { "WorkspaceSelect", "Workspaces", "WorkspaceSave", "WorkspaceManage", "WorkspaceClose", "WorkspaceMenu" },
+	cmd = {
+		"WorkspaceSelect",
+		"Workspaces",
+		"WorkspaceSave",
+		"WorkspaceNew",
+		"WorkspaceManage",
+		"WorkspaceClose",
+		"WorkspaceMenu",
+	},
 	keys = {
 		{ "<C-S-w>", mode = { "n", "i" }, desc = "Select Workspace" },
 		{ "<leader>ws", mode = { "n" }, desc = "Select Workspace" },

@@ -68,6 +68,7 @@ M.commands = {
 	-- 🦊 Workspaces & Sessions
 	-- --------------------------------------------------------------------------
 	{ name = "💼 Select Workspace (Workspaces UI)", cmd = "WorkspaceSelect", category = "Workspace" },
+	{ name = "➕ New Workspace", cmd = "WorkspaceNew", category = "Workspace" },
 	{ name = "💾 Save Current Workspace", cmd = "WorkspaceSave", category = "Workspace" },
 	{ name = "🚪 Close Workspace & Go to Main Menu", cmd = "WorkspaceClose", category = "Workspace" },
 
