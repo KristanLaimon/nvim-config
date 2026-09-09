@@ -58,6 +58,7 @@ M.settings = {
 			"<M-S>",
 			"<leader>gs",
 		},
+		conflict_resolver = { "<C-S-m>", "<C-S-M>", "<leader>gm", "<leader>gM" },
 		smart_launch = is_mobile and { "<C-S-s>", "<C-S-S>", "<C-S>", "<C-s>" } or { "<C-S-s>", "<C-S-S>" },
 		launch_profiles = { "<C-S-q>", "<C-S-Q>", "<C-Q>" },
 		task_menu = { "<C-S-t>", "<C-S-T>" },
@@ -133,6 +134,10 @@ end, "Toggle Git Control Center")
 map_all_modes(M.settings.keys.git_stage_all, function()
 	require("plugins.krs.git.git_center").stage_all_with_modal()
 end, "Stage all unstaged changes in git (Modal Confirmation)")
+
+map_all_modes(M.settings.keys.conflict_resolver, function()
+	require("plugins.krs.git.conflict_resolver").open()
+end, "Open Git Merge Conflict Resolver (3-Way Editor)")
 
 map_all_modes(M.settings.keys.smart_launch, function()
 	require("plugins.krs.dev.launch_profiles").handle_smart_launch()

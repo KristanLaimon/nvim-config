@@ -79,6 +79,18 @@ describe("git status parse_files", function()
 		expect(files.unstaged).toEqual({})
 		expect(files.untracked).toEqual({})
 	end)
+
+	it("detects conflicted / unmerged files into conflicted list", function()
+		local files = status.parse_files({
+			"## main",
+			"UU conflict.lua",
+			"AA both_added.lua",
+			"M  staged.lua",
+		})
+
+		expect(files.conflicted).toEqual({ "conflict.lua", "both_added.lua" })
+		expect(files.staged).toEqual({ "conflict.lua", "both_added.lua", "staged.lua" })
+	end)
 end)
 
 describe("git status sum_numstat", function()

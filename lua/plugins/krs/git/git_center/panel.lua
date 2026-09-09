@@ -1090,6 +1090,14 @@ function M.open_git_center()
 		notify("🔴 Unstaged all files in " .. cur_target.name)
 	end, key_opts)
 
+	vim.keymap.set("n", "M", function()
+		local cur_target = get_active_target()
+		local active_cwd = (cur_target and cur_target.full_path) or config.root_dir or vim.fn.getcwd()
+		M.close_git_center()
+		local resolver = require("plugins.krs.git.conflict_resolver")
+		resolver.open(nil, active_cwd)
+	end, key_opts)
+
 	vim.keymap.set("n", "C", function()
 		if config.commit_data.title == "" then
 			notify("Please enter a commit title first with [c]", vim.log.levels.WARN)

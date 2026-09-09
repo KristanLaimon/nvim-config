@@ -18,7 +18,7 @@ local M = {}
 -- CONFIGURATION
 -- ============================================================================
 
-local is_mobile_ed = false
+local is_mobile_ed
 local env_ok_ed, env_mod_ed = pcall(require, "krs.core.environment")
 if env_ok_ed then
 	local env = env_mod_ed.detect()
@@ -42,8 +42,8 @@ M.settings = {
 		--- Close the current buffer/split/tab, smartly (see buffer_cleaner).
 		close = "<C-w>",
 		--- Move focus between windows.
-		window_left = "<C-h>",
-		window_right = "<C-l>",
+		window_left = { "<C-h>", "<C-H>" },
+		window_right = { "<C-l>", "<C-L>" },
 		window_up = {
 			"<C-S-A-k>",
 			"<C-A-S-k>",

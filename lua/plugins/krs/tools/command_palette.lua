@@ -96,6 +96,7 @@ M.commands = {
 	},
 	{ name = "🐙 Toggle Git Panel (Neogit)", cmd = "Neogit", category = "Git" },
 	{ name = "👤 Git Accounts Manager (Select Identity)", cmd = "GitAccounts", category = "Git" },
+	{ name = "⚔️ Resolve Merge Conflicts (3-Way VSCode Merge Editor)", cmd = "GitConflictResolve", category = "Git" },
 
 	-- --------------------------------------------------------------------------
 	-- 🧠 LSP, Diagnostics & Type Injection

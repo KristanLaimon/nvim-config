@@ -57,9 +57,9 @@ end
 --- so one file can legitimately appear in BOTH staged and unstaged.
 ---
 --- @param lines string[] Status lines, header included.
---- @return table files `{ staged = {...}, unstaged = {...}, untracked = {...} }`
+--- @return table files `{ staged = {...}, unstaged = {...}, untracked = {...}, conflicted = {...} }`
 function M.parse_files(lines)
-	local files = { staged = {}, unstaged = {}, untracked = {} }
+	local files = { staged = {}, unstaged = {}, untracked = {}, conflicted = {} }
 
 	for index = 2, #lines do
 		local line = lines[index]
@@ -71,6 +71,16 @@ function M.parse_files(lines)
 			if index_state == "?" and worktree_state == "?" then
 				table.insert(files.untracked, name)
 			else
+				local is_conflicted = (
+					index_state == "U"
+					or worktree_state == "U"
+					or (index_state == "A" and worktree_state == "A")
+					or (index_state == "D" and worktree_state == "D")
+				)
+				if is_conflicted then
+					table.insert(files.conflicted, name)
+				end
+
 				if index_state ~= " " and index_state ~= "?" then
 					table.insert(files.staged, name)
 				end
@@ -163,7 +173,8 @@ function M.info_finish(handle)
 	if #files.staged > 0 or #files.unstaged > 0 then
 		added, deleted = M.sum_numstat(git.collect(handle.numstat_proc), git.collect(handle.numstat_cached_proc))
 	end
-	local has_changes = (#files.staged + #files.unstaged + #files.untracked > 0)
+	local has_conflicts = (#(files.conflicted or {}) > 0)
+	local has_changes = (#files.staged + #files.unstaged + #files.untracked + #(files.conflicted or {}) > 0)
 
 	return {
 		branch = branch,
@@ -175,6 +186,8 @@ function M.info_finish(handle)
 		staged = files.staged,
 		unstaged = files.unstaged,
 		untracked = files.untracked,
+		conflicted = files.conflicted or {},
+		has_conflicts = has_conflicts,
 		has_changes = has_changes,
 	}
 end

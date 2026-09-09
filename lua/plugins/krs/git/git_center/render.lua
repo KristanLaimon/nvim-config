@@ -412,6 +412,7 @@ function M.setup_panel_highlights()
 	vim.api.nvim_set_hl(0, "KRSGitGraphCyan", { fg = "#89dceb", bold = true, default = true })
 	vim.api.nvim_set_hl(0, "KRSGitGraphWhite", { fg = "#cdd6f4", default = true })
 	vim.api.nvim_set_hl(0, "KRSGitGraphDim", { fg = "#6c7086", default = true })
+	vim.api.nvim_set_hl(0, "KRSGitConflictWarning", { fg = "#f9e2af", bold = true, default = true })
 end
 
 --- Applies extmark highlights to the main Git Center panel buffer.
@@ -505,6 +506,18 @@ function M.build_panel_content(info, width)
 			#info.untracked
 		)
 	)
+
+	if info.conflicted and #info.conflicted > 0 then
+		separator("─")
+		local conflict_warn = string.format(
+			" ⚠️ MERGE CONFLICT DETECTED (%d %s)  │  [M] Resolve Conflicts",
+			#info.conflicted,
+			#info.conflicted == 1 and "file" or "files"
+		)
+		local r_warn = add(conflict_warn) - 1
+		add_hl(r_warn, 0, -1, "KRSGitConflictWarning")
+		highlight_brackets(r_warn, lines[r_warn + 1])
+	end
 	separator("═")
 
 	section_lines[1] = add(" 󰜘 [SECTION 1: COMMIT BOX & TAG] (Press 1)")
@@ -630,15 +643,23 @@ function M.build_panel_content(info, width)
 	section_lines[6] = add(" 󰜴 [SECTION 6: QUICK ACTIONS & SHORTCUTS] (Press 6)")
 	add_hl(section_lines[6] - 1, 0, -1, "KRSGitSectionActions")
 
-	for _, help in ipairs({
+	local help_items = {
 		"   [Alt+h / Alt+l] Switch Submodule Tab  │  [< / >] Resize Split Width",
 		"   [b] Branch Manager (Create / Delete / Switch / Rename)",
 		"   [l / L] Commit Log & History Viewer (--all)",
 		"   [s] Stage file  │  [S] Stage All  │  [u] Unstage file  │  [U] Unstage All",
 		"   [r] Restore File  │  [R] Restore Section  │  [d] Side-by-Side Diff Modal",
 		"   [c] Commit Title  │  [C] Execute Commit & Tag  │  [P] Push to Remote",
-		"   [1-6] Jump to Section 1-6  │  [Tab] Focus preview  │  [Ctrl+Shift+J/K] Scroll preview",
-	}) do
+	}
+	if info.conflicted and #info.conflicted > 0 then
+		table.insert(help_items, "   [M] ⚔️ Resolve Merge Conflicts (3-Way Merge Editor)")
+	end
+	table.insert(
+		help_items,
+		"   [1-6] Jump to Section 1-6  │  [Tab] Focus preview  │  [Ctrl+Shift+J/K] Scroll preview"
+	)
+
+	for _, help in ipairs(help_items) do
 		local r_h = add(help) - 1
 		highlight_brackets(r_h, help)
 	end
