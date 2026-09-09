@@ -183,6 +183,10 @@ local function show_menu()
 	end)
 end
 
+if true then
+	--nothing
+end
+
 -- Parse CLI Flags
 local raw_args = arg or {}
 local parsed = cli.parse_args(raw_args, schema)
