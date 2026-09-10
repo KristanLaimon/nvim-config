@@ -14,6 +14,13 @@ return {
 		-- Eager: a lazily loaded theme means a flash of the default colours.
 		lazy = false,
 		config = function()
+			local has_omarchy, omarchy_mod = pcall(require, "plugins.krs.ui.omarchy_theme")
+			if has_omarchy and omarchy_mod.is_sync_enabled() and omarchy_mod.is_omarchy_available() then
+				omarchy_mod.apply_omarchy_theme({ quiet = true })
+				omarchy_mod.start_watcher()
+				return
+			end
+
 			local has_picker, picker = pcall(require, "plugins.krs.ui.theme_picker")
 			if has_picker then
 				picker.restore_saved_theme()

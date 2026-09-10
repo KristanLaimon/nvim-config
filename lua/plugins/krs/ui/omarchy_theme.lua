@@ -18,6 +18,7 @@ local store = lazy_req("krs.core.store")
 local M = {}
 
 M.settings = {
+	sync_data_file = vim.fn.stdpath("data") .. "/omarchy_sync.json",
 	store_file = vim.fn.stdpath("config") .. "/.krsnvim/theme.json",
 	omarchy_state_dir = vim.fn.expand("~/.local/state/omarchy/current"),
 	omarchy_theme_name_file = vim.fn.expand("~/.local/state/omarchy/current/theme.name"),
@@ -397,29 +398,38 @@ function M.apply_omarchy_theme(opts)
 end
 
 --- Checks if Omarchy theme synchronization is enabled in store.
+--- Checks if Omarchy theme synchronization is enabled in nvim data.
 --- Default is false.
 --- @return boolean enabled
 function M.is_sync_enabled()
-	local data = store.load(M.settings.store_file, {})
-	return data.omarchy_sync == true
+	local data = store.load(M.settings.sync_data_file, {})
+	if data.enabled ~= nil then
+		return data.enabled == true
+	end
+	-- Fallback to config store if data file doesn't exist yet
+	local config_data = store.load(M.settings.store_file, {})
+	return config_data.omarchy_sync == true
 end
 
 --- Enables or disables Omarchy theme synchronization.
 --- @param enable boolean
 --- @return boolean success
 function M.set_sync_enabled(enable)
-	local data = store.load(M.settings.store_file, {})
-
 	if enable then
 		if not M.is_omarchy_available() then
 			vim.notify("⚠️ Omarchy Linux desktop was not detected on this system.", vim.log.levels.WARN)
 			return false
 		end
 
-		data.previous_theme = data.theme or vim.g.colors_name or M.settings.default_fallback_theme
-		data.theme = "omarchy-krs"
-		data.omarchy_sync = true
-		store.save(M.settings.store_file, data)
+		-- Persist boolean in nvim data
+		store.save(M.settings.sync_data_file, { enabled = true })
+
+		-- Also update config theme.json for picker/backward compatibility
+		local cfg = store.load(M.settings.store_file, {})
+		cfg.previous_theme = cfg.theme or vim.g.colors_name or M.settings.default_fallback_theme
+		cfg.theme = "omarchy-krs"
+		cfg.omarchy_sync = true
+		store.save(M.settings.store_file, cfg)
 
 		M.start_watcher()
 		local ok, name = M.apply_omarchy_theme({ quiet = true })
@@ -430,10 +440,14 @@ function M.set_sync_enabled(enable)
 		end
 		return true
 	else
-		data.omarchy_sync = false
-		local restored = data.previous_theme or M.settings.default_fallback_theme
-		data.theme = restored
-		store.save(M.settings.store_file, data)
+		-- Persist boolean in nvim data
+		store.save(M.settings.sync_data_file, { enabled = false })
+
+		local cfg = store.load(M.settings.store_file, {})
+		cfg.omarchy_sync = false
+		local restored = cfg.previous_theme or M.settings.default_fallback_theme
+		cfg.theme = restored
+		store.save(M.settings.store_file, cfg)
 
 		M.stop_watcher()
 		pcall(vim.cmd.colorscheme, restored)
@@ -560,7 +574,8 @@ function M.setup()
 		vim.notify("🎨 Omarchy Theme Sync: " .. status, vim.log.levels.INFO)
 	end, { desc = "Show Omarchy theme synchronization status" })
 
-	if M.is_sync_enabled() then
+	if M.is_sync_enabled() and M.is_omarchy_available() then
+		M.apply_omarchy_theme({ quiet = true })
 		M.start_watcher()
 	end
 end

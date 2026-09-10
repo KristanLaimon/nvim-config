@@ -62,21 +62,18 @@ function M.set_theme(name)
 	if ok then
 		local data = store.load(M.settings.store_file, {})
 		data.theme = name
+		local has_omarchy, omarchy_mod = pcall(require, "plugins.krs.ui.omarchy_theme")
 		if name == "omarchy-krs" then
-			data.omarchy_sync = true
-			local has_omarchy, omarchy_mod = pcall(require, "plugins.krs.ui.omarchy_theme")
 			if has_omarchy then
-				omarchy_mod.start_watcher()
+				omarchy_mod.set_sync_enabled(true)
 			end
-		elseif data.omarchy_sync then
-			data.omarchy_sync = false
-			local has_omarchy, omarchy_mod = pcall(require, "plugins.krs.ui.omarchy_theme")
-			if has_omarchy then
-				omarchy_mod.stop_watcher()
-			end
+		elseif has_omarchy and omarchy_mod.is_sync_enabled() then
+			omarchy_mod.set_sync_enabled(false)
 			vim.notify("Omarchy Sync disabled to apply " .. name, vim.log.levels.INFO)
+		else
+			data.omarchy_sync = false
+			store.save(M.settings.store_file, data)
 		end
-		store.save(M.settings.store_file, data)
 		vim.notify("Applied colorscheme: " .. name, vim.log.levels.INFO)
 	else
 		vim.notify("Failed to apply theme " .. name .. ": " .. tostring(err), vim.log.levels.ERROR)
@@ -85,15 +82,13 @@ end
 
 --- Restores persisted theme on startup.
 function M.restore_saved_theme()
-	local data = store.load(M.settings.store_file, {})
-	if data.omarchy_sync then
-		local has_omarchy, omarchy_mod = pcall(require, "plugins.krs.ui.omarchy_theme")
-		if has_omarchy and omarchy_mod.is_omarchy_available() then
-			omarchy_mod.apply_omarchy_theme({ quiet = true })
-			omarchy_mod.start_watcher()
-			return
-		end
+	local has_omarchy, omarchy_mod = pcall(require, "plugins.krs.ui.omarchy_theme")
+	if has_omarchy and omarchy_mod.is_sync_enabled() and omarchy_mod.is_omarchy_available() then
+		omarchy_mod.apply_omarchy_theme({ quiet = true })
+		omarchy_mod.start_watcher()
+		return
 	end
+
 	local saved = M.get_current_theme()
 	if saved then
 		pcall(vim.cmd.colorscheme, saved)

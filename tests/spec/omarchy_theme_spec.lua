@@ -9,11 +9,14 @@ local cp = require("plugins.krs.tools.command_palette")
 local theme_picker = require("plugins.krs.ui.theme_picker")
 
 local original_store_file
+local original_sync_data_file
 
 describe("plugins.krs.ui.omarchy_theme", function()
 	beforeEach(function()
 		original_store_file = omarchy.settings.store_file
+		original_sync_data_file = omarchy.settings.sync_data_file
 		omarchy.settings.store_file = vim.fn.tempname() .. ".json"
+		omarchy.settings.sync_data_file = vim.fn.tempname() .. ".json"
 	end)
 
 	afterEach(function()
@@ -21,7 +24,11 @@ describe("plugins.krs.ui.omarchy_theme", function()
 		if omarchy.settings.store_file and vim.fn.filereadable(omarchy.settings.store_file) == 1 then
 			vim.fn.delete(omarchy.settings.store_file)
 		end
+		if omarchy.settings.sync_data_file and vim.fn.filereadable(omarchy.settings.sync_data_file) == 1 then
+			vim.fn.delete(omarchy.settings.sync_data_file)
+		end
 		omarchy.settings.store_file = original_store_file
+		omarchy.settings.sync_data_file = original_sync_data_file
 	end)
 
 	it("parses TOML color key-value pairs accurately", function()
