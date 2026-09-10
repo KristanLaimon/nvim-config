@@ -193,6 +193,16 @@ M.commands = {
 	{ name = "📚 Open Documentation Center & Wiki (Ctrl+Shift+D)", cmd = "KrsWiki", category = "UI" },
 	{ name = "🎨 Open Nagatoro & NvChad Theme Picker", cmd = "KrsThemePicker", category = "UI" },
 	{
+		name = "🎨 Toggle Omarchy Theme Sync (Adapt colors to Omarchy - Default: OFF)",
+		cmd = "KrsOmarchySyncToggle",
+		category = "UI",
+	},
+	{
+		name = "🔄 Sync Colors with Omarchy Theme Now",
+		cmd = "KrsOmarchySyncNow",
+		category = "UI",
+	},
+	{
 		name = "📊 Open Statusline Theme Picker (NvChad Pills, Blocks, etc.)",
 		cmd = "KrsStatuslineTheme",
 		category = "UI",

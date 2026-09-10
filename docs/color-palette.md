@@ -26,7 +26,22 @@ KrsVim ships with a set of complete, hand-crafted themes matching the `nagatoro-
   - `onedark-krs` (NvChad OneDark in nagatoro format)
   - `catppuccin-krs` (NvChad Catppuccin Mocha in nagatoro format)
   - `nord-krs` (NvChad Nord in nagatoro format)
+  - `omarchy-krs` (Dynamic theme synced with Omarchy Linux)
 - **Live Preview & Store Persistence:** Previews themes in real time while tabbed/selected. Cancelling (`<Esc>`) restores the previous theme; confirming (`<Enter>`) saves choice to `.krsnvim/theme.json` via [`krs.core.store`](architecture.md#layer-2--shared-libraries-luakrs).
+
+---
+
+## 🦊 Omarchy Dynamic Theme Sync (`:KrsOmarchySyncToggle`)
+
+When running under [Omarchy Linux](https://omarchy.org/) (Hyprland), KrsVim can dynamically adapt all editor highlights, syntax tokens, and UI colors to match the active system theme:
+
+- **Command Palette Toggle:** Open `<C-S-p>` and choose `🎨 Toggle Omarchy Theme Sync (Adapt colors to Omarchy - Default: OFF)`.
+- **Default State:** Disabled (`false`) by default, preserving your explicit local theme choice until explicitly turned on.
+- **Commands:**
+  - `:KrsOmarchySyncToggle` — Toggle live Omarchy synchronization on/off.
+  - `:KrsOmarchySyncNow` — Force an immediate re-sync with Omarchy's current active theme.
+  - `:KrsOmarchySyncStatus` — Inspect current sync status and detected Omarchy theme.
+- **Live Adaptation:** When enabled, a libuv filesystem event watcher (`vim.uv.new_fs_event`) monitors `~/.local/state/omarchy/current/theme/colors.toml` and `theme.name`. When `omarchy theme set <theme>` is executed in your terminal or desktop shell, Neovim automatically recompiles and applies the matching color palette on the fly with no restart required. Supports all 20+ Omarchy stock themes and custom themes in dark and light modes.
 
 ---
 

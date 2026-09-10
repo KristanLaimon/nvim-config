@@ -14,7 +14,12 @@ return {
 		-- Eager: a lazily loaded theme means a flash of the default colours.
 		lazy = false,
 		config = function()
-			pcall(vim.cmd.colorscheme, "nagatoro-krs")
+			local has_picker, picker = pcall(require, "plugins.krs.ui.theme_picker")
+			if has_picker then
+				picker.restore_saved_theme()
+			else
+				pcall(vim.cmd.colorscheme, "nagatoro-krs")
+			end
 		end,
 	},
 	{

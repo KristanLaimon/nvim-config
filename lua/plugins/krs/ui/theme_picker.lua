@@ -27,7 +27,12 @@ function M.discover_themes()
 
 	for _, file in ipairs(files) do
 		local name = vim.fn.fnamemodify(file, ":t:r")
-		if name:match("%-krs$") or name:match("^nagatoro%-") then
+		if name == "omarchy-krs" then
+			local has_omarchy, omarchy_mod = pcall(require, "plugins.krs.ui.omarchy_theme")
+			if has_omarchy and omarchy_mod.is_omarchy_available() then
+				table.insert(themes, name)
+			end
+		elseif name:match("%-krs$") or name:match("^nagatoro%-") then
 			table.insert(themes, name)
 		end
 	end
@@ -55,7 +60,23 @@ function M.set_theme(name)
 	end
 	local ok, err = pcall(vim.cmd.colorscheme, name)
 	if ok then
-		store.save(M.settings.store_file, { theme = name })
+		local data = store.load(M.settings.store_file, {})
+		data.theme = name
+		if name == "omarchy-krs" then
+			data.omarchy_sync = true
+			local has_omarchy, omarchy_mod = pcall(require, "plugins.krs.ui.omarchy_theme")
+			if has_omarchy then
+				omarchy_mod.start_watcher()
+			end
+		elseif data.omarchy_sync then
+			data.omarchy_sync = false
+			local has_omarchy, omarchy_mod = pcall(require, "plugins.krs.ui.omarchy_theme")
+			if has_omarchy then
+				omarchy_mod.stop_watcher()
+			end
+			vim.notify("Omarchy Sync disabled to apply " .. name, vim.log.levels.INFO)
+		end
+		store.save(M.settings.store_file, data)
 		vim.notify("Applied colorscheme: " .. name, vim.log.levels.INFO)
 	else
 		vim.notify("Failed to apply theme " .. name .. ": " .. tostring(err), vim.log.levels.ERROR)
@@ -64,6 +85,15 @@ end
 
 --- Restores persisted theme on startup.
 function M.restore_saved_theme()
+	local data = store.load(M.settings.store_file, {})
+	if data.omarchy_sync then
+		local has_omarchy, omarchy_mod = pcall(require, "plugins.krs.ui.omarchy_theme")
+		if has_omarchy and omarchy_mod.is_omarchy_available() then
+			omarchy_mod.apply_omarchy_theme({ quiet = true })
+			omarchy_mod.start_watcher()
+			return
+		end
+	end
 	local saved = M.get_current_theme()
 	if saved then
 		pcall(vim.cmd.colorscheme, saved)
