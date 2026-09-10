@@ -351,6 +351,10 @@ function M.build_highlights(p, colors)
 		CmpItemKindClass = { fg = p.bg, bg = p.type, bold = true },
 		CmpItemKindField = { fg = p.bg, bg = p.operator, bold = true },
 		CmpItemKindModule = { fg = p.bg, bg = p.accent, bold = true },
+		-- Dashboard Alpha Header
+		AlphaHeader = { fg = p.accent, bold = true },
+		AlphaHeaderTheme = { fg = p.accent, bold = true },
+		AlphaHeaderOrange = { fg = p.accent, bold = true },
 	}
 end
 
@@ -386,6 +390,7 @@ function M.apply_omarchy_theme(opts)
 
 	pcall(vim.cmd, "redrawstatus")
 	M._last_applied_theme = theme_name
+	pcall(vim.api.nvim_exec_autocmds, "ColorScheme", { modeline = false })
 
 	if not opts.quiet then
 		vim.notify(
@@ -465,13 +470,13 @@ function M.toggle_sync()
 	return new_state
 end
 
---- Manually syncs active Neovim colors with Omarchy immediately.
+--- Manually syncs active Neovim colors with Omarchy immediately and enables sync.
 function M.sync_now()
 	if not M.is_omarchy_available() then
 		vim.notify("⚠️ Omarchy Linux desktop is not available.", vim.log.levels.WARN)
 		return
 	end
-	M.apply_omarchy_theme({ quiet = false })
+	M.set_sync_enabled(true)
 end
 
 --- Starts filesystem watcher and FocusGained autocmd to adapt dynamically on theme change.
@@ -489,7 +494,7 @@ function M.start_watcher()
 					if err then
 						return
 					end
-					if fname and (fname:match("theme") or fname:match("colors")) then
+					if not fname or fname:match("theme") or fname:match("colors") or fname:match("background") then
 						if M._debounce_timer then
 							M._debounce_timer:stop()
 							M._debounce_timer:close()

@@ -189,13 +189,21 @@ return {
 		})
 
 		-- `:colorscheme` clears user-defined groups, so the banner colour is
-		-- re-applied whenever the theme changes.
+		-- re-applied whenever the theme changes, adapting to the active theme accent.
 		local function set_header_highlight()
-			vim.api.nvim_set_hl(0, settings.header_highlight.name, settings.header_highlight.opts)
+			local hl = vim.api.nvim_get_hl(0, { name = "FloatTitle", link = false })
+			local fg = hl and hl.fg
+			if not fg then
+				local cur_hl = vim.api.nvim_get_hl(0, { name = "CursorLineNr", link = false })
+				fg = cur_hl and cur_hl.fg
+			end
+			local opts = { fg = fg or "#d2824e", bold = true }
+			vim.api.nvim_set_hl(0, "AlphaHeaderTheme", opts)
+			vim.api.nvim_set_hl(0, settings.header_highlight.name, opts)
 		end
 		set_header_highlight()
 		vim.api.nvim_create_autocmd("ColorScheme", { callback = set_header_highlight })
-		dashboard.section.header.opts.hl = settings.header_highlight.name
+		dashboard.section.header.opts.hl = "AlphaHeaderTheme"
 
 		--- Turns a settings entry into an alpha button.
 		--- @param entry table `{ key, icon, label, command }`
