@@ -35,6 +35,7 @@ KrsVim automatically auto-detects the current file's filetype identifier:
 | **TypeScript React (TSX)** | `.tsx` | `typescriptreact` | `snippets/typescriptreact.json` |
 | **JavaScript** | `.js`, `.mjs`, `.cjs` | `javascript` | `snippets/javascript.json` |
 | **JavaScript React (JSX)** | `.jsx` | `javascriptreact` | `snippets/javascriptreact.json` |
+| **Svelte** | `.svelte` | `svelte` | `snippets/svelte.json` |
 | **Python** | `.py` | `python` | `snippets/python.json` |
 | **PHP** | `.php` | `php` | `snippets/php.json` |
 | **Blade (Laravel)** | `.blade.php` | `blade` | `snippets/blade.json` |

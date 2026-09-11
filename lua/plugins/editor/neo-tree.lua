@@ -17,7 +17,7 @@
 --   width is re-asserted on WinClosed as well.
 --
 -- SIDEBAR KEYS
---   a / <C-n> new file    A / <C-S-n> new folder    r rename    m move
+--   a / <C-n> new file    A / <A-n> new folder    r rename    m move
 --   <C-/> find files (gitignore)   <C-S-/> find all files   <C-;> terminal
 -- ============================================================================
 
@@ -56,8 +56,10 @@ local settings = {
 		["<C-n>"] = "add_file_with_modal",
 		["<C-f>"] = "open_file_browser_desktop",
 		["<C-F>"] = "open_file_browser_desktop",
-		["<C-S-n>"] = "add_folder_with_modal",
-		["<C-S-N>"] = "add_folder_with_modal",
+		["<A-n>"] = "add_folder_with_modal",
+		["<A-N>"] = "add_folder_with_modal",
+		["<M-n>"] = "add_folder_with_modal",
+		["<M-N>"] = "add_folder_with_modal",
 		["<C-/>"] = "search_respect_gitignore",
 		["<C-_>"] = "search_respect_gitignore",
 		["<C-S-/>"] = "search_all_files",

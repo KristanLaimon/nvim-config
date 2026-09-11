@@ -126,7 +126,7 @@ Forgot a shortcut? Press `?` or `<F1>` to see context-aware help, or press `<C-S
 | :--- | :---: | :--- |
 | `<C-S-Space>` | n | Toggle the sidebar |
 | `a` / `<C-n>` | Neo-tree | New file prompt |
-| `A` / `<C-f>` / `<C-S-n>` | Neo-tree | New folder prompt |
+| `A` / `<A-n>` | Neo-tree | New folder prompt |
 | `r` | Neo-tree | Rename via the input modal |
 | `d` | Neo-tree | Delete |
 | `c` | Neo-tree | Copy |

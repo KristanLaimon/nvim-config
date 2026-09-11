@@ -619,7 +619,7 @@ function M.build_panel_content(info, width)
 
 	local graph_raw = info.commit_graph or {}
 	section_lines[5] =
-		add(string.format(" 📜 [SECTION 5: COMMIT HISTORY LOG] (Press 5 | [Enter/d] Details / [K] Checkout)", #graph_raw))
+		add(string.format(" 📜 [SECTION 5: COMMIT HISTORY LOG (CURRENT BRANCH)] (Press 5 | [Enter/d] Details / [K] Checkout)", #graph_raw))
 	add_hl(section_lines[5] - 1, 0, -1, "KRSGitSectionCommit")
 	highlight_brackets(section_lines[5] - 1, lines[section_lines[5]])
 

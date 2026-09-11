@@ -48,7 +48,7 @@ input_modal.open({
 
 2. **Neo-tree Integration**
    - Pressing `r` in Neo-tree triggers `rename_with_modal` for renaming files or folders.
-   - Pressing `a`, `A`, `<C-n>`, or `<C-S-n>` triggers `add_with_modal` for creating new files or folders.
+   - Pressing `a`, `A`, `<C-n>`, or `<A-n>` triggers `add_with_modal` for creating new files or folders.
 
 3. **Git Control Center (`<C-S-g>`)**
    - Pressing `c` edits Commit Title.

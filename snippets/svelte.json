@@ -1,0 +1,774 @@
+{
+  "$schema": "./snippets.schema.json",
+
+  "Svelte If Block": {
+    "prefix": ["#if", "if", "s-if"],
+    "body": [
+      "{#if ${1:condition}}",
+      "\t${0}",
+      "{/if}"
+    ],
+    "description": "Svelte {#if} conditional block"
+  },
+
+  "Svelte If Else Block": {
+    "prefix": ["#ifelse", "ifelse", "s-ifelse"],
+    "body": [
+      "{#if ${1:condition}}",
+      "\t${2}",
+      "{:else}",
+      "\t${0}",
+      "{/if}"
+    ],
+    "description": "Svelte {#if}{:else} conditional block"
+  },
+
+  "Svelte If Else-If Else Block": {
+    "prefix": ["#ifelseif", "ifelseif", "elif", "s-ifelseif"],
+    "body": [
+      "{#if ${1:condition1}}",
+      "\t${2}",
+      "{:else if ${3:condition2}}",
+      "\t${4}",
+      "{:else}",
+      "\t${0}",
+      "{/if}"
+    ],
+    "description": "Svelte {#if}{:else if}{:else} conditional block"
+  },
+
+  "Svelte Else-If Branch": {
+    "prefix": [":elseif", "elseif", "s-elseif"],
+    "body": [
+      "{:else if ${1:condition}}",
+      "\t${0}"
+    ],
+    "description": "Svelte {:else if} branch"
+  },
+
+  "Svelte Else Branch": {
+    "prefix": [":else", "else", "s-else"],
+    "body": [
+      "{:else}",
+      "\t${0}"
+    ],
+    "description": "Svelte {:else} branch"
+  },
+
+  "Svelte Each Block": {
+    "prefix": ["#each", "each", "s-each"],
+    "body": [
+      "{#each ${1:items} as ${2:item}}",
+      "\t${0}",
+      "{/each}"
+    ],
+    "description": "Svelte {#each} iteration block"
+  },
+
+  "Svelte Keyed Each Block": {
+    "prefix": ["#eachk", "eachk", "eachkeyed", "s-eachk"],
+    "body": [
+      "{#each ${1:items} as ${2:item} (${3:item.id})}",
+      "\t${0}",
+      "{/each}"
+    ],
+    "description": "Svelte {#each} iteration block with unique key"
+  },
+
+  "Svelte Each With Index": {
+    "prefix": ["#eachi", "eachi", "s-eachi"],
+    "body": [
+      "{#each ${1:items} as ${2:item}, ${3:index}}",
+      "\t${0}",
+      "{/each}"
+    ],
+    "description": "Svelte {#each} iteration block with index"
+  },
+
+  "Svelte Keyed Each With Index": {
+    "prefix": ["#eachik", "eachik", "s-eachik"],
+    "body": [
+      "{#each ${1:items} as ${2:item}, ${3:index} (${4:item.id})}",
+      "\t${0}",
+      "{/each}"
+    ],
+    "description": "Svelte {#each} keyed iteration block with index"
+  },
+
+  "Svelte Each Else Block": {
+    "prefix": ["#eachelse", "eachelse", "s-eachelse"],
+    "body": [
+      "{#each ${1:items} as ${2:item}}",
+      "\t${3}",
+      "{:else}",
+      "\t${0}",
+      "{/each}"
+    ],
+    "description": "Svelte {#each}{:else} iteration block with empty fallback"
+  },
+
+  "Svelte Keyed Each Else Block": {
+    "prefix": ["#eachikelse", "eachikelse"],
+    "body": [
+      "{#each ${1:items} as ${2:item}, ${3:index} (${4:item.id})}",
+      "\t${5}",
+      "{:else}",
+      "\t${0}",
+      "{/each}"
+    ],
+    "description": "Svelte {#each} keyed iteration block with index and empty fallback"
+  },
+
+  "Svelte Await Block": {
+    "prefix": ["#await", "await", "s-await"],
+    "body": [
+      "{#await ${1:promise}}",
+      "\t${2:<p>Loading...</p>}",
+      "{:then ${3:data}}",
+      "\t${0}",
+      "{:catch ${4:error}}",
+      "\t<p style=\"color: red\">{${4:error}.message}</p>",
+      "{/await}"
+    ],
+    "description": "Svelte {#await} asynchronous block with then and catch"
+  },
+
+  "Svelte Await Then Shorthand": {
+    "prefix": ["#awaitthen", "awaitthen", "s-awaitthen"],
+    "body": [
+      "{#await ${1:promise} then ${2:data}}",
+      "\t${0}",
+      "{/await}"
+    ],
+    "description": "Svelte {#await ... then} resolved shorthand block"
+  },
+
+  "Svelte Await Catch Shorthand": {
+    "prefix": ["#awaitcatch", "awaitcatch", "s-awaitcatch"],
+    "body": [
+      "{#await ${1:promise} catch ${2:error}}",
+      "\t${0}",
+      "{/await}"
+    ],
+    "description": "Svelte {#await ... catch} error shorthand block"
+  },
+
+  "Svelte Then Branch": {
+    "prefix": [":then", "then", "s-then"],
+    "body": [
+      "{:then ${1:data}}",
+      "\t${0}"
+    ],
+    "description": "Svelte {:then} branch in await block"
+  },
+
+  "Svelte Catch Branch": {
+    "prefix": [":catch", "catch", "s-catch"],
+    "body": [
+      "{:catch ${1:error}}",
+      "\t${0}"
+    ],
+    "description": "Svelte {:catch} branch in await block"
+  },
+
+  "Svelte Key Block": {
+    "prefix": ["#key", "key", "s-key"],
+    "body": [
+      "{#key ${1:expression}}",
+      "\t${0}",
+      "{/key}"
+    ],
+    "description": "Svelte {#key} block to recreate contents when expression changes"
+  },
+
+  "Svelte Snippet Definition": {
+    "prefix": ["#snippet", "snippet", "s-snippet"],
+    "body": [
+      "{#snippet ${1:snippetName}(${2:params})}",
+      "\t${0}",
+      "{/snippet}"
+    ],
+    "description": "Svelte 5 {#snippet} reusable template block"
+  },
+
+  "Svelte Snippet With Destructuring": {
+    "prefix": ["#snippetd", "snippetd", "s-snippet-destruct"],
+    "body": [
+      "{#snippet ${1:snippetName}({ ${2:prop} })}",
+      "\t${0}",
+      "{/snippet}"
+    ],
+    "description": "Svelte 5 {#snippet} with destructured parameter"
+  },
+
+  "Svelte Render Snippet Tag": {
+    "prefix": ["@render", "render", "s-render"],
+    "body": [
+      "{@render ${1:snippetName}(${2:args})}"
+    ],
+    "description": "Svelte 5 {@render} tag to render a snippet"
+  },
+
+  "Svelte Raw HTML Tag": {
+    "prefix": ["@html", "html", "s-html"],
+    "body": [
+      "{@html ${1:content}}"
+    ],
+    "description": "Svelte {@html} raw unescaped HTML tag"
+  },
+
+  "Svelte Const Tag": {
+    "prefix": ["@const", "const", "s-const"],
+    "body": [
+      "{@const ${1:name} = ${2:value}}"
+    ],
+    "description": "Svelte {@const} local block-scoped constant"
+  },
+
+  "Svelte Debug Tag": {
+    "prefix": ["@debug", "debug", "s-debug"],
+    "body": [
+      "{@debug ${1:vars}}"
+    ],
+    "description": "Svelte {@debug} tag for debugger pausing on value change"
+  },
+
+  "Svelte 5 Component Template": {
+    "prefix": ["s-comp5", "scomp5", "svelte5"],
+    "body": [
+      "<script lang=\"ts\">",
+      "\tinterface Props {",
+      "\t\t${1:title}?: string;",
+      "\t}",
+      "",
+      "\tlet { ${1:title} = '${2:Default}' }: Props = $props();",
+      "\t${0}",
+      "</script>",
+      "",
+      "<div>",
+      "\t<h1>{${1:title}}</h1>",
+      "</div>",
+      "",
+      "<style>",
+      "",
+      "</style>"
+    ],
+    "description": "Svelte 5 component template with TypeScript and $props()"
+  },
+
+  "Svelte 4 Component Template": {
+    "prefix": ["s-comp", "scomp", "svelte"],
+    "body": [
+      "<script lang=\"ts\">",
+      "\texport let ${1:name}: string = '${2:World}';",
+      "\t${0}",
+      "</script>",
+      "",
+      "<div>",
+      "\t<h1>Hello {${1:name}}!</h1>",
+      "</div>",
+      "",
+      "<style>",
+      "",
+      "</style>"
+    ],
+    "description": "Svelte 4 component template with TypeScript and export let"
+  },
+
+  "Svelte TypeScript Script Tag": {
+    "prefix": ["scriptts", "s-script-ts"],
+    "body": [
+      "<script lang=\"ts\">",
+      "\t${0}",
+      "</script>"
+    ],
+    "description": "Svelte <script lang=\"ts\"> tag"
+  },
+
+  "Svelte Script Tag": {
+    "prefix": ["script", "s-script"],
+    "body": [
+      "<script>",
+      "\t${0}",
+      "</script>"
+    ],
+    "description": "Svelte <script> tag"
+  },
+
+  "Svelte Module Script Tag": {
+    "prefix": ["scriptmodule", "s-script-module"],
+    "body": [
+      "<script module>",
+      "\t${0}",
+      "</script>"
+    ],
+    "description": "Svelte 5 <script module> tag for shared module exports"
+  },
+
+  "Svelte Style Tag": {
+    "prefix": ["style", "s-style"],
+    "body": [
+      "<style>",
+      "\t${0}",
+      "</style>"
+    ],
+    "description": "Svelte scoped <style> block"
+  },
+
+  "Svelte 5 $state Rune": {
+    "prefix": ["$state", "state"],
+    "body": [
+      "let ${1:count} = $state(${2:0});"
+    ],
+    "description": "Svelte 5 reactive $state() rune"
+  },
+
+  "Svelte 5 $state.raw Rune": {
+    "prefix": ["$state.raw", "stateraw"],
+    "body": [
+      "let ${1:data} = $state.raw(${2:initial});"
+    ],
+    "description": "Svelte 5 non-deep-reactive $state.raw() rune"
+  },
+
+  "Svelte 5 $state.snapshot Rune": {
+    "prefix": ["$state.snapshot", "statesnapshot"],
+    "body": [
+      "const ${1:copy} = $state.snapshot(${2:stateObject});"
+    ],
+    "description": "Svelte 5 immutable $state.snapshot() utility"
+  },
+
+  "Svelte 5 $derived Rune": {
+    "prefix": ["$derived", "derived"],
+    "body": [
+      "let ${1:doubled} = $derived(${2:count * 2});"
+    ],
+    "description": "Svelte 5 reactive $derived() rune"
+  },
+
+  "Svelte 5 $derived.by Rune": {
+    "prefix": ["$derived.by", "derivedby"],
+    "body": [
+      "let ${1:computed} = $derived.by(() => {",
+      "\t${0}",
+      "});"
+    ],
+    "description": "Svelte 5 complex reactive $derived.by() rune"
+  },
+
+  "Svelte 5 $effect Rune": {
+    "prefix": ["$effect", "effect"],
+    "body": [
+      "$effect(() => {",
+      "\t${1}",
+      "",
+      "\treturn () => {",
+      "\t\t${0}",
+      "\t};",
+      "});"
+    ],
+    "description": "Svelte 5 side-effect $effect() rune with cleanup"
+  },
+
+  "Svelte 5 $effect.pre Rune": {
+    "prefix": ["$effect.pre", "effectpre"],
+    "body": [
+      "$effect.pre(() => {",
+      "\t${0}",
+      "});"
+    ],
+    "description": "Svelte 5 pre-DOM update $effect.pre() rune"
+  },
+
+  "Svelte 5 $props Rune": {
+    "prefix": ["$props", "props"],
+    "body": [
+      "let { ${1:prop} } = $props();"
+    ],
+    "description": "Svelte 5 component input $props() rune"
+  },
+
+  "Svelte 5 $props Typed": {
+    "prefix": ["$propsts", "propsts"],
+    "body": [
+      "interface Props {",
+      "\t${1:name}: ${2:string};",
+      "}",
+      "",
+      "let { ${1:name} }: Props = $props();"
+    ],
+    "description": "Svelte 5 typed $props() rune with TypeScript interface"
+  },
+
+  "Svelte 5 $bindable Rune": {
+    "prefix": ["$bindable", "bindable"],
+    "body": [
+      "let { ${1:value} = $bindable(${2:defaultValue}) } = $props();"
+    ],
+    "description": "Svelte 5 two-way bindable prop $bindable() rune"
+  },
+
+  "Svelte 5 $inspect Rune": {
+    "prefix": ["$inspect", "inspect"],
+    "body": [
+      "$inspect(${1:value});"
+    ],
+    "description": "Svelte 5 reactive console debugger $inspect() rune"
+  },
+
+  "Svelte onMount Hook": {
+    "prefix": ["onMount", "s-onMount"],
+    "body": [
+      "onMount(() => {",
+      "\t${0}",
+      "});"
+    ],
+    "description": "Svelte onMount lifecycle hook"
+  },
+
+  "Svelte onDestroy Hook": {
+    "prefix": ["onDestroy", "s-onDestroy"],
+    "body": [
+      "onDestroy(() => {",
+      "\t${0}",
+      "});"
+    ],
+    "description": "Svelte onDestroy lifecycle hook"
+  },
+
+  "Svelte tick Helper": {
+    "prefix": ["tick", "s-tick"],
+    "body": [
+      "await tick();",
+      "${0}"
+    ],
+    "description": "Svelte tick() promise that resolves after DOM updates"
+  },
+
+  "Svelte Event Dispatcher": {
+    "prefix": ["createEventDispatcher", "dispatcher", "s-dispatch"],
+    "body": [
+      "import { createEventDispatcher } from 'svelte';",
+      "",
+      "const dispatch = createEventDispatcher<{",
+      "\t${1:eventName}: ${2:detailType};",
+      "}>();"
+    ],
+    "description": "Svelte createEventDispatcher helper"
+  },
+
+  "Svelte Writable Store": {
+    "prefix": ["writable", "s-writable"],
+    "body": [
+      "import { writable } from 'svelte/store';",
+      "",
+      "export const ${1:store} = writable<${2:type}>(${3:initialValue});"
+    ],
+    "description": "Svelte writable store definition"
+  },
+
+  "Svelte Readable Store": {
+    "prefix": ["readable", "s-readable"],
+    "body": [
+      "import { readable } from 'svelte/store';",
+      "",
+      "export const ${1:store} = readable<${2:type}>(${3:initialValue}, (set) => {",
+      "\t${0}",
+      "\treturn () => {};",
+      "});"
+    ],
+    "description": "Svelte readable store definition"
+  },
+
+  "Svelte Derived Store": {
+    "prefix": ["sderived", "s-derived"],
+    "body": [
+      "import { derived } from 'svelte/store';",
+      "",
+      "export const ${1:derivedStore} = derived(${2:store}, (\\$${2:store}) => {",
+      "\treturn ${0};",
+      "});"
+    ],
+    "description": "Svelte derived store definition"
+  },
+
+  "Svelte 5 $state Object": {
+    "prefix": ["$state.object", "stateobj"],
+    "body": [
+      "let ${1:state} = $state({",
+      "\t${2:key}: ${3:value},",
+      "});"
+    ],
+    "description": "Svelte 5 deeply reactive $state() object rune"
+  },
+
+  "Svelte 5 $state Array": {
+    "prefix": ["$state.array", "statearr"],
+    "body": [
+      "let ${1:items} = $state<${2:string}[]>([]);"
+    ],
+    "description": "Svelte 5 reactive $state() array rune"
+  },
+
+  "Svelte 5 $effect.root Rune": {
+    "prefix": ["$effect.root", "effectroot"],
+    "body": [
+      "const cleanup = $effect.root(() => {",
+      "\t${0}",
+      "});"
+    ],
+    "description": "Svelte 5 non-tracked $effect.root() rune with manual cleanup"
+  },
+
+  "Svelte 5 $effect.tracking Rune": {
+    "prefix": ["$effect.tracking", "effecttracking"],
+    "body": [
+      "if ($effect.tracking()) {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "Svelte 5 $effect.tracking() rune to check if running inside reactive context"
+  },
+
+  "Svelte 5 $props with Rest": {
+    "prefix": ["$propsrest", "propsrest"],
+    "body": [
+      "let { ${1:title}, ...${2:restProps} } = $props();"
+    ],
+    "description": "Svelte 5 $props() rune with rest properties capture"
+  },
+
+  "Svelte 5 $inspect with Formatter": {
+    "prefix": ["$inspect.with", "inspectwith"],
+    "body": [
+      "$inspect(${1:value}).with(${2:console.trace});"
+    ],
+    "description": "Svelte 5 $inspect().with() custom callback debugger rune"
+  },
+
+  "Svelte 5 $host Rune": {
+    "prefix": ["$host", "host"],
+    "body": [
+      "const host = $host<${1:HTMLElement}>();"
+    ],
+    "description": "Svelte 5 $host() rune for custom elements shadow host reference"
+  },
+
+  "Svelte 5 Snippet Prop Interface": {
+    "prefix": ["snippetspec", "s-snippet-type"],
+    "body": [
+      "import type { Snippet } from 'svelte';",
+      "",
+      "interface Props {",
+      "\t${1:children}?: Snippet;",
+      "}"
+    ],
+    "description": "Svelte 5 Snippet typing definition for component props"
+  },
+
+  "Svelte Legacy Reactive Declaration ($:)": {
+    "prefix": ["$:", "s-reactive", "reactive"],
+    "body": [
+      "$: ${1:doubled} = ${2:count * 2};"
+    ],
+    "description": "Svelte < 5 legacy reactive statement ($: label)"
+  },
+
+  "Svelte Legacy Reactive Block ($:{})": {
+    "prefix": ["$:{", "s-reactive-block"],
+    "body": [
+      "$: {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "Svelte < 5 legacy reactive code block ($: { ... })"
+  },
+
+  "Svelte Legacy Reactive If Statement": {
+    "prefix": ["$:if", "s-reactive-if"],
+    "body": [
+      "$: if (${1:condition}) {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "Svelte < 5 legacy reactive conditional statement ($: if (...) { ... })"
+  },
+
+  "Svelte Legacy Reactive Console Log": {
+    "prefix": ["$:log", "s-reactive-log"],
+    "body": [
+      "$: console.log('${1:label}:', ${2:value});"
+    ],
+    "description": "Svelte < 5 legacy reactive console logger ($: console.log)"
+  },
+
+  "Svelte Legacy export let Prop": {
+    "prefix": ["exportlet", "s-exportlet"],
+    "body": [
+      "export let ${1:name}: ${2:string};"
+    ],
+    "description": "Svelte < 5 legacy exported component prop declaration"
+  },
+
+  "Svelte Legacy export let with Default": {
+    "prefix": ["exportletdef", "s-exportlet-default"],
+    "body": [
+      "export let ${1:name}: ${2:string} = ${3:defaultValue};"
+    ],
+    "description": "Svelte < 5 legacy exported prop with default value"
+  },
+
+  "Svelte Legacy Dispatch Call": {
+    "prefix": ["dispatch", "s-dispatch-call"],
+    "body": [
+      "dispatch('${1:eventName}', ${2:detail});"
+    ],
+    "description": "Svelte < 5 legacy event dispatcher invocation"
+  },
+
+  "Svelte Legacy Event Directive (on:event)": {
+    "prefix": ["on:event", "s-on"],
+    "body": [
+      "on:${1:click}={${2:handleClick}}"
+    ],
+    "description": "Svelte < 5 legacy DOM event listener directive"
+  },
+
+  "Svelte Legacy Prevent Default Event": {
+    "prefix": ["on:submit", "s-on-submit"],
+    "body": [
+      "on:${1:submit}|preventDefault={${2:handleSubmit}}"
+    ],
+    "description": "Svelte < 5 legacy event modifier |preventDefault directive"
+  },
+
+  "Svelte Legacy <svelte:component>": {
+    "prefix": ["svelte:component", "s-component"],
+    "body": [
+      "<svelte:component this={${1:Component}} ${2}/>"
+    ],
+    "description": "Svelte < 5 legacy dynamic <svelte:component> element"
+  },
+
+  "Svelte Legacy <svelte:element>": {
+    "prefix": ["svelte:element", "s-element"],
+    "body": [
+      "<svelte:element this={${1:tag}} ${2}>",
+      "\t${0}",
+      "</svelte:element>"
+    ],
+    "description": "Svelte < 5 legacy dynamic HTML element <svelte:element>"
+  },
+
+  "Svelte Legacy <svelte:window>": {
+    "prefix": ["svelte:window", "s-window"],
+    "body": [
+      "<svelte:window on:${1:keydown}={${2:handleKeydown}} />"
+    ],
+    "description": "Svelte < 5 legacy window event listener element <svelte:window>"
+  },
+
+  "Svelte Legacy <svelte:body>": {
+    "prefix": ["svelte:body", "s-body"],
+    "body": [
+      "<svelte:body on:${1:mouseenter}={${2:handleMouseenter}} />"
+    ],
+    "description": "Svelte < 5 legacy document body event listener element <svelte:body>"
+  },
+
+  "Svelte Legacy <svelte:head>": {
+    "prefix": ["svelte:head", "s-head"],
+    "body": [
+      "<svelte:head>",
+      "\t<title>${1:Title}</title>",
+      "</svelte:head>"
+    ],
+    "description": "Svelte < 5 legacy document head injector <svelte:head>"
+  },
+
+  "Svelte Legacy <svelte:fragment>": {
+    "prefix": ["svelte:fragment", "s-fragment"],
+    "body": [
+      "<svelte:fragment slot=\"${1:name}\">",
+      "\t${0}",
+      "</svelte:fragment>"
+    ],
+    "description": "Svelte < 5 legacy named slot wrapper <svelte:fragment>"
+  },
+
+  "Svelte Legacy <slot>": {
+    "prefix": ["slot", "s-slot"],
+    "body": [
+      "<slot>${0}</slot>"
+    ],
+    "description": "Svelte < 5 legacy component slot element"
+  },
+
+  "Svelte Legacy Named <slot>": {
+    "prefix": ["slotname", "s-slot-name"],
+    "body": [
+      "<slot name=\"${1:name}\">${0}</slot>"
+    ],
+    "description": "Svelte < 5 legacy named component slot element"
+  },
+
+  "Svelte Legacy <svelte:options>": {
+    "prefix": ["svelte:options", "s-options"],
+    "body": [
+      "<svelte:options immutable={${1:true}} />"
+    ],
+    "description": "Svelte < 5 legacy compiler options directive <svelte:options>"
+  },
+
+  "Svelte Legacy Module Script Context": {
+    "prefix": ["scriptcontext", "s-script-context"],
+    "body": [
+      "<script context=\"module\">",
+      "\t${0}",
+      "</script>"
+    ],
+    "description": "Svelte < 5 legacy <script context=\"module\"> shared block"
+  },
+
+  "Svelte beforeUpdate Hook": {
+    "prefix": ["beforeUpdate", "s-beforeUpdate"],
+    "body": [
+      "beforeUpdate(() => {",
+      "\t${0}",
+      "});"
+    ],
+    "description": "Svelte beforeUpdate lifecycle hook"
+  },
+
+  "Svelte afterUpdate Hook": {
+    "prefix": ["afterUpdate", "s-afterUpdate"],
+    "body": [
+      "afterUpdate(() => {",
+      "\t${0}",
+      "});"
+    ],
+    "description": "Svelte afterUpdate lifecycle hook"
+  },
+
+  "Svelte Custom Store Boilerplate": {
+    "prefix": ["customstore", "s-custom-store"],
+    "body": [
+      "import { writable } from 'svelte/store';",
+      "",
+      "function create${1:Counter}() {",
+      "\tconst { subscribe, set, update } = writable(${2:0});",
+      "",
+      "\treturn {",
+      "\t\tsubscribe,",
+      "\t\tincrement: () => update((n) => n + 1),",
+      "\t\tdecrement: () => update((n) => n - 1),",
+      "\t\treset: () => set(${2:0}),",
+      "\t};",
+      "}",
+      "",
+      "export const ${3:counter} = create${1:Counter}();"
+    ],
+    "description": "Svelte custom store pattern with subscribe, set, and update"
+  }
+}

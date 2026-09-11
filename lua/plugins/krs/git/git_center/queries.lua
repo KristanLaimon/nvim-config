@@ -65,7 +65,7 @@ function M.get_local_branches(cwd)
 	return branches
 end
 
---- Gets recent commit history graph lines with ANSI colors, author and relative date.
+--- Gets recent commit history graph lines with ANSI colors, author and relative date for current branch.
 --- @param cwd string|nil
 --- @param limit integer|nil
 --- @return string[] lines
@@ -73,6 +73,24 @@ function M.get_commit_graph(cwd, limit)
 	local target = config.get_active_target()
 	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
 	limit = limit or 15
+	return M.git_lines({
+		"log",
+		"--graph",
+		"--color=always",
+		"--pretty=format:%C(yellow)%h%C(reset)%C(auto)%d%C(reset) %C(cyan)%an%C(reset) %C(green)(%cr)%C(reset) %s",
+		"-n",
+		tostring(limit),
+	}, cwd)
+end
+
+--- Gets recent commit history graph lines with ANSI colors, author and relative date across all branches.
+--- @param cwd string|nil
+--- @param limit integer|nil
+--- @return string[] lines
+function M.get_all_commit_graph(cwd, limit)
+	local target = config.get_active_target()
+	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+	limit = limit or 150
 	return M.git_lines({
 		"log",
 		"--all",

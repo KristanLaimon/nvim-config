@@ -1,0 +1,425 @@
+{
+  "$schema": "./snippets.schema.json",
+
+  "React Functional Component": {
+    "prefix": ["rfc", "reactFunctionComponent"],
+    "body": [
+      "export default function ${1:${TM_FILENAME_BASE}}() {",
+      "\treturn (",
+      "\t\t<div>",
+      "\t\t\t${0}",
+      "\t\t</div>",
+      "\t);",
+      "}"
+    ],
+    "description": "React functional component with export default"
+  },
+
+  "React Functional Component with Props": {
+    "prefix": ["rfcp", "tsrfc", "reactFunctionComponentProps"],
+    "body": [
+      "interface ${1:${TM_FILENAME_BASE}}Props {",
+      "\t${2:title}?: string;",
+      "}",
+      "",
+      "export default function ${1:${TM_FILENAME_BASE}}({ ${3:title} }: ${1:${TM_FILENAME_BASE}}Props) {",
+      "\treturn (",
+      "\t\t<div>",
+      "\t\t\t${0}",
+      "\t\t</div>",
+      "\t);",
+      "}"
+    ],
+    "description": "React functional component with typed TypeScript Props interface"
+  },
+
+  "React Arrow Function Component": {
+    "prefix": ["rafc", "reactArrowFunctionComponent"],
+    "body": [
+      "export const ${1:${TM_FILENAME_BASE}} = () => {",
+      "\treturn (",
+      "\t\t<div>",
+      "\t\t\t${0}",
+      "\t\t</div>",
+      "\t);",
+      "};"
+    ],
+    "description": "React exported arrow function component"
+  },
+
+  "React Arrow Function Component with Props": {
+    "prefix": ["rafcp", "tsrafc"],
+    "body": [
+      "interface ${1:${TM_FILENAME_BASE}}Props {",
+      "\t${2:title}?: string;",
+      "}",
+      "",
+      "export const ${1:${TM_FILENAME_BASE}} = ({ ${3:title} }: ${1:${TM_FILENAME_BASE}}Props) => {",
+      "\treturn (",
+      "\t\t<div>",
+      "\t\t\t${0}",
+      "\t\t</div>",
+      "\t);",
+      "};"
+    ],
+    "description": "React arrow function component with typed Props interface"
+  },
+
+  "React Functional Component with Export at Bottom": {
+    "prefix": ["rfce"],
+    "body": [
+      "function ${1:${TM_FILENAME_BASE}}() {",
+      "\treturn (",
+      "\t\t<div>",
+      "\t\t\t${0}",
+      "\t\t</div>",
+      "\t);",
+      "}",
+      "",
+      "export default ${1:${TM_FILENAME_BASE}};"
+    ],
+    "description": "React functional component with export default at bottom"
+  },
+
+  "React Component with Children": {
+    "prefix": ["rfcc", "reactChildrenComponent"],
+    "body": [
+      "import { type ReactNode } from 'react';",
+      "",
+      "interface ${1:${TM_FILENAME_BASE}}Props {",
+      "\tchildren: ReactNode;",
+      "}",
+      "",
+      "export default function ${1:${TM_FILENAME_BASE}}({ children }: ${1:${TM_FILENAME_BASE}}Props) {",
+      "\treturn (",
+      "\t\t<div>",
+      "\t\t\t{children}",
+      "\t\t</div>",
+      "\t);",
+      "}"
+    ],
+    "description": "React functional component accepting typed children"
+  },
+
+  "React ForwardRef Component": {
+    "prefix": ["rcforward", "fwdref", "forwardRef"],
+    "body": [
+      "import { forwardRef, type ComponentPropsWithoutRef } from 'react';",
+      "",
+      "interface ${1:${TM_FILENAME_BASE}}Props extends ComponentPropsWithoutRef<'${2:div}'> {",
+      "\t${3}",
+      "}",
+      "",
+      "export const ${1:${TM_FILENAME_BASE}} = forwardRef<${4:HTMLDivElement}, ${1:${TM_FILENAME_BASE}}Props>(",
+      "\tfunction ${1:${TM_FILENAME_BASE}}(props, ref) {",
+      "\t\treturn (",
+      "\t\t\t<${2:div} ref={ref} {...props}>",
+      "\t\t\t\t${0}",
+      "\t\t\t</${2:div}>",
+      "\t\t);",
+      "\t}",
+      ");",
+      "",
+      "${1:${TM_FILENAME_BASE}}.displayName = '${1:${TM_FILENAME_BASE}}';"
+    ],
+    "description": "React forwardRef component with HTML ref typing"
+  },
+
+  "React Memo Component": {
+    "prefix": ["rcmemo", "reactMemo"],
+    "body": [
+      "import { memo } from 'react';",
+      "",
+      "export const ${1:${TM_FILENAME_BASE}} = memo(function ${1:${TM_FILENAME_BASE}}() {",
+      "\treturn (",
+      "\t\t<div>",
+      "\t\t\t${0}",
+      "\t\t</div>",
+      "\t);",
+      "});"
+    ],
+    "description": "React memoized component"
+  },
+
+  "useState Hook": {
+    "prefix": ["useState", "us"],
+    "body": [
+      "const [${1:state}, set${2:State}] = useState(${3:initialState});"
+    ],
+    "description": "React useState hook"
+  },
+
+  "useState Hook Typed": {
+    "prefix": ["useStatet", "ust"],
+    "body": [
+      "const [${1:state}, set${2:State}] = useState<${3:string}>(${4:initialState});"
+    ],
+    "description": "React useState hook with TypeScript generic type"
+  },
+
+  "useEffect Hook": {
+    "prefix": ["useEffect", "ue"],
+    "body": [
+      "useEffect(() => {",
+      "\t${0}",
+      "}, [${1:deps}]);"
+    ],
+    "description": "React useEffect hook"
+  },
+
+  "useEffect Hook with Cleanup": {
+    "prefix": ["useEffectCleanup", "uec"],
+    "body": [
+      "useEffect(() => {",
+      "\t${1}",
+      "",
+      "\treturn () => {",
+      "\t\t${0}",
+      "\t};",
+      "}, [${2:deps}]);"
+    ],
+    "description": "React useEffect hook with teardown cleanup function"
+  },
+
+  "useContext Hook": {
+    "prefix": ["useContext", "uc"],
+    "body": [
+      "const ${1:value} = useContext(${2:MyContext});"
+    ],
+    "description": "React useContext hook"
+  },
+
+  "useRef Hook": {
+    "prefix": ["useRef", "ur"],
+    "body": [
+      "const ${1:ref} = useRef<${2:HTMLDivElement}>(null);"
+    ],
+    "description": "React useRef hook typed for DOM elements"
+  },
+
+  "useRef Value Hook": {
+    "prefix": ["useRefValue", "urv"],
+    "body": [
+      "const ${1:ref} = useRef<${2:type}>(${3:initialValue});"
+    ],
+    "description": "React useRef hook for mutable instance variables"
+  },
+
+  "useMemo Hook": {
+    "prefix": ["useMemo", "um"],
+    "body": [
+      "const ${1:memoizedValue} = useMemo(() => {",
+      "\treturn ${2:computeValue};",
+      "}, [${3:deps}]);"
+    ],
+    "description": "React useMemo hook"
+  },
+
+  "useCallback Hook": {
+    "prefix": ["useCallback", "ucb"],
+    "body": [
+      "const ${1:memoizedCallback} = useCallback((${2:params}) => {",
+      "\t${0}",
+      "}, [${3:deps}]);"
+    ],
+    "description": "React useCallback hook"
+  },
+
+  "useReducer Hook": {
+    "prefix": ["useReducer", "ured"],
+    "body": [
+      "const [${1:state}, dispatch] = useReducer(${2:reducer}, ${3:initialState});"
+    ],
+    "description": "React useReducer hook"
+  },
+
+  "useId Hook": {
+    "prefix": ["useId", "uid"],
+    "body": [
+      "const ${1:id} = useId();"
+    ],
+    "description": "React useId hook for accessible IDs"
+  },
+
+  "useTransition Hook": {
+    "prefix": ["useTransition", "utr"],
+    "body": [
+      "const [${1:isPending}, ${2:startTransition}] = useTransition();"
+    ],
+    "description": "React useTransition hook for non-blocking state transitions"
+  },
+
+  "useDeferredValue Hook": {
+    "prefix": ["useDeferredValue", "udv"],
+    "body": [
+      "const deferred${1:Value} = useDeferredValue(${2:value});"
+    ],
+    "description": "React useDeferredValue hook"
+  },
+
+  "useLayoutEffect Hook": {
+    "prefix": ["useLayoutEffect", "ule"],
+    "body": [
+      "useLayoutEffect(() => {",
+      "\t${0}",
+      "}, [${1:deps}]);"
+    ],
+    "description": "React useLayoutEffect hook (fires synchronously after DOM mutations)"
+  },
+
+  "useImperativeHandle Hook": {
+    "prefix": ["useImperativeHandle", "uih"],
+    "body": [
+      "useImperativeHandle(${1:ref}, () => ({",
+      "\t${0}",
+      "}), [${2:deps}]);"
+    ],
+    "description": "React useImperativeHandle hook for ref customization"
+  },
+
+  "Custom React Hook": {
+    "prefix": ["useCustomHook", "customhook"],
+    "body": [
+      "export function use${1:CustomHook}(${2:params}) {",
+      "\t${0}",
+      "\treturn {};",
+      "}"
+    ],
+    "description": "Custom React hook template"
+  },
+
+  "React Context Boilerplate": {
+    "prefix": ["createContext", "reactContext", "cntx"],
+    "body": [
+      "import { createContext, useContext, useState, type ReactNode } from 'react';",
+      "",
+      "interface ${1:Name}ContextType {",
+      "\t${2:value}: ${3:string};",
+      "}",
+      "",
+      "const ${1:Name}Context = createContext<${1:Name}ContextType | undefined>(undefined);",
+      "",
+      "export function ${1:Name}Provider({ children }: { children: ReactNode }) {",
+      "\tconst [${2:value}, set${2:Value}] = useState<${3:string}>(${4:initialValue});",
+      "",
+      "\treturn (",
+      "\t\t<${1:Name}Context.Provider value={{ ${2:value} }}>",
+      "\t\t\t{children}",
+      "\t\t</${1:Name}Context.Provider>",
+      "\t);",
+      "}",
+      "",
+      "export function use${1:Name}() {",
+      "\tconst context = useContext(${1:Name}Context);",
+      "\tif (!context) {",
+      "\t\tthrow new Error('use${1:Name} must be used within a ${1:Name}Provider');",
+      "\t}",
+      "\treturn context;",
+      "}"
+    ],
+    "description": "Complete React Context with TypeScript interface, Provider, and custom consumption hook"
+  },
+
+  "React Change Event Handler": {
+    "prefix": ["handleChange", "onchange"],
+    "body": [
+      "const handle${1:Change} = (e: React.ChangeEvent<${2:HTMLInputElement}>) => {",
+      "\t${0}",
+      "};"
+    ],
+    "description": "React typed input change event handler"
+  },
+
+  "React Click Event Handler": {
+    "prefix": ["handleClick", "onclick"],
+    "body": [
+      "const handle${1:Click} = (e: React.MouseEvent<${2:HTMLButtonElement}>) => {",
+      "\t${0}",
+      "};"
+    ],
+    "description": "React typed mouse/click event handler"
+  },
+
+  "React Form Submit Handler": {
+    "prefix": ["handleSubmit", "onsubmit"],
+    "body": [
+      "const handle${1:Submit} = (e: React.FormEvent<${2:HTMLFormElement}>) => {",
+      "\te.preventDefault();",
+      "\t${0}",
+      "};"
+    ],
+    "description": "React typed form submit handler with preventDefault()"
+  },
+
+  "React Keyboard Event Handler": {
+    "prefix": ["handleKeyDown", "onkeydown"],
+    "body": [
+      "const handle${1:KeyDown} = (e: React.KeyboardEvent<${2:HTMLInputElement}>) => {",
+      "\tif (e.key === '${3:Enter}') {",
+      "\t\t${0}",
+      "\t}",
+      "};"
+    ],
+    "description": "React typed keyboard event handler"
+  },
+
+  "React Lazy Import": {
+    "prefix": ["reactLazy", "rlazy"],
+    "body": [
+      "const ${1:Component} = lazy(() => import('${2:./Component}'));"
+    ],
+    "description": "React lazy load component import"
+  },
+
+  "React Suspense Boundary": {
+    "prefix": ["suspense", "rsuspense"],
+    "body": [
+      "<Suspense fallback={<${1:Loading} />}>",
+      "\t<${2:Component} />",
+      "</Suspense>"
+    ],
+    "description": "React Suspense boundary with fallback"
+  },
+
+  "React Error Boundary": {
+    "prefix": ["errorboundary", "reb"],
+    "body": [
+      "import { Component, type ReactNode, type ErrorInfo } from 'react';",
+      "",
+      "interface Props {",
+      "\tchildren: ReactNode;",
+      "\tfallback?: ReactNode;",
+      "}",
+      "",
+      "interface State {",
+      "\thasError: boolean;",
+      "\terror?: Error;",
+      "}",
+      "",
+      "export class ErrorBoundary extends Component<Props, State> {",
+      "\tstate: State = { hasError: false };",
+      "",
+      "\tstatic getDerivedStateFromError(error: Error): State {",
+      "\t\treturn { hasError: true, error };",
+      "\t}",
+      "",
+      "\tcomponentDidCatch(error: Error, info: ErrorInfo) {",
+      "\t\tconsole.error('ErrorBoundary caught:', error, info);",
+      "\t}",
+      "",
+      "\trender() {",
+      "\t\tif (this.state.hasError) {",
+      "\t\t\treturn this.props.fallback || (",
+      "\t\t\t\t<div role=\"alert\">",
+      "\t\t\t\t\t<h2>Something went wrong.</h2>",
+      "\t\t\t\t\t<p>{this.state.error?.message}</p>",
+      "\t\t\t\t</div>",
+      "\t\t\t);",
+      "\t\t}",
+      "\t\treturn this.props.children;",
+      "\t}",
+      "}"
+    ],
+    "description": "React class Error Boundary component"
+  }
+}

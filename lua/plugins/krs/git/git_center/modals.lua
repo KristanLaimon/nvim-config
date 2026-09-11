@@ -274,49 +274,71 @@ function M.open_commit_log_modal(target_cwd)
 		return
 	end
 
-	local raw_commits = git_lines({
-		"log",
-		"--all",
-		"--pretty=format:%h%x1f%an%x1f%ar%x1f%s%x1f%d",
-		"-n",
-		"150",
-	}, active_cwd)
+	local raw_commits = queries.get_all_commit_graph(active_cwd, 150)
+	if #raw_commits == 0 then
+		notify("No commit history found", vim.log.levels.INFO)
+		return
+	end
 
-	local commits = {}
+	local render = require("plugins.krs.git.git_center.render")
+	render.setup_panel_highlights()
+
 	local list_lines = {}
-	for _, line in ipairs(raw_commits) do
-		local parts = vim.split(line, "\x1f", { plain = true })
-		if #parts >= 4 then
-			local hash = parts[1] or ""
-			local author = parts[2] or ""
-			local date = parts[3] or ""
-			local subject = parts[4] or ""
-			local refs = parts[5] or ""
+	local line_commits = {}
+	local all_spans = {}
+	local commit_cache = {}
 
-			table.insert(commits, {
-				hash = hash,
-				author = author,
-				date = date,
-				subject = subject,
-				refs = refs,
-			})
-			table.insert(
-				list_lines,
-				string.format(
-					" %-7s │ %-12.12s │ %-10.10s │ %s%s",
-					hash,
-					author,
-					date,
-					subject,
-					refs ~= "" and (" " .. refs) or ""
-				)
-			)
+	for idx, raw_line in ipairs(raw_commits) do
+		local clean_text, spans = render.parse_ansi_line(raw_line)
+		local line_text = " " .. clean_text
+		table.insert(list_lines, line_text)
+		table.insert(all_spans, spans)
+
+		local hash = clean_text:match("(%x%x%x%x%x%x%x+)")
+		if hash then
+			line_commits[idx] = hash
 		end
 	end
 
-	if #commits == 0 then
-		notify("No commit history found", vim.log.levels.INFO)
-		return
+	local function get_commit_at_row(row)
+		local hash = line_commits[row]
+		if not hash then
+			for r = row, 1, -1 do
+				if line_commits[r] then
+					hash = line_commits[r]
+					break
+				end
+			end
+			if not hash then
+				for r = row, #list_lines do
+					if line_commits[r] then
+						hash = line_commits[r]
+						break
+					end
+				end
+			end
+		end
+		if not hash then
+			return nil
+		end
+		if commit_cache[hash] then
+			return commit_cache[hash]
+		end
+
+		local meta = git_lines({ "show", "-s", "--pretty=format:%h%x1f%an%x1f%ar%x1f%s%x1f%d", hash }, active_cwd)
+		local commit = { hash = hash, author = "", date = "", subject = "", refs = "" }
+		if #meta > 0 then
+			local parts = vim.split(meta[1], "\x1f", { plain = true })
+			if #parts >= 4 then
+				commit.hash = parts[1] or hash
+				commit.author = parts[2] or ""
+				commit.date = parts[3] or ""
+				commit.subject = parts[4] or ""
+				commit.refs = parts[5] or ""
+			end
+		end
+		commit_cache[hash] = commit
+		return commit
 	end
 
 	diff.setup_highlights()
@@ -338,6 +360,14 @@ function M.open_commit_log_modal(target_cwd)
 	vim.bo[left_buf].bufhidden = "wipe"
 	vim.bo[left_buf].swapfile = false
 	vim.api.nvim_buf_set_lines(left_buf, 0, -1, false, list_lines)
+
+	local ns_log = vim.api.nvim_create_namespace("KRSGitLogModalSpans")
+	vim.api.nvim_buf_clear_namespace(left_buf, ns_log, 0, -1)
+	for row, spans in ipairs(all_spans) do
+		for _, s in ipairs(spans) do
+			pcall(vim.api.nvim_buf_add_highlight, left_buf, ns_log, s.hl_group, row - 1, s.col_start + 1, s.col_end + 1)
+		end
+	end
 
 	local left_win = vim.api.nvim_open_win(left_buf, true, {
 		relative = "editor",
@@ -407,7 +437,7 @@ function M.open_commit_log_modal(target_cwd)
 			return
 		end
 		local row = vim.api.nvim_win_get_cursor(left_win)[1]
-		local commit = commits[row]
+		local commit = get_commit_at_row(row)
 		if not commit then
 			return
 		end
@@ -569,7 +599,7 @@ function M.open_commit_log_modal(target_cwd)
 
 	local function checkout_commit()
 		local row = vim.api.nvim_win_get_cursor(left_win)[1]
-		local commit = commits[row]
+		local commit = get_commit_at_row(row)
 		if not commit then
 			return
 		end
@@ -632,7 +662,7 @@ function M.open_commit_log_modal(target_cwd)
 
 	local function open_left_commit_diff()
 		local row = vim.api.nvim_win_get_cursor(left_win)[1]
-		local commit = commits[row]
+		local commit = get_commit_at_row(row)
 		if commit then
 			M.open_diff_modal(nil, "commit", active_cwd, commit.hash)
 		end
@@ -645,7 +675,7 @@ function M.open_commit_log_modal(target_cwd)
 			return
 		end
 		local row = vim.api.nvim_win_get_cursor(left_win)[1]
-		local commit = commits[row]
+		local commit = get_commit_at_row(row)
 
 		local cursor_line = vim.api.nvim_win_get_cursor(right_win)[1]
 		local line_text = vim.api.nvim_buf_get_lines(right_buf, cursor_line - 1, cursor_line, false)[1] or ""
@@ -677,7 +707,7 @@ function M.open_commit_log_modal(target_cwd)
 
 	local function open_right_file_diff()
 		local row = vim.api.nvim_win_get_cursor(left_win)[1]
-		local commit = commits[row]
+		local commit = get_commit_at_row(row)
 		local filepath = current_right_file()
 		if commit then
 			M.open_diff_modal(filepath, "commit", active_cwd, commit.hash)

@@ -78,7 +78,7 @@ M.commands = {
 	{ name = "🌳 Toggle File Explorer (Neo-tree)", cmd = "Neotree toggle", category = "Explorer" },
 	{ name = "🔄 Rescan & Refresh File Explorer (Neo-tree)", cmd = "NeotreeRefresh", category = "Explorer" },
 	{ name = "➕ Create New File in Neo-tree (a / <C-n>)", cmd = "NeotreeCreateFile", category = "Explorer" },
-	{ name = "📁 Create New Folder in Neo-tree (A / <C-S-n>)", cmd = "NeotreeCreateFolder", category = "Explorer" },
+	{ name = "📁 Create New Folder in Neo-tree (A / <A-n>)", cmd = "NeotreeCreateFolder", category = "Explorer" },
 	{
 		name = "🙈 Toggle Custom Hidden Items Visibility (Show/Hide Marked Files)",
 		cmd = "NeotreeToggleCustomHiddenVisibility",
