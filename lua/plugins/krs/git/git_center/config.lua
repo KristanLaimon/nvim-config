@@ -89,7 +89,7 @@ M.settings = {
 		--- Close the diff modal.
 		modal_close = { "q", "<Esc>", "<esc>", "<ESC>", "<C-[>", "<C-c>", "<C-S-g>", "<C-S-G>", "<C-g>", "<C-G>" },
 		--- Open selected file in a bufferline tab.
-		open_tab = { "<S-CR>", "<S-Enter>", "<S-Return>" },
+		open_tab = {},
 	},
 }
 

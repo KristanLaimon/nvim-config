@@ -19,7 +19,7 @@ The **Git Control Center** (`<C-S-g>`) is a high-speed, interactive floating Git
 - **File & Section Restore**: Discard changes for single file (`r`) or entire section (`R`) with confirmation dialogs.
 - **Remote Push**: Execute `git push` (`P`) with automatic upstream tracking detection or interactive remote branch selection.
 - **Commit & Tag Box**: Multi-line commit title (`c`), description (`m`), and optional tag (`t`) via the `input_modal` component.
-- **VSCode 3-Way Merge Conflict Resolver (`M` / `<C-S-m>` / `:GitConflictResolve`)**: Opens a full-screen tiled workspace (like the DAP debugger) with 4 synchronized panels: Left Sidebar (conflicted files with live decreasing counts `(2)` -> `(1)` -> `(0)`), Top-Left Current/Ours, Top-Right Incoming/Theirs, Bottom editable Result (clean merged code without git markers). Panel jumps: `c` (Current), `i` (Incoming), `r` (Result), `s` (Sidebar) in read-only panels, and `gc`/`gi`/`gs` or `<A-c>`/`<A-i>`/`<A-s>` from Result. In Result editor: Accept Current (`co`/`1`), Accept Incoming (`ct`/`2`), Accept Both (`cb`/`3`), navigate (`]c`/`[c`), and stage (`s`). Git Center shows a yellow warning banner when merge conflicts are active.
+- **VSCode 3-Way Merge Conflict Resolver (`M` / `:GitConflictResolve` / `<leader>gm`)**: Opens a full-screen tiled workspace (like the DAP debugger) with 4 synchronized panels: Left Sidebar (conflicted files with live decreasing counts `(2)` -> `(1)` -> `(0)` and locked to Neo-tree width), Top-Left Current/Ours (highlighted in Green), Top-Right Incoming/Theirs (highlighted in Blue), Bottom editable Result (clean merged code with unlimited undo). Panel jumps: `<C-h>` (Sidebar), `<C-k>` (Current), `<C-l>` (Incoming), `<C-j>` (Result), `<Tab>`/`<S-Tab>`. Conflict actions: Accept Ours (`<C-1>`/`<C-o>`), Accept Theirs (`<C-2>`/`<C-t>`), Accept Both (`<C-3>`/`<C-b>`), Undo resolution (`<C-z>`/`u` - repeatable back to initial state), navigate (`<C-n>`/`<C-p>`), and stage (`<C-s>`).
 - **In-Buffer GitSigns Integration (`gitsigns.nvim`)**: Real-time signcolumn diff indicators (`▎`, ``) and hunk navigation (`]c`/`[c`). See [Keybinds](keybinds.md#git--gitsigns) for full list.
 
 ---
@@ -34,7 +34,7 @@ The **Git Control Center** (`<C-S-g>`) is a high-speed, interactive floating Git
 | `<A-h>` / `<M-h>` | Normal, Visual, Insert, Terminal | Switch to Previous Submodule Tab (Left) |
 | `<A-l>` / `<M-l>` | Normal, Visual, Insert, Terminal | Switch to Next Submodule Tab (Right) |
 | `M` | Normal | Open 3-Way Merge Conflict Resolver |
-| `<C-S-m>` | All | Open 3-Way Merge Conflict Resolver from anywhere |
+| `<leader>gm` | Normal | Open 3-Way Merge Conflict Resolver from anywhere |
 | `b` | Normal | Open Branch Management Modal (Create, Delete, Switch, Rename) |
 | `l` / `L` | Normal | Open Commit Log & History Modal (`git log --all` with per-file diffs & jump) |
 | `<CR>` (Commit Log) | Normal | Press Enter on file in "Files Changed" to jump directly to its diff |
@@ -52,7 +52,6 @@ The **Git Control Center** (`<C-S-g>`) is a high-speed, interactive floating Git
 | `<Tab>` | Normal | Toggle focus between left control panel and right live preview |
 | `<C-S-j>` / `<C-S-k>` | Normal | Scroll right live diff preview window |
 | `d` | Normal | Open selected file in Side-by-Side Diff Modal UI |
-| `<S-CR>` / `<S-Enter>` | Normal, Visual, Insert | Open file under cursor in bufferline tab (switches to existing tab if open) |
 | `<F5>` / `<C-r>` | Normal | Refresh Git status |
 
 ---

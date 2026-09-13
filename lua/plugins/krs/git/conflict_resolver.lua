@@ -8,34 +8,28 @@
 --     3. Top-Right: Incoming branch (Theirs) [Read-Only].
 --     4. Bottom: Result (Final Merged) [THE ONLY EDITABLE WINDOW].
 --
+--
 -- PANEL NAVIGATION SHORTCUTS
---   In Current/Incoming/Sidebar (Read-only panels):
---     c           Jump to Current panel (top-left)
---     i           Jump to Incoming panel (top-right)
---     r           Jump to Result panel (bottom)
---     s           Jump to Sidebar (left)
+--   In All Panels (Result, Current, Incoming, Sidebar):
+--     <C-h>       Jump to Sidebar (left)
+--     <C-k>       Jump to Current / Ours (top-left)
+--     <C-l>       Jump to Incoming / Theirs (top-right)
+--     <C-j>       Jump to Result (bottom)
 --     <Tab>       Cycle forward across panels
 --     <S-Tab>     Cycle backward across panels
---   In Result editor (Bottom):
---     gc / <A-c>  Jump to Current panel (top-left)
---     gi / <A-i>  Jump to Incoming panel (top-right)
---     gs / <A-s>  Jump to Sidebar (left)
---     <Tab>       Cycle to next panel
---     <S-Tab>     Cycle to previous panel
---     <C-h>       Jump left to Sidebar
---     <C-k>       Jump up to Current
---     <C-l>       Jump up-right to Incoming
+--     c / i / r / s Panel jump aliases in read-only panels
 --
--- CONFLICT ACTIONS IN RESULT EDITOR
---   co / 1        Accept Current (Ours) for active conflict
---   ct / 2        Accept Incoming (Theirs) for active conflict
---   cb / 3        Accept Both (Current first)
---   cB / 4        Accept Both (Incoming first)
---   ]c / ]x       Jump to next conflict
---   [c / [x       Jump to previous conflict
---   s             Save & Stage file (git add)
---   ?             Show keymap reference popup
---   q / <Esc>     Close conflict resolver
+-- CONFLICT ACTIONS (Scoped only to Git Merge Conflict Screen):
+--   <C-1> / <C-o> Accept Current (Ours / HEAD) [Green highlight]
+--   <C-2> / <C-t> Accept Incoming (Theirs / Remote) [Blue highlight]
+--   <C-3> / <C-b> Accept Both (Current first)
+--   <C-4>         Accept Both (Incoming first)
+--   <C-z> / u     Undo Resolution (repeat to reach initial merge state)
+--   <C-n> / ]c    Jump to next conflict
+--   <C-p> / [c    Jump to previous conflict
+--   <C-s> / s     Save & Stage file (git add)
+--   <C-/> / ?     Show keymap reference popup
+--   <C-q> / q     Close conflict resolver
 -- ============================================================================
 
 local lazy_req = require("krs.core.lazy_require")
@@ -57,6 +51,9 @@ M.state = {
 	files = {},
 	active_idx = 1,
 	spans = {},
+	current_spans = {},
+	incoming_spans = {},
+	history = {},
 	sidebar_win = nil,
 	sidebar_buf = nil,
 	current_win = nil,
@@ -65,6 +62,7 @@ M.state = {
 	incoming_buf = nil,
 	result_win = nil,
 	result_buf = nil,
+	last_top_win = nil,
 	prev_win = nil,
 	prev_tab = nil,
 }
@@ -73,21 +71,69 @@ local function notify(msg, level)
 	vim.notify(msg, level or vim.log.levels.INFO, { title = M.settings.notify_title })
 end
 
+--- Retrieves the actual Neo-tree width (from disk or open window) to keep sidebar aligned.
+--- @return integer
+function M.get_sidebar_width()
+	local ok, store = pcall(require, "krs.core.store")
+	if ok and store and store.read_file then
+		local raw = store.read_file(vim.fn.stdpath("state") .. "/neotree_width")
+		local w = tonumber(raw or "")
+		if w and w >= 18 and w <= 60 then
+			return w
+		end
+	end
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		local ok_buf, buf = pcall(vim.api.nvim_win_get_buf, win)
+		if ok_buf and buf and vim.bo[buf].filetype == "neo-tree" then
+			local w = vim.api.nvim_win_get_width(win)
+			if w and w >= 18 and w <= 60 then
+				return w
+			end
+		end
+	end
+	return M.settings.sidebar_width or 30
+end
+
+--- Pins the sidebar window width so it never expands when adjacent splits change.
+function M.enforce_sidebar_width()
+	if
+		M.state.sidebar_win
+		and pcall(vim.api.nvim_win_is_valid, M.state.sidebar_win)
+		and vim.api.nvim_win_is_valid(M.state.sidebar_win)
+	then
+		local target_w = M.get_sidebar_width()
+		vim.wo[M.state.sidebar_win].winfixwidth = true
+		if vim.api.nvim_win_get_width(M.state.sidebar_win) ~= target_w then
+			pcall(vim.api.nvim_win_set_width, M.state.sidebar_win, target_w)
+		end
+	end
+end
+
 -- ---------------------------------------------------------------------------
--- Highlights
+-- Highlights (Distinct colors for Ours = Green vs Theirs = Blue)
 -- ---------------------------------------------------------------------------
 
 function M.setup_highlights()
+	-- Ours (Current branch / HEAD): Distinct Green
 	vim.api.nvim_set_hl(0, "KRSConflictOursHeader", { fg = "#a6e3a1", bg = "#1e3a29", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSConflictOursChunk", { bg = "#1a3826", default = true })
+	vim.api.nvim_set_hl(0, "KRSConflictOursBadge", { fg = "#a6e3a1", bg = "#1e3a29", bold = true, default = true })
+
+	-- Theirs (Incoming branch): Distinct Blue
 	vim.api.nvim_set_hl(0, "KRSConflictTheirsHeader", { fg = "#89b4fa", bg = "#1e2d42", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "KRSConflictTheirsChunk", { bg = "#182c47", default = true })
+	vim.api.nvim_set_hl(0, "KRSConflictTheirsBadge", { fg = "#89b4fa", bg = "#1e2d42", bold = true, default = true })
+
+	-- Both & Separator: Purple & Gold
 	vim.api.nvim_set_hl(0, "KRSConflictSeparator", { fg = "#f9e2af", bg = "#3b382c", bold = true, default = true })
-	vim.api.nvim_set_hl(0, "KRSConflictOursChunk", { bg = "#172b1f", default = true })
-	vim.api.nvim_set_hl(0, "KRSConflictTheirsChunk", { bg = "#172333", default = true })
+	vim.api.nvim_set_hl(0, "KRSConflictBothChunk", { bg = "#2d2345", default = true })
 	vim.api.nvim_set_hl(0, "KRSConflictBadge", { fg = "#11111b", bg = "#f9e2af", bold = true, default = true })
+
+	-- Sidebar & Result status
 	vim.api.nvim_set_hl(0, "KRSConflictActiveFile", { fg = "#89dceb", bold = true, default = true })
 	vim.api.nvim_set_hl(0, "KRSConflictResolved", { fg = "#a6e3a1", bold = true, default = true })
 	vim.api.nvim_set_hl(0, "KRSConflictPending", { fg = "#f9e2af", bold = true, default = true })
-	vim.api.nvim_set_hl(0, "KRSConflictResultChunk", { bg = "#262b3d", default = true })
+	vim.api.nvim_set_hl(0, "KRSConflictResultChunk", { bg = "#332a1e", default = true })
 end
 
 -- ---------------------------------------------------------------------------
@@ -109,14 +155,27 @@ end
 
 function M.focus_current()
 	if M.state.current_win and vim.api.nvim_win_is_valid(M.state.current_win) then
+		M.state.last_top_win = M.state.current_win
 		vim.api.nvim_set_current_win(M.state.current_win)
 	end
 end
 
 function M.focus_incoming()
 	if M.state.incoming_win and vim.api.nvim_win_is_valid(M.state.incoming_win) then
+		M.state.last_top_win = M.state.incoming_win
 		vim.api.nvim_set_current_win(M.state.incoming_win)
 	end
+end
+
+--- Navigates UP from the result window, returning to whichever top panel
+--- (Current/Ours or Incoming/Theirs) was most recently active.
+function M.focus_up()
+	local target = M.state.last_top_win
+	if target and vim.api.nvim_win_is_valid(target) then
+		vim.api.nvim_set_current_win(target)
+		return
+	end
+	M.focus_current()
 end
 
 function M.focus_result()
@@ -158,10 +217,96 @@ function M.cycle_prev_panel()
 end
 
 -- ---------------------------------------------------------------------------
--- Highlighting Result Buffer Conflict Sections
+-- Highlighting Buffer Conflict Sections (Ours = Green, Theirs = Blue)
 -- ---------------------------------------------------------------------------
 
---- Clears and re-applies extmarks to the result buffer.
+--- Clears and re-applies extmarks to the Top-Left Current (Ours) buffer.
+function M.update_current_highlights()
+	if not M.state.current_buf or not vim.api.nvim_buf_is_valid(M.state.current_buf) then
+		return
+	end
+
+	local buf = M.state.current_buf
+	vim.api.nvim_buf_clear_namespace(buf, M.ns_markers, 0, -1)
+
+	local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+	if #lines == 0 then
+		return
+	end
+
+	local cwd = M.state.cwd or vim.fn.getcwd()
+	local head_name = conflicts.get_conflict_branch_names(cwd)
+
+	for _, span in ipairs(M.state.current_spans or {}) do
+		local s_line = math.max(0, math.min(span.start_line - 1, #lines - 1))
+		local e_line = math.max(s_line, math.min(span.end_line - 1, #lines - 1))
+
+		local label = string.format(" 🌿 OURS #%d (%s) ", span.id, head_name)
+		if span.empty then
+			label = string.format(" 🌿 OURS #%d: [Empty / Deleted in %s] ", span.id, head_name)
+		end
+
+		pcall(vim.api.nvim_buf_set_extmark, buf, M.ns_markers, s_line, 0, {
+			virt_lines = {
+				{ { label, "KRSConflictOursHeader" } },
+			},
+			virt_lines_above = true,
+		})
+
+		if not span.empty then
+			for l = s_line, e_line do
+				pcall(vim.api.nvim_buf_set_extmark, buf, M.ns_markers, l, 0, {
+					line_hl_group = "KRSConflictOursChunk",
+				})
+			end
+		end
+	end
+end
+
+--- Clears and re-applies extmarks to the Top-Right Incoming (Theirs) buffer.
+function M.update_incoming_highlights()
+	if not M.state.incoming_buf or not vim.api.nvim_buf_is_valid(M.state.incoming_buf) then
+		return
+	end
+
+	local buf = M.state.incoming_buf
+	vim.api.nvim_buf_clear_namespace(buf, M.ns_markers, 0, -1)
+
+	local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+	if #lines == 0 then
+		return
+	end
+
+	local cwd = M.state.cwd or vim.fn.getcwd()
+	local _, inc_name = conflicts.get_conflict_branch_names(cwd)
+
+	for _, span in ipairs(M.state.incoming_spans or {}) do
+		local s_line = math.max(0, math.min(span.start_line - 1, #lines - 1))
+		local e_line = math.max(s_line, math.min(span.end_line - 1, #lines - 1))
+
+		local label = string.format(" 📥 THEIRS #%d (%s) ", span.id, inc_name)
+		if span.empty then
+			label = string.format(" 📥 THEIRS #%d: [Empty / Deleted in %s] ", span.id, inc_name)
+		end
+
+		pcall(vim.api.nvim_buf_set_extmark, buf, M.ns_markers, s_line, 0, {
+			virt_lines = {
+				{ { label, "KRSConflictTheirsHeader" } },
+			},
+			virt_lines_above = true,
+		})
+
+		if not span.empty then
+			for l = s_line, e_line do
+				pcall(vim.api.nvim_buf_set_extmark, buf, M.ns_markers, l, 0, {
+					line_hl_group = "KRSConflictTheirsChunk",
+				})
+			end
+		end
+	end
+end
+
+--- Clears and re-applies extmarks to the result buffer with distinct colors for Ours vs Theirs.
 function M.update_result_highlights()
 	if not M.state.result_buf or not vim.api.nvim_buf_is_valid(M.state.result_buf) then
 		return
@@ -181,18 +326,25 @@ function M.update_result_highlights()
 
 		local choice_badge
 		local badge_hl
+		local line_hl
 		if span.resolved then
-			badge_hl = "KRSConflictResolved"
-			if span.choice == "incoming" then
-				choice_badge = " [RESOLVED: Theirs] "
+			if span.choice == "incoming" or span.choice == "theirs" then
+				badge_hl = "KRSConflictTheirsHeader"
+				line_hl = "KRSConflictTheirsChunk"
+				choice_badge = " [RESOLVED: Theirs (Blue)] "
 			elseif span.choice == "both" then
+				badge_hl = "KRSConflictSeparator"
+				line_hl = "KRSConflictBothChunk"
 				choice_badge = " [RESOLVED: Both] "
 			else
-				choice_badge = " [RESOLVED: Ours] "
+				badge_hl = "KRSConflictOursHeader"
+				line_hl = "KRSConflictOursChunk"
+				choice_badge = " [RESOLVED: Ours (Green)] "
 			end
 		else
 			badge_hl = "KRSConflictPending"
-			choice_badge = " [CONFLICT: 1:Ours 2:Theirs 3:Both] "
+			line_hl = "KRSConflictResultChunk"
+			choice_badge = " [CONFLICT: Ctrl+1/co: Ours (Green)  Ctrl+2/ct: Theirs (Blue)  Ctrl+3/cb: Both  Ctrl+z: Undo] "
 		end
 
 		pcall(vim.api.nvim_buf_set_extmark, buf, M.ns_markers, s_line, 0, {
@@ -206,7 +358,7 @@ function M.update_result_highlights()
 
 		for l = s_line, e_line do
 			pcall(vim.api.nvim_buf_set_extmark, buf, M.ns_markers, l, 0, {
-				line_hl_group = span.resolved and "Normal" or "KRSConflictResultChunk",
+				line_hl_group = line_hl,
 			})
 		end
 	end
@@ -231,7 +383,7 @@ function M.update_winbars()
 	if M.state.current_win and vim.api.nvim_win_is_valid(M.state.current_win) then
 		pcall(function()
 			vim.wo[M.state.current_win].winbar = string.format(
-				"%%#KRSConflictOursHeader# 🌿 Current (%s) [READ-ONLY] %%* │ [i] Incoming  [r] Result  [s] Sidebar",
+				"%%#KRSConflictOursHeader# 🌿 Ours (%s) [READ-ONLY] %%* │ [Ctrl+1/co] Accept Ours │ [Ctrl+l] Theirs  [Ctrl+j] Result",
 				head_name
 			)
 		end)
@@ -240,7 +392,7 @@ function M.update_winbars()
 	if M.state.incoming_win and vim.api.nvim_win_is_valid(M.state.incoming_win) then
 		pcall(function()
 			vim.wo[M.state.incoming_win].winbar = string.format(
-				"%%#KRSConflictTheirsHeader# 📥 Incoming (%s) [READ-ONLY] %%* │ [c] Current  [r] Result  [s] Sidebar",
+				"%%#KRSConflictTheirsHeader# 📥 Theirs (%s) [READ-ONLY] %%* │ [Ctrl+2/ct] Accept Theirs │ [Ctrl+k] Ours  [Ctrl+j] Result",
 				inc_name
 			)
 		end)
@@ -248,10 +400,10 @@ function M.update_winbars()
 
 	if M.state.result_win and vim.api.nvim_win_is_valid(M.state.result_win) then
 		local status_str = remaining > 0 and string.format("%%#KRSConflictPending# ⚠️ %d remaining %%*", remaining)
-			or "%#KRSConflictResolved# ✅ All resolved (0) │ Press [s] to Stage %*"
+			or "%#KRSConflictResolved# ✅ All resolved (0) │ Press [Ctrl+s] to Stage %*"
 		pcall(function()
 			vim.wo[M.state.result_win].winbar = string.format(
-				"%%#Bold# ✏️ Result (Merged - EDITABLE) %%* │ %s │ [1/co] Ours  [2/ct] Theirs  [3/cb] Both  [s] Stage",
+				"%%#Bold# ✏️ Result (Merged) %%* │ %s │ [Ctrl+1] Ours  [Ctrl+2] Theirs  [Ctrl+3] Both  [Ctrl+z] Undo  [Ctrl+s] Stage",
 				status_str
 			)
 		end)
@@ -302,19 +454,20 @@ function M.render_sidebar()
 	table.insert(lines, "")
 	table.insert(lines, "────────────────────────────")
 	table.insert(lines, " 🧭 PANEL JUMP:")
-	table.insert(lines, " [c] Current (Top-Left)")
-	table.insert(lines, " [i] Incoming (Top-Right)")
-	table.insert(lines, " [r] Result (Bottom)")
-	table.insert(lines, " [s] Sidebar (Left)")
+	table.insert(lines, " [Ctrl+h] Sidebar (Left)")
+	table.insert(lines, " [Ctrl+k] Current (Top-Left)")
+	table.insert(lines, " [Ctrl+l] Incoming (Top-Right)")
+	table.insert(lines, " [Ctrl+j] Result (Bottom)")
 	table.insert(lines, " [Tab] Cycle Panels")
 	table.insert(lines, "")
 	table.insert(lines, " ⚡ CONFLICT ACTIONS:")
-	table.insert(lines, " [co / 1] Accept Current")
-	table.insert(lines, " [ct / 2] Accept Incoming")
-	table.insert(lines, " [cb / 3] Accept Both")
-	table.insert(lines, " [s]      Stage & Save")
-	table.insert(lines, " [?]      Show Help")
-	table.insert(lines, " [q]      Close Resolver")
+	table.insert(lines, " [Ctrl+1 / 1] Accept Ours (Green)")
+	table.insert(lines, " [Ctrl+2 / 2] Accept Theirs (Blue)")
+	table.insert(lines, " [Ctrl+3 / 3] Accept Both")
+	table.insert(lines, " [Ctrl+z / u] Undo Resolution")
+	table.insert(lines, " [Ctrl+s]     Stage & Save")
+	table.insert(lines, " [?]          Show Help")
+	table.insert(lines, " [Ctrl+q / q] Close Resolver")
 
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
 	vim.bo[buf].modifiable = false
@@ -332,17 +485,36 @@ local function unmap_result_keymaps(buf)
 	for _, k in ipairs({
 		"co",
 		"1",
+		"<C-1>",
+		"<C-o>",
+		"<C-O>",
 		"ct",
 		"2",
+		"<C-2>",
+		"<C-t>",
+		"<C-T>",
 		"cb",
 		"3",
+		"<C-3>",
+		"<C-b>",
+		"<C-B>",
 		"cB",
 		"4",
+		"<C-4>",
 		"]c",
 		"[c",
 		"]x",
 		"[x",
+		"<C-n>",
+		"<C-p>",
+		"<C-Down>",
+		"<C-Up>",
 		"s",
+		"<C-s>",
+		"<C-S>",
+		"u",
+		"<C-z>",
+		"<C-u>",
 		"gc",
 		"<A-c>",
 		"gi",
@@ -352,13 +524,23 @@ local function unmap_result_keymaps(buf)
 		"<Tab>",
 		"<S-Tab>",
 		"?",
+		"<C-/>",
+		"<C-_>",
 		"q",
 		"<Esc>",
+		"<C-q>",
 		"<C-h>",
 		"<C-k>",
+		"<C-Up>",
+		"<A-k>",
+		"<M-k>",
+		"<C-w>k",
+		"<C-w><C-k>",
+		"<C-w><Up>",
 		"<C-l>",
+		"<C-j>",
 	}) do
-		pcall(vim.keymap.del, "n", k, { buffer = buf })
+		pcall(vim.keymap.del, { "n", "i" }, k, { buffer = buf })
 	end
 end
 
@@ -386,16 +568,21 @@ function M.load_file(idx)
 	local working_lines = conflicts.read_file_lines(full_path)
 	local marker_list = conflicts.parse_markers(working_lines)
 
-	-- 1. Current branch content (Ours / HEAD / Stage 2)
+	-- 1. Extract clean versions and conflict spans for Ours and Theirs
+	local clean_curr, clean_inc, _, c_spans, i_spans = conflicts.extract_clean_versions(working_lines)
+	M.state.current_spans = c_spans or {}
+	M.state.incoming_spans = i_spans or {}
+
+	-- Current branch content (Ours / HEAD / Stage 2)
 	local current_lines = conflicts.get_stage_content(rel_path, 2, cwd)
 	if not current_lines or #current_lines == 0 then
-		current_lines, _, _ = conflicts.extract_clean_versions(working_lines)
+		current_lines = clean_curr
 	end
 
 	-- 2. Incoming branch content (Theirs / MERGE_HEAD / Stage 3)
 	local incoming_lines = conflicts.get_stage_content(rel_path, 3, cwd)
 	if not incoming_lines or #incoming_lines == 0 then
-		_, incoming_lines, _ = conflicts.extract_clean_versions(working_lines)
+		incoming_lines = clean_inc
 	end
 
 	-- Determine filetype for syntax highlighting
@@ -471,6 +658,19 @@ function M.load_file(idx)
 			M.state.spans = spans
 			item.conflict_count = #spans
 			vim.api.nvim_buf_set_lines(res_buf, 0, -1, false, clean_lines)
+
+			-- Save initial state for unlimited undo back to the beginning
+			if not M.state.history then
+				M.state.history = {}
+			end
+			if not M.state.history[idx] then
+				M.state.history[idx] = {
+					stack = {},
+					initial_lines = vim.deepcopy(clean_lines),
+					initial_spans = vim.deepcopy(spans),
+					initial_count = #spans,
+				}
+			end
 		else
 			M.state.spans = {}
 			item.conflict_count = 0
@@ -480,6 +680,8 @@ function M.load_file(idx)
 		end
 
 		M.attach_result_keymaps(res_buf)
+		M.update_current_highlights()
+		M.update_incoming_highlights()
 		M.update_result_highlights()
 
 		if M.state.spans and #M.state.spans > 0 then
@@ -526,6 +728,21 @@ local function apply_span_choice(choice)
 	if not span then
 		notify("No conflict span at cursor", vim.log.levels.WARN)
 		return
+	end
+
+	-- Save snapshot to undo stack before modifying buffer
+	local hist = M.state.history and M.state.history[M.state.active_idx]
+	if hist and M.state.result_buf and vim.api.nvim_buf_is_valid(M.state.result_buf) then
+		local item = M.state.files[M.state.active_idx]
+		local snapshot = {
+			lines = vim.api.nvim_buf_get_lines(M.state.result_buf, 0, -1, false),
+			spans = vim.deepcopy(M.state.spans),
+			conflict_count = item and item.conflict_count or 0,
+			cursor = pcall(vim.api.nvim_win_get_cursor, M.state.result_win) and vim.api.nvim_win_get_cursor(
+				M.state.result_win
+			) or nil,
+		}
+		table.insert(hist.stack, snapshot)
 	end
 
 	local new_chunk = {}
@@ -589,6 +806,107 @@ local function apply_span_choice(choice)
 	local label = (choice == "incoming" or choice == "theirs") and "📥 Incoming (Theirs)"
 		or ((choice:find("both")) and "🔀 Both Changes" or "🌿 Current (Ours)")
 	notify(string.format("Applied %s for Conflict #%d", label, span.id))
+end
+
+--- Undoes the last conflict resolution action on the active file.
+--- Can be pressed repeatedly to step back all the way to the original merge state at the beginning.
+--- @return boolean
+function M.undo()
+	local idx = M.state.active_idx
+	local hist = M.state.history and M.state.history[idx]
+	if not hist or #hist.stack == 0 then
+		notify("Already at original merge state at the beginning", vim.log.levels.INFO)
+		return false
+	end
+
+	local prev = table.remove(hist.stack)
+	local buf = M.state.result_buf
+	if not buf or not vim.api.nvim_buf_is_valid(buf) then
+		return false
+	end
+
+	vim.bo[buf].modifiable = true
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, prev.lines)
+
+	M.state.spans = vim.deepcopy(prev.spans)
+	local item = M.state.files[idx]
+	if item then
+		item.conflict_count = prev.conflict_count
+		item.is_staged = false
+	end
+
+	if prev.cursor and M.state.result_win and vim.api.nvim_win_is_valid(M.state.result_win) then
+		pcall(vim.api.nvim_win_set_cursor, M.state.result_win, prev.cursor)
+	end
+
+	M.update_result_highlights()
+	M.render_sidebar()
+	M.update_winbars()
+
+	local remaining = (item and item.conflict_count) or 0
+	local steps_left = #hist.stack
+	if steps_left == 0 then
+		notify(
+			string.format(
+				"↩️ Restored to original merge state at the beginning (%d conflict%s remaining)",
+				remaining,
+				remaining == 1 and "" or "s"
+			)
+		)
+	else
+		notify(
+			string.format(
+				"↩️ Undid conflict resolution (%d conflict%s remaining)",
+				remaining,
+				remaining == 1 and "" or "s"
+			)
+		)
+	end
+	return true
+end
+
+--- Resets the active file to the original merge state at the beginning.
+--- @return boolean
+function M.reset_to_initial()
+	local idx = M.state.active_idx
+	local hist = M.state.history and M.state.history[idx]
+	if not hist or not hist.initial_lines then
+		notify("Already at original merge state", vim.log.levels.INFO)
+		return false
+	end
+
+	local buf = M.state.result_buf
+	if not buf or not vim.api.nvim_buf_is_valid(buf) then
+		return false
+	end
+
+	local item = M.state.files[idx]
+	local snapshot = {
+		lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false),
+		spans = vim.deepcopy(M.state.spans),
+		conflict_count = item and item.conflict_count or 0,
+		cursor = pcall(vim.api.nvim_win_get_cursor, M.state.result_win) and vim.api.nvim_win_get_cursor(M.state.result_win)
+			or nil,
+	}
+	table.insert(hist.stack, snapshot)
+
+	vim.bo[buf].modifiable = true
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, hist.initial_lines)
+
+	M.state.spans = vim.deepcopy(hist.initial_spans)
+	if item then
+		item.conflict_count = hist.initial_count
+		item.is_staged = false
+	end
+
+	M.update_result_highlights()
+	M.render_sidebar()
+	M.update_winbars()
+
+	notify(
+		string.format("🔄 Reset file back to original merge state at the beginning (%d conflicts)", hist.initial_count)
+	)
+	return true
 end
 
 function M.accept_current()
@@ -701,34 +1019,79 @@ end
 function M.attach_result_keymaps(buf)
 	local opts = { buffer = buf, silent = true, nowait = true }
 
-	-- Conflict resolution actions
-	vim.keymap.set("n", "co", M.accept_current, opts)
-	vim.keymap.set("n", "1", M.accept_current, opts)
-	vim.keymap.set("n", "ct", M.accept_incoming, opts)
-	vim.keymap.set("n", "2", M.accept_incoming, opts)
-	vim.keymap.set("n", "cb", function()
-		M.accept_both("current_first")
-	end, opts)
-	vim.keymap.set("n", "3", function()
-		M.accept_both("current_first")
-	end, opts)
-	vim.keymap.set("n", "cB", function()
-		M.accept_both("incoming_first")
-	end, opts)
-	vim.keymap.set("n", "4", function()
-		M.accept_both("incoming_first")
-	end, opts)
+	local function stop_insert_if_needed()
+		if vim.fn.mode() == "i" then
+			pcall(vim.cmd, "stopinsert")
+		end
+	end
 
-	-- Conflict jumps
-	vim.keymap.set("n", "]c", M.next_conflict, opts)
-	vim.keymap.set("n", "[c", M.prev_conflict, opts)
-	vim.keymap.set("n", "]x", M.next_conflict, opts)
-	vim.keymap.set("n", "[x", M.prev_conflict, opts)
+	-- Conflict resolution actions (Ctrl+ prefixed as requested, plus single-key aliases)
+	for _, k in ipairs({ "<C-1>", "<C-o>", "<C-O>", "co", "1" }) do
+		vim.keymap.set({ "n", "i" }, k, function()
+			stop_insert_if_needed()
+			M.accept_current()
+		end, opts)
+	end
 
-	-- Save & Stage
-	vim.keymap.set("n", "s", M.stage_current_file, opts)
+	for _, k in ipairs({ "<C-2>", "<C-t>", "<C-T>", "ct", "2" }) do
+		vim.keymap.set({ "n", "i" }, k, function()
+			stop_insert_if_needed()
+			M.accept_incoming()
+		end, opts)
+	end
 
-	-- Panel navigation
+	for _, k in ipairs({ "<C-3>", "<C-b>", "<C-B>", "cb", "3" }) do
+		vim.keymap.set({ "n", "i" }, k, function()
+			stop_insert_if_needed()
+			M.accept_both("current_first")
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-4>", "cB", "4" }) do
+		vim.keymap.set({ "n", "i" }, k, function()
+			stop_insert_if_needed()
+			M.accept_both("incoming_first")
+		end, opts)
+	end
+
+	-- Undo resolution (Ctrl+z / u / Ctrl+u)
+	for _, k in ipairs({ "<C-z>", "u", "<C-u>" }) do
+		vim.keymap.set({ "n", "i" }, k, function()
+			stop_insert_if_needed()
+			M.undo()
+		end, opts)
+	end
+
+	-- Conflict jumps (Ctrl+n / Ctrl+p / Ctrl+Down / Ctrl+Up, plus ]c / [c / ]x / [x)
+	for _, k in ipairs({ "<C-n>", "<C-Down>", "]c", "]x" }) do
+		vim.keymap.set({ "n", "i" }, k, function()
+			stop_insert_if_needed()
+			M.next_conflict()
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-p>", "<C-Up>", "[c", "[x" }) do
+		vim.keymap.set({ "n", "i" }, k, function()
+			stop_insert_if_needed()
+			M.prev_conflict()
+		end, opts)
+	end
+
+	-- Save & Stage (Ctrl+s, s)
+	for _, k in ipairs({ "<C-s>", "<C-S>", "s" }) do
+		vim.keymap.set({ "n", "i" }, k, function()
+			stop_insert_if_needed()
+			M.stage_current_file()
+		end, opts)
+	end
+
+	-- Direct panel navigation (Ctrl+h/k/l/j, Alt+c/i/s, gc/gi/gs)
+	vim.keymap.set("n", "<C-h>", M.focus_sidebar, opts)
+	for _, k in ipairs({ "<C-k>", "<C-Up>", "<A-k>", "<M-k>", "<C-w>k", "<C-w><C-k>", "<C-w><Up>" }) do
+		vim.keymap.set("n", k, M.focus_up, opts)
+	end
+	vim.keymap.set("n", "<C-l>", M.focus_incoming, opts)
+	vim.keymap.set("n", "<C-j>", M.focus_result, opts)
 	vim.keymap.set("n", "gc", M.focus_current, opts)
 	vim.keymap.set("n", "<A-c>", M.focus_current, opts)
 	vim.keymap.set("n", "gi", M.focus_incoming, opts)
@@ -740,7 +1103,11 @@ function M.attach_result_keymaps(buf)
 
 	-- Help & Close
 	vim.keymap.set("n", "?", M.show_help_popup, opts)
+	vim.keymap.set("n", "<C-/>", M.show_help_popup, opts)
+	vim.keymap.set("n", "<C-_>", M.show_help_popup, opts)
+	vim.keymap.set("n", "<C-q>", M.close, opts)
 	vim.keymap.set("n", "q", M.close, opts)
+	vim.keymap.set("n", "<Esc>", M.close, opts)
 end
 
 function M.attach_sidebar_keymaps()
@@ -761,13 +1128,72 @@ function M.attach_sidebar_keymaps()
 
 	vim.keymap.set("n", "<CR>", on_select, opts)
 	vim.keymap.set("n", "<2-LeftMouse>", on_select, opts)
+
+	-- Actions from sidebar
+	for _, k in ipairs({ "<C-1>", "<C-o>", "1", "co" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_current()
+			M.focus_result()
+		end, opts)
+	end
+	for _, k in ipairs({ "<C-2>", "<C-t>", "2", "ct" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_incoming()
+			M.focus_result()
+		end, opts)
+	end
+	for _, k in ipairs({ "<C-3>", "<C-b>", "3", "cb" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_both("current_first")
+			M.focus_result()
+		end, opts)
+	end
+	for _, k in ipairs({ "<C-4>", "4", "cB" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_both("incoming_first")
+			M.focus_result()
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-z>", "u", "<C-u>" }) do
+		vim.keymap.set("n", k, function()
+			M.undo()
+			M.focus_result()
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-n>", "<C-Down>", "]c", "]x" }) do
+		vim.keymap.set("n", k, function()
+			M.next_conflict()
+			M.focus_result()
+		end, opts)
+	end
+	for _, k in ipairs({ "<C-p>", "<C-Up>", "[c", "[x" }) do
+		vim.keymap.set("n", k, function()
+			M.prev_conflict()
+			M.focus_result()
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-s>", "<C-S>", "s" }) do
+		vim.keymap.set("n", k, M.stage_current_file, opts)
+	end
+
+	-- Panel navigation
+	vim.keymap.set("n", "<C-k>", M.focus_current, opts)
+	vim.keymap.set("n", "<C-l>", M.focus_incoming, opts)
+	vim.keymap.set("n", "<C-j>", M.focus_result, opts)
 	vim.keymap.set("n", "c", M.focus_current, opts)
 	vim.keymap.set("n", "i", M.focus_incoming, opts)
 	vim.keymap.set("n", "r", M.focus_result, opts)
-	vim.keymap.set("n", "s", M.stage_current_file, opts)
 	vim.keymap.set("n", "<Tab>", M.cycle_next_panel, opts)
 	vim.keymap.set("n", "<S-Tab>", M.cycle_prev_panel, opts)
+
+	-- Help & Close
 	vim.keymap.set("n", "?", M.show_help_popup, opts)
+	vim.keymap.set("n", "<C-/>", M.show_help_popup, opts)
+	vim.keymap.set("n", "<C-_>", M.show_help_popup, opts)
+	vim.keymap.set("n", "<C-q>", M.close, opts)
 	vim.keymap.set("n", "q", M.close, opts)
 	vim.keymap.set("n", "<Esc>", M.close, opts)
 end
@@ -779,29 +1205,71 @@ function M.attach_current_keymaps()
 	end
 	local opts = { buffer = buf, silent = true, nowait = true }
 
+	for _, k in ipairs({ "<C-1>", "<C-o>", "1", "co" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_current()
+			M.focus_result()
+		end, opts)
+	end
+	for _, k in ipairs({ "<C-2>", "<C-t>", "2", "ct" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_incoming()
+			M.focus_result()
+		end, opts)
+	end
+	for _, k in ipairs({ "<C-3>", "<C-b>", "3", "cb" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_both("current_first")
+			M.focus_result()
+		end, opts)
+	end
+	for _, k in ipairs({ "<C-4>", "4", "cB" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_both("incoming_first")
+			M.focus_result()
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-z>", "u", "<C-u>" }) do
+		vim.keymap.set("n", k, function()
+			M.undo()
+			M.focus_result()
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-n>", "<C-Down>", "]c", "]x" }) do
+		vim.keymap.set("n", k, function()
+			M.next_conflict()
+			M.focus_result()
+		end, opts)
+	end
+	for _, k in ipairs({ "<C-p>", "<C-Up>", "[c", "[x" }) do
+		vim.keymap.set("n", k, function()
+			M.prev_conflict()
+			M.focus_result()
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-s>", "<C-S>", "s" }) do
+		vim.keymap.set("n", k, M.stage_current_file, opts)
+	end
+
+	-- Panel navigation
+	vim.keymap.set("n", "<C-h>", M.focus_sidebar, opts)
+	vim.keymap.set("n", "<C-l>", M.focus_incoming, opts)
+	vim.keymap.set("n", "<C-j>", M.focus_result, opts)
 	vim.keymap.set("n", "c", M.focus_current, opts)
 	vim.keymap.set("n", "i", M.focus_incoming, opts)
 	vim.keymap.set("n", "r", M.focus_result, opts)
 	vim.keymap.set("n", "s", M.focus_sidebar, opts)
 	vim.keymap.set("n", "<Tab>", M.cycle_next_panel, opts)
 	vim.keymap.set("n", "<S-Tab>", M.cycle_prev_panel, opts)
-	vim.keymap.set("n", "co", function()
-		M.accept_current()
-		M.focus_result()
-	end, opts)
-	vim.keymap.set("n", "1", function()
-		M.accept_current()
-		M.focus_result()
-	end, opts)
-	vim.keymap.set("n", "]c", function()
-		M.next_conflict()
-		M.focus_result()
-	end, opts)
-	vim.keymap.set("n", "[c", function()
-		M.prev_conflict()
-		M.focus_result()
-	end, opts)
+
+	-- Help & Close
 	vim.keymap.set("n", "?", M.show_help_popup, opts)
+	vim.keymap.set("n", "<C-/>", M.show_help_popup, opts)
+	vim.keymap.set("n", "<C-_>", M.show_help_popup, opts)
+	vim.keymap.set("n", "<C-q>", M.close, opts)
 	vim.keymap.set("n", "q", M.close, opts)
 	vim.keymap.set("n", "<Esc>", M.close, opts)
 end
@@ -813,29 +1281,71 @@ function M.attach_incoming_keymaps()
 	end
 	local opts = { buffer = buf, silent = true, nowait = true }
 
+	for _, k in ipairs({ "<C-1>", "<C-o>", "1", "co" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_current()
+			M.focus_result()
+		end, opts)
+	end
+	for _, k in ipairs({ "<C-2>", "<C-t>", "2", "ct" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_incoming()
+			M.focus_result()
+		end, opts)
+	end
+	for _, k in ipairs({ "<C-3>", "<C-b>", "3", "cb" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_both("current_first")
+			M.focus_result()
+		end, opts)
+	end
+	for _, k in ipairs({ "<C-4>", "4", "cB" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_both("incoming_first")
+			M.focus_result()
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-z>", "u", "<C-u>" }) do
+		vim.keymap.set("n", k, function()
+			M.undo()
+			M.focus_result()
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-n>", "<C-Down>", "]c", "]x" }) do
+		vim.keymap.set("n", k, function()
+			M.next_conflict()
+			M.focus_result()
+		end, opts)
+	end
+	for _, k in ipairs({ "<C-p>", "<C-Up>", "[c", "[x" }) do
+		vim.keymap.set("n", k, function()
+			M.prev_conflict()
+			M.focus_result()
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-s>", "<C-S>", "s" }) do
+		vim.keymap.set("n", k, M.stage_current_file, opts)
+	end
+
+	-- Panel navigation
+	vim.keymap.set("n", "<C-h>", M.focus_current, opts)
+	vim.keymap.set("n", "<C-k>", M.focus_current, opts)
+	vim.keymap.set("n", "<C-j>", M.focus_result, opts)
 	vim.keymap.set("n", "c", M.focus_current, opts)
 	vim.keymap.set("n", "i", M.focus_incoming, opts)
 	vim.keymap.set("n", "r", M.focus_result, opts)
 	vim.keymap.set("n", "s", M.focus_sidebar, opts)
 	vim.keymap.set("n", "<Tab>", M.cycle_next_panel, opts)
 	vim.keymap.set("n", "<S-Tab>", M.cycle_prev_panel, opts)
-	vim.keymap.set("n", "ct", function()
-		M.accept_incoming()
-		M.focus_result()
-	end, opts)
-	vim.keymap.set("n", "2", function()
-		M.accept_incoming()
-		M.focus_result()
-	end, opts)
-	vim.keymap.set("n", "]c", function()
-		M.next_conflict()
-		M.focus_result()
-	end, opts)
-	vim.keymap.set("n", "[c", function()
-		M.prev_conflict()
-		M.focus_result()
-	end, opts)
+
+	-- Help & Close
 	vim.keymap.set("n", "?", M.show_help_popup, opts)
+	vim.keymap.set("n", "<C-/>", M.show_help_popup, opts)
+	vim.keymap.set("n", "<C-_>", M.show_help_popup, opts)
+	vim.keymap.set("n", "<C-q>", M.close, opts)
 	vim.keymap.set("n", "q", M.close, opts)
 	vim.keymap.set("n", "<Esc>", M.close, opts)
 end
@@ -848,30 +1358,27 @@ function M.show_help_popup()
 	local help_lines = {
 		" ⚔️ 3-WAY MERGE CONFLICT RESOLVER CHEAT-SHEET ",
 		"─────────────────────────────────────────────────",
-		" 🧭 PANEL NAVIGATION (Letters):",
-		"   c            Jump to Current panel (top-left)",
-		"   i            Jump to Incoming panel (top-right)",
-		"   r            Jump to Result panel (bottom)",
-		"   s            Jump to Sidebar (left)",
-		"   gc / <A-c>   Jump to Current (from Result)",
-		"   gi / <A-i>   Jump to Incoming (from Result)",
-		"   gs / <A-s>   Jump to Sidebar (from Result)",
-		"   <Tab>        Cycle next panel",
-		"   <S-Tab>      Cycle previous panel",
-		"   <C-h/k/l>    Direct jump (Sidebar/Current/Incoming)",
+		" 🧭 PANEL NAVIGATION (Ctrl + Directions):",
+		"   <C-h> / s     Jump to Sidebar (left)",
+		"   <C-k> / c     Jump to Current / Ours (top-left)",
+		"   <C-l> / i     Jump to Incoming / Theirs (top-right)",
+		"   <C-j> / r     Jump to Result (bottom)",
+		"   <Tab>         Cycle next panel",
+		"   <S-Tab>       Cycle previous panel",
 		"",
-		" ⚡ CONFLICT RESOLUTION (In Result Window):",
-		"   1  or  co    Accept Current (Ours / HEAD)",
-		"   2  or  ct    Accept Incoming (Theirs / Remote)",
-		"   3  or  cb    Accept Both (Current first)",
-		"   4  or  cB    Accept Both (Incoming first)",
-		"   ]c or  ]x    Jump to Next conflict",
-		"   [c or  [x    Jump to Previous conflict",
+		" ⚡ CONFLICT RESOLUTION (Any Panel / Result):",
+		"   <C-1> / <C-o> Accept Ours (Current / HEAD) [Green]",
+		"   <C-2> / <C-t> Accept Theirs (Incoming) [Blue]",
+		"   <C-3> / <C-b> Accept Both (Ours first)",
+		"   <C-4>         Accept Both (Theirs first)",
+		"   <C-z> / u     Undo Resolution (repeat to reach initial)",
+		"   <C-n> / ]c    Jump to Next conflict",
+		"   <C-p> / [c    Jump to Previous conflict",
 		"",
 		" 💾 FILE ACTIONS:",
-		"   s            Save file and stage with git add",
-		"   <CR>         In sidebar: switch to file under cursor",
-		"   q / <Esc>    Close Conflict Resolver",
+		"   <C-s> / s     Save file and stage with git add",
+		"   <CR>          In sidebar: switch to file under cursor",
+		"   <C-q> / q     Close Conflict Resolver",
 		"─────────────────────────────────────────────────",
 		" Press q, <Esc>, or <CR> to close this help window",
 	}
@@ -992,8 +1499,8 @@ function M.open(files_or_cwd, cwd_arg)
 	M.state.tab = vim.api.nvim_get_current_tabpage()
 	local base_win = vim.api.nvim_get_current_win()
 
-	-- 1. Create Sidebar window on the far left (fixed width)
-	local sb_width = M.settings.sidebar_width or 30
+	-- 1. Create Sidebar window on the far left (width matched to neo-tree)
+	local sb_width = M.get_sidebar_width()
 	local sidebar_buf = vim.api.nvim_create_buf(false, true)
 	vim.bo[sidebar_buf].buftype = "nofile"
 	vim.bo[sidebar_buf].bufhidden = "wipe"
@@ -1006,6 +1513,7 @@ function M.open(files_or_cwd, cwd_arg)
 	})
 	M.state.sidebar_win = sidebar_win
 	M.state.sidebar_buf = sidebar_buf
+	vim.wo[sidebar_win].winfixwidth = true
 
 	-- 2. Split base_win (right column) horizontally: Result on the bottom
 	local res_height = math.max(8, math.floor(vim.o.lines * 0.48))
@@ -1056,6 +1564,7 @@ function M.open(files_or_cwd, cwd_arg)
 		vim.wo[sidebar_win].signcolumn = "no"
 		vim.wo[sidebar_win].wrap = false
 		vim.wo[sidebar_win].cursorline = true
+		vim.wo[sidebar_win].winfixwidth = true
 	end
 
 	M.state.is_open = true
@@ -1071,6 +1580,24 @@ function M.open(files_or_cwd, cwd_arg)
 	-- Focus on result window
 	M.focus_result()
 
+	-- Navigation watcher to remember which top panel (Current/Ours vs Incoming/Theirs) was last active
+	M.state.last_top_win = current_win
+	local nav_group = vim.api.nvim_create_augroup("KrsConflictResolverNav", { clear = true })
+	vim.api.nvim_create_autocmd("WinEnter", {
+		group = nav_group,
+		callback = function()
+			if not M.state.is_open then
+				return
+			end
+			local cur_win = vim.api.nvim_get_current_win()
+			if cur_win == M.state.incoming_win then
+				M.state.last_top_win = M.state.incoming_win
+			elseif cur_win == M.state.current_win then
+				M.state.last_top_win = M.state.current_win
+			end
+		end,
+	})
+
 	-- Tab closed autocmd to reset state if user closes tab manually
 	local augroup = vim.api.nvim_create_augroup("KrsConflictResolverTab", { clear = true })
 	vim.api.nvim_create_autocmd("TabClosed", {
@@ -1083,6 +1610,20 @@ function M.open(files_or_cwd, cwd_arg)
 				M.state.current_win = nil
 				M.state.incoming_win = nil
 				M.state.result_win = nil
+				M.state.last_top_win = nil
+				M.state.history = {}
+				pcall(vim.api.nvim_del_augroup_by_name, "KrsConflictResolverNav")
+			end
+		end,
+	})
+
+	-- Resize watcher to enforce that sidebar maintains neo-tree width without growing
+	local resize_group = vim.api.nvim_create_augroup("KrsConflictResolverResize", { clear = true })
+	vim.api.nvim_create_autocmd({ "WinResized", "VimResized" }, {
+		group = resize_group,
+		callback = function()
+			if M.is_open() then
+				M.enforce_sidebar_width()
 			end
 		end,
 	})
@@ -1097,10 +1638,18 @@ function M.close()
 	end
 
 	M.state.is_open = false
+	pcall(vim.api.nvim_del_augroup_by_name, "KrsConflictResolverResize")
+	pcall(vim.api.nvim_del_augroup_by_name, "KrsConflictResolverNav")
 
 	if M.state.result_buf and vim.api.nvim_buf_is_valid(M.state.result_buf) then
 		unmap_result_keymaps(M.state.result_buf)
 		pcall(vim.api.nvim_buf_clear_namespace, M.state.result_buf, M.ns_markers, 0, -1)
+	end
+	if M.state.current_buf and vim.api.nvim_buf_is_valid(M.state.current_buf) then
+		pcall(vim.api.nvim_buf_clear_namespace, M.state.current_buf, M.ns_markers, 0, -1)
+	end
+	if M.state.incoming_buf and vim.api.nvim_buf_is_valid(M.state.incoming_buf) then
+		pcall(vim.api.nvim_buf_clear_namespace, M.state.incoming_buf, M.ns_markers, 0, -1)
 	end
 
 	if M.state.tab and pcall(vim.api.nvim_tabpage_is_valid, M.state.tab) then
@@ -1126,6 +1675,10 @@ function M.close()
 	M.state.incoming_buf = nil
 	M.state.result_win = nil
 	M.state.result_buf = nil
+	M.state.last_top_win = nil
+	M.state.history = {}
+	M.state.current_spans = {}
+	M.state.incoming_spans = {}
 
 	if
 		M.state.prev_win
@@ -1193,6 +1746,18 @@ function M.setup()
 	end, {
 		desc = "Save and stage current conflicted file",
 	})
+
+	vim.api.nvim_create_user_command("GitConflictUndo", function()
+		M.undo()
+	end, {
+		desc = "Undo last merge conflict resolution step",
+	})
+
+	vim.api.nvim_create_user_command("GitConflictReset", function()
+		M.reset_to_initial()
+	end, {
+		desc = "Reset current file back to initial merge conflict state",
+	})
 end
 
 return setmetatable({
@@ -1207,6 +1772,8 @@ return setmetatable({
 		"GitConflictAcceptIncoming",
 		"GitConflictAcceptBoth",
 		"GitConflictStage",
+		"GitConflictUndo",
+		"GitConflictReset",
 	},
 	config = function()
 		M.setup()

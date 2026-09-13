@@ -100,10 +100,15 @@ end
 --- Extracts clean Current (ours) and Incoming (theirs) versions of a file
 --- from its lines containing conflict markers.
 ---
+--- Extracts clean Current (ours) and Incoming (theirs) versions of a file
+--- from its lines containing conflict markers, along with line spans for each.
+---
 --- @param lines string[] Lines containing conflict markers
 --- @return string[] current_lines Version with all Current changes chosen
 --- @return string[] incoming_lines Version with all Incoming changes chosen
 --- @return string[] base_lines Version with base changes if diff3, else current
+--- @return table[] current_spans Array of span descriptors for Current ({ id, start_line, end_line, empty })
+--- @return table[] incoming_spans Array of span descriptors for Incoming ({ id, start_line, end_line, empty })
 function M.extract_clean_versions(lines)
 	local conflicts = M.parse_markers(lines)
 	if #conflicts == 0 then
@@ -111,17 +116,19 @@ function M.extract_clean_versions(lines)
 		for _, l in ipairs(lines) do
 			table.insert(copy, l)
 		end
-		return copy, copy, copy
+		return copy, copy, copy, {}, {}
 	end
 
 	local current_out = {}
 	local incoming_out = {}
 	local base_out = {}
+	local current_spans = {}
+	local incoming_spans = {}
 
 	local line_idx = 1
 	local total = #lines
 
-	for _, c in ipairs(conflicts) do
+	for idx, c in ipairs(conflicts) do
 		-- Add common lines before conflict
 		while line_idx < c.start_line do
 			table.insert(current_out, lines[line_idx])
@@ -131,14 +138,32 @@ function M.extract_clean_versions(lines)
 		end
 
 		-- Add current chunk
+		local cur_start = #current_out + 1
 		for _, l in ipairs(c.current_lines) do
 			table.insert(current_out, l)
 		end
+		local cur_end = math.max(cur_start, #current_out)
+		table.insert(current_spans, {
+			id = idx,
+			start_line = cur_start,
+			end_line = cur_end,
+			empty = #c.current_lines == 0,
+			label = c.current_label,
+		})
 
 		-- Add incoming chunk
+		local inc_start = #incoming_out + 1
 		for _, l in ipairs(c.incoming_lines) do
 			table.insert(incoming_out, l)
 		end
+		local inc_end = math.max(inc_start, #incoming_out)
+		table.insert(incoming_spans, {
+			id = idx,
+			start_line = inc_start,
+			end_line = inc_end,
+			empty = #c.incoming_lines == 0,
+			label = c.incoming_label,
+		})
 
 		-- Add base chunk (or current if no diff3 base recorded)
 		local base_chunk = #c.base_lines > 0 and c.base_lines or c.current_lines
@@ -157,7 +182,7 @@ function M.extract_clean_versions(lines)
 		line_idx = line_idx + 1
 	end
 
-	return current_out, incoming_out, base_out
+	return current_out, incoming_out, base_out, current_spans, incoming_spans
 end
 
 --- Resolves a single conflict inside an array of lines.

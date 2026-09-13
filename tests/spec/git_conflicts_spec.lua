@@ -126,10 +126,14 @@ describe("plugins.krs.git.conflict_resolver", function()
 		expect(type(resolver.accept_current)).toBe("function")
 		expect(type(resolver.accept_incoming)).toBe("function")
 		expect(type(resolver.accept_both)).toBe("function")
+		expect(type(resolver.undo)).toBe("function")
+		expect(type(resolver.reset_to_initial)).toBe("function")
+		expect(type(resolver.get_sidebar_width)).toBe("function")
 		expect(type(resolver.stage_current_file)).toBe("function")
 		expect(resolver.settings.sidebar_width).toBe(30)
 		expect(type(resolver.focus_current)).toBe("function")
 		expect(type(resolver.focus_incoming)).toBe("function")
+		expect(type(resolver.focus_up)).toBe("function")
 		expect(type(resolver.focus_result)).toBe("function")
 		expect(type(resolver.focus_sidebar)).toBe("function")
 		expect(type(resolver.cycle_next_panel)).toBe("function")
@@ -147,6 +151,8 @@ describe("plugins.krs.git.conflict_resolver", function()
 		expect(commands["GitConflictAcceptIncoming"]).toBeDefined()
 		expect(commands["GitConflictAcceptBoth"]).toBeDefined()
 		expect(commands["GitConflictStage"]).toBeDefined()
+		expect(commands["GitConflictUndo"]).toBeDefined()
+		expect(commands["GitConflictReset"]).toBeDefined()
 	end)
 
 	it("validates repository and prevents opening when no merge conflicts exist", function()
@@ -212,5 +218,143 @@ describe("git conflicts build_resolved_lines", function()
 		expect(clean).toEqual({ "header", "theirs", "footer" })
 		expect(#spans).toBe(1)
 		expect(spans[1].choice).toBe("incoming")
+	end)
+
+	it("returns line spans for Ours and Theirs in extract_clean_versions", function()
+		local _, _, _, cur_spans, inc_spans = conflicts.extract_clean_versions(lines)
+		expect(#cur_spans).toBe(1)
+		expect(cur_spans[1].start_line).toBe(2)
+		expect(cur_spans[1].end_line).toBe(2)
+		expect(#inc_spans).toBe(1)
+		expect(inc_spans[1].start_line).toBe(2)
+		expect(inc_spans[1].end_line).toBe(2)
+	end)
+end)
+
+describe("git conflicts resolver undo system", function()
+	it("undoes resolutions step-by-step back to original merge state", function()
+		local rbuf = vim.api.nvim_create_buf(false, true)
+		resolver.state.result_buf = rbuf
+		resolver.state.active_idx = 1
+		resolver.state.files = {
+			{ file = "src/app.ts", conflict_count = 2, is_staged = false },
+		}
+		resolver.state.history = {
+			[1] = {
+				stack = {},
+				initial_lines = { "start", "conflict 1", "mid", "conflict 2", "end" },
+				initial_spans = {
+					{ id = 1, start_line = 2, end_line = 2, resolved = false },
+					{ id = 2, start_line = 4, end_line = 4, resolved = false },
+				},
+				initial_count = 2,
+			},
+		}
+		resolver.state.spans = vim.deepcopy(resolver.state.history[1].initial_spans)
+		vim.api.nvim_buf_set_lines(rbuf, 0, -1, false, resolver.state.history[1].initial_lines)
+
+		-- Step 1: Simulate resolution of conflict #1
+		local snapshot1 = {
+			lines = vim.api.nvim_buf_get_lines(rbuf, 0, -1, false),
+			spans = vim.deepcopy(resolver.state.spans),
+			conflict_count = 2,
+		}
+		table.insert(resolver.state.history[1].stack, snapshot1)
+		vim.api.nvim_buf_set_lines(rbuf, 1, 2, false, { "ours 1" })
+		resolver.state.spans[1].resolved = true
+		resolver.state.files[1].conflict_count = 1
+
+		-- Step 2: Simulate resolution of conflict #2
+		local snapshot2 = {
+			lines = vim.api.nvim_buf_get_lines(rbuf, 0, -1, false),
+			spans = vim.deepcopy(resolver.state.spans),
+			conflict_count = 1,
+		}
+		table.insert(resolver.state.history[1].stack, snapshot2)
+		vim.api.nvim_buf_set_lines(rbuf, 3, 4, false, { "theirs 2" })
+		resolver.state.spans[2].resolved = true
+		resolver.state.files[1].conflict_count = 0
+
+		expect(#resolver.state.history[1].stack).toBe(2)
+		expect(resolver.state.files[1].conflict_count).toBe(0)
+
+		-- Undo 1 step: back to conflict #2 unresolved
+		local ok1 = resolver.undo()
+		expect(ok1).toBe(true)
+		expect(resolver.state.files[1].conflict_count).toBe(1)
+		expect(resolver.state.spans[2].resolved).toBe(false)
+		expect(resolver.state.spans[1].resolved).toBe(true)
+
+		-- Undo 2nd step: back to initial merge state
+		local ok2 = resolver.undo()
+		expect(ok2).toBe(true)
+		expect(resolver.state.files[1].conflict_count).toBe(2)
+		expect(resolver.state.spans[1].resolved).toBe(false)
+		expect(resolver.state.spans[2].resolved).toBe(false)
+		local current_lines = vim.api.nvim_buf_get_lines(rbuf, 0, -1, false)
+		expect(current_lines).toEqual(resolver.state.history[1].initial_lines)
+
+		-- 3rd undo: already at beginning
+		local ok3 = resolver.undo()
+		expect(ok3).toBe(false)
+
+		pcall(vim.api.nvim_buf_delete, rbuf, { force = true })
+		resolver.state.result_buf = nil
+		resolver.state.files = {}
+		resolver.state.history = {}
+		resolver.state.spans = {}
+	end)
+end)
+
+describe("git conflicts resolver top panel memory", function()
+	it("remembers whether user came from top-left (Ours) or top-right (Theirs)", function()
+		local cur_win = vim.api.nvim_get_current_win()
+		local inc_win = vim.api.nvim_open_win(vim.api.nvim_create_buf(false, true), false, {
+			split = "right",
+		})
+		local res_win = vim.api.nvim_open_win(vim.api.nvim_create_buf(false, true), false, {
+			split = "below",
+		})
+
+		resolver.state.current_win = cur_win
+		resolver.state.incoming_win = inc_win
+		resolver.state.result_win = res_win
+
+		-- Simulate starting at top-right (Incoming)
+		resolver.focus_incoming()
+		expect(resolver.state.last_top_win).toBe(inc_win)
+		expect(vim.api.nvim_get_current_win()).toBe(inc_win)
+
+		-- Move down to Result
+		resolver.focus_result()
+		expect(vim.api.nvim_get_current_win()).toBe(res_win)
+		-- last_top_win should still remember inc_win
+		expect(resolver.state.last_top_win).toBe(inc_win)
+
+		-- Go UP: should return to top-right (Incoming)
+		resolver.focus_up()
+		expect(vim.api.nvim_get_current_win()).toBe(inc_win)
+
+		-- Now switch to top-left (Current)
+		resolver.focus_current()
+		expect(resolver.state.last_top_win).toBe(cur_win)
+		expect(vim.api.nvim_get_current_win()).toBe(cur_win)
+
+		-- Move down to Result
+		resolver.focus_result()
+		expect(vim.api.nvim_get_current_win()).toBe(res_win)
+		expect(resolver.state.last_top_win).toBe(cur_win)
+
+		-- Go UP: should return to top-left (Current)
+		resolver.focus_up()
+		expect(vim.api.nvim_get_current_win()).toBe(cur_win)
+
+		-- Clean up windows
+		pcall(vim.api.nvim_win_close, inc_win, true)
+		pcall(vim.api.nvim_win_close, res_win, true)
+		resolver.state.current_win = nil
+		resolver.state.incoming_win = nil
+		resolver.state.result_win = nil
+		resolver.state.last_top_win = nil
 	end)
 end)

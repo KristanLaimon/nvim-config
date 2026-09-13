@@ -148,7 +148,6 @@ Forgot a shortcut? Press `?` or `<F1>` to see context-aware help, or press `<C-S
 | `c` / `m` / `t` | Git Center | Edit commit title / description / tag |
 | `C` | Git Center | Commit (and tag) |
 | `P` | Git Center | Push (with remote branch selector) |
-| `<S-CR>` / `<S-Enter>` | Git Center | Open file under cursor in bufferline tab |
 
 ---
 

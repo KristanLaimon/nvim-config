@@ -58,7 +58,7 @@ M.settings = {
 			"<M-S>",
 			"<leader>gs",
 		},
-		conflict_resolver = { "<C-S-m>", "<C-S-M>", "<leader>gm", "<leader>gM" },
+		conflict_resolver = { "<leader>gm", "<leader>gM" },
 		smart_launch = is_mobile and { "<C-S-s>", "<C-S-S>", "<C-S>", "<C-s>" } or { "<C-S-s>", "<C-S-S>" },
 		launch_profiles = { "<C-S-q>", "<C-S-Q>", "<C-Q>" },
 		task_menu = { "<C-S-t>", "<C-S-T>" },

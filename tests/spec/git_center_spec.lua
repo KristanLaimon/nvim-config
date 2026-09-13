@@ -370,14 +370,14 @@ describe("plugins.krs.git.git_center", function()
 		git_center.close_git_center()
 	end)
 
-	it("binds Shift+Enter keymaps to open files in bufferline tab and closes git-center", function()
+	it("does not bind Shift+Enter to avoid accidental file opening", function()
 		git_center.open_git_center()
 
 		local main_buf = git_center.main_buf
 		local shift_cr_map = vim.api.nvim_buf_call(main_buf, function()
 			return vim.fn.maparg("<S-CR>", "n", false, true)
 		end)
-		expect(shift_cr_map.rhs or shift_cr_map.callback).toBeDefined()
+		expect(shift_cr_map.rhs or shift_cr_map.callback).toBeFalsy()
 
 		local temp_file = vim.fn.tempname() .. ".lua"
 		vim.fn.writefile({ "print('hello')" }, temp_file)

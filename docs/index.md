@@ -113,7 +113,6 @@ If you have just installed or launched KrsVim for the first time, follow these s
 | :--- | :--- | :--- |
 | `<C-S-g>` | **Git Control Center** | Interactive staging, live diff, branch manager, commit & push |
 | `<C-S-x>` | **Stage All Changed Files** | Quick global shortcut to stage all unstaged/untracked files |
-| `<S-CR>` / `<S-Enter>` *(in Git Center)* | **Open File at First Change** | Open file in bufferline tab and position cursor on 1st changed line (`zz`) |
 | `<CR>` *(in Git Center)* | **Side-by-Side Diff Modal** | Open full-screen dual-pane diff preview |
 | `s` / `S` *(in Git Center)* | **Stage File / Stage All** | Stage file under cursor or visual selection / stage all |
 | `u` / `U` *(in Git Center)* | **Unstage File / Unstage All** | Unstage file under cursor or selection / unstage all |
