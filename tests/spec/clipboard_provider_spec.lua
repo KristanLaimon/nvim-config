@@ -14,4 +14,9 @@ describe("Clipboard provider setup in options", function()
 			expect(vim.g.clipboard == nil or type(vim.g.clipboard) == "table").toBeTruthy()
 		end
 	end)
+
+	it("configures an executable shell", function()
+		require("vim_options")
+		expect(vim.fn.executable(vim.o.shell)).toBe(1)
+	end)
 end)

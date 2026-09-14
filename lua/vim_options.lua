@@ -98,17 +98,10 @@ local settings = {
 	},
 
 	--- Shell used for `:!` and `:terminal`, per platform.
-	--- Windows points at Git Bash, so POSIX one-liners work everywhere.
+	--- The Windows value is resolved below: Git Bash when it is actually
+	--- installed, otherwise the PowerShell included with Windows.
 	shell = {
 		unix = { shell = "bash" },
-		windows = {
-			shell = "C:\\PROGRA~1\\Git\\bin\\bash.exe",
-			shellcmdflag = "-c",
-			shellxquote = "",
-			shellquote = "",
-			shellredir = ">%s 2>&1",
-			shellpipe = "2>&1| tee",
-		},
 	},
 }
 
@@ -158,8 +151,67 @@ end
 -- SHELL
 -- ============================================================================
 
+--- Returns an executable Git Bash path without relying on a volume's optional
+--- 8.3 short-name support (for example, `C:\\PROGRA~1`).
+--- @return string|nil
+local function git_bash_path()
+	local candidates = {}
+	local git = vim.fn.exepath("git.exe")
+	if git ~= "" then
+		table.insert(candidates, vim.fn.fnamemodify(git, ":h:h") .. "/bin/bash.exe")
+	end
+
+	for _, program_files in ipairs({ vim.env.ProgramFiles, vim.env.ProgramW6432, vim.env["ProgramFiles(x86)"] }) do
+		if program_files and program_files ~= "" then
+			table.insert(candidates, program_files .. "/Git/bin/bash.exe")
+		end
+	end
+
+	for _, candidate in ipairs(candidates) do
+		if vim.fn.executable(candidate) == 1 then
+			return candidate
+		end
+	end
+end
+
+--- Builds Windows shell options. Git Bash is preferred for POSIX command
+--- compatibility; a missing or relocated Git install falls back to PowerShell.
+--- @return table
+local function windows_shell_settings()
+	local bash = git_bash_path()
+	if bash then
+		return {
+			shell = bash,
+			shellcmdflag = "-c",
+			shellxquote = "",
+			shellquote = "",
+			shellredir = ">%s 2>&1",
+			shellpipe = "2>&1| tee",
+		}
+	end
+
+	local powershell = vim.fn.exepath("pwsh.exe")
+	if powershell == "" then
+		powershell = vim.fn.exepath("powershell.exe")
+	end
+	if powershell ~= "" then
+		return {
+			shell = powershell,
+			shellcmdflag = "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command",
+			shellredir = "2>&1 | Out-File -Encoding UTF8 %s",
+			shellpipe = "2>&1 | Tee-Object -FilePath %s",
+			shellquote = "",
+			shellxquote = "",
+		}
+	end
+
+	-- `cmd.exe` is present on supported Windows installations and gives Neovim
+	-- a functional terminal even on unusually stripped-down systems.
+	return { shell = "cmd.exe" }
+end
+
 local shell_settings = (vim.fn.has("wsl") == 1 or vim.fn.has("unix") == 1) and settings.shell.unix
-	or (is_windows and settings.shell.windows)
+	or (is_windows and windows_shell_settings())
 
 for name, value in pairs(shell_settings or {}) do
 	vim.opt[name] = value
