@@ -84,26 +84,26 @@ check_cmd() {
 
 # Component installer functions
 install_core() {
-  echo -e "\n${BLUE}[*] Installing Core Utilities (neovim, git, ripgrep, fd, compiler, chafa)...${NC}"
+  echo -e "\n${BLUE}[*] Installing Core Utilities (neovim, git, ripgrep, fd, compiler, tree-sitter, chafa)...${NC}"
   case "$PKG_MANAGER" in
     pkg)
-      run_cmd pkg install -y neovim git ripgrep fd clang chafa
+      run_cmd pkg install -y neovim git ripgrep fd clang tree-sitter chafa
       ;;
     apt)
       run_cmd apt-get update
-      run_cmd apt-get install -y neovim git ripgrep fd-find build-essential chafa
+      run_cmd apt-get install -y neovim git ripgrep fd-find build-essential tree-sitter-cli chafa
       ;;
     dnf)
-      run_cmd dnf install -y neovim git ripgrep fd-find gcc gcc-c++ chafa
+      run_cmd dnf install -y neovim git ripgrep fd-find gcc gcc-c++ tree-sitter-cli chafa
       ;;
     pacman)
-      run_cmd pacman -Sy --needed neovim git ripgrep fd gcc chafa
+      run_cmd pacman -Sy --needed neovim git ripgrep fd gcc tree-sitter-cli chafa
       ;;
     brew)
-      run_cmd brew install neovim git ripgrep fd gcc chafa
+      run_cmd brew install neovim git ripgrep fd gcc tree-sitter chafa
       ;;
     apk)
-      run_cmd apk add neovim git ripgrep fd build-base chafa
+      run_cmd apk add neovim git ripgrep fd build-base tree-sitter chafa
       ;;
   esac
 }
@@ -189,20 +189,23 @@ install_python() {
 }
 
 install_lua_tools() {
-  echo -e "\n${BLUE}[*] Installing Lua tools (stylua)...${NC}"
+  echo -e "\n${BLUE}[*] Installing Lua tools (stylua, luacheck)...${NC}"
   case "$PKG_MANAGER" in
     pkg)
-      run_cmd pkg install -y stylua 2>/dev/null || true
+      run_cmd pkg install -y stylua luacheck 2>/dev/null || true
       ;;
     pacman)
-      run_cmd pacman -Sy --needed stylua 2>/dev/null || true
+      run_cmd pacman -Sy --needed stylua luacheck 2>/dev/null || true
       ;;
     brew)
-      run_cmd brew install stylua 2>/dev/null || true
+      run_cmd brew install stylua luacheck 2>/dev/null || true
       ;;
     *)
       if check_cmd cargo; then
         cargo install stylua 2>/dev/null || true
+      fi
+      if check_cmd luarocks; then
+        luarocks install luacheck 2>/dev/null || true
       fi
       ;;
   esac
@@ -304,7 +307,7 @@ if [ "$AUTO_ALL" = true ]; then
 else
   echo -e "\n${YELLOW}Select component toolchains to install from official package manager sources:${NC}\n"
   echo "  1) ALL Recommended Dependencies (Core, Node/npm, Go, Python, Lua tools, .NET/C#) [Default]"
-  echo "  2) Core Utilities only (neovim, git, ripgrep, fd, compiler, chafa)"
+  echo "  2) Core Utilities only (neovim, git, ripgrep, fd, compiler, tree-sitter, chafa)"
   echo "  3) Node.js & Web Toolchain (node, npm, prettier)"
   echo "  4) Go Toolchain (go)"
   echo "  5) Python Toolchain (python3, pip)"

@@ -4,7 +4,7 @@
 -- Standalone bootstrap installer with zero external dependencies.
 --
 -- WHAT IT DOES:
---   1. Stage 1 (Essentials): Ensures lazy.nvim, core tools (git, gcc, rg, fd) exist.
+--   1. Stage 1 (Essentials): Ensures lazy.nvim and core tools (git, gcc, tree-sitter, rg, fd) exist.
 --   2. Stage 2 (Heavy Setup): Checks & installs Mason LSPs, Treesitter parsers,
 --      and toolchain runtimes with a live animated floating UI modal & progress bar.
 --   3. Persistence: Saves state to stdpath("data")/krs_setup_completed.json once
@@ -79,6 +79,7 @@ end
 M.essential_tools = {
 	{ cmd = "git", name = "Git version control" },
 	{ cmd = "gcc", name = "C/C++ Compiler (gcc/clang)", alt = "clang" },
+	{ cmd = "tree-sitter", name = "Tree-sitter CLI" },
 	{ cmd = "rg", name = "Ripgrep (rg)" },
 	{ cmd = "fd", name = "fd / fdfind", alt = "fdfind" },
 }
@@ -107,8 +108,20 @@ M.health_categories = {
 		tools = {
 			{ cmd = "git", name = "Git version control", note = "version control, lazy.nvim plugin installs" },
 			{ cmd = "gcc", name = "C/C++ Compiler (gcc/clang)", alt = "clang", note = "compiles Treesitter parsers" },
+			{
+				cmd = "tree-sitter",
+				name = "Tree-sitter CLI",
+				note = "builds Treesitter parsers (required by nvim-treesitter main)",
+			},
 			{ cmd = "rg", name = "Ripgrep", note = "Telescope live-grep & find-files" },
 			{ cmd = "fd", name = "fd", alt = "fdfind", note = "Telescope file finder" },
+		},
+	},
+	{
+		label = "🌙 Lua Development Tools",
+		tools = {
+			{ cmd = "stylua", name = "StyLua", note = "formats KrsVim Lua configuration" },
+			{ cmd = "luacheck", name = "Luacheck", note = "lints KrsVim Lua configuration" },
 		},
 	},
 	{

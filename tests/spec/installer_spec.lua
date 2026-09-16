@@ -7,6 +7,19 @@ local describe, it, expect = t.describe, t.it, t.expect
 local installer = require("krs.core.installer")
 
 describe("krs.core.installer", function()
+	it("includes Tree-sitter and Lua quality CLIs in the health check", function()
+		local health_tools = {}
+		for _, category in ipairs(installer.health_categories) do
+			for _, tool in ipairs(category.tools) do
+				health_tools[tool.cmd] = true
+			end
+		end
+
+		expect(health_tools["tree-sitter"]).toBe(true)
+		expect(health_tools.stylua).toBe(true)
+		expect(health_tools.luacheck).toBe(true)
+	end)
+
 	it("renders unicode progress bar correctly", function()
 		expect(installer.render_bar(0, 10)).toBe("░░░░░░░░░░")
 		expect(installer.render_bar(50, 10)).toBe("█████░░░░░")

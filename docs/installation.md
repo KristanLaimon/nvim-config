@@ -65,6 +65,7 @@ If you skip running `setup.ps1` or `setup.sh`, KrsVim handles missing external C
 KrsVim provides several built-in commands to inspect runtime dependencies from within Neovim:
 
 - `:checkhealth` — Standard Neovim system and plugin health report.
+- `:KrsHealthCheck` — KrsVim's complete CLI report, including Tree-sitter, StyLua, and Luacheck.
 - `:Mason` — Opens the Mason UI to view installed LSP servers, formatters, and debug adapters.
 - `:Lazy` — Opens the Lazy plugin manager to verify plugin status and updates.
 - `:PHPCheckTools` — Diagnostic modal probing host and WSL PHP, Composer, Intelephense, Pint, and Xdebug.
@@ -84,6 +85,9 @@ For manual installation or custom package managers, here is the complete tool ch
 | **fd** | Fast file finder (`<C-/>`) | `scoop install fd` | `fd-find` (or `fd`) |
 | **chafa** | Terminal pixel-art image previewer (`:ImageViewer`) | `scoop install chafa` | `chafa` |
 | **GCC / MinGW** | Treesitter parser compilation | `scoop install gcc` | `gcc` / `build-essential` |
+| **Tree-sitter CLI** (`tree-sitter`) | Builds parsers required by `nvim-treesitter`'s `main` branch | `scoop install tree-sitter` | `tree-sitter-cli` (Arch/Debian) |
+| **StyLua** (`stylua`) | Formats KrsVim's Lua configuration | `scoop install stylua` | `stylua` |
+| **Luacheck** (`luacheck`) | Lints KrsVim's Lua configuration | `scoop install luacheck` | `luacheck` |
 | **Node.js & npm** | JS/TS LSP, Prettier, JSON/HTML LSPs | `scoop install nodejs-lts` | `nodejs npm` |
 | **Bun** *(optional)* | Bun launch profiles & fast JS runtime | `scoop install bun` | `curl -fsSL https://bun.sh/install \| bash` |
 | **Go** *(optional)* | Go LSP (`gopls`), `gofumpt`, Delve debugger | `scoop install go` | `golang` |
