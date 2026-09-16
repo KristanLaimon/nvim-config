@@ -409,7 +409,9 @@ return {
 		"saghen/blink.cmp",
 		event = { "BufReadPre", "BufReadPost", "BufNewFile", "InsertEnter" },
 		dependencies = { "rafamadriz/friendly-snippets" },
-		version = "*",
+		-- Prebuilt fuzzy-match libraries are published for release tags. Tracking
+		-- main leaves Blink unable to determine which binary to download.
+		version = "1.*",
 		opts = function(_, opts)
 			local is_mobile = false
 			local env_ok, env_mod = pcall(require, "krs.core.environment")
