@@ -155,4 +155,16 @@ function M.is_absolute(p)
 	return norm:sub(1, 1) == "/" or norm:match("^%a:") ~= nil
 end
 
+--- Returns the trailing file or directory name from a path.
+--- @param p string|nil
+--- @return string
+function M.filename(p)
+	if not p or p == "" then
+		return ""
+	end
+	local norm = M.normalize(p)
+	return vim.fs.basename(norm) or norm:match("[^/\\]+$") or norm
+end
+M.basename = M.filename
+
 return M

@@ -26,13 +26,16 @@ local save_left_ratio = config.save_left_ratio
 local git_lines = queries.git_lines
 local git_run = queries.git_run
 
---- True when the Git Center is on screen.
+--- True when the Git Center or any of its modals is on screen.
+--- True when the Git Center or any of its modals is on screen.
 --- @return boolean
 function M.is_open()
 	return (config.main_win ~= nil and vim.api.nvim_win_is_valid(config.main_win))
 		or (config.preview_win ~= nil and vim.api.nvim_win_is_valid(config.preview_win))
 		or (config.tab_win ~= nil and vim.api.nvim_win_is_valid(config.tab_win))
 		or (config.diff_modal_win ~= nil and vim.api.nvim_win_is_valid(config.diff_modal_win))
+		or (config.log_win ~= nil and vim.api.nvim_win_is_valid(config.log_win))
+		or (config.branch_win ~= nil and vim.api.nvim_win_is_valid(config.branch_win))
 end
 
 --- Resizes the horizontal split between the left panel and preview pane.
@@ -71,24 +74,60 @@ end
 local is_closing = false
 
 --- Closes every window this module owns and forgets their handles.
-function M.close_git_center()
+--- Caches active screen in RAM so it can be restored on reopen.
+--- @param opts? { keep_cached_view?: boolean }
+function M.close_git_center(opts)
+	opts = opts or {}
 	if is_closing then
 		return
 	end
 	is_closing = true
+
+	-- Update RAM cached screen state
+	if opts.keep_cached_view then
+		if config.log_win and vim.api.nvim_win_is_valid(config.log_win) then
+			config.cached_view = "log"
+			local ok, row = pcall(vim.api.nvim_win_get_cursor, config.log_win)
+			if ok and row then
+				config.cached_view_data.log_row = row[1]
+			end
+		elseif config.branch_win and vim.api.nvim_win_is_valid(config.branch_win) then
+			config.cached_view = "branch"
+		elseif config.diff_modal_win and vim.api.nvim_win_is_valid(config.diff_modal_win) then
+			config.cached_view = "diff"
+		else
+			if not config.cached_view or config.cached_view == "panel" then
+				config.cached_view = "panel"
+			end
+		end
+	else
+		config.cached_view = "panel"
+		config.cached_view_data = {}
+	end
+
 	config.refresh = nil
 	config.update_preview = nil
 	local diff_win, prev_win, tab_win, main_win =
 		config.diff_modal_win, config.preview_win, config.tab_win, config.main_win
+	local log_win, log_r_win = config.log_win, config.log_right_win
+	local branch_win = config.branch_win
+
 	config.main_win, config.main_buf = nil, nil
 	config.preview_win, config.preview_buf = nil, nil
 	config.tab_win, config.tab_buf = nil, nil
 	config.diff_modal_win, config.diff_modal_buf = nil, nil
+	config.log_win, config.log_buf = nil, nil
+	config.log_right_win, config.log_right_buf = nil, nil
+	config.branch_win, config.branch_buf = nil, nil
 
 	ui.close(diff_win)
+	ui.close(log_win)
+	ui.close(log_r_win)
+	ui.close(branch_win)
 	ui.close(prev_win)
 	ui.close(tab_win)
 	ui.close(main_win)
+
 	is_closing = false
 end
 
@@ -104,7 +143,7 @@ local function get_first_changed_line(file_path, cwd, target_type)
 
 	local rel_path = path_util.relative_to(file_path, cwd) or file_path
 
-	local args = {}
+	local args
 	if target_type == "staged" then
 		args = { "diff", "--cached", "--no-ext-diff", "-U0", "--", rel_path }
 	elseif target_type == "unstaged" then
@@ -192,7 +231,7 @@ end
 --- Opens the Git Center, or closes it when it is already open.
 function M.toggle_git_center()
 	if M.is_open() then
-		M.close_git_center()
+		M.close_git_center({ keep_cached_view = true })
 	else
 		M.open_git_center()
 	end
@@ -201,7 +240,7 @@ end
 --- Opens the Git Center.
 function M.open_git_center()
 	if M.is_open() then
-		M.close_git_center()
+		M.close_git_center({ keep_cached_view = true })
 		return
 	end
 
@@ -212,6 +251,20 @@ function M.open_git_center()
 	end
 
 	config.root_dir = root
+
+	-- Restore RAM cached screen if user previously closed on another screen
+	if config.cached_view == "log" then
+		local target_cwd = config.cached_view_data.cwd or root
+		modals.open_commit_log_modal(target_cwd, config.cached_view_data.log_row)
+		return
+	elseif config.cached_view == "branch" then
+		local target_cwd = config.cached_view_data.cwd or root
+		modals.open_branch_modal(target_cwd)
+		return
+	elseif config.cached_view == "diff" and config.cached_view_data and config.cached_view_data.target_file then
+		local d = config.cached_view_data
+		modals.open_diff_modal(d.target_file, d.target_type, d.cwd or root, d.commit_hash, d.diff_index)
+	end
 
 	local root_status_handle = status.info_start(root)
 
@@ -291,7 +344,7 @@ function M.open_git_center()
 		style = "minimal",
 		border = "rounded",
 		zindex = base_z,
-		title = " 🐙 Git Center (Ctrl+h/l or Alt+h/l Tabs/Focus | </> Resize | Ctrl+Shift+J/K Preview | Esc Close) ",
+		title = " 🐙 Git Center | [v/V]: Diff Mode | [l]: Log | [b]: Branch | [Esc]: Close ",
 		title_pos = "center",
 	})
 
@@ -340,7 +393,9 @@ function M.open_git_center()
 				pattern = tostring(win),
 				once = true,
 				callback = function()
-					vim.schedule(M.close_git_center)
+					if not is_closing and (config.main_win or config.preview_win or config.tab_win) then
+						vim.schedule(M.close_git_center)
+					end
 				end,
 			})
 		end
@@ -487,6 +542,9 @@ function M.open_git_center()
 					msg =
 						" 💡 SECTION 1: COMMIT BOX & TAG\n\n   • [c] Edit Commit Title\n   • [m] Edit Commit Description\n   • [t] Edit Tag (e.g. v1.0.0)\n   • [C] Execute Commit"
 					p_title = " 󰜘 Commit Box "
+				end
+				if not (preview_buf and vim.api.nvim_buf_is_valid(preview_buf)) then
+					return
 				end
 
 				vim.bo[preview_buf].modifiable = true
@@ -971,9 +1029,26 @@ function M.open_git_center()
 	vim.keymap.set({ "n", "v", "i", "t" }, "<Tab>", toggle_focus, key_opts)
 	vim.keymap.set({ "n", "v", "i", "t" }, "<Tab>", toggle_focus, preview_opts)
 
+	local function is_toggle_key(key)
+		if not key then
+			return false
+		end
+		for _, tk in ipairs(config.settings.keys.toggle) do
+			if key == tk then
+				return true
+			end
+		end
+		return false
+	end
+
 	for _, key in ipairs(config.settings.keys.close) do
-		vim.keymap.set({ "n", "v", "i", "t" }, key, M.close_git_center, key_opts)
-		vim.keymap.set({ "n", "v", "i", "t" }, key, M.close_git_center, preview_opts)
+		local keep = is_toggle_key(key)
+		vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+			M.close_git_center({ keep_cached_view = keep })
+		end, key_opts)
+		vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+			M.close_git_center({ keep_cached_view = keep })
+		end, preview_opts)
 	end
 
 	for section = 1, 6 do
@@ -986,6 +1061,22 @@ function M.open_git_center()
 
 	vim.keymap.set("n", "b", function()
 		modals.open_branch_modal(get_active_target().full_path)
+	end, key_opts)
+
+	vim.keymap.set("n", "v", function()
+		M.close_git_center({ keep_cached_view = false })
+		vim.schedule(function()
+			local diff_mode = require("plugins.krs.git.diff_mode")
+			diff_mode.open()
+		end)
+	end, key_opts)
+
+	vim.keymap.set("n", "V", function()
+		M.close_git_center({ keep_cached_view = false })
+		vim.schedule(function()
+			local diff_mode = require("plugins.krs.git.diff_mode")
+			diff_mode.toggle()
+		end)
 	end, key_opts)
 
 	vim.keymap.set("n", "l", function()

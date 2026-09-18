@@ -101,6 +101,13 @@ M.main_win, M.main_buf = nil, nil
 M.preview_win, M.preview_buf = nil, nil
 M.tab_win, M.tab_buf = nil, nil
 M.diff_modal_win, M.diff_modal_buf = nil, nil
+M.log_win, M.log_buf = nil, nil
+M.log_right_win, M.log_right_buf = nil, nil
+M.branch_win, M.branch_buf = nil, nil
+
+--- RAM-cached active screen in Git Center: "panel", "log", "branch", "diff", "diff_mode"
+M.cached_view = "panel"
+M.cached_view_data = {}
 
 --- Discovered repository list: [1] = root repository, [2..n] = submodules.
 M.submodules = {}

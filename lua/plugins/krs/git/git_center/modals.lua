@@ -5,7 +5,6 @@
 local lazy_req = require("krs.core.lazy_require")
 local ui = lazy_req("krs.core.ui")
 local diff = lazy_req("krs.git.diff")
-local path_util = lazy_req("krs.core.path")
 local config = require("plugins.krs.git.git_center.config")
 local queries = require("plugins.krs.git.git_center.queries")
 
@@ -15,6 +14,18 @@ local notify = config.notify
 local get_active_target = config.get_active_target
 local git_lines = queries.git_lines
 local git_run = queries.git_run
+
+local function is_toggle_key(key)
+	if not key then
+		return false
+	end
+	for _, tk in ipairs(config.settings.keys.toggle) do
+		if tk:lower() == key:lower() then
+			return true
+		end
+	end
+	return false
+end
 
 --- Opens the Branch Management modal UI.
 --- @param target_cwd string|nil Repository path.
@@ -29,7 +40,8 @@ function M.open_branch_modal(target_cwd)
 
 	local raw_branches = git_lines({ "branch", "-a", "--sort=-committerdate" }, active_cwd)
 	local branches = {}
-	local current_branch = info.branch or "main"
+	local current_branch = (info.branch and info.branch ~= "") and info.branch
+		or (queries.git_lines({ "branch", "--show-current" }, active_cwd)[1] or "HEAD")
 
 	for _, line in ipairs(raw_branches) do
 		local clean = line:gsub("^%*%s*", ""):gsub("^%s*", ""):gsub("%s*$", "")
@@ -82,17 +94,47 @@ function M.open_branch_modal(target_cwd)
 		zindex = 100,
 	})
 
+	config.branch_win = win
+	config.branch_buf = buf
+
 	vim.api.nvim_set_option_value("cursorline", true, { win = win })
 	pcall(vim.api.nvim_win_set_cursor, win, { current_idx, 0 })
 
 	local opts = { buffer = buf, noremap = true, silent = true, nowait = true }
 
-	local function close_modal()
+	local is_closed = false
+	local function close_modal(keep_screen)
+		if is_closed then
+			return
+		end
+		is_closed = true
+		if keep_screen == true then
+			config.cached_view = "branch"
+			config.cached_view_data.cwd = active_cwd
+		elseif keep_screen == false then
+			config.cached_view = "panel"
+			config.cached_view_data = {}
+		end
+		config.branch_win, config.branch_buf = nil, nil
 		ui.close(win)
-		if prev_win and vim.api.nvim_win_is_valid(prev_win) then
-			pcall(vim.api.nvim_set_current_win, prev_win)
-		elseif config.main_win and vim.api.nvim_win_is_valid(config.main_win) then
-			pcall(vim.api.nvim_set_current_win, config.main_win)
+		if keep_screen then
+			local panel_mod = package.loaded["plugins.krs.git.git_center.panel"]
+			if panel_mod and panel_mod.close_git_center then
+				panel_mod.close_git_center({ keep_cached_view = true })
+			end
+			if prev_win and vim.api.nvim_win_is_valid(prev_win) then
+				pcall(vim.api.nvim_set_current_win, prev_win)
+			end
+		else
+			if
+				prev_win
+				and vim.api.nvim_win_is_valid(prev_win)
+				and not (config.main_win and vim.api.nvim_win_is_valid(config.main_win))
+			then
+				pcall(vim.api.nvim_set_current_win, prev_win)
+			elseif config.main_win and vim.api.nvim_win_is_valid(config.main_win) then
+				pcall(vim.api.nvim_set_current_win, config.main_win)
+			end
 		end
 	end
 
@@ -263,7 +305,8 @@ end
 
 --- Full commit log modal showing git log --all.
 --- @param target_cwd string|nil Repository path.
-function M.open_commit_log_modal(target_cwd)
+--- @param initial_row integer|nil Optional row to restore cursor position.
+function M.open_commit_log_modal(target_cwd, initial_row)
 	local prev_win = vim.api.nvim_get_current_win()
 	local orig_cwd = vim.fn.getcwd()
 	local active_cwd = target_cwd or (get_active_target() and get_active_target().full_path) or orig_cwd
@@ -378,7 +421,7 @@ function M.open_commit_log_modal(target_cwd)
 		style = "minimal",
 		border = "rounded",
 		zindex = log_z,
-		title = " 📜 Git Log (--all) | [j/k]: Move | [K]: Checkout | [Enter/Tab]: Focus | [</>]: Resize | [q/Esc]: Close ",
+		title = " 📜 Git Log (--all) | [<C-S-g>]: Toggle/Cache | [q/Esc]: Back to Panel | [j/k]: Move ",
 		title_pos = "center",
 	})
 	vim.api.nvim_set_option_value("cursorline", true, { win = left_win })
@@ -404,18 +447,54 @@ function M.open_commit_log_modal(target_cwd)
 	vim.api.nvim_set_option_value("wrap", false, { win = right_win })
 	vim.api.nvim_set_option_value("number", true, { win = right_win })
 
+	config.log_win = left_win
+	config.log_buf = left_buf
+	config.log_right_win = right_win
+	config.log_right_buf = right_buf
+
+	if initial_row and initial_row >= 1 and initial_row <= #list_lines then
+		pcall(vim.api.nvim_win_set_cursor, left_win, { initial_row, 0 })
+	end
+
 	local is_closed = false
-	local function close_log_modal()
+	local function close_log_modal(keep_screen)
 		if is_closed then
 			return
 		end
 		is_closed = true
+		if keep_screen == true then
+			config.cached_view = "log"
+			config.cached_view_data.cwd = active_cwd
+			local ok, row = pcall(vim.api.nvim_win_get_cursor, left_win)
+			if ok and row then
+				config.cached_view_data.log_row = row[1]
+			end
+		elseif keep_screen == false then
+			config.cached_view = "panel"
+			config.cached_view_data = {}
+		end
+		config.log_win, config.log_buf = nil, nil
+		config.log_right_win, config.log_right_buf = nil, nil
 		ui.close(left_win)
 		ui.close(right_win)
-		if prev_win and vim.api.nvim_win_is_valid(prev_win) then
-			pcall(vim.api.nvim_set_current_win, prev_win)
-		elseif config.main_win and vim.api.nvim_win_is_valid(config.main_win) then
-			pcall(vim.api.nvim_set_current_win, config.main_win)
+		if keep_screen then
+			local panel_mod = package.loaded["plugins.krs.git.git_center.panel"]
+			if panel_mod and panel_mod.close_git_center then
+				panel_mod.close_git_center({ keep_cached_view = true })
+			end
+			if prev_win and vim.api.nvim_win_is_valid(prev_win) then
+				pcall(vim.api.nvim_set_current_win, prev_win)
+			end
+		else
+			if
+				prev_win
+				and vim.api.nvim_win_is_valid(prev_win)
+				and not (config.main_win and vim.api.nvim_win_is_valid(config.main_win))
+			then
+				pcall(vim.api.nvim_set_current_win, prev_win)
+			elseif config.main_win and vim.api.nvim_win_is_valid(config.main_win) then
+				pcall(vim.api.nvim_set_current_win, config.main_win)
+			end
 		end
 	end
 
@@ -782,11 +861,20 @@ function M.open_commit_log_modal(target_cwd)
 	end
 
 	for _, key in ipairs(config.settings.keys.modal_close) do
-		vim.keymap.set({ "n", "v", "i", "t" }, key, close_log_modal, opts)
-		vim.keymap.set({ "n", "v", "i", "t" }, key, close_log_modal, right_opts)
+		local tk = is_toggle_key(key)
+		vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+			close_log_modal(tk)
+		end, opts)
+		vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+			close_log_modal(tk)
+		end, right_opts)
 	end
-	vim.keymap.set("n", "l", close_log_modal, opts)
-	vim.keymap.set("n", "L", close_log_modal, opts)
+	vim.keymap.set("n", "l", function()
+		close_log_modal(false)
+	end, opts)
+	vim.keymap.set("n", "L", function()
+		close_log_modal(false)
+	end, opts)
 end
 
 --- Full-screen side-by-side diff viewer with file rotation and hunk navigation.
@@ -794,7 +882,8 @@ end
 --- @param target_type string|nil "staged" | "unstaged" | "untracked" | "commit" (or commit hash).
 --- @param target_cwd string|nil Repository directory to view diffs for.
 --- @param commit_hash string|nil Optional commit hash for viewing past commit diffs.
-function M.open_diff_modal(target_file, target_type, target_cwd, commit_hash)
+--- @param initial_index integer|nil Optional initial file index to display.
+function M.open_diff_modal(target_file, target_type, target_cwd, commit_hash, initial_index)
 	local prev_win = vim.api.nvim_get_current_win()
 	local orig_cwd = vim.fn.getcwd()
 	local active_cwd = target_cwd or (get_active_target() and get_active_target().full_path) or orig_cwd
@@ -845,9 +934,9 @@ function M.open_diff_modal(target_file, target_type, target_cwd, commit_hash)
 		end
 	end
 
-	local index = 1
+	local index = initial_index and math.max(1, math.min(#files, initial_index)) or 1
 	for idx, item in ipairs(files) do
-		if target_file and item.file == target_file then
+		if target_file and (item.file == target_file or item.file:match(target_file .. "$")) then
 			index = idx
 			break
 		end
@@ -855,28 +944,32 @@ function M.open_diff_modal(target_file, target_type, target_cwd, commit_hash)
 
 	diff.setup_highlights()
 
-	local total_width = math.floor(vim.o.columns * config.settings.modal_width_ratio)
-	local total_height = math.floor(vim.o.lines * config.settings.modal_height_ratio)
-	local ratio = config.current_left_ratio or config.load_saved_left_ratio(active_cwd)
-	local left_width = math.floor(total_width * ratio)
-	local right_width = total_width - left_width - 2
-	local start_row = math.floor((vim.o.lines - total_height) / 2)
-	local start_col = math.floor((vim.o.columns - total_width) / 2)
+	local tot_w = math.floor(vim.o.columns * config.settings.modal_width_ratio)
+	local tot_h = math.floor(vim.o.lines * config.settings.modal_height_ratio)
+	local start_r = math.floor((vim.o.lines - tot_h) / 2)
+	local start_c = math.floor((vim.o.columns - tot_w) / 2)
+
+	local left_width = math.floor((tot_w - 2) * 0.50)
+	local right_width = tot_w - left_width - 2
+
+	local left_buf = vim.api.nvim_create_buf(false, true)
+	local right_buf = vim.api.nvim_create_buf(false, true)
+
+	for _, b in ipairs({ left_buf, right_buf }) do
+		vim.bo[b].buftype = "nofile"
+		vim.bo[b].bufhidden = "wipe"
+		vim.bo[b].swapfile = false
+	end
 
 	local z_index = require("krs.core.z_index")
 	local diff_z = z_index.next_zindex("git_center_diff", { parent = "git_center", offset = 40 })
 
-	local left_buf = vim.api.nvim_create_buf(false, true)
-	vim.bo[left_buf].buftype = "nofile"
-	vim.bo[left_buf].bufhidden = "wipe"
-	vim.bo[left_buf].swapfile = false
-
 	local left_win = vim.api.nvim_open_win(left_buf, true, {
 		relative = "editor",
 		width = left_width,
-		height = total_height,
-		row = start_row,
-		col = start_col,
+		height = tot_h,
+		row = start_r,
+		col = start_c,
 		style = "minimal",
 		border = "rounded",
 		zindex = diff_z,
@@ -884,17 +977,12 @@ function M.open_diff_modal(target_file, target_type, target_cwd, commit_hash)
 		title_pos = "center",
 	})
 
-	local right_buf = vim.api.nvim_create_buf(false, true)
-	vim.bo[right_buf].buftype = "nofile"
-	vim.bo[right_buf].bufhidden = "wipe"
-	vim.bo[right_buf].swapfile = false
-
 	local right_win = vim.api.nvim_open_win(right_buf, false, {
 		relative = "editor",
 		width = right_width,
-		height = total_height,
-		row = start_row,
-		col = start_col + left_width + 2,
+		height = tot_h,
+		row = start_r,
+		col = start_c + left_width + 2,
 		style = "minimal",
 		border = "rounded",
 		zindex = diff_z,
@@ -930,7 +1018,7 @@ function M.open_diff_modal(target_file, target_type, target_cwd, commit_hash)
 		})
 		pcall(vim.api.nvim_win_set_config, right_win, {
 			title = string.format(
-				" 🟢 AFTER (%d/%d): %s │ [q/Esc]: Close │ [Tab/S-Tab]: Switch File │ [Ctrl+h/l]: Focus ",
+				" 🟢 AFTER (%d/%d): %s │ [<C-S-g>]: Cache │ [q/Esc]: Close │ [Tab/S-Tab]: Switch File ",
 				index,
 				#files,
 				item.file
@@ -955,21 +1043,48 @@ function M.open_diff_modal(target_file, target_type, target_cwd, commit_hash)
 	render(index)
 
 	local is_closed = false
-	local function close_modal()
+	local function close_modal(keep_screen)
 		if is_closed then
 			return
 		end
 		is_closed = true
+		if keep_screen == true then
+			config.cached_view = "diff"
+			config.cached_view_data = {
+				target_file = target_file,
+				target_type = target_type,
+				cwd = active_cwd,
+				commit_hash = hash,
+				diff_index = index,
+			}
+		elseif keep_screen == false then
+			config.cached_view = "panel"
+			config.cached_view_data = {}
+		end
 		config.diff_modal_win, config.diff_modal_buf = nil, nil
 		ui.close(left_win)
 		ui.close(right_win)
 		if orig_cwd and vim.fn.isdirectory(orig_cwd) == 1 then
 			pcall(vim.fn.chdir, orig_cwd)
 		end
-		if prev_win and vim.api.nvim_win_is_valid(prev_win) then
-			pcall(vim.api.nvim_set_current_win, prev_win)
-		elseif config.main_win and vim.api.nvim_win_is_valid(config.main_win) then
-			pcall(vim.api.nvim_set_current_win, config.main_win)
+		if keep_screen then
+			local panel_mod = package.loaded["plugins.krs.git.git_center.panel"]
+			if panel_mod and panel_mod.close_git_center then
+				panel_mod.close_git_center({ keep_cached_view = true })
+			end
+			if prev_win and vim.api.nvim_win_is_valid(prev_win) then
+				pcall(vim.api.nvim_set_current_win, prev_win)
+			end
+		else
+			if
+				prev_win
+				and vim.api.nvim_win_is_valid(prev_win)
+				and not (config.main_win and vim.api.nvim_win_is_valid(config.main_win))
+			then
+				pcall(vim.api.nvim_set_current_win, prev_win)
+			elseif config.main_win and vim.api.nvim_win_is_valid(config.main_win) then
+				pcall(vim.api.nvim_set_current_win, config.main_win)
+			end
 		end
 	end
 
@@ -1037,14 +1152,19 @@ function M.open_diff_modal(target_file, target_type, target_cwd, commit_hash)
 		vim.api.nvim_create_autocmd("WinClosed", {
 			pattern = tostring(win),
 			once = true,
-			callback = close_modal,
+			callback = function()
+				close_modal(false)
+			end,
 		})
 	end
 
 	for _, b in ipairs({ left_buf, right_buf }) do
 		local opts = { buffer = b, noremap = true, silent = true, nowait = true }
 		for _, key in ipairs(config.settings.keys.modal_close) do
-			vim.keymap.set({ "n", "v", "i", "t" }, key, close_modal, opts)
+			local tk = is_toggle_key(key)
+			vim.keymap.set({ "n", "v", "i", "t" }, key, function()
+				close_modal(tk)
+			end, opts)
 		end
 
 		local function handle_diff_shift_enter()

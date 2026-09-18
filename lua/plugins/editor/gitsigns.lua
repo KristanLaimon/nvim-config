@@ -58,6 +58,11 @@ return {
 				if vim.wo.diff then
 					return "]c"
 				end
+				local dm_ok, dm = pcall(require, "plugins.krs.git.diff_mode")
+				if dm_ok and dm.is_open and dm.is_open() then
+					dm.jump_next_modification()
+					return "<Ignore>"
+				end
 				vim.schedule(function()
 					gs.next_hunk()
 				end)
@@ -67,6 +72,11 @@ return {
 			map("n", "[c", function()
 				if vim.wo.diff then
 					return "[c"
+				end
+				local dm_ok, dm = pcall(require, "plugins.krs.git.diff_mode")
+				if dm_ok and dm.is_open and dm.is_open() then
+					dm.jump_prev_modification()
+					return "<Ignore>"
 				end
 				vim.schedule(function()
 					gs.prev_hunk()

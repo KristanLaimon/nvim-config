@@ -27,7 +27,7 @@ local M = {}
 -- ============================================================================
 
 local env_ok, env_mod = pcall(require, "krs.core.environment")
-local is_mobile = false
+local is_mobile
 if env_ok then
 	local env = env_mod.detect()
 	is_mobile = env.is_mobile or env.is_termux or env.is_proot
@@ -332,5 +332,31 @@ end, { nargs = "?" })
 vim.api.nvim_create_user_command("KrsExportPs1", function(...)
 	vim.cmd("KrsTranspilePs1 " .. (... or ""))
 end, { nargs = "?" })
+
+-- ============================================================================
+-- GIT DIFF MODE KEYMAPS
+-- ============================================================================
+
+vim.keymap.set("n", "<S-Tab>", function()
+	pcall(vim.cmd, "normal! <<")
+end, opts("Reverse Indent"))
+
+vim.keymap.set("n", "]d", function()
+	local ok, dm = pcall(require, "plugins.krs.git.diff_mode")
+	if ok and dm.is_open and dm.is_open() then
+		dm.jump_next_modification()
+		return
+	end
+	pcall(vim.diagnostic.goto_next)
+end, opts("Next Git Diff Modification / Diagnostic"))
+
+vim.keymap.set("n", "[d", function()
+	local ok, dm = pcall(require, "plugins.krs.git.diff_mode")
+	if ok and dm.is_open and dm.is_open() then
+		dm.jump_prev_modification()
+		return
+	end
+	pcall(vim.diagnostic.goto_prev)
+end, opts("Previous Git Diff Modification / Diagnostic"))
 
 return M

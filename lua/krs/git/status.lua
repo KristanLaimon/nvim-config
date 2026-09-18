@@ -42,6 +42,11 @@ function M.parse_branch(header)
 	end
 
 	local info = header:sub(4)
+	local no_commits_branch = info:match("^No commits yet on%s+(%S+)")
+	if no_commits_branch then
+		return no_commits_branch, nil, 0, 0
+	end
+
 	local branch, upstream = info:match("^([^%.]+)%.%.%.(%S+)")
 	local ahead = tonumber(header:match("%[.*ahead%s+(%d+)")) or 0
 	local behind = tonumber(header:match("%[.*behind%s+(%d+)")) or 0

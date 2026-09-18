@@ -31,6 +31,13 @@ M.open_branch_modal = modals.open_branch_modal
 M.open_commit_log_modal = modals.open_commit_log_modal
 M.open_diff_modal = modals.open_diff_modal
 
+-- Re-export diff_mode
+local diff_mode = require("plugins.krs.git.diff_mode")
+M.diff_mode = diff_mode
+M.open_diff_mode = diff_mode.open
+M.toggle_diff_mode = diff_mode.toggle
+M.close_diff_mode = diff_mode.close
+
 -- Re-export panel & window controls
 M.is_open = panel.is_open
 M.resize_split = panel.resize_split
@@ -61,6 +68,32 @@ function M.setup()
 	pcall(vim.api.nvim_create_user_command, "GitHistory", function()
 		M.open_commit_log_modal()
 	end, { desc = "Open Git Commit Log & History Viewer" })
+
+	pcall(vim.api.nvim_create_user_command, "GitDiffMode", function()
+		diff_mode.open()
+	end, { desc = "Open Git Diff Mode Manager (Same Branch / Between Branches)" })
+
+	pcall(vim.api.nvim_create_user_command, "GitDiffSameBranch", function(cmd_opts)
+		local n = cmd_opts.args ~= "" and tonumber(cmd_opts.args) or nil
+		diff_mode.start_same_branch({ commits_behind = n })
+	end, { nargs = "?", desc = "Start Git Diff Mode for Same Branch (HEAD vs HEAD~N)" })
+
+	pcall(vim.api.nvim_create_user_command, "GitDiffBetweenBranches", function(cmd_opts)
+		local args = cmd_opts.fargs or {}
+		if #args >= 2 then
+			diff_mode.start_between_branches(args[1], args[2])
+		else
+			diff_mode.open_branch_selector_modal()
+		end
+	end, { nargs = "*", desc = "Start Git Diff Mode Between 2 Branches (Side-by-Side)" })
+
+	pcall(vim.api.nvim_create_user_command, "GitDiffClose", function()
+		diff_mode.close()
+	end, { desc = "Close Git Diff Mode" })
+
+	pcall(vim.api.nvim_create_user_command, "GitDiffToggle", function()
+		diff_mode.toggle()
+	end, { desc = "Toggle Git Diff Mode (Same Branch)" })
 
 	local function reload()
 		package.loaded["plugins.krs.git.git_center"] = nil
@@ -144,7 +177,18 @@ _G.GitCenter = M
 return setmetatable({
 	name = "krs_git_center",
 	dir = require("krs.core.lazyspec").for_module(),
-	cmd = { "GitCenter", "GitCenterStage", "GitCenterCommit", "GitCenterPush", "GitCenterDiff" },
+	cmd = {
+		"GitCenter",
+		"GitCenterStage",
+		"GitCenterCommit",
+		"GitCenterPush",
+		"GitCenterDiff",
+		"GitDiffMode",
+		"GitDiffSameBranch",
+		"GitDiffBetweenBranches",
+		"GitDiffClose",
+		"GitDiffToggle",
+	},
 	keys = {
 		{ "<C-S-g>", mode = { "n", "i", "v", "t" }, desc = "Open Git Control Center" },
 		{ "<leader>gc", mode = { "n", "v" }, desc = "Open Git Control Center" },

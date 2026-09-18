@@ -598,4 +598,72 @@ describe("plugins.krs.git.git_center", function()
 
 		git_center.close_git_center()
 	end)
+
+	it("caches screen in RAM and restores log modal when closed with keep_cached_view", function()
+		git_center.open_git_center()
+		git_center.open_commit_log_modal()
+		expect(git_center.log_win ~= nil and vim.api.nvim_win_is_valid(git_center.log_win)).toBeTruthy()
+
+		-- Set cursor to row 2
+		pcall(vim.api.nvim_win_set_cursor, git_center.log_win, { 2, 0 })
+
+		-- Close preserving cached view (simulating Ctrl+Shift+G toggle)
+		git_center.close_git_center({ keep_cached_view = true })
+		expect(git_center.is_open()).toBeFalsy()
+		expect(git_center.cached_view).toBe("log")
+
+		-- Reopen via open_git_center() / toggle_git_center()
+		git_center.open_git_center()
+		expect(git_center.is_open()).toBeTruthy()
+		expect(git_center.log_win ~= nil and vim.api.nvim_win_is_valid(git_center.log_win)).toBeTruthy()
+
+		-- Normal close resets cached_view to panel
+		git_center.close_git_center()
+		expect(git_center.cached_view).toBe("panel")
+	end)
+
+	it("binds v and V keys in main panel to launch git diff mode", function()
+		git_center.open_git_center()
+		local main_buf = git_center.main_buf
+		expect(main_buf).toBeDefined()
+
+		local v_map = vim.api.nvim_buf_call(main_buf, function()
+			return vim.fn.maparg("v", "n", false, true)
+		end)
+		expect(v_map.buffer).toBe(1)
+
+		local v_upper_map = vim.api.nvim_buf_call(main_buf, function()
+			return vim.fn.maparg("V", "n", false, true)
+		end)
+		expect(v_upper_map.buffer).toBe(1)
+
+		git_center.close_git_center()
+	end)
+
+	it("restores exact cursor position in log modal after toggle_git_center() cycle", function()
+		git_center.open_git_center()
+		git_center.open_commit_log_modal()
+		expect(git_center.log_win ~= nil and vim.api.nvim_win_is_valid(git_center.log_win)).toBeTruthy()
+
+		-- Set cursor to row 3 (if enough lines)
+		local line_count = vim.api.nvim_buf_line_count(git_center.log_buf)
+		local target_row = math.min(line_count, 3)
+		vim.api.nvim_win_set_cursor(git_center.log_win, { target_row, 0 })
+
+		-- Toggle closed with toggle_git_center (same as user pressing Ctrl+Shift+G)
+		git_center.toggle_git_center()
+		expect(git_center.is_open()).toBeFalsy()
+		expect(git_center.cached_view).toBe("log")
+
+		-- Toggle open with toggle_git_center
+		git_center.toggle_git_center()
+		expect(git_center.is_open()).toBeTruthy()
+		expect(git_center.log_win ~= nil and vim.api.nvim_win_is_valid(git_center.log_win)).toBeTruthy()
+
+		-- Verify cursor restored to target_row
+		local restored_row = vim.api.nvim_win_get_cursor(git_center.log_win)[1]
+		expect(restored_row).toBe(target_row)
+
+		git_center.close_git_center()
+	end)
 end)

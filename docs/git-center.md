@@ -20,6 +20,9 @@ The **Git Control Center** (`<C-S-g>`) is a high-speed, interactive floating Git
 - **Remote Push**: Execute `git push` (`P`) with automatic upstream tracking detection or interactive remote branch selection.
 - **Commit & Tag Box**: Multi-line commit title (`c`), description (`m`), and optional tag (`t`) via the `input_modal` component.
 - **VSCode 3-Way Merge Conflict Resolver (`M` / `:GitConflictResolve` / `<leader>gm`)**: Opens a full-screen tiled workspace (like the DAP debugger) with 4 synchronized panels: Left Sidebar (conflicted files with live decreasing counts `(2)` -> `(1)` -> `(0)` and locked to Neo-tree width), Top-Left Current/Ours (highlighted in Green), Top-Right Incoming/Theirs (highlighted in Blue), Bottom editable Result (clean merged code with unlimited undo). Panel jumps: `<C-h>` (Sidebar), `<C-k>` (Current), `<C-l>` (Incoming), `<C-j>` (Result), `<Tab>`/`<S-Tab>`. Conflict actions: Accept Ours (`<C-1>`/`<C-o>`), Accept Theirs (`<C-2>`/`<C-t>`), Accept Both (`<C-3>`/`<C-b>`), Undo resolution (`<C-z>`/`u` - repeatable back to initial state), navigate (`<C-n>`/`<C-p>`), and stage (`<C-s>`).
+- **RAM Screen Caching (`<C-S-g>`)**: Closing Git Center while on any subscreen (such as the Commit History Log or Branch Modal) using `<C-S-g>` caches the view and cursor position in RAM. Re-opening with `<C-S-g>` restores you directly to the exact screen where you left off. Closing with `q` or `<Esc>` returns to the main control panel.
+- **Git Diff Mode (Same Branch) (`V` / `:GitDiffSameBranch`)**: In-buffer diff comparison highlighting added lines in green and displaying deleted lines via red virtual lines (`-`). By default, compares live working tree changes (both staged & unstaged) against the `HEAD` commit. Supports configurable diff ranges via `c` (`HEAD~N` + working tree, committed history only `HEAD~N..HEAD`, or between 2 chosen commits). Features a docked right sidebar file list with status markers. Jump between modifications using `]c`/`[c` or `]d`/`[d`, and return focus to code editor using `h` or `<Esc>`.
+- **Git Diff Mode (Between 2 Branches) (`v` / `:GitDiffBetweenBranches`)**: Dual synchronized split view comparing the same file across two branches or refs (selected via dual Base & Target floating menus with custom branch/ref input prompt). Supports synchronized scrolling (`scrollbind`/`cursorbind`), side-by-side color highlights, and jumping between modifications with `]c`/`[c` or `]d`/`[d`.
 - **In-Buffer GitSigns Integration (`gitsigns.nvim`)**: Real-time signcolumn diff indicators (`▎`, ``) and hunk navigation (`]c`/`[c`). See [Keybinds](keybinds.md#git--gitsigns) for full list.
 
 ---
@@ -51,7 +54,11 @@ The **Git Control Center** (`<C-S-g>`) is a high-speed, interactive floating Git
 | `C` | Normal | Execute Commit & Tag |
 | `<Tab>` | Normal | Toggle focus between left control panel and right live preview |
 | `<C-S-j>` / `<C-S-k>` | Normal | Scroll right live diff preview window |
-| `d` | Normal | Open selected file in Side-by-Side Diff Modal UI |
+| `v` | Normal | Open Git Diff Mode Manager menu (Same branch, 2 branches, commits) |
+| `V` | Normal | Toggle Git Diff Mode (Same branch: Live working tree vs HEAD) |
+| `c` (Diff Sidebar) | Normal | Configure diff scope / commits behind range |
+| `h` / `<Esc>` (Diff Sidebar) | Normal | Return focus to code editor |
+| `]c` / `[c` or `]d` / `[d` | Normal | Jump to next / previous modification in active diff buffer |
 | `<F5>` / `<C-r>` | Normal | Refresh Git status |
 
 ---

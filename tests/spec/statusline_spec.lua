@@ -84,4 +84,30 @@ describe("plugins.krs.ui.statusline_picker", function()
 		local cmds = vim.api.nvim_get_commands({})
 		expect(cmds["KrsStatuslineTheme"]).toBeDefined()
 	end)
+
+	it("dynamically resolves git branch from directory instead of defaulting to main", function()
+		-- In current repo
+		local cur_branch = statusline.resolve_git_branch(vim.fn.getcwd())
+		expect(type(cur_branch)).toBe("string")
+		expect(cur_branch ~= "").toBeTruthy()
+
+		-- In non-git directory, returns empty string
+		local tmp_dir = vim.fn.tempname()
+		vim.fn.mkdir(tmp_dir, "p")
+		expect(statusline.resolve_git_branch(tmp_dir)).toBe("")
+
+		-- In a repo with custom branch name
+		local test_repo = vim.fn.tempname()
+		vim.fn.mkdir(test_repo, "p")
+		vim.fn.system({ "git", "-C", test_repo, "init", "-b", "feature-statusline-test" })
+		local resolved = statusline.resolve_git_branch(test_repo)
+		expect(resolved).toBe("feature-statusline-test")
+
+		-- Test git_branch() function
+		local branch_label = statusline.git_branch()
+		expect(type(branch_label)).toBe("string")
+
+		vim.fn.delete(tmp_dir, "rf")
+		vim.fn.delete(test_repo, "rf")
+	end)
 end)
