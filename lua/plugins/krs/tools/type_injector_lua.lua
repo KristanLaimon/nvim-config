@@ -72,13 +72,51 @@ function M.get_active_lua_libraries(root, core)
 	return paths
 end
 
+--- Directories lua_ls should ignore: inactive schemas and common non-project folders.
+--- @param root string|nil Project root.
+--- @param core table type_injector core module.
+--- @return string[] ignored
+function M.get_ignored_lua_directories(root, core)
+	local ignored = { ".vscode" }
+	local active_names = {}
+	if root then
+		for _, name in ipairs(core.load_project_types(root).lua or {}) do
+			active_names[name] = true
+		end
+	end
+
+	local all_schemas = core.scan_available_schemas("lua")
+	for _, name in ipairs(all_schemas) do
+		if not active_names[name] then
+			local schema_dir = core.resolve_schema_dir("lua", name)
+			if schema_dir then
+				table.insert(ignored, schema_dir)
+				if root then
+					local norm_root = vim.fs.normalize(root)
+					local norm_dir = vim.fs.normalize(schema_dir)
+					if norm_dir:sub(1, #norm_root) == norm_root then
+						local rel = norm_dir:sub(#norm_root + 2)
+						if rel ~= "" and not vim.tbl_contains(ignored, rel) then
+							table.insert(ignored, rel)
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return ignored
+end
+
 function M.apply_lsp_settings(root, core)
 	local lua_libs = M.get_active_lua_libraries(root, core)
+	local lua_ignored = M.get_ignored_lua_directories(root, core)
 	for _, client in ipairs(vim.lsp.get_clients({ name = "lua_ls" })) do
 		local settings = client.config and client.config.settings
 		if settings and settings.Lua then
 			settings.Lua.workspace = settings.Lua.workspace or {}
 			settings.Lua.workspace.library = lua_libs
+			settings.Lua.workspace.ignoreDir = lua_ignored
 			client.notify("workspace/didChangeConfiguration", { settings = settings })
 		end
 	end

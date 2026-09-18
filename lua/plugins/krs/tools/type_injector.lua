@@ -301,6 +301,10 @@ function M.get_active_lua_libraries(root)
 	return lua_injector.get_active_lua_libraries(root, M)
 end
 
+function M.get_ignored_lua_directories(root)
+	return lua_injector.get_ignored_lua_directories(root, M)
+end
+
 function M.sync_ts_type_links(root, active_names)
 	return ts_injector.sync_ts_type_links(root, active_names, M)
 end

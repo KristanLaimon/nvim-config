@@ -22,7 +22,9 @@ M.lsp_config = {
 	lua_ls = {
 		filetypes = { "lua", "krsnvim" },
 		before_init = function(_, config)
-			local libs = require("plugins.krs.tools.type_injector").get_active_lua_libraries(config.root_dir)
+			local type_injector = require("plugins.krs.tools.type_injector")
+			local libs = type_injector.get_active_lua_libraries(config.root_dir)
+			local ignored = type_injector.get_ignored_lua_directories(config.root_dir)
 
 			-- Detect Omarchy and inject hyprland and omarchy types
 			local env = require("krs.core.environment").detect()
@@ -37,6 +39,7 @@ M.lsp_config = {
 			end
 
 			config.settings.Lua.workspace.library = libs
+			config.settings.Lua.workspace.ignoreDir = ignored
 		end,
 		settings = {
 			Lua = {
@@ -48,6 +51,12 @@ M.lsp_config = {
 				},
 				workspace = {
 					checkThirdParty = false,
+					ignoreDir = {
+						".vscode",
+						"schemas-langs/lua/garrysmod",
+						"schemas-langs/lua/love",
+						"schemas-langs/lua/koreader",
+					},
 				},
 				completion = {
 					callSnippet = "Replace",

@@ -5,6 +5,12 @@
 		"vim.fn": "vim.fn"
 	},
 	"workspace.checkThirdParty": false,
+	"workspace.ignoreDir": [
+		".vscode",
+		"schemas-langs/lua/garrysmod",
+		"schemas-langs/lua/love",
+		"schemas-langs/lua/koreader"
+	],
 	"workspace.library": ["$VIMRUNTIME/lua", "${3rd}/luv/library"],
 	"diagnostics.globals": [
 		"vim",
