@@ -180,8 +180,31 @@ end
 --- @param bufnr integer
 local function clear_buffer_diff_highlights(bufnr)
 	if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
-		vim.api.nvim_buf_clear_namespace(bufnr, M.namespace, 0, -1)
+		pcall(vim.api.nvim_buf_clear_namespace, bufnr, M.namespace, 0, -1)
+		pcall(vim.api.nvim_buf_clear_namespace, bufnr, diff.namespace, 0, -1)
+		pcall(vim.api.nvim_buf_clear_namespace, bufnr, diff.ts_namespace, 0, -1)
 	end
+end
+
+--- Clears diff highlights and extmarks from all buffers in Neovim
+function M.clear_all_diff_highlights()
+	for b, _ in pairs(M.state.highlighted_bufs or {}) do
+		if vim.api.nvim_buf_is_valid(b) then
+			pcall(vim.api.nvim_buf_clear_namespace, b, M.namespace, 0, -1)
+			pcall(vim.api.nvim_buf_clear_namespace, b, diff.namespace, 0, -1)
+			pcall(vim.api.nvim_buf_clear_namespace, b, diff.ts_namespace, 0, -1)
+		end
+	end
+	M.state.highlighted_bufs = {}
+
+	for _, b in ipairs(vim.api.nvim_list_bufs()) do
+		if vim.api.nvim_buf_is_valid(b) then
+			pcall(vim.api.nvim_buf_clear_namespace, b, M.namespace, 0, -1)
+			pcall(vim.api.nvim_buf_clear_namespace, b, diff.namespace, 0, -1)
+			pcall(vim.api.nvim_buf_clear_namespace, b, diff.ts_namespace, 0, -1)
+		end
+	end
+	M.state.current_modifications = {}
 end
 
 --- Computes diff and applies inline/line highlights to the given buffer
@@ -193,6 +216,10 @@ end
 --- @return integer[] modification_lines
 function M.apply_same_branch_highlights(bufnr, file_path, base_ref, target_ref, cwd)
 	clear_buffer_diff_highlights(bufnr)
+	M.state.highlighted_bufs = M.state.highlighted_bufs or {}
+	if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
+		M.state.highlighted_bufs[bufnr] = true
+	end
 	diff.setup_highlights()
 
 	local rel_path = path_util.relative_to(file_path, cwd) or file_path
@@ -1036,6 +1063,18 @@ function M.open_file_list_window(files, selected_idx)
 	})
 	M.state.file_list_win = win
 
+	-- Auto-close diff mode cleanly if sidebar window is closed externally (e.g. :q, :close, <C-w>c)
+	local win_str = tostring(win)
+	vim.api.nvim_create_autocmd("WinClosed", {
+		pattern = win_str,
+		once = true,
+		callback = function()
+			if M.is_open() then
+				M.close()
+			end
+		end,
+	})
+
 	vim.wo[win].winfixwidth = true
 	vim.wo[win].number = false
 	vim.wo[win].relativenumber = false
@@ -1311,6 +1350,35 @@ function M.start_same_branch(opts)
 
 	M.state.files = M.get_changed_files(M.state.base_ref, M.state.target_ref, cwd)
 
+	-- Live diff highlights refresh on file save
+	if M._augroup then
+		pcall(vim.api.nvim_del_augroup_by_id, M._augroup)
+	end
+	M._augroup = vim.api.nvim_create_augroup("krs_git_diff_mode_active", { clear = true })
+	vim.api.nvim_create_autocmd("BufWritePost", {
+		group = M._augroup,
+		callback = function(args)
+			if M.is_open() and M.state.mode == "same_branch" and M.state.cwd then
+				local b = args.buf
+				if b and vim.api.nvim_buf_is_valid(b) then
+					local bname = vim.api.nvim_buf_get_name(b)
+					local rel = path_util.relative_to(bname, M.state.cwd)
+					if rel and rel ~= "" and M.state.files then
+						for _, item in ipairs(M.state.files) do
+							if item.file == rel then
+								M.apply_same_branch_highlights(b, rel, M.state.base_ref, M.state.target_ref, M.state.cwd)
+								if render_file_list then
+									render_file_list()
+								end
+								break
+							end
+						end
+					end
+				end
+			end
+		end,
+	})
+
 	M.open_file_list_window()
 
 	-- Determine initial file to show
@@ -1498,29 +1566,44 @@ function M.close(opts)
 		M.state.current_modifications = {}
 	end
 
-	-- Clear extmarks
-	if M.state.prev_buf and vim.api.nvim_buf_is_valid(M.state.prev_buf) then
-		clear_buffer_diff_highlights(M.state.prev_buf)
+	-- Delete live diff autocmd group
+	if M._augroup then
+		pcall(vim.api.nvim_del_augroup_by_id, M._augroup)
+		M._augroup = nil
 	end
-	local cur_buf = vim.api.nvim_get_current_buf()
-	if cur_buf and vim.api.nvim_buf_is_valid(cur_buf) then
-		clear_buffer_diff_highlights(cur_buf)
-	end
+
+	-- Clear diff highlights & extmarks from ALL open buffers in Neovim
+	M.clear_all_diff_highlights()
 
 	-- Close file list window
 	if M.state.file_list_win and vim.api.nvim_win_is_valid(M.state.file_list_win) then
-		ui.close(M.state.file_list_win)
+		local sb_win = M.state.file_list_win
+		M.state.file_list_win = nil
+		ui.close(sb_win)
+	end
+	if M.state.file_list_buf and vim.api.nvim_buf_is_valid(M.state.file_list_buf) then
+		pcall(vim.api.nvim_buf_delete, M.state.file_list_buf, { force = true })
 	end
 	M.state.file_list_win = nil
 	M.state.file_list_buf = nil
 
 	-- Restore windows from dual mode
 	if M.state.mode == "between_branches" then
+		local left_buf_to_wipe = M.state.dual_left_buf
+		local right_buf_to_wipe = M.state.dual_right_buf
+
 		if M.state.dual_left_win and vim.api.nvim_win_is_valid(M.state.dual_left_win) then
 			pcall(vim.api.nvim_set_option_value, "scrollbind", false, { win = M.state.dual_left_win })
 			pcall(vim.api.nvim_set_option_value, "cursorbind", false, { win = M.state.dual_left_win })
 			if M.state.prev_buf and vim.api.nvim_buf_is_valid(M.state.prev_buf) then
 				pcall(vim.api.nvim_win_set_buf, M.state.dual_left_win, M.state.prev_buf)
+			elseif M.state.active_file and M.state.cwd then
+				local full_p = path_util.join(M.state.cwd, M.state.active_file)
+				if vim.fn.filereadable(full_p) == 1 then
+					pcall(vim.api.nvim_win_call, M.state.dual_left_win, function()
+						vim.cmd("edit " .. vim.fn.fnameescape(full_p))
+					end)
+				end
 			end
 		end
 		if M.state.dual_right_win and vim.api.nvim_win_is_valid(M.state.dual_right_win) then
@@ -1528,6 +1611,14 @@ function M.close(opts)
 			pcall(vim.api.nvim_set_option_value, "cursorbind", false, { win = M.state.dual_right_win })
 			ui.close(M.state.dual_right_win)
 		end
+
+		if left_buf_to_wipe and vim.api.nvim_buf_is_valid(left_buf_to_wipe) then
+			pcall(vim.api.nvim_buf_delete, left_buf_to_wipe, { force = true })
+		end
+		if right_buf_to_wipe and vim.api.nvim_buf_is_valid(right_buf_to_wipe) then
+			pcall(vim.api.nvim_buf_delete, right_buf_to_wipe, { force = true })
+		end
+
 		M.state.dual_left_win, M.state.dual_left_buf = nil, nil
 		M.state.dual_right_win, M.state.dual_right_buf = nil, nil
 	end
@@ -2059,6 +2150,24 @@ function M.export_diff_files_to_zip(zip_name, files, cwd)
 
 		if copied then
 			copied_count = copied_count + 1
+
+			-- Also export base version if available (for 3-way merge on import)
+			if item.status ~= "A" and item.status ~= "?" then
+				local base_ref = M.state.base_ref or "HEAD"
+				local base_res = vim.system({ "git", "-C", cwd, "show", base_ref .. ":" .. rel_path }):wait()
+				if base_res and base_res.code == 0 and base_res.stdout then
+					local base_dest = path_util.join(staging_dir, ".krs_diff_base", rel_path)
+					local base_dest_dir = vim.fs.dirname(base_dest)
+					if base_dest_dir and base_dest_dir ~= "" then
+						vim.fn.mkdir(base_dest_dir, "p")
+					end
+					local bf = io.open(base_dest, "wb")
+					if bf then
+						bf:write(base_res.stdout)
+						bf:close()
+					end
+				end
+			end
 		end
 	end
 
@@ -2188,11 +2297,13 @@ function M.read_zip_manifest(zip_path)
 	return decoded, nil
 end
 
---- Extracts and updates diff files from a validated KRS zip archive into target_dir
+--- Extracts and merges diff files from a validated KRS zip archive into target_dir
+--- Performs a 3-way merge (via git merge-file) against base version (or target repo HEAD/empty)
+--- generating standard conflict markers (<<<<<<< / ======= / >>>>>>>) when conflicts occur.
 --- @param zip_path string Path to zip archive
 --- @param target_dir? string Target project root (defaults to cwd)
 --- @param manifest? table Pre-validated manifest (optional)
---- @return boolean ok, string|nil err
+--- @return boolean ok, string|nil err, table|nil stats
 function M.import_diff_files_from_zip(zip_path, target_dir, manifest)
 	target_dir = target_dir or M.state.cwd or vim.fn.getcwd()
 
@@ -2208,21 +2319,21 @@ function M.import_diff_files_from_zip(zip_path, target_dir, manifest)
 		return false, "Archive manifest contains no files to import"
 	end
 
+	local extract_tmp = vim.fn.tempname() .. "_diff_zip_in"
+	vim.fn.mkdir(extract_tmp, "p")
+
 	local ok_extract = false
 	local err_msg = nil
 
 	-- Method 1: Python
 	local py_bin = (vim.fn.executable("python3") == 1 and "python3") or (vim.fn.executable("python") == 1 and "python")
 	if py_bin then
-		local py_script = "import sys, zipfile, json, os; "
+		local py_script = "import sys, zipfile; "
 			.. "zip_p, target = sys.argv[1], sys.argv[2]; "
 			.. "zf = zipfile.ZipFile(zip_p, 'r'); "
-			.. "manifest = json.loads(zf.read('.krs_diff_manifest.json').decode('utf-8')); "
-			.. "for f in manifest.get('files', []): "
-			.. "    if f in zf.namelist(): "
-			.. "        zf.extract(f, target); "
+			.. "zf.extractall(target); "
 			.. "zf.close()"
-		local res = vim.system({ py_bin, "-c", py_script, zip_path, target_dir }):wait()
+		local res = vim.system({ py_bin, "-c", py_script, zip_path, extract_tmp }):wait()
 		if res and res.code == 0 then
 			ok_extract = true
 		else
@@ -2232,11 +2343,7 @@ function M.import_diff_files_from_zip(zip_path, target_dir, manifest)
 
 	-- Method 2: unzip
 	if not ok_extract and vim.fn.executable("unzip") == 1 then
-		local cmd = { "unzip", "-o", zip_path }
-		for _, f in ipairs(manifest.files) do
-			table.insert(cmd, f)
-		end
-		vim.list_extend(cmd, { "-d", target_dir })
+		local cmd = { "unzip", "-q", "-o", zip_path, "-d", extract_tmp }
 		local res = vim.system(cmd):wait()
 		if res and res.code == 0 then
 			ok_extract = true
@@ -2253,20 +2360,9 @@ function M.import_diff_files_from_zip(zip_path, target_dir, manifest)
 	then
 		local ps_cmd = string.format(
 			"Add-Type -AssemblyName System.IO.Compression.FileSystem; "
-				.. "$zip = [System.IO.Compression.ZipFile]::OpenRead('%s'); "
-				.. "$manifest = $zip.GetEntry('.krs_diff_manifest.json'); "
-				.. "$reader = New-Object System.IO.StreamReader($manifest.Open()); "
-				.. "$json = ConvertFrom-Json $reader.ReadToEnd(); "
-				.. "foreach ($f in $json.files) { "
-				.. "    $entry = $zip.GetEntry($f); "
-				.. "    if ($entry) { "
-				.. "        $dest = [System.IO.Path]::Combine('%s', $f); "
-				.. "        [System.IO.Directory]::CreateDirectory([System.IO.Path]::GetDirectoryName($dest)) | Out-Null; "
-				.. "        [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $dest, $true); "
-				.. "    } "
-				.. "}; $zip.Dispose()",
+				.. "[System.IO.Compression.ZipFile]::ExtractToDirectory('%s', '%s')",
 			zip_path:gsub("'", "''"),
-			target_dir:gsub("'", "''")
+			extract_tmp:gsub("'", "''")
 		)
 		local res = vim.system({ "powershell.exe", "-NoProfile", "-NonInteractive", "-Command", ps_cmd }):wait()
 		if res and res.code == 0 then
@@ -2277,7 +2373,195 @@ function M.import_diff_files_from_zip(zip_path, target_dir, manifest)
 	end
 
 	if not ok_extract then
+		pcall(vim.fn.delete, extract_tmp, "rf")
 		return false, err_msg or "Failed to extract zip archive"
+	end
+
+	local zip_filename = vim.fn.fnamemodify(zip_path, ":t")
+	local stats = {
+		total = #manifest.files,
+		added = 0,
+		merged_clean = 0,
+		identical = 0,
+		conflicted = 0,
+		total_conflicts = 0,
+		conflicted_files = {},
+		binary = 0,
+	}
+
+	local touched_files = {}
+
+	for _, rel_path in ipairs(manifest.files) do
+		-- Basic safety check against path traversal
+		if not rel_path:match("^/") and not rel_path:match("%.%.[/\\]") then
+			local incoming_path = path_util.join(extract_tmp, rel_path)
+			local dest_path = path_util.join(target_dir, rel_path)
+			local base_in_zip = path_util.join(extract_tmp, ".krs_diff_base", rel_path)
+
+			if vim.fn.filereadable(incoming_path) == 1 then
+				table.insert(touched_files, dest_path)
+
+				-- Save buffer if open and modified in Neovim before merging
+				for _, b in ipairs(vim.api.nvim_list_bufs()) do
+					if vim.api.nvim_buf_is_loaded(b) and vim.bo[b].modified then
+						local bname = vim.api.nvim_buf_get_name(b)
+						if path_util.equals(bname, dest_path) then
+							pcall(vim.api.nvim_buf_call, b, function()
+								vim.cmd("noautocmd silent write")
+							end)
+						end
+					end
+				end
+
+				if vim.fn.filereadable(dest_path) == 0 then
+					-- Case 1: Destination file does not exist -> newly added
+					local dest_dir = vim.fs.dirname(dest_path)
+					if dest_dir and dest_dir ~= "" then
+						vim.fn.mkdir(dest_dir, "p")
+					end
+					vim.uv.fs_copyfile(incoming_path, dest_path)
+					stats.added = stats.added + 1
+				else
+					-- Case 2: Destination file exists -> check if identical or merge
+					local function read_file(p)
+						local f = io.open(p, "rb")
+						if not f then
+							return nil
+						end
+						local content = f:read("*a")
+						f:close()
+						return content
+					end
+
+					local dest_content = read_file(dest_path)
+					local inc_content = read_file(incoming_path)
+
+					if dest_content and inc_content and dest_content == inc_content then
+						stats.identical = stats.identical + 1
+					else
+						-- Differences exist: perform 3-way merge
+						local base_file_to_use = nil
+						local temp_base_file = nil
+
+						if vim.fn.filereadable(base_in_zip) == 1 then
+							base_file_to_use = base_in_zip
+						else
+							-- Try to get base from destination git repo
+							local git_base_content = nil
+							if vim.fn.executable("git") == 1 then
+								if manifest.base_ref and manifest.base_ref ~= "" and manifest.base_ref ~= "WORKTREE" then
+									local bres = vim
+										.system({
+											"git",
+											"-C",
+											target_dir,
+											"show",
+											manifest.base_ref .. ":" .. rel_path,
+										})
+										:wait()
+									if bres and bres.code == 0 and bres.stdout then
+										git_base_content = bres.stdout
+									end
+								end
+								if not git_base_content then
+									local hres = vim.system({ "git", "-C", target_dir, "show", "HEAD:" .. rel_path }):wait()
+									if hres and hres.code == 0 and hres.stdout then
+										git_base_content = hres.stdout
+									end
+								end
+							end
+
+							temp_base_file = vim.fn.tempname() .. "_base"
+							local bf = io.open(temp_base_file, "wb")
+							if bf then
+								if git_base_content then
+									bf:write(git_base_content)
+								end
+								bf:close()
+								base_file_to_use = temp_base_file
+							end
+						end
+
+						-- Merge using git merge-file
+						local merge_ok = false
+						if vim.fn.executable("git") == 1 and base_file_to_use then
+							local merge_cmd = {
+								"git",
+								"merge-file",
+								"-L",
+								"current (workspace)",
+								"-L",
+								"base",
+								"-L",
+								string.format("incoming (%s)", zip_filename),
+								dest_path,
+								base_file_to_use,
+								incoming_path,
+							}
+							local merge_res = vim.system(merge_cmd):wait()
+							if merge_res then
+								if merge_res.code == 0 then
+									-- Clean merge without conflicts
+									stats.merged_clean = stats.merged_clean + 1
+									merge_ok = true
+								elseif merge_res.code > 0 then
+									-- Merge with conflicts!
+									stats.conflicted = stats.conflicted + 1
+									stats.total_conflicts = stats.total_conflicts + merge_res.code
+									table.insert(stats.conflicted_files, { file = rel_path, conflicts = merge_res.code })
+									merge_ok = true
+								else
+									-- Return code < 0: Binary file or error
+									vim.uv.fs_copyfile(incoming_path, dest_path)
+									stats.binary = stats.binary + 1
+									merge_ok = true
+								end
+							end
+						end
+
+						-- Fallback if git is not executable
+						if not merge_ok then
+							local conf_content = string.format(
+								"<<<<<<< current (workspace)\n%s\n=======\n%s\n>>>>>>> incoming (%s)\n",
+								dest_content or "",
+								inc_content or "",
+								zip_filename
+							)
+							local wf = io.open(dest_path, "wb")
+							if wf then
+								wf:write(conf_content)
+								wf:close()
+							end
+							stats.conflicted = stats.conflicted + 1
+							stats.total_conflicts = stats.total_conflicts + 1
+							table.insert(stats.conflicted_files, { file = rel_path, conflicts = 1 })
+						end
+
+						if temp_base_file then
+							pcall(vim.fn.delete, temp_base_file)
+						end
+					end
+				end
+			end
+		end
+	end
+
+	-- Clean up temporary extraction folder
+	pcall(vim.fn.delete, extract_tmp, "rf")
+
+	-- Reload any open buffers in Neovim that were touched
+	for _, b in ipairs(vim.api.nvim_list_bufs()) do
+		if vim.api.nvim_buf_is_loaded(b) then
+			local bname = vim.api.nvim_buf_get_name(b)
+			for _, touched in ipairs(touched_files) do
+				if path_util.equals(bname, touched) then
+					pcall(vim.api.nvim_buf_call, b, function()
+						vim.cmd("edit!")
+					end)
+					break
+				end
+			end
+		end
 	end
 
 	-- Refresh open buffers & editor state
@@ -2290,7 +2574,7 @@ function M.import_diff_files_from_zip(zip_path, target_dir, manifest)
 		M.start_same_branch({ cwd = target_dir })
 	end
 
-	return true, nil
+	return true, nil, stats
 end
 
 --- Prompts user to select a zip file, validates KRS compatibility, and confirms before importing
@@ -2324,12 +2608,13 @@ function M.import_diff_prompt(initial_path)
 
 		-- Confirmation prompt
 		local choices = {
-			string.format("1. ✅ Confirm: Import & overwrite %d file(s)", file_count),
+			string.format("1. 🔀 Confirm: Merge & import %d file(s)", file_count),
 			"2. 📋 Review list of files in archive",
 			"3. ❌ Cancel",
 		}
 
-		local prompt_title = string.format("📦 Import %d files from '%s'%s?", file_count, zip_filename, branch_label)
+		local prompt_title =
+			string.format("📦 Import & Merge %d files from '%s'%s?", file_count, zip_filename, branch_label)
 		vim.ui.select(choices, { prompt = prompt_title }, function(choice, idx)
 			if not choice or not idx or idx == 3 then
 				notify("Import cancelled")
@@ -2349,12 +2634,32 @@ function M.import_diff_prompt(initial_path)
 			end
 
 			if idx == 1 then
-				local ok, extract_err = M.import_diff_files_from_zip(full_path, cwd, manifest)
+				local ok, extract_err, stats = M.import_diff_files_from_zip(full_path, cwd, manifest)
 				if ok then
-					notify(
-						string.format("✅ Successfully imported %d file(s) from '%s' into project root!", file_count, zip_filename),
-						vim.log.levels.INFO
-					)
+					if stats and stats.conflicted > 0 then
+						local conf_msg = string.format(
+							"⚠️ Imported %d file(s) from '%s' with %d conflict(s) in %d file(s)!\nConflict markers (<<<<<<< / ======= / >>>>>>>) were generated:\n",
+							file_count,
+							zip_filename,
+							stats.total_conflicts,
+							stats.conflicted
+						)
+						for _, cf in ipairs(stats.conflicted_files) do
+							conf_msg = conf_msg
+								.. string.format("  • %s (%d conflict%s)\n", cf.file, cf.conflicts, cf.conflicts == 1 and "" or "s")
+						end
+						conf_msg = conf_msg .. "💡 Tip: Search for '<<<<<<<' or use Conflict Resolver (<leader>gm) to resolve."
+						notify(vim.trim(conf_msg), vim.log.levels.WARN)
+					else
+						notify(
+							string.format(
+								"✅ Successfully merged & imported %d file(s) from '%s' into project root!",
+								file_count,
+								zip_filename
+							),
+							vim.log.levels.INFO
+						)
+					end
 				else
 					notify("Failed to import zip files: " .. tostring(extract_err), vim.log.levels.ERROR)
 				end

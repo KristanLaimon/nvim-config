@@ -187,6 +187,196 @@ describe("plugins.krs.git.diff_mode.export_zip", function()
 		expect(vim.fn.filereadable(manifest_in_target)).toBe(0)
 	end)
 
+	it("cleanly 3-way merges non-conflicting changes when importing zip into existing file", function()
+		local f_name = "src/calculator.lua"
+
+		local base_content =
+			"local M = {}\n\nfunction M.add(a, b)\n\treturn a + b\nend\n\nfunction M.sub(a, b)\n\treturn a - b\nend\n\nreturn M\n"
+		local incoming_content =
+			"local M = {}\n\nfunction M.add(a, b)\n\t-- Added logging\n\treturn a + b\nend\n\nfunction M.sub(a, b)\n\treturn a - b\nend\n\nreturn M\n"
+		local local_content =
+			"local M = {}\n\nfunction M.add(a, b)\n\treturn a + b\nend\n\nfunction M.sub(a, b)\n\t-- Local sub comment\n\treturn a - b\nend\n\nreturn M\n"
+
+		local staging = vim.fn.tempname() .. "_staging"
+		vim.fn.mkdir(staging, "p")
+		local inc_file = path_util.join(staging, f_name)
+		local base_file = path_util.join(staging, ".krs_diff_base", f_name)
+		vim.fn.mkdir(vim.fs.dirname(inc_file), "p")
+		vim.fn.mkdir(vim.fs.dirname(base_file), "p")
+
+		local h_inc = io.open(inc_file, "w")
+		if h_inc then
+			h_inc:write(incoming_content)
+			h_inc:close()
+		end
+		local h_base = io.open(base_file, "w")
+		if h_base then
+			h_base:write(base_content)
+			h_base:close()
+		end
+
+		local mf = {
+			generator = "krs_git_diff_mode",
+			version = "2.0",
+			files = { f_name },
+		}
+		local h_mf = io.open(path_util.join(staging, ".krs_diff_manifest.json"), "w")
+		if h_mf then
+			h_mf:write(vim.json.encode(mf))
+			h_mf:close()
+		end
+
+		diff_mode.zip_directory(staging, zip_dest)
+		pcall(vim.fn.delete, staging, "rf")
+
+		-- Target repo has local_content
+		local target_file = path_util.join(target_import_repo, f_name)
+		vim.fn.mkdir(vim.fs.dirname(target_file), "p")
+		local h_target = io.open(target_file, "w")
+		if h_target then
+			h_target:write(local_content)
+			h_target:close()
+		end
+
+		-- Import zip into target_import_repo
+		local ok, err, stats = diff_mode.import_diff_files_from_zip(zip_dest, target_import_repo)
+		expect(ok).toBeTruthy()
+		expect(err).toBeNil()
+		expect(stats).toBeDefined()
+		expect(stats.merged_clean).toBe(1)
+		expect(stats.conflicted).toBe(0)
+
+		-- Verify both changes are merged and no conflict markers
+		local merged_data = io.open(target_file, "r"):read("*a")
+		expect(merged_data:match("Added logging") ~= nil).toBeTruthy()
+		expect(merged_data:match("Local sub comment") ~= nil).toBeTruthy()
+		expect(merged_data:match("<<<<<<<") == nil).toBeTruthy()
+		expect(merged_data:match(">>>>>>>") == nil).toBeTruthy()
+	end)
+
+	it("generates conflict markers (<<<<<<< / ======= / >>>>>>>) when changes conflict", function()
+		local f_name = "src/config.lua"
+
+		local base_content = "return { version = '1.0.0', mode = 'dev' }\n"
+		local incoming_content = "return { version = '2.0.0-incoming', mode = 'dev' }\n"
+		local local_content = "return { version = '3.0.0-local', mode = 'dev' }\n"
+
+		local staging = vim.fn.tempname() .. "_staging2"
+		vim.fn.mkdir(staging, "p")
+		local inc_file = path_util.join(staging, f_name)
+		local base_file = path_util.join(staging, ".krs_diff_base", f_name)
+		vim.fn.mkdir(vim.fs.dirname(inc_file), "p")
+		vim.fn.mkdir(vim.fs.dirname(base_file), "p")
+
+		local h_inc = io.open(inc_file, "w")
+		if h_inc then
+			h_inc:write(incoming_content)
+			h_inc:close()
+		end
+		local h_base = io.open(base_file, "w")
+		if h_base then
+			h_base:write(base_content)
+			h_base:close()
+		end
+
+		local mf = {
+			generator = "krs_git_diff_mode",
+			version = "2.0",
+			files = { f_name },
+		}
+		local h_mf = io.open(path_util.join(staging, ".krs_diff_manifest.json"), "w")
+		if h_mf then
+			h_mf:write(vim.json.encode(mf))
+			h_mf:close()
+		end
+
+		diff_mode.zip_directory(staging, zip_dest)
+		pcall(vim.fn.delete, staging, "rf")
+
+		-- Target repo has local_content
+		local target_file = path_util.join(target_import_repo, f_name)
+		vim.fn.mkdir(vim.fs.dirname(target_file), "p")
+		local h_target = io.open(target_file, "w")
+		if h_target then
+			h_target:write(local_content)
+			h_target:close()
+		end
+
+		-- Import zip into target_import_repo
+		local ok, err, stats = diff_mode.import_diff_files_from_zip(zip_dest, target_import_repo)
+		expect(ok).toBeTruthy()
+		expect(err).toBeNil()
+		expect(stats).toBeDefined()
+		expect(stats.conflicted).toBe(1)
+		expect(stats.total_conflicts >= 1).toBeTruthy()
+		expect(#stats.conflicted_files).toBe(1)
+		expect(stats.conflicted_files[1].file).toBe(f_name)
+
+		-- Verify conflict markers are in target_file
+		local merged_data = io.open(target_file, "r"):read("*a")
+		expect(merged_data:match("<<<<<<<") ~= nil).toBeTruthy()
+		expect(merged_data:match("=======") ~= nil).toBeTruthy()
+		expect(merged_data:match(">>>>>>>") ~= nil).toBeTruthy()
+		expect(merged_data:match("3%.0%.0%-local") ~= nil).toBeTruthy()
+		expect(merged_data:match("2%.0%.0%-incoming") ~= nil).toBeTruthy()
+
+		-- Verify .krs_diff_base is not in target_import_repo
+		local base_in_target = path_util.join(target_import_repo, ".krs_diff_base")
+		expect(vim.fn.isdirectory(base_in_target)).toBe(0)
+	end)
+
+	it("end-to-end: exports modified file from git repo with base and imports with merge", function()
+		-- Initialize git repo in temp_repo
+		vim.system({ "git", "-C", temp_repo, "init" }):wait()
+		vim.system({ "git", "-C", temp_repo, "config", "user.email", "test@krs.dev" }):wait()
+		vim.system({ "git", "-C", temp_repo, "config", "user.name", "KRS Tester" }):wait()
+
+		local f_name = "hello.txt"
+		local full_file = path_util.join(temp_repo, f_name)
+		local h = io.open(full_file, "w")
+		if h then
+			h:write("line1\nline2\nline3\n")
+			h:close()
+		end
+
+		vim.system({ "git", "-C", temp_repo, "add", f_name }):wait()
+		vim.system({ "git", "-C", temp_repo, "commit", "-m", "initial" }):wait()
+
+		-- Modify file in temp_repo (incoming changes on line 3)
+		local h2 = io.open(full_file, "w")
+		if h2 then
+			h2:write("line1\nline2\nline3_incoming\n")
+			h2:close()
+		end
+
+		diff_mode.state.cwd = temp_repo
+		diff_mode.state.base_ref = "HEAD"
+		diff_mode.state.target_ref = "WORKTREE"
+
+		local out = diff_mode.export_diff_files_to_zip(zip_dest, { { file = f_name, status = "M" } }, temp_repo)
+		expect(out).toBeDefined()
+
+		-- Target repo has modification on line 1
+		local target_file = path_util.join(target_import_repo, f_name)
+		local h_t = io.open(target_file, "w")
+		if h_t then
+			h_t:write("line1_local\nline2\nline3\n")
+			h_t:close()
+		end
+
+		-- Import zip into target_import_repo
+		local ok, err, stats = diff_mode.import_diff_files_from_zip(out, target_import_repo)
+		expect(ok).toBeTruthy()
+		expect(err).toBeNil()
+		expect(stats.merged_clean).toBe(1)
+		expect(stats.conflicted).toBe(0)
+
+		local content = io.open(target_file, "r"):read("*a")
+		expect(content:match("line1_local") ~= nil).toBeTruthy()
+		expect(content:match("line2") ~= nil).toBeTruthy()
+		expect(content:match("line3_incoming") ~= nil).toBeTruthy()
+	end)
+
 	it("registers GitDiffExportZip and GitDiffImportZip user commands and palette entries", function()
 		diff_mode.setup()
 		expect(vim.fn.exists(":GitDiffExportZip")).toBe(2)

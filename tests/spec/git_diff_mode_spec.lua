@@ -203,6 +203,37 @@ describe("plugins.krs.git.diff_mode", function()
 		expect(diff_mode.state.file_list_win).toBeNil()
 	end)
 
+	it("completely clears diff extmark highlights and virtual lines from all open buffers when closing", function()
+		local b1 = vim.api.nvim_create_buf(false, true)
+		local b2 = vim.api.nvim_create_buf(false, true)
+		vim.api.nvim_buf_set_lines(b1, 0, -1, false, { "line1", "line2", "line3" })
+		vim.api.nvim_buf_set_lines(b2, 0, -1, false, { "code1", "code2", "code3" })
+
+		-- Apply mock highlights using M.namespace on both buffers
+		vim.api.nvim_buf_set_extmark(b1, diff_mode.namespace, 0, 0, {
+			line_hl_group = "GitCenterDiffAdd",
+			virt_lines = { { { "  - deleted line", "GitCenterDiffDelete" } } },
+		})
+		vim.api.nvim_buf_set_extmark(b2, diff_mode.namespace, 1, 0, {
+			line_hl_group = "GitCenterDiffAdd",
+			virt_lines = { { { "  - deleted line 2", "GitCenterDiffDelete" } } },
+		})
+
+		diff_mode.state.highlighted_bufs = { [b1] = true, [b2] = true }
+
+		expect(#vim.api.nvim_buf_get_extmarks(b1, diff_mode.namespace, 0, -1, {})).toBe(1)
+		expect(#vim.api.nvim_buf_get_extmarks(b2, diff_mode.namespace, 0, -1, {})).toBe(1)
+
+		diff_mode.close()
+
+		-- Must be completely purged from all buffers
+		expect(#vim.api.nvim_buf_get_extmarks(b1, diff_mode.namespace, 0, -1, {})).toBe(0)
+		expect(#vim.api.nvim_buf_get_extmarks(b2, diff_mode.namespace, 0, -1, {})).toBe(0)
+
+		pcall(vim.api.nvim_buf_delete, b1, { force = true })
+		pcall(vim.api.nvim_buf_delete, b2, { force = true })
+	end)
+
 	it("starts and manages between branches diff mode with side-by-side dual windows and sidebar", function()
 		local cwd = vim.fn.getcwd()
 		local head = vim.fn.systemlist("git rev-parse HEAD")[1]
