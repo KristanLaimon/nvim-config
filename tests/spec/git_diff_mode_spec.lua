@@ -397,4 +397,310 @@ describe("plugins.krs.git.diff_mode", function()
 		expect(cmds["GitDiffToggle"]).toBeDefined()
 		expect(cmds["GitDiffClose"]).toBeDefined()
 	end)
+
+	it("keeps focus in diff sidebar window when selecting a file from list", function()
+		local sample_files = {
+			{ file = "lua/plugins/krs/git/diff_mode.lua", status = "M" },
+			{ file = "README.md", status = "M" },
+		}
+		local win, buf = diff_mode.open_file_list_window(sample_files, 1)
+		diff_mode.state.file_list_win = win
+		diff_mode.state.file_list_buf = buf
+		diff_mode.state.is_active = true
+		diff_mode.state.cwd = vim.fn.getcwd()
+
+		local editor_win = vim.api.nvim_get_current_win()
+		diff_mode.state.editor_win = editor_win
+
+		-- Focus sidebar window
+		vim.api.nvim_set_current_win(win)
+		expect(vim.api.nvim_get_current_win()).toBe(win)
+
+		-- Trigger <CR> map in sidebar
+		local cr_map = vim.api.nvim_buf_call(buf, function()
+			return vim.fn.maparg("<CR>", "n", false, true)
+		end)
+		expect(cr_map.callback).toBeDefined()
+		cr_map.callback()
+
+		-- Must remain focused on the diff sidebar window, NOT automatically jumping to code center
+		expect(vim.api.nvim_get_current_win()).toBe(win)
+		expect(diff_mode.state.active_file).toBe("lua/plugins/krs/git/diff_mode.lua")
+
+		diff_mode.close()
+	end)
+
+	it("registers diff jump shortcuts available only in diff sidebar buffer", function()
+		local sample_files = {
+			{ file = "test_jump.lua", status = "M" },
+		}
+		local win, buf = diff_mode.open_file_list_window(sample_files, 1)
+		diff_mode.state.file_list_win = win
+		diff_mode.state.file_list_buf = buf
+		diff_mode.state.is_active = true
+
+		-- Check buffer-local keymaps for next diff
+		for _, key in ipairs({ "J", "n", "]c", "]d", "]" }) do
+			local map = vim.api.nvim_buf_call(buf, function()
+				return vim.fn.maparg(key, "n", false, true)
+			end)
+			expect(map.buffer).toBe(1)
+			expect(map.callback).toBeDefined()
+		end
+
+		-- Check buffer-local keymaps for prev diff
+		for _, key in ipairs({ "K", "p", "N", "[c", "[d", "[" }) do
+			local map = vim.api.nvim_buf_call(buf, function()
+				return vim.fn.maparg(key, "n", false, true)
+			end)
+			expect(map.buffer).toBe(1)
+			expect(map.callback).toBeDefined()
+		end
+
+		diff_mode.close()
+	end)
+
+	it("jumps modifications in editor window from sidebar without losing sidebar focus", function()
+		local editor_win = vim.api.nvim_get_current_win()
+		local editor_buf = vim.api.nvim_create_buf(false, true)
+		vim.api.nvim_buf_set_lines(editor_buf, 0, -1, false, {
+			"line 1",
+			"line 2",
+			"line 3",
+			"line 4",
+			"line 5",
+		})
+		vim.api.nvim_win_set_buf(editor_win, editor_buf)
+
+		local sample_files = { { file = "dummy.lua", status = "M" } }
+		local sb_win, sb_buf = diff_mode.open_file_list_window(sample_files, 1)
+		diff_mode.state.file_list_win = sb_win
+		diff_mode.state.file_list_buf = sb_buf
+		diff_mode.state.editor_win = editor_win
+		diff_mode.state.is_active = true
+		diff_mode.state.current_modifications = { 2, 4 }
+
+		-- Focus sidebar
+		vim.api.nvim_set_current_win(sb_win)
+		expect(vim.api.nvim_get_current_win()).toBe(sb_win)
+		vim.api.nvim_win_set_cursor(editor_win, { 1, 0 })
+
+		-- Trigger J (jump next) from sidebar
+		local j_map = vim.api.nvim_buf_call(sb_buf, function()
+			return vim.fn.maparg("J", "n", false, true)
+		end)
+		j_map.callback()
+
+		-- Editor cursor must move to line 2, but current window must STAY sb_win!
+		expect(vim.api.nvim_win_get_cursor(editor_win)[1]).toBe(2)
+		expect(vim.api.nvim_get_current_win()).toBe(sb_win)
+
+		-- Trigger J again -> moves to line 4
+		j_map.callback()
+		expect(vim.api.nvim_win_get_cursor(editor_win)[1]).toBe(4)
+		expect(vim.api.nvim_get_current_win()).toBe(sb_win)
+
+		-- Trigger K (jump prev) from sidebar -> moves back to line 2
+		local k_map = vim.api.nvim_buf_call(sb_buf, function()
+			return vim.fn.maparg("K", "n", false, true)
+		end)
+		k_map.callback()
+		expect(vim.api.nvim_win_get_cursor(editor_win)[1]).toBe(2)
+		expect(vim.api.nvim_get_current_win()).toBe(sb_win)
+
+		diff_mode.close()
+		pcall(vim.api.nvim_buf_delete, editor_buf, { force = true })
+	end)
+
+	it("computes diff stats including total diffs and file subtotals", function()
+		local cwd = vim.fn.getcwd()
+		local files = {
+			{ file = "lua/plugins/krs/git/diff_mode.lua", status = "M" },
+		}
+		local stats = diff_mode.compute_diff_stats("HEAD~1", "HEAD", cwd, files)
+		expect(type(stats)).toBe("table")
+		expect(type(stats.total_add)).toBe("number")
+		expect(type(stats.total_del)).toBe("number")
+		expect(type(stats.per_file)).toBe("table")
+
+		-- Get file subtotal stat
+		local file_stat = diff_mode.get_file_stat(stats, "lua/plugins/krs/git/diff_mode.lua", cwd)
+		expect(type(file_stat.add)).toBe("number")
+		expect(type(file_stat.del)).toBe("number")
+	end)
+
+	it("renders total diffs and viewing file subtotal in diff bar bottom side", function()
+		local sample_files = {
+			{ file = "fileA.lua", status = "M" },
+			{ file = "fileB.lua", status = "A" },
+		}
+		local win, buf = diff_mode.open_file_list_window(sample_files, 1)
+		diff_mode.state.file_list_win = win
+		diff_mode.state.file_list_buf = buf
+		diff_mode.state.is_active = true
+		diff_mode.state.active_file = "fileA.lua"
+
+		-- Inject stats into state
+		diff_mode.state.stats = {
+			total_add = 42,
+			total_del = 15,
+			per_file = {
+				["fileA.lua"] = { add = 30, del = 10 },
+				["fileB.lua"] = { add = 12, del = 5 },
+			},
+		}
+
+		-- Re-render
+		diff_mode.open_file_list_window(sample_files, 1)
+
+		local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+		local content = table.concat(lines, "\n")
+
+		-- Check Total stats rendered
+		expect(content:match("Total:%s+%+42%s+%-15") ~= nil).toBeTruthy()
+		-- Check Subtotal stats rendered for active file (fileA.lua)
+		expect(content:match("Subtotal:%s+%+30%s+%-10") ~= nil).toBeTruthy()
+		expect(content:match("fileA.lua") ~= nil).toBeTruthy()
+
+		-- Check window statusline
+		local stl = vim.wo[win].statusline
+		expect(stl:match("Total: %+42 %-15") ~= nil).toBeTruthy()
+		expect(stl:match("Subtotal: %+30 %-10") ~= nil).toBeTruthy()
+
+		diff_mode.close()
+	end)
+
+	it("computes change counts across diff hunks", function()
+		local cwd = vim.fn.getcwd()
+		local files = {
+			{ file = "lua/plugins/krs/git/diff_mode.lua", status = "M" },
+		}
+		local counts = diff_mode.compute_change_counts("HEAD~1", "HEAD", cwd, files)
+		expect(type(counts)).toBe("table")
+		expect(type(counts.total)).toBe("number")
+		expect(type(counts.per_file)).toBe("table")
+		expect(counts.total >= 0).toBeTruthy()
+	end)
+
+	it("renders <1/# Changes in file> and <1/# Changes in total> in diff sidebar without toasts", function()
+		local sample_files = {
+			{ file = "fileA.lua", status = "M" },
+			{ file = "fileB.lua", status = "A" },
+		}
+		local win, buf = diff_mode.open_file_list_window(sample_files, 1)
+		diff_mode.state.file_list_win = win
+		diff_mode.state.file_list_buf = buf
+		diff_mode.state.is_active = true
+		diff_mode.state.active_file = "fileA.lua"
+
+		diff_mode.state.stats = {
+			total_add = 20,
+			total_del = 5,
+			per_file = {
+				["fileA.lua"] = { add = 12, del = 3 },
+				["fileB.lua"] = { add = 8, del = 2 },
+			},
+		}
+
+		diff_mode.state.change_counts = {
+			total = 5,
+			per_file = {
+				["fileA.lua"] = 3,
+				["fileB.lua"] = 2,
+			},
+		}
+		diff_mode.state.current_modifications = { 10, 25, 40 }
+		diff_mode.state.current_mod_idx = 1
+
+		diff_mode.render_file_list()
+
+		local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+		local content = table.concat(lines, "\n")
+
+		-- Check message format: <1/# Changes in file> and <1/# Changes in total>
+		expect(content:match("<1/3 Changes in file>") ~= nil).toBeTruthy()
+		expect(content:match("<1/5 Changes in total>") ~= nil).toBeTruthy()
+
+		-- Statusline should also include file and total counts
+		local stl = vim.wo[win].statusline
+		expect(stl:match("<1/3 file> <1/5 total>") ~= nil).toBeTruthy()
+
+		diff_mode.close()
+	end)
+
+	it("updates change counter in sidebar when jumping modifications and never triggers notifications", function()
+		local editor_win = vim.api.nvim_get_current_win()
+		local editor_buf = vim.api.nvim_create_buf(false, true)
+		vim.api.nvim_buf_set_lines(editor_buf, 0, -1, false, {
+			"line 1",
+			"line 2",
+			"line 3",
+			"line 4",
+			"line 5",
+			"line 6",
+		})
+		vim.api.nvim_win_set_buf(editor_win, editor_buf)
+
+		local sample_files = {
+			{ file = "fileA.lua", status = "M" },
+			{ file = "fileB.lua", status = "M" },
+		}
+		local sb_win, sb_buf = diff_mode.open_file_list_window(sample_files, 1)
+		diff_mode.state.file_list_win = sb_win
+		diff_mode.state.file_list_buf = sb_buf
+		diff_mode.state.editor_win = editor_win
+		diff_mode.state.is_active = true
+		diff_mode.state.active_file = "fileA.lua"
+
+		diff_mode.state.change_counts = {
+			total = 4,
+			per_file = {
+				["fileA.lua"] = 2,
+				["fileB.lua"] = 2,
+			},
+		}
+		diff_mode.state.current_modifications = { 2, 5 }
+		diff_mode.state.current_mod_idx = 1
+		diff_mode.render_file_list()
+
+		-- Focus sidebar
+		vim.api.nvim_set_current_win(sb_win)
+		vim.api.nvim_win_set_cursor(editor_win, { 1, 0 })
+
+		-- Spy on vim.notify to ensure NO toasts are triggered
+		local notify_called = false
+		local orig_notify = vim.notify
+		vim.notify = function()
+			notify_called = true
+		end
+
+		-- Jump next from sidebar
+		local j_map = vim.api.nvim_buf_call(sb_buf, function()
+			return vim.fn.maparg("J", "n", false, true)
+		end)
+		j_map.callback()
+
+		-- Must NOT create toast notification
+		expect(notify_called).toBe(false)
+		-- Must have updated current_mod_idx to 1 (cursor moved to line 2)
+		expect(diff_mode.state.current_mod_idx).toBe(1)
+		expect(vim.api.nvim_win_get_cursor(editor_win)[1]).toBe(2)
+
+		-- Jump next again -> moves to line 5, idx 2
+		j_map.callback()
+		expect(notify_called).toBe(false)
+		expect(diff_mode.state.current_mod_idx).toBe(2)
+		expect(vim.api.nvim_win_get_cursor(editor_win)[1]).toBe(5)
+
+		-- Check sidebar contents reflect <2/2 Changes in file> and <2/4 Changes in total>
+		local lines = vim.api.nvim_buf_get_lines(sb_buf, 0, -1, false)
+		local content = table.concat(lines, "\n")
+		expect(content:match("<2/2 Changes in file>") ~= nil).toBeTruthy()
+		expect(content:match("<2/4 Changes in total>") ~= nil).toBeTruthy()
+
+		-- Restore vim.notify
+		vim.notify = orig_notify
+		diff_mode.close()
+		pcall(vim.api.nvim_buf_delete, editor_buf, { force = true })
+	end)
 end)

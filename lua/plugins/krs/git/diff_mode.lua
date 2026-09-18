@@ -67,9 +67,16 @@ M.state = {
 
 	-- Line modifications in active file for jumping
 	current_modifications = {},
+
+	-- Diff statistics
+	stats = nil,
+	current_mod_idx = 0,
+	change_counts = nil,
 }
 
 local EMPTY_TREE_SHA = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+
+local render_file_list = nil
 
 --- Notifies user with Diff Mode prefix
 --- @param msg string
@@ -257,51 +264,6 @@ function M.apply_same_branch_highlights(bufnr, file_path, base_ref, target_ref, 
 	return modification_lines
 end
 
---- Moves cursor to next modification in active file
-function M.jump_next_modification()
-	local mods = M.state.current_modifications
-	if not mods or #mods == 0 then
-		notify("No diff modifications in active file", vim.log.levels.WARN)
-		return
-	end
-
-	local cur_row = vim.api.nvim_win_get_cursor(0)[1]
-	for _, row in ipairs(mods) do
-		if row > cur_row then
-			pcall(vim.api.nvim_win_set_cursor, 0, { row, 0 })
-			pcall(vim.cmd, "normal! zz")
-			return
-		end
-	end
-	-- Wrap to first
-	pcall(vim.api.nvim_win_set_cursor, 0, { mods[1], 0 })
-	pcall(vim.cmd, "normal! zz")
-	notify("Jumped to first modification (wrapped)")
-end
-
---- Moves cursor to previous modification in active file
-function M.jump_prev_modification()
-	local mods = M.state.current_modifications
-	if not mods or #mods == 0 then
-		notify("No diff modifications in active file", vim.log.levels.WARN)
-		return
-	end
-
-	local cur_row = vim.api.nvim_win_get_cursor(0)[1]
-	for i = #mods, 1, -1 do
-		local row = mods[i]
-		if row < cur_row then
-			pcall(vim.api.nvim_win_set_cursor, 0, { row, 0 })
-			pcall(vim.cmd, "normal! zz")
-			return
-		end
-	end
-	-- Wrap to last
-	pcall(vim.api.nvim_win_set_cursor, 0, { mods[#mods], 0 })
-	pcall(vim.cmd, "normal! zz")
-	notify("Jumped to last modification (wrapped)")
-end
-
 --- Determines if a window can serve as the main code editor window
 --- Rejects nil, invalid windows, the diff sidebar, dual left window, and floating windows
 --- @param win integer|nil
@@ -374,8 +336,351 @@ local function get_valid_editor_win()
 	return new_win
 end
 
+--- Moves cursor to next modification in active file
+--- @param target_win? integer Window to move cursor in (defaults to editor window if in sidebar, else current window)
+function M.jump_next_modification(target_win)
+	local mods = M.state.current_modifications
+	if not mods or #mods == 0 then
+		return
+	end
+
+	local win = target_win
+	if not (win and vim.api.nvim_win_is_valid(win)) then
+		local cur_win = vim.api.nvim_get_current_win()
+		if cur_win == M.state.file_list_win then
+			if
+				M.state.mode == "between_branches"
+				and M.state.dual_right_win
+				and vim.api.nvim_win_is_valid(M.state.dual_right_win)
+			then
+				win = M.state.dual_right_win
+			else
+				win = get_valid_editor_win()
+			end
+		else
+			win = cur_win
+		end
+	end
+
+	if not (win and vim.api.nvim_win_is_valid(win)) then
+		return
+	end
+
+	local cur_row = vim.api.nvim_win_get_cursor(win)[1]
+	local target_row = nil
+	local idx = nil
+	for i, row in ipairs(mods) do
+		if row > cur_row then
+			target_row = row
+			idx = i
+			break
+		end
+	end
+
+	if not target_row then
+		target_row = mods[1]
+		idx = 1
+	end
+
+	pcall(vim.api.nvim_win_set_cursor, win, { target_row, 0 })
+	vim.api.nvim_win_call(win, function()
+		pcall(vim.cmd, "normal! zz")
+	end)
+
+	if
+		M.state.mode == "between_branches"
+		and M.state.dual_left_win
+		and vim.api.nvim_win_is_valid(M.state.dual_left_win)
+	then
+		pcall(vim.api.nvim_win_set_cursor, M.state.dual_left_win, { target_row, 0 })
+		vim.api.nvim_win_call(M.state.dual_left_win, function()
+			pcall(vim.cmd, "normal! zz")
+		end)
+	end
+
+	M.state.current_mod_idx = idx
+
+	-- Re-render sidebar to update change counter without stealing focus or moving cursor
+	if render_file_list and M.state.file_list_win and vim.api.nvim_win_is_valid(M.state.file_list_win) then
+		local cur_pos = vim.api.nvim_win_get_cursor(M.state.file_list_win)
+		render_file_list()
+		if vim.api.nvim_win_is_valid(M.state.file_list_win) then
+			pcall(vim.api.nvim_win_set_cursor, M.state.file_list_win, cur_pos)
+		end
+	end
+end
+
+--- Moves cursor to previous modification in active file
+--- @param target_win? integer Window to move cursor in (defaults to editor window if in sidebar, else current window)
+function M.jump_prev_modification(target_win)
+	local mods = M.state.current_modifications
+	if not mods or #mods == 0 then
+		return
+	end
+
+	local win = target_win
+	if not (win and vim.api.nvim_win_is_valid(win)) then
+		local cur_win = vim.api.nvim_get_current_win()
+		if cur_win == M.state.file_list_win then
+			if
+				M.state.mode == "between_branches"
+				and M.state.dual_right_win
+				and vim.api.nvim_win_is_valid(M.state.dual_right_win)
+			then
+				win = M.state.dual_right_win
+			else
+				win = get_valid_editor_win()
+			end
+		else
+			win = cur_win
+		end
+	end
+
+	if not (win and vim.api.nvim_win_is_valid(win)) then
+		return
+	end
+
+	local cur_row = vim.api.nvim_win_get_cursor(win)[1]
+	local target_row = nil
+	local idx = nil
+	for i = #mods, 1, -1 do
+		local row = mods[i]
+		if row < cur_row then
+			target_row = row
+			idx = i
+			break
+		end
+	end
+
+	if not target_row then
+		target_row = mods[#mods]
+		idx = #mods
+	end
+
+	pcall(vim.api.nvim_win_set_cursor, win, { target_row, 0 })
+	vim.api.nvim_win_call(win, function()
+		pcall(vim.cmd, "normal! zz")
+	end)
+
+	if
+		M.state.mode == "between_branches"
+		and M.state.dual_left_win
+		and vim.api.nvim_win_is_valid(M.state.dual_left_win)
+	then
+		pcall(vim.api.nvim_win_set_cursor, M.state.dual_left_win, { target_row, 0 })
+		vim.api.nvim_win_call(M.state.dual_left_win, function()
+			pcall(vim.cmd, "normal! zz")
+		end)
+	end
+
+	M.state.current_mod_idx = idx
+
+	-- Re-render sidebar to update change counter without stealing focus or moving cursor
+	if render_file_list and M.state.file_list_win and vim.api.nvim_win_is_valid(M.state.file_list_win) then
+		local cur_pos = vim.api.nvim_win_get_cursor(M.state.file_list_win)
+		render_file_list()
+		if vim.api.nvim_win_is_valid(M.state.file_list_win) then
+			pcall(vim.api.nvim_win_set_cursor, M.state.file_list_win, cur_pos)
+		end
+	end
+end
+
+--- Computes line additions and deletions across all changed files and per-file
+--- @param base_ref string
+--- @param target_ref string
+--- @param cwd string
+--- @param files? table[]
+--- @return { total_add: integer, total_del: integer, per_file: table<string, { add: integer, del: integer, is_binary?: boolean }> }
+function M.compute_diff_stats(base_ref, target_ref, cwd, files)
+	cwd = cwd or M.state.cwd or vim.fn.getcwd()
+	base_ref = base_ref or M.state.base_ref or "HEAD"
+	target_ref = target_ref or M.state.target_ref or "WORKTREE"
+	local per_file = {}
+	local total_add = 0
+	local total_del = 0
+
+	local diff_args
+	if target_ref == "WORKTREE" then
+		diff_args = { "diff", "--numstat", "--no-ext-diff", base_ref }
+	else
+		diff_args = { "diff", "--numstat", "--no-ext-diff", base_ref, target_ref }
+	end
+
+	local raw_lines = git.lines(diff_args, cwd)
+	for _, line in ipairs(raw_lines) do
+		local plus, minus, path = line:match("^(%d+)%s+(%d+)%s+(.+)$")
+		if plus and minus and path then
+			local add = tonumber(plus) or 0
+			local del = tonumber(minus) or 0
+			local clean_path = path
+			if path:find("=>") then
+				local pre, mid_new, post = path:match("(.-){.-%=>%s*(.-)}(.*)")
+				if pre and mid_new and post then
+					clean_path = pre .. mid_new .. post
+				else
+					clean_path = path:match("%=>%s*(.+)$") or path
+				end
+			end
+			clean_path = vim.trim(clean_path):gsub('^"', ""):gsub('"$', "")
+			clean_path = path_util.normalize(clean_path)
+			per_file[clean_path] = { add = add, del = del }
+			total_add = total_add + add
+			total_del = total_del + del
+		else
+			local bin_path = line:match("^%-%s+%-%s+(.+)$")
+			if bin_path then
+				local clean_path = vim.trim(bin_path):gsub('^"', ""):gsub('"$', "")
+				clean_path = path_util.normalize(clean_path)
+				per_file[clean_path] = { add = 0, del = 0, is_binary = true }
+			end
+		end
+	end
+
+	-- Account for untracked files when target is WORKTREE
+	if target_ref == "WORKTREE" and files then
+		for _, item in ipairs(files) do
+			local norm_file = path_util.normalize(item.file)
+			if item.status == "?" and not per_file[norm_file] then
+				local full = path_util.join(cwd, item.file)
+				local count = 0
+				local ok, f_lines = pcall(vim.fn.readfile, full)
+				if ok and type(f_lines) == "table" then
+					count = #f_lines
+				end
+				per_file[norm_file] = { add = count, del = 0 }
+				total_add = total_add + count
+			end
+		end
+	end
+
+	return {
+		total_add = total_add,
+		total_del = total_del,
+		per_file = per_file,
+	}
+end
+
+--- Retrieves diff stats for a given file
+--- @param stats table
+--- @param file_path string|nil
+--- @param cwd? string
+--- @return { add: integer, del: integer, is_binary?: boolean }
+function M.get_file_stat(stats, file_path, cwd)
+	if not (stats and stats.per_file and file_path) then
+		return { add = 0, del = 0 }
+	end
+	if stats.per_file[file_path] then
+		return stats.per_file[file_path]
+	end
+	local norm = path_util.normalize(file_path)
+	if stats.per_file[norm] then
+		return stats.per_file[norm]
+	end
+	if cwd then
+		local rel = path_util.relative_to(file_path, cwd)
+		if rel and stats.per_file[rel] then
+			return stats.per_file[rel]
+		end
+	end
+	return { add = 0, del = 0 }
+end
+
+--- Returns cached diff stats or computes them
+--- @param force? boolean
+--- @return { total_add: integer, total_del: integer, per_file: table }
+function M.get_or_compute_stats(force)
+	if not force and M.state.stats then
+		return M.state.stats
+	end
+	local cwd = M.state.cwd or vim.fn.getcwd()
+	local base_ref = M.state.base_ref or "HEAD"
+	local target_ref = M.state.target_ref or "WORKTREE"
+	local stats = M.compute_diff_stats(base_ref, target_ref, cwd, M.state.files)
+	M.state.stats = stats
+	return stats
+end
+
+--- Computes total change modifications and per-file change counts across diff hunks
+--- @param base_ref string
+--- @param target_ref string
+--- @param cwd string
+--- @param files? table[]
+--- @return { total: integer, per_file: table<string, integer> }
+function M.compute_change_counts(base_ref, target_ref, cwd, files)
+	cwd = cwd or M.state.cwd or vim.fn.getcwd()
+	base_ref = base_ref or M.state.base_ref or "HEAD"
+	target_ref = target_ref or M.state.target_ref or "WORKTREE"
+	local per_file = {}
+	local total = 0
+
+	local diff_args
+	if target_ref == "WORKTREE" then
+		diff_args = { "diff", "-U0", "--no-ext-diff", base_ref }
+	else
+		diff_args = { "diff", "-U0", "--no-ext-diff", base_ref, target_ref }
+	end
+
+	local raw_lines = git.lines(diff_args, cwd)
+	local cur_file = nil
+	for _, line in ipairs(raw_lines) do
+		local raw_path = line:match("^diff %-%-git%s+.-%s+[%w]%/(.+)$")
+		if not raw_path then
+			raw_path = line:match('^diff %-%-git%s+.-%s+"[^"/]+%/(.+)"$')
+		end
+		if raw_path then
+			cur_file = path_util.normalize(vim.trim(raw_path):gsub('^"', ""):gsub('"$', ""))
+			if not per_file[cur_file] then
+				per_file[cur_file] = 0
+			end
+		elseif cur_file and line:match("^@@ %-%d+") then
+			per_file[cur_file] = (per_file[cur_file] or 0) + 1
+			total = total + 1
+		end
+	end
+
+	-- Account for untracked files when target is WORKTREE
+	if target_ref == "WORKTREE" and files then
+		for _, item in ipairs(files) do
+			local norm_file = path_util.normalize(item.file)
+			if item.status == "?" and not per_file[norm_file] then
+				per_file[norm_file] = 1
+				total = total + 1
+			end
+		end
+	end
+
+	if files then
+		for _, item in ipairs(files) do
+			local norm_file = path_util.normalize(item.file)
+			if not per_file[norm_file] then
+				per_file[norm_file] = 0
+			end
+		end
+	end
+
+	return {
+		total = total,
+		per_file = per_file,
+	}
+end
+
+--- Returns cached change counts or computes them
+--- @param force? boolean
+--- @return { total: integer, per_file: table<string, integer> }
+function M.get_or_compute_change_counts(force)
+	if not force and M.state.change_counts then
+		return M.state.change_counts
+	end
+	local cwd = M.state.cwd or vim.fn.getcwd()
+	local base_ref = M.state.base_ref or "HEAD"
+	local target_ref = M.state.target_ref or "WORKTREE"
+	local counts = M.compute_change_counts(base_ref, target_ref, cwd, M.state.files)
+	M.state.change_counts = counts
+	return counts
+end
+
 --- Renders contents of right sidebar changed files list window
-local function render_file_list()
+render_file_list = function()
 	if not (M.state.file_list_buf and vim.api.nvim_buf_is_valid(M.state.file_list_buf)) then
 		return
 	end
@@ -420,7 +725,85 @@ local function render_file_list()
 		end
 	end
 
+	-- Diff bar at bottom side: separator, stats, and shortcuts
 	table.insert(lines, string.rep("─", 36))
+
+	local stats = M.get_or_compute_stats()
+	local cur_file = M.state.active_file
+	if not cur_file and #M.state.files > 0 then
+		local sel_item = M.state.files[M.state.selected_file_idx]
+		cur_file = sel_item and sel_item.file
+	end
+	local cur_stat = M.get_file_stat(stats, cur_file, M.state.cwd)
+
+	local cur_display = "none"
+	if cur_file then
+		cur_display = path_util.filename(cur_file)
+		if #cur_display > 14 then
+			cur_display = cur_display:sub(1, 11) .. "..."
+		end
+	end
+
+	local total_stat_line = #lines + 1
+	table.insert(lines, string.format(" 󰊢 Total:    +%d  -%d", stats.total_add or 0, stats.total_del or 0))
+	local subtotal_stat_line = #lines + 1
+	table.insert(lines, string.format(" 󰈔 Subtotal: +%d  -%d (%s)", cur_stat.add or 0, cur_stat.del or 0, cur_display))
+
+	local change_counts = M.get_or_compute_change_counts()
+	local file_changes = 0
+	if cur_file and M.state.active_file and cur_file == M.state.active_file and #M.state.current_modifications > 0 then
+		file_changes = #M.state.current_modifications
+	elseif cur_file then
+		local norm_cur = path_util.normalize(cur_file)
+		file_changes = change_counts.per_file[norm_cur] or change_counts.per_file[cur_file] or 0
+	end
+
+	local cur_mod_idx = 0
+	if file_changes > 0 then
+		if M.state.current_mod_idx and M.state.current_mod_idx > 0 then
+			cur_mod_idx = math.min(M.state.current_mod_idx, file_changes)
+		else
+			cur_mod_idx = 1
+		end
+	end
+
+	local total_changes = 0
+	local cur_total_idx = 0
+	local offset = 0
+	local active_norm = cur_file and path_util.normalize(cur_file)
+
+	for _, item in ipairs(M.state.files) do
+		local norm = path_util.normalize(item.file)
+		local count
+		if cur_file and norm == active_norm and file_changes > 0 then
+			count = file_changes
+		else
+			count = change_counts.per_file[norm] or change_counts.per_file[item.file] or 0
+		end
+		if cur_file and norm == active_norm then
+			if cur_mod_idx > 0 then
+				cur_total_idx = offset + cur_mod_idx
+			end
+		elseif cur_total_idx == 0 then
+			offset = offset + count
+		end
+		total_changes = total_changes + count
+	end
+
+	if total_changes == 0 and change_counts.total > 0 then
+		total_changes = change_counts.total
+	end
+	if cur_total_idx == 0 and cur_mod_idx > 0 then
+		cur_total_idx = cur_mod_idx
+	end
+
+	local file_change_line = #lines + 1
+	table.insert(lines, string.format(" <%d/%d Changes in file>", cur_mod_idx, file_changes))
+	local total_change_line = #lines + 1
+	table.insert(lines, string.format(" <%d/%d Changes in total>", cur_total_idx, total_changes))
+
+	table.insert(lines, string.rep("─", 36))
+	table.insert(lines, " [J/K / ]c/[c]: Jump Diff")
 	table.insert(lines, " [Enter/Space]: Select | [h/Esc]: Code")
 	table.insert(lines, " [c]: Range | [e]: Export | [i]: Import")
 	table.insert(lines, " [q]: Close")
@@ -429,8 +812,10 @@ local function render_file_list()
 	vim.api.nvim_buf_set_lines(M.state.file_list_buf, 0, -1, false, lines)
 	vim.bo[M.state.file_list_buf].modifiable = false
 
-	-- Apply highlights to status markers
+	-- Apply highlights
 	vim.api.nvim_buf_clear_namespace(M.state.file_list_buf, M.files_namespace, 0, -1)
+
+	-- Highlights for files
 	for i = 3, 2 + #M.state.files do
 		local item = M.state.files[i - 2]
 		if item then
@@ -458,15 +843,169 @@ local function render_file_list()
 			end
 		end
 	end
+
+	-- Highlights for bottom diff bar stats
+	pcall(
+		vim.api.nvim_buf_add_highlight,
+		M.state.file_list_buf,
+		M.files_namespace,
+		"GitCenterDiffHeader",
+		total_stat_line - 1,
+		1,
+		11
+	)
+	pcall(
+		vim.api.nvim_buf_add_highlight,
+		M.state.file_list_buf,
+		M.files_namespace,
+		"GitCenterDiffHeader",
+		subtotal_stat_line - 1,
+		1,
+		14
+	)
+
+	local total_line_str = lines[total_stat_line] or ""
+	local total_plus_col = total_line_str:find("%+")
+	local total_minus_col = total_line_str:find("%-")
+	if total_plus_col and total_minus_col then
+		pcall(
+			vim.api.nvim_buf_add_highlight,
+			M.state.file_list_buf,
+			M.files_namespace,
+			"GitCenterDiffAddPrefix",
+			total_stat_line - 1,
+			total_plus_col - 1,
+			total_minus_col - 1
+		)
+		pcall(
+			vim.api.nvim_buf_add_highlight,
+			M.state.file_list_buf,
+			M.files_namespace,
+			"GitCenterDiffDeletePrefix",
+			total_stat_line - 1,
+			total_minus_col - 1,
+			-1
+		)
+	end
+
+	local sub_line_str = lines[subtotal_stat_line] or ""
+	local sub_plus_col = sub_line_str:find("%+")
+	local sub_minus_col = sub_line_str:find("%-")
+	local sub_paren_col = sub_line_str:find("%(")
+	if sub_plus_col and sub_minus_col then
+		local end_col = sub_paren_col and (sub_paren_col - 1) or -1
+		pcall(
+			vim.api.nvim_buf_add_highlight,
+			M.state.file_list_buf,
+			M.files_namespace,
+			"GitCenterDiffAddPrefix",
+			subtotal_stat_line - 1,
+			sub_plus_col - 1,
+			sub_minus_col - 1
+		)
+		pcall(
+			vim.api.nvim_buf_add_highlight,
+			M.state.file_list_buf,
+			M.files_namespace,
+			"GitCenterDiffDeletePrefix",
+			subtotal_stat_line - 1,
+			sub_minus_col - 1,
+			end_col
+		)
+	end
+	if sub_paren_col then
+		pcall(
+			vim.api.nvim_buf_add_highlight,
+			M.state.file_list_buf,
+			M.files_namespace,
+			"GitCenterDiffContext",
+			subtotal_stat_line - 1,
+			sub_paren_col - 1,
+			-1
+		)
+	end
+
+	-- Highlights for change messages
+	pcall(
+		vim.api.nvim_buf_add_highlight,
+		M.state.file_list_buf,
+		M.files_namespace,
+		"GitCenterDiffContext",
+		file_change_line - 1,
+		0,
+		-1
+	)
+	pcall(
+		vim.api.nvim_buf_add_highlight,
+		M.state.file_list_buf,
+		M.files_namespace,
+		"GitCenterDiffContext",
+		total_change_line - 1,
+		0,
+		-1
+	)
+
+	local file_line_str = lines[file_change_line] or ""
+	local fl_lt = file_line_str:find("<")
+	local fl_gt = file_line_str:find(">")
+	if fl_lt and fl_gt then
+		pcall(
+			vim.api.nvim_buf_add_highlight,
+			M.state.file_list_buf,
+			M.files_namespace,
+			"GitCenterDiffHeader",
+			file_change_line - 1,
+			fl_lt - 1,
+			fl_gt
+		)
+	end
+
+	local tot_line_str = lines[total_change_line] or ""
+	local tl_lt = tot_line_str:find("<")
+	local tl_gt = tot_line_str:find(">")
+	if tl_lt and tl_gt then
+		pcall(
+			vim.api.nvim_buf_add_highlight,
+			M.state.file_list_buf,
+			M.files_namespace,
+			"GitCenterDiffHeader",
+			total_change_line - 1,
+			tl_lt - 1,
+			tl_gt
+		)
+	end
+
+	-- Update statusline on window if valid
+	if M.state.file_list_win and vim.api.nvim_win_is_valid(M.state.file_list_win) then
+		local status_str = string.format(
+			" Diff 󰊢 Total: +%d -%d │ 󰈔 Subtotal: +%d -%d (%s) │ <%d/%d file> <%d/%d total>",
+			stats.total_add or 0,
+			stats.total_del or 0,
+			cur_stat.add or 0,
+			cur_stat.del or 0,
+			cur_display,
+			cur_mod_idx,
+			file_changes,
+			cur_total_idx,
+			total_changes
+		)
+		pcall(function()
+			vim.wo[M.state.file_list_win].statusline = status_str
+		end)
+	end
 end
+M.render_file_list = render_file_list
 
 --- Opens or focuses the docked right sidebar changed files list window
 --- @param files? table[]
 --- @param selected_idx? integer
 --- @return integer win, integer buf
 function M.open_file_list_window(files, selected_idx)
-	if files then
+	if files and files ~= M.state.files then
 		M.state.files = files
+		M.state.stats = nil
+		M.state.change_counts = nil
+		M.state.current_mod_idx = 0
 	end
 	if selected_idx then
 		M.state.selected_file_idx = selected_idx
@@ -511,16 +1050,16 @@ function M.open_file_list_window(files, selected_idx)
 	local opts = { buffer = buf, noremap = true, silent = true, nowait = true }
 
 	-- Navigation mappings inside file list
-	vim.keymap.set("n", "j", function()
+	local function move_down()
 		if #M.state.files == 0 then
 			return
 		end
 		M.state.selected_file_idx = (M.state.selected_file_idx % #M.state.files) + 1
 		render_file_list()
 		pcall(vim.api.nvim_win_set_cursor, win, { 2 + M.state.selected_file_idx, 0 })
-	end, opts)
+	end
 
-	vim.keymap.set("n", "k", function()
+	local function move_up()
 		if #M.state.files == 0 then
 			return
 		end
@@ -530,7 +1069,12 @@ function M.open_file_list_window(files, selected_idx)
 		end
 		render_file_list()
 		pcall(vim.api.nvim_win_set_cursor, win, { 2 + M.state.selected_file_idx, 0 })
-	end, opts)
+	end
+
+	vim.keymap.set("n", "j", move_down, opts)
+	vim.keymap.set("n", "<Down>", move_down, opts)
+	vim.keymap.set("n", "k", move_up, opts)
+	vim.keymap.set("n", "<Up>", move_up, opts)
 
 	local function open_selected()
 		local file_entry = M.state.files[M.state.selected_file_idx]
@@ -538,14 +1082,48 @@ function M.open_file_list_window(files, selected_idx)
 			return
 		end
 		if M.state.mode == "same_branch" then
-			M.open_file_same_branch(file_entry.file)
+			M.open_file_same_branch(file_entry.file, { keep_focus = true })
 		else
-			M.open_file_between_branches(file_entry.file)
+			M.open_file_between_branches(file_entry.file, { keep_focus = true })
 		end
+		if M.state.file_list_win and vim.api.nvim_win_is_valid(M.state.file_list_win) then
+			pcall(vim.api.nvim_set_current_win, M.state.file_list_win)
+			pcall(vim.api.nvim_win_set_cursor, M.state.file_list_win, { 2 + M.state.selected_file_idx, 0 })
+		end
+		render_file_list()
 	end
 
 	vim.keymap.set("n", "<CR>", open_selected, opts)
 	vim.keymap.set("n", "<Space>", open_selected, opts)
+
+	-- Mouse click to select file without leaving sidebar
+	vim.keymap.set("n", "<LeftMouse>", function()
+		local mousepos = vim.fn.getmousepos()
+		if mousepos.winid == win then
+			local row = mousepos.line
+			local idx = row - 2
+			if idx >= 1 and idx <= #M.state.files then
+				M.state.selected_file_idx = idx
+				open_selected()
+				pcall(vim.api.nvim_win_set_cursor, win, { 2 + M.state.selected_file_idx, 0 })
+				return
+			end
+		end
+		pcall(vim.cmd, "normal! <LeftMouse>")
+	end, opts)
+
+	-- Shortcuts (only available in this git diff sidebar) to move between changes in same file
+	for _, k in ipairs({ "J", "n", "]c", "]d", "]" }) do
+		vim.keymap.set("n", k, function()
+			M.jump_next_modification()
+		end, opts)
+	end
+
+	for _, k in ipairs({ "K", "p", "N", "[c", "[d", "[" }) do
+		vim.keymap.set("n", k, function()
+			M.jump_prev_modification()
+		end, opts)
+	end
 
 	-- Navigation shortcuts to return focus to code editor
 	for _, key in ipairs({ "<Esc>", "h" }) do
@@ -624,9 +1202,14 @@ end
 
 --- Opens a file in Same Branch Diff Mode (single code window)
 --- @param file_path string
-function M.open_file_same_branch(file_path)
+--- @param opts? { keep_focus?: boolean }
+function M.open_file_same_branch(file_path, opts)
+	opts = opts or {}
 	M.state.active_file = file_path
 	local full_path = path_util.join(M.state.cwd, file_path)
+
+	local origin_win = vim.api.nvim_get_current_win()
+	local stay_in_sidebar = opts.keep_focus or (origin_win == M.state.file_list_win)
 
 	local target_win = M.focus_editor()
 	if
@@ -658,6 +1241,13 @@ function M.open_file_same_branch(file_path)
 	if #M.state.current_modifications > 0 then
 		pcall(vim.api.nvim_win_set_cursor, 0, { M.state.current_modifications[1], 0 })
 		pcall(vim.cmd, "normal! zz")
+		M.state.current_mod_idx = 1
+	else
+		M.state.current_mod_idx = 0
+	end
+
+	if stay_in_sidebar and M.state.file_list_win and vim.api.nvim_win_is_valid(M.state.file_list_win) then
+		pcall(vim.api.nvim_set_current_win, M.state.file_list_win)
 	end
 end
 
@@ -760,8 +1350,12 @@ end
 
 --- Opens a file in Between Branches Diff Mode (side-by-side dual windows)
 --- @param file_path string
-function M.open_file_between_branches(file_path)
+--- @param opts? { keep_focus?: boolean }
+function M.open_file_between_branches(file_path, opts)
+	opts = opts or {}
 	M.state.active_file = file_path
+	local origin_win = vim.api.nvim_get_current_win()
+	local stay_in_sidebar = opts.keep_focus or (origin_win == M.state.file_list_win)
 	local cwd = M.state.cwd
 	local base_b = M.state.base_ref
 	local target_b = M.state.target_ref
@@ -840,8 +1434,15 @@ function M.open_file_between_branches(file_path)
 		end
 	end
 	M.state.current_modifications = mods
+	M.state.current_mod_idx = #mods > 0 and 1 or 0
 
-	M.focus_editor()
+	if not stay_in_sidebar then
+		M.focus_editor()
+	else
+		if M.state.file_list_win and vim.api.nvim_win_is_valid(M.state.file_list_win) then
+			pcall(vim.api.nvim_set_current_win, M.state.file_list_win)
+		end
+	end
 end
 
 --- Starts Git Diff Mode (Between 2 Branches)
@@ -890,6 +1491,11 @@ function M.close(opts)
 	opts = opts or {}
 	if not opts.keep_state then
 		M.state.is_active = false
+		M.state.stats = nil
+		M.state.change_counts = nil
+		M.state.current_mod_idx = 0
+		M.state.active_file = nil
+		M.state.current_modifications = {}
 	end
 
 	-- Clear extmarks

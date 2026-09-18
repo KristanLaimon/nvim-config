@@ -11,8 +11,8 @@ local settings = {
 	--- Menu entries, in order: { key, icon, label, command }.
 	buttons = {
 		{ "f", "📁", "File Explorer", ":TelescopeFileBrowserDesktop<CR>" },
-		{ "n", "📝", "Notes", ":Notes<CR>" },
 		{ "p", "💼", "Recent projects", ":RecentProjects<CR>" },
+		{ "n", "📝", "Notes", ":Notes<CR>" },
 		{ "s", "📦", "Dependencies & Toolchains", ":KrsInstallDependencies<CR>" },
 		{ "h", "🩺", "Health Check", ":KrsHealthCheck<CR>" },
 		{ "w", "📚", "Wiki & Docs (Ctrl+Shift+D)", ":KrsWiki<CR>" },
