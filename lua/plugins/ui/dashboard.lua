@@ -11,6 +11,7 @@ local settings = {
 	--- Menu entries, in order: { key, icon, label, command }.
 	buttons = {
 		{ "f", "📁", "File Explorer", ":TelescopeFileBrowserDesktop<CR>" },
+		{ "n", "📝", "Notes", ":Notes<CR>" },
 		{ "p", "💼", "Recent projects", ":RecentProjects<CR>" },
 		{ "s", "📦", "Dependencies & Toolchains", ":KrsInstallDependencies<CR>" },
 		{ "h", "🩺", "Health Check", ":KrsHealthCheck<CR>" },
@@ -22,7 +23,7 @@ local settings = {
 
 	--- WSL entry, inserted at this position when WSL is available.
 	wsl_button = { "l", "🐧", "File Explorer (WSL)", ":TelescopeFileBrowserWSL<CR>" },
-	wsl_button_position = 4,
+	wsl_button_position = 5,
 
 	--- Filetypes that must never be replaced by the dashboard.
 	protected_filetypes = { "alpha", "neo-tree" },

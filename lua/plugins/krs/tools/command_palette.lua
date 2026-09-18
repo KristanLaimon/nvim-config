@@ -63,6 +63,8 @@ M.commands = {
 	{ name = "📁 Select Recent Project (Ctrl+Shift+R)", cmd = "RecentProjects", category = "Files" },
 	{ name = "🐧 Browse WSL Files", cmd = "TelescopeFileBrowserWSL", category = "Files" },
 	{ name = "🔄 Check & Reload External File Changes (SmartCheck)", cmd = "SmartCheck", category = "Files" },
+	{ name = "📝 Open Notes Folder (File Explorer)", cmd = "Notes", category = "Notes" },
+	{ name = "📁 Change Default Notes Folder", cmd = "NotesChangeFolder", category = "Notes" },
 
 	-- --------------------------------------------------------------------------
 	-- 🦊 Workspaces & Sessions
@@ -99,6 +101,8 @@ M.commands = {
 	{ name = "🔍 Git Diff Mode: Same Branch (HEAD vs HEAD~N)", cmd = "GitDiffSameBranch", category = "Git" },
 	{ name = "🌿 Git Diff Mode: Between 2 Branches (Side-by-Side)", cmd = "GitDiffBetweenBranches", category = "Git" },
 	{ name = "⚡ Toggle Git Diff Mode (Same Branch)", cmd = "GitDiffToggle", category = "Git" },
+	{ name = "📦 Export Changed Diff Files to Zip Archive", cmd = "GitDiffExportZip", category = "Git" },
+	{ name = "📥 Import Changed Diff Files from Zip Archive", cmd = "GitDiffImportZip", category = "Git" },
 	{ name = "❌ Close Git Diff Mode", cmd = "GitDiffClose", category = "Git" },
 	{ name = "🐙 Toggle Git Panel (Neogit)", cmd = "Neogit", category = "Git" },
 	{ name = "👤 Git Accounts Manager (Select Identity)", cmd = "GitAccounts", category = "Git" },

@@ -57,6 +57,8 @@ The **Git Control Center** (`<C-S-g>`) is a high-speed, interactive floating Git
 | `v` | Normal | Open Git Diff Mode Manager menu (Same branch, 2 branches, commits) |
 | `V` | Normal | Toggle Git Diff Mode (Same branch: Live working tree vs HEAD) |
 | `c` (Diff Sidebar) | Normal | Configure diff scope / commits behind range |
+| `e` / `E` / `z` (Diff Sidebar) | Normal | Export currently diffed files with current code into a `.zip` archive |
+| `i` / `I` (Diff Sidebar) | Normal | Import diff files from a compatible KRS `.zip` archive (with confirmation prompt) |
 | `h` / `<Esc>` (Diff Sidebar) | Normal | Return focus to code editor |
 | `]c` / `[c` or `]d` / `[d` | Normal | Jump to next / previous modification in active diff buffer |
 | `<F5>` / `<C-r>` | Normal | Refresh Git status |

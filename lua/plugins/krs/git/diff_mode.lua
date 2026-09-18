@@ -422,7 +422,8 @@ local function render_file_list()
 
 	table.insert(lines, string.rep("─", 36))
 	table.insert(lines, " [Enter/Space]: Select | [h/Esc]: Code")
-	table.insert(lines, " [c]: Config/Range     | [q]: Close   ")
+	table.insert(lines, " [c]: Range | [e]: Export | [i]: Import")
+	table.insert(lines, " [q]: Close")
 
 	vim.bo[M.state.file_list_buf].modifiable = true
 	vim.api.nvim_buf_set_lines(M.state.file_list_buf, 0, -1, false, lines)
@@ -560,6 +561,18 @@ function M.open_file_list_window(files, selected_idx)
 	vim.keymap.set("n", "c", function()
 		M.open_config_dialog()
 	end, opts)
+
+	for _, k in ipairs({ "e", "E", "z" }) do
+		vim.keymap.set("n", k, function()
+			M.export_diff_prompt()
+		end, opts)
+	end
+
+	for _, k in ipairs({ "i", "I" }) do
+		vim.keymap.set("n", k, function()
+			M.import_diff_prompt()
+		end, opts)
+	end
 
 	return win, buf
 end
@@ -1301,6 +1314,551 @@ function M.open()
 	end)
 end
 
+--- Computes the default filename for exported diff archive based on current commit/branch
+--- @param cwd? string
+--- @return string default_zip_name
+function M.get_default_export_name(cwd)
+	cwd = cwd or M.state.cwd or vim.fn.getcwd()
+	local commit_slug = git.lines({ "log", "-1", "--format=%f" }, cwd)[1]
+	local branch = git.lines({ "branch", "--show-current" }, cwd)[1]
+
+	local default_name = "diff-export.zip"
+	if commit_slug and commit_slug ~= "" then
+		if branch and branch ~= "" and branch ~= "HEAD" and not commit_slug:lower():find(branch:lower(), 1, true) then
+			default_name = branch .. "-" .. commit_slug .. ".zip"
+		else
+			default_name = commit_slug .. ".zip"
+		end
+	elseif branch and branch ~= "" and branch ~= "HEAD" then
+		default_name = branch .. "-diff.zip"
+	end
+	return default_name:gsub('[\\/:*?"<>|]', "-")
+end
+
+--- Compresses contents of src_dir into zip_dest, preserving relative file paths
+--- @param src_dir string Directory containing files to zip
+--- @param zip_dest string Absolute path to output zip file
+--- @return boolean ok, string|nil err
+function M.zip_directory(src_dir, zip_dest)
+	local dest_parent = vim.fs.dirname(zip_dest)
+	if dest_parent and dest_parent ~= "" then
+		vim.fn.mkdir(dest_parent, "p")
+	end
+
+	if vim.fn.filereadable(zip_dest) == 1 then
+		vim.fn.delete(zip_dest)
+	end
+
+	-- 1. Try python3 or python (supports relative directory structure cleanly)
+	local py_bin = (vim.fn.executable("python3") == 1 and "python3") or (vim.fn.executable("python") == 1 and "python")
+	if py_bin then
+		local py_script = "import os, sys, zipfile; src_dir, out_zip = sys.argv[1], sys.argv[2]; "
+			.. "zf = zipfile.ZipFile(out_zip, 'w', zipfile.ZIP_DEFLATED); "
+			.. "[zf.write(os.path.join(r, f), os.path.relpath(os.path.join(r, f), src_dir)) "
+			.. " for r, _, fs in os.walk(src_dir) for f in fs]; "
+			.. "zf.close()"
+		local res = vim.system({ py_bin, "-c", py_script, src_dir, zip_dest }):wait()
+		if res and res.code == 0 and vim.fn.filereadable(zip_dest) == 1 then
+			return true
+		end
+	end
+
+	-- 2. Try zip command line utility
+	if vim.fn.executable("zip") == 1 then
+		local res = vim.system({ "zip", "-q", "-r", zip_dest, "." }, { cwd = src_dir }):wait()
+		if res and res.code == 0 and vim.fn.filereadable(zip_dest) == 1 then
+			return true
+		end
+	end
+
+	-- 3. Try PowerShell on Windows
+	if (vim.fn.has("win32") == 1 or vim.fn.has("wsl") == 1) and vim.fn.executable("powershell.exe") == 1 then
+		local ps_cmd = string.format(
+			"Compress-Archive -Path '%s\\*' -DestinationPath '%s' -Force",
+			src_dir:gsub("'", "''"),
+			zip_dest:gsub("'", "''")
+		)
+		local res = vim.system({ "powershell.exe", "-NoProfile", "-NonInteractive", "-Command", ps_cmd }):wait()
+		if res and res.code == 0 and vim.fn.filereadable(zip_dest) == 1 then
+			return true
+		end
+	end
+
+	return false, "No supported zip compression tool found (requires python3, zip, or powershell)"
+end
+
+--- Exports diff files with their current code into a zip archive
+--- @param zip_name string
+--- @param files? table[]
+--- @param cwd? string
+--- @return string|nil out_path
+function M.export_diff_files_to_zip(zip_name, files, cwd)
+	cwd = cwd or M.state.cwd or vim.fn.getcwd()
+	files = files or M.state.files or {}
+
+	local exportable = {}
+	for _, item in ipairs(files) do
+		if item.status ~= "D" then
+			table.insert(exportable, item)
+		end
+	end
+
+	if #exportable == 0 then
+		notify("No files to export (all changed files are deleted)", vim.log.levels.WARN)
+		return nil
+	end
+
+	local is_abs = zip_name:sub(1, 1) == "/" or zip_name:match("^%a:[/\\]")
+	local out_path = is_abs and path_util.normalize(zip_name) or path_util.join(cwd, zip_name)
+	local staging_dir = vim.fn.tempname() .. "_diff_zip"
+	vim.fn.mkdir(staging_dir, "p")
+
+	local copied_count = 0
+	for _, item in ipairs(exportable) do
+		local rel_path = item.file
+		local dest_file = path_util.join(staging_dir, rel_path)
+		local dest_dir = vim.fs.dirname(dest_file)
+		if dest_dir and dest_dir ~= "" then
+			vim.fn.mkdir(dest_dir, "p")
+		end
+
+		local copied = false
+		local disk_src = path_util.join(cwd, rel_path)
+
+		-- If worktree or HEAD, read directly from disk if available
+		if M.state.target_ref == "WORKTREE" or M.state.target_ref == "HEAD" or not M.state.target_ref then
+			if vim.fn.filereadable(disk_src) == 1 then
+				if vim.uv.fs_copyfile(disk_src, dest_file) then
+					copied = true
+				end
+			end
+		else
+			-- Between branches or custom commit: try git show <target_ref>:<file>
+			local res = vim.system({ "git", "-C", cwd, "show", M.state.target_ref .. ":" .. rel_path }):wait()
+			if res and res.code == 0 and res.stdout then
+				local f = io.open(dest_file, "wb")
+				if f then
+					f:write(res.stdout)
+					f:close()
+					copied = true
+				end
+			end
+			-- Fallback to disk if git show fails
+			if not copied and vim.fn.filereadable(disk_src) == 1 then
+				if vim.uv.fs_copyfile(disk_src, dest_file) then
+					copied = true
+				end
+			end
+		end
+
+		if copied then
+			copied_count = copied_count + 1
+		end
+	end
+
+	if copied_count == 0 then
+		pcall(vim.fn.delete, staging_dir, "rf")
+		notify("Could not copy any diff files for export", vim.log.levels.ERROR)
+		return nil
+	end
+
+	-- Generate manifest signature to verify compatibility on import
+	local manifest = {
+		generator = "krs_git_diff_mode",
+		version = "1.0",
+		created_at = os.time(),
+		branch = git.lines({ "branch", "--show-current" }, cwd)[1] or "",
+		commit = git.lines({ "log", "-1", "--format=%h %s" }, cwd)[1] or "",
+		base_ref = M.state.base_ref or "",
+		target_ref = M.state.target_ref or "",
+		files = {},
+	}
+	for _, item in ipairs(exportable) do
+		table.insert(manifest.files, item.file)
+	end
+
+	local manifest_path = path_util.join(staging_dir, ".krs_diff_manifest.json")
+	local mf = io.open(manifest_path, "w")
+	if mf then
+		mf:write(vim.json.encode(manifest))
+		mf:close()
+	end
+
+	local ok, err = M.zip_directory(staging_dir, out_path)
+	pcall(vim.fn.delete, staging_dir, "rf")
+
+	if not ok then
+		notify("Error exporting zip archive: " .. tostring(err), vim.log.levels.ERROR)
+		return nil
+	end
+
+	pcall(vim.fn.setreg, "+", out_path)
+	pcall(vim.fn.setreg, "*", out_path)
+
+	notify(
+		string.format(
+			"📦 Exported %d diff file(s) with current code to:\n%s\n(Path copied to clipboard)",
+			copied_count,
+			out_path
+		),
+		vim.log.levels.INFO
+	)
+
+	return out_path
+end
+
+--- Reads and validates the KRS diff manifest from a zip archive
+--- Ensures only zips exported by this nvim distribution are compatible
+--- @param zip_path string Absolute path to zip file
+--- @return table|nil manifest, string|nil error_message
+function M.read_zip_manifest(zip_path)
+	if not zip_path or zip_path == "" or vim.fn.filereadable(zip_path) == 0 then
+		return nil, "Zip file not found or unreadable: " .. tostring(zip_path)
+	end
+
+	local content = nil
+
+	-- Method 1: Python 3 or Python
+	local py_bin = (vim.fn.executable("python3") == 1 and "python3") or (vim.fn.executable("python") == 1 and "python")
+	if py_bin then
+		local py_script = "import sys, zipfile; "
+			.. "try:\n"
+			.. "    zf = zipfile.ZipFile(sys.argv[1], 'r')\n"
+			.. "    if '.krs_diff_manifest.json' not in zf.namelist(): sys.exit(2)\n"
+			.. "    sys.stdout.write(zf.read('.krs_diff_manifest.json').decode('utf-8'))\n"
+			.. "    zf.close()\n"
+			.. "except Exception as e:\n"
+			.. "    sys.exit(3)\n"
+		local res = vim.system({ py_bin, "-c", py_script, zip_path }):wait()
+		if res and res.code == 0 and res.stdout and res.stdout ~= "" then
+			content = res.stdout
+		elseif res and res.code == 2 then
+			return nil,
+				"Incompatible zip archive: Missing .krs_diff_manifest.json signature (not exported by KRS Git Diff Mode)"
+		elseif res and res.code == 3 then
+			return nil, "Corrupted or invalid zip file"
+		end
+	end
+
+	-- Method 2: unzip CLI
+	if not content and vim.fn.executable("unzip") == 1 then
+		local res = vim.system({ "unzip", "-p", zip_path, ".krs_diff_manifest.json" }):wait()
+		if res and res.code == 0 and res.stdout and res.stdout ~= "" then
+			content = res.stdout
+		end
+	end
+
+	-- Method 3: PowerShell on Windows
+	if
+		not content
+		and (vim.fn.has("win32") == 1 or vim.fn.has("wsl") == 1)
+		and vim.fn.executable("powershell.exe") == 1
+	then
+		local ps_cmd = string.format(
+			"[System.IO.Compression.ZipFile]::OpenRead('%s').GetEntry('.krs_diff_manifest.json')"
+				.. " | ForEach-Object { (New-Object System.IO.StreamReader($_.Open())).ReadToEnd() }",
+			zip_path:gsub("'", "''")
+		)
+		local res = vim.system({ "powershell.exe", "-NoProfile", "-NonInteractive", "-Command", ps_cmd }):wait()
+		if res and res.code == 0 and res.stdout and res.stdout ~= "" then
+			content = res.stdout
+		end
+	end
+
+	if not content or content == "" then
+		return nil,
+			"Incompatible zip archive: Missing .krs_diff_manifest.json signature (not exported by KRS Git Diff Mode)"
+	end
+
+	local ok, decoded = pcall(vim.json.decode, content)
+	if not ok or type(decoded) ~= "table" then
+		return nil, "Malformed .krs_diff_manifest.json inside zip archive"
+	end
+
+	if decoded.generator ~= "krs_git_diff_mode" or type(decoded.files) ~= "table" then
+		return nil, "Incompatible zip archive: Generator signature mismatch (must be 'krs_git_diff_mode')"
+	end
+
+	return decoded, nil
+end
+
+--- Extracts and updates diff files from a validated KRS zip archive into target_dir
+--- @param zip_path string Path to zip archive
+--- @param target_dir? string Target project root (defaults to cwd)
+--- @param manifest? table Pre-validated manifest (optional)
+--- @return boolean ok, string|nil err
+function M.import_diff_files_from_zip(zip_path, target_dir, manifest)
+	target_dir = target_dir or M.state.cwd or vim.fn.getcwd()
+
+	if not manifest then
+		local mf, err = M.read_zip_manifest(zip_path)
+		if not mf then
+			return false, err
+		end
+		manifest = mf
+	end
+
+	if not manifest.files or #manifest.files == 0 then
+		return false, "Archive manifest contains no files to import"
+	end
+
+	local ok_extract = false
+	local err_msg = nil
+
+	-- Method 1: Python
+	local py_bin = (vim.fn.executable("python3") == 1 and "python3") or (vim.fn.executable("python") == 1 and "python")
+	if py_bin then
+		local py_script = "import sys, zipfile, json, os; "
+			.. "zip_p, target = sys.argv[1], sys.argv[2]; "
+			.. "zf = zipfile.ZipFile(zip_p, 'r'); "
+			.. "manifest = json.loads(zf.read('.krs_diff_manifest.json').decode('utf-8')); "
+			.. "for f in manifest.get('files', []): "
+			.. "    if f in zf.namelist(): "
+			.. "        zf.extract(f, target); "
+			.. "zf.close()"
+		local res = vim.system({ py_bin, "-c", py_script, zip_path, target_dir }):wait()
+		if res and res.code == 0 then
+			ok_extract = true
+		else
+			err_msg = res and res.stderr or "Extraction failed via python"
+		end
+	end
+
+	-- Method 2: unzip
+	if not ok_extract and vim.fn.executable("unzip") == 1 then
+		local cmd = { "unzip", "-o", zip_path }
+		for _, f in ipairs(manifest.files) do
+			table.insert(cmd, f)
+		end
+		vim.list_extend(cmd, { "-d", target_dir })
+		local res = vim.system(cmd):wait()
+		if res and res.code == 0 then
+			ok_extract = true
+		else
+			err_msg = res and res.stderr or "Extraction failed via unzip"
+		end
+	end
+
+	-- Method 3: PowerShell
+	if
+		not ok_extract
+		and (vim.fn.has("win32") == 1 or vim.fn.has("wsl") == 1)
+		and vim.fn.executable("powershell.exe") == 1
+	then
+		local ps_cmd = string.format(
+			"Add-Type -AssemblyName System.IO.Compression.FileSystem; "
+				.. "$zip = [System.IO.Compression.ZipFile]::OpenRead('%s'); "
+				.. "$manifest = $zip.GetEntry('.krs_diff_manifest.json'); "
+				.. "$reader = New-Object System.IO.StreamReader($manifest.Open()); "
+				.. "$json = ConvertFrom-Json $reader.ReadToEnd(); "
+				.. "foreach ($f in $json.files) { "
+				.. "    $entry = $zip.GetEntry($f); "
+				.. "    if ($entry) { "
+				.. "        $dest = [System.IO.Path]::Combine('%s', $f); "
+				.. "        [System.IO.Directory]::CreateDirectory([System.IO.Path]::GetDirectoryName($dest)) | Out-Null; "
+				.. "        [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $dest, $true); "
+				.. "    } "
+				.. "}; $zip.Dispose()",
+			zip_path:gsub("'", "''"),
+			target_dir:gsub("'", "''")
+		)
+		local res = vim.system({ "powershell.exe", "-NoProfile", "-NonInteractive", "-Command", ps_cmd }):wait()
+		if res and res.code == 0 then
+			ok_extract = true
+		else
+			err_msg = res and res.stderr or "Extraction failed via powershell"
+		end
+	end
+
+	if not ok_extract then
+		return false, err_msg or "Failed to extract zip archive"
+	end
+
+	-- Refresh open buffers & editor state
+	pcall(vim.cmd, "checktime")
+	pcall(function()
+		require("neo-tree.sources.manager").refresh("filesystem")
+	end)
+
+	if M.is_open() and M.state.mode == "same_branch" then
+		M.start_same_branch({ cwd = target_dir })
+	end
+
+	return true, nil
+end
+
+--- Prompts user to select a zip file, validates KRS compatibility, and confirms before importing
+--- @param initial_path? string Optional path to zip archive
+function M.import_diff_prompt(initial_path)
+	local cwd = M.state.cwd or vim.fn.getcwd()
+
+	local function confirm_and_import(target_zip)
+		local full_path = (target_zip:sub(1, 1) == "/" or target_zip:match("^%a:[/\\]")) and path_util.normalize(target_zip)
+			or path_util.join(cwd, target_zip)
+
+		if vim.fn.filereadable(full_path) == 0 then
+			notify("Zip archive not found: " .. full_path, vim.log.levels.ERROR)
+			return
+		end
+
+		local manifest, err = M.read_zip_manifest(full_path)
+		if not manifest then
+			notify(
+				"❌ Incompatible zip archive:\n"
+					.. (err or "Missing .krs_diff_manifest.json (not exported by KRS Git Diff Mode)."),
+				vim.log.levels.ERROR
+			)
+			return
+		end
+
+		local file_count = #manifest.files
+		local zip_filename = vim.fn.fnamemodify(full_path, ":t")
+		local branch_label = (manifest.branch and manifest.branch ~= "") and (" (from branch '" .. manifest.branch .. "')")
+			or ""
+
+		-- Confirmation prompt
+		local choices = {
+			string.format("1. ✅ Confirm: Import & overwrite %d file(s)", file_count),
+			"2. 📋 Review list of files in archive",
+			"3. ❌ Cancel",
+		}
+
+		local prompt_title = string.format("📦 Import %d files from '%s'%s?", file_count, zip_filename, branch_label)
+		vim.ui.select(choices, { prompt = prompt_title }, function(choice, idx)
+			if not choice or not idx or idx == 3 then
+				notify("Import cancelled")
+				return
+			end
+
+			if idx == 2 then
+				local file_lines = {}
+				for i, f in ipairs(manifest.files) do
+					table.insert(file_lines, string.format("%d. %s", i, f))
+				end
+				notify(string.format("Files in '%s':\n%s", zip_filename, table.concat(file_lines, "\n")), vim.log.levels.INFO)
+				vim.schedule(function()
+					confirm_and_import(target_zip)
+				end)
+				return
+			end
+
+			if idx == 1 then
+				local ok, extract_err = M.import_diff_files_from_zip(full_path, cwd, manifest)
+				if ok then
+					notify(
+						string.format("✅ Successfully imported %d file(s) from '%s' into project root!", file_count, zip_filename),
+						vim.log.levels.INFO
+					)
+				else
+					notify("Failed to import zip files: " .. tostring(extract_err), vim.log.levels.ERROR)
+				end
+			end
+		end)
+	end
+
+	if initial_path and initial_path ~= "" then
+		confirm_and_import(initial_path)
+		return
+	end
+
+	-- Scan cwd for .zip files to suggest
+	local found_zips = {}
+	local handle = vim.uv.fs_scandir(cwd)
+	while handle do
+		local name, t = vim.uv.fs_scandir_next(handle)
+		if not name then
+			break
+		end
+		if t == "file" and name:lower():match("%.zip$") then
+			table.insert(found_zips, name)
+		end
+	end
+
+	if #found_zips > 0 then
+		local options = {}
+		for _, z in ipairs(found_zips) do
+			table.insert(options, "📦 " .. z)
+		end
+		table.insert(options, "📂 Browse / Type custom path...")
+
+		vim.ui.select(options, { prompt = "⚡ Select Diff Zip Archive to Import:" }, function(choice, idx)
+			if not choice or not idx then
+				return
+			end
+			if idx <= #found_zips then
+				confirm_and_import(found_zips[idx])
+			else
+				local input_modal = require("plugins.krs.ui.input_modal")
+				input_modal.open({
+					label = "Enter path to KRS Diff Zip archive:",
+					default_value = found_zips[1] or "",
+					relative = "editor",
+					callback = function(ok, val)
+						if ok and val and vim.trim(val) ~= "" then
+							confirm_and_import(vim.trim(val))
+						end
+					end,
+				})
+			end
+		end)
+	else
+		local input_modal = require("plugins.krs.ui.input_modal")
+		input_modal.open({
+			label = "Enter path to KRS Diff Zip archive:",
+			default_value = "",
+			relative = "editor",
+			callback = function(ok, val)
+				if ok and val and vim.trim(val) ~= "" then
+					confirm_and_import(vim.trim(val))
+				end
+			end,
+		})
+	end
+end
+
+--- Prompts user for zip filename and exports current diff files
+function M.export_diff_prompt()
+	if not M.is_open() then
+		notify("Git Diff Mode is not active", vim.log.levels.WARN)
+		return
+	end
+
+	if not M.state.files or #M.state.files == 0 then
+		notify("No changed files in diff mode to export", vim.log.levels.WARN)
+		return
+	end
+
+	local exportable = {}
+	for _, f in ipairs(M.state.files) do
+		if f.status ~= "D" then
+			table.insert(exportable, f)
+		end
+	end
+
+	if #exportable == 0 then
+		notify("All changed files are deletions; nothing to export", vim.log.levels.WARN)
+		return
+	end
+
+	local default_name = M.get_default_export_name(M.state.cwd)
+	local input_modal = require("plugins.krs.ui.input_modal")
+	input_modal.open({
+		label = string.format("📦 Export %d Diff File(s) to Zip Archive:", #exportable),
+		default_value = default_name,
+		relative = "editor",
+		callback = function(ok, val)
+			if not ok or not val or vim.trim(val) == "" then
+				return
+			end
+			local zip_name = vim.trim(val)
+			if not zip_name:lower():match("%.zip$") then
+				zip_name = zip_name .. ".zip"
+			end
+			M.export_diff_files_to_zip(zip_name, exportable, M.state.cwd)
+		end,
+	})
+end
+
 --- Toggles Git Diff Mode on/off
 function M.toggle()
 	if M.is_open() then
@@ -1338,6 +1896,19 @@ function M.setup()
 	pcall(vim.api.nvim_create_user_command, "GitDiffClose", function()
 		M.close()
 	end, { desc = "Close Git Diff Mode" })
+
+	pcall(vim.api.nvim_create_user_command, "GitDiffExportZip", function()
+		M.export_diff_prompt()
+	end, { desc = "Export currently diffed files to a zip archive" })
+
+	pcall(vim.api.nvim_create_user_command, "GitDiffImportZip", function(opts)
+		local arg = opts.args and vim.trim(opts.args) or nil
+		M.import_diff_prompt(arg ~= "" and arg or nil)
+	end, {
+		desc = "Import and apply diff files from a KRS zip archive",
+		nargs = "?",
+		complete = "file",
+	})
 end
 
 return setmetatable({
@@ -1349,6 +1920,8 @@ return setmetatable({
 		"GitDiffBetweenBranches",
 		"GitDiffToggle",
 		"GitDiffClose",
+		"GitDiffExportZip",
+		"GitDiffImportZip",
 	},
 	config = function()
 		M.setup()
