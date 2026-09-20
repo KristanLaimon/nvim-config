@@ -13,7 +13,7 @@ Turns type definitions on and off **per project**, for Lua and for TypeScript/Ja
 | `:KrsTypes` / `:TypeInjector` | Open the picker |
 | `:KrsGitignoreGenerated` | Add the generated `.krsnvim/types.d.ts` to `.gitignore` |
 
-Inside the picker: `<Enter>` / `<Tab>` toggles a schema, `<C-n>` installs an `@types` package from NPM, `<C-d>` deletes one. Active schemas are ✅, sorted to the top, with their version in the label.
+Inside the picker: `<Enter>` / `<Tab>` toggles a schema, `<C-n>` installs an `@types` package from NPM, `u` updates an already downloaded package to `@latest`, `<C-d>` deletes one. Active schemas are ✅, sorted to the top, with their version in the label.
 
 The language is inferred from the current filetype; from any other buffer it asks Lua vs TypeScript/JavaScript first.
 

@@ -1,5 +1,4 @@
 {
-  "$schema": "./snippets.schema.json",
 
   "Svelte If Block": {
     "prefix": ["#if", "if", "s-if"],

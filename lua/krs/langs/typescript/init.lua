@@ -70,11 +70,55 @@ function M.has_prettier_config(filename)
 	return vim.fs.find(M.PRETTIER_CONFIG_FILES, { path = filename, upward = true })[1] ~= nil
 end
 
+--- Checks if an HTML buffer contains at least one <script> tag with inline code content
+--- (ignoring external scripts like <script src="..."></script> or non-JS types like importmap).
+--- @param bufnr integer
+--- @return boolean
+function M.has_inline_script(bufnr)
+	if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
+		return false
+	end
+	local line_count = vim.api.nvim_buf_line_count(bufnr)
+	local lines = vim.api.nvim_buf_get_lines(bufnr, 0, math.min(line_count, 3000), false)
+	local text = table.concat(lines, "\n")
+
+	for open_tag, body in text:gmatch("<script(.-)>(.-)</script>") do
+		local is_non_js = open_tag:match("type%s*=%s*[\"']application/json[\"']")
+			or open_tag:match("type%s*=%s*[\"']importmap[\"']")
+			or open_tag:match("type%s*=%s*[\"']text/template[\"']")
+			or open_tag:match("type%s*=%s*[\"']text/html[\"']")
+
+		if not is_non_js and body:match("%S") then
+			return true
+		end
+	end
+
+	return false
+end
+
 --- lspconfig server settings, keyed by server name (see M.lsp_server).
 ---@type table<string, vim.lsp.Config>
 M.lsp_config = {
 	[M.lsp_server[1]] = {
+		filetypes = {
+			"javascript",
+			"javascriptreact",
+			"typescript",
+			"typescriptreact",
+			"html",
+		},
 		root_dir = function(bufnr, on_dir)
+			local path = vim.api.nvim_buf_get_name(bufnr)
+			local ft = (vim.bo[bufnr] and vim.bo[bufnr].filetype) or ""
+			local is_html = ft == "html" or path:match("%.html?$") ~= nil
+
+			-- HTML optimization: Only activate JavaScript/TypeScript LSP on HTML files
+			-- if the buffer contains an inline <script> tag with content inside (not for
+			-- external <script src="..."> scripts only).
+			if is_html and not M.has_inline_script(bufnr) then
+				return
+			end
+
 			local root = vim.fs.root(bufnr, {
 				"tsconfig.json",
 				"jsconfig.json",
@@ -91,11 +135,28 @@ M.lsp_config = {
 			[M.lsp_server[1]] = {
 				autoUseWorkspaceTsdk = true,
 				experimental = {
-					completion = { enableServerSideFuzzyMatch = true },
+					completion = {
+						enableServerSideFuzzyMatch = true,
+						entriesLimit = 200,
+					},
 				},
 			},
 			typescript = {
 				tsserver = { maxTsServerMemory = 8192 },
+				suggest = {
+					completeFunctionCalls = true,
+					includeCompletionsForImportStatements = true,
+					autoImports = true,
+					paths = true,
+					includeAutomaticOptionalChainCompletions = true,
+				},
+				preferences = {
+					includeCompletionsForImportStatements = true,
+					includeCompletionsForModuleExports = true,
+					includePackageJsonAutoImports = "on",
+					importModuleSpecifier = "shortest",
+					importModuleSpecifierEnding = "auto",
+				},
 				inlayHints = {
 					parameterNames = { enabled = "literals", suppressWhenArgumentMatchesName = true },
 					parameterTypes = { enabled = true },
@@ -106,6 +167,20 @@ M.lsp_config = {
 				},
 			},
 			javascript = {
+				suggest = {
+					completeFunctionCalls = true,
+					includeCompletionsForImportStatements = true,
+					autoImports = true,
+					paths = true,
+					includeAutomaticOptionalChainCompletions = true,
+				},
+				preferences = {
+					includeCompletionsForImportStatements = true,
+					includeCompletionsForModuleExports = true,
+					includePackageJsonAutoImports = "on",
+					importModuleSpecifier = "shortest",
+					importModuleSpecifierEnding = "auto",
+				},
 				inlayHints = {
 					parameterNames = { enabled = "literals", suppressWhenArgumentMatchesName = true },
 					parameterTypes = { enabled = true },
@@ -329,6 +404,29 @@ function M.setup()
 		pattern = { "typescript", "javascript", "typescriptreact", "javascriptreact", "json", "jsonc" },
 		callback = function(args)
 			M.apply_defaults(args.buf)
+		end,
+	})
+
+	-- Auto-attach JavaScript LSP to HTML buffers when an inline <script> with content is written
+	vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
+		pattern = { "*.html", "*.htm" },
+		callback = function(args)
+			local buf = args.buf
+			if not vim.api.nvim_buf_is_valid(buf) or vim.bo[buf].filetype ~= "html" then
+				return
+			end
+			local server_name = M.lsp_server[1]
+			for _, client in ipairs(vim.lsp.get_clients({ bufnr = buf })) do
+				if client.name == server_name then
+					return
+				end
+			end
+			if M.has_inline_script(buf) then
+				local ok_lsp, lspconfig = pcall(require, "lspconfig")
+				if ok_lsp and lspconfig[server_name] and lspconfig[server_name].manager then
+					lspconfig[server_name].manager:try_add(buf)
+				end
+			end
 		end,
 	})
 end

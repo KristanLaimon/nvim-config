@@ -159,4 +159,60 @@ describe("LSP server scoping", function()
 		vim.api.nvim_buf_delete(plain_buf, { force = true })
 		vim.api.nvim_buf_delete(tw_buf, { force = true })
 	end)
+
+	it("only activates JavaScript LSP on HTML files when inline <script> with content exists", function()
+		expect(typescript.lsp_config.vtsls).toBeDefined()
+		expect(vim.tbl_contains(typescript.lsp_config.vtsls.filetypes, "html")).toBe(true)
+
+		local temp_dir = vim.fn.tempname()
+		vim.fn.mkdir(temp_dir, "p")
+
+		-- 1. HTML buffer with only external script <script src="...">
+		local ext_buf = vim.api.nvim_create_buf(false, true)
+		vim.api.nvim_buf_set_name(ext_buf, temp_dir .. "/external.html")
+		vim.api.nvim_buf_set_lines(ext_buf, 0, -1, false, {
+			"<!DOCTYPE html>",
+			"<html>",
+			"<head>",
+			'  <script src="app.js"></script>',
+			'  <script src="vendor.js">',
+			"  </script>",
+			"</head>",
+			"<body><h1>No inline script</h1></body>",
+			"</html>",
+		})
+		vim.bo[ext_buf].filetype = "html"
+
+		local called_dir = nil
+		typescript.lsp_config.vtsls.root_dir(ext_buf, function(dir)
+			called_dir = dir
+		end)
+		expect(called_dir).toBeNil()
+
+		-- 2. HTML buffer WITH inline script content
+		local inline_buf = vim.api.nvim_create_buf(false, true)
+		vim.api.nvim_buf_set_name(inline_buf, temp_dir .. "/inline.html")
+		vim.api.nvim_buf_set_lines(inline_buf, 0, -1, false, {
+			"<!DOCTYPE html>",
+			"<html>",
+			"<body>",
+			"  <script>",
+			"    const app = 'my-app';",
+			"    console.log(app);",
+			"  </script>",
+			"</body>",
+			"</html>",
+		})
+		vim.bo[inline_buf].filetype = "html"
+
+		called_dir = nil
+		typescript.lsp_config.vtsls.root_dir(inline_buf, function(dir)
+			called_dir = dir
+		end)
+		expect(called_dir).toBeDefined()
+
+		vim.fn.delete(temp_dir, "rf")
+		vim.api.nvim_buf_delete(ext_buf, { force = true })
+		vim.api.nvim_buf_delete(inline_buf, { force = true })
+	end)
 end)

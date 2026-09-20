@@ -9,4 +9,6 @@ json_out
 output_test
 output_tests
 
+krsnvim/theme.json
+
 *.log

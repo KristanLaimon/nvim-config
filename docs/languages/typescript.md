@@ -36,3 +36,13 @@ Accessible via **Command Palette** (`<C-S-p>` / `:CommandPalette`):
 1. **`pwa-node`**: Attach to or launch Node.js scripts with `js-debug-adapter`.
 2. **`pwa-chrome` / `pwa-msedge`**: Launch browser or attach to web dev servers (Vite, Next.js, Nuxt, React).
 3. **Bun Debugger**: Direct debugging for Bun scripts and test suites.
+
+---
+
+## ⚡ JavaScript in HTML Files (`<script>`)
+
+`vtsls` dynamically scopes activation on HTML documents:
+- **Active on Inline Scripts**: Only activates on `.html` files when an inline `<script>` tag with actual content inside is present.
+- **Ignored on External Scripts**: Files with only `<script src="..."></script>` (or non-JS scripts like `type="importmap"` / `type="application/json"`) do not attach `vtsls`, preventing unnecessary background processes.
+- **Dynamic Attachment**: As soon as inline script content is written into an HTML file, `vtsls` attaches automatically.
+

@@ -331,6 +331,13 @@ function M.install_npm_types(input_pkg, callback)
 	ts_injector.install_npm_types(input_pkg, callback, M)
 end
 
+--- Updates an existing TypeScript type package in the schema store.
+--- @param schema_folder string Schema folder name.
+--- @param callback fun(ok: boolean, schema_folder: string)|nil
+function M.update_npm_types(schema_folder, callback)
+	ts_injector.update_npm_types(schema_folder, callback, M)
+end
+
 -- ============================================================================
 -- PICKER
 -- ============================================================================
@@ -418,7 +425,7 @@ local function open_schema_picker(lang, root, active_data)
 		.new({
 			prompt_title = " 💉 Type Injector ("
 				.. lang.label
-				.. ") | Enter/Tab: Toggle | Ctrl+N: Install NPM | Ctrl+D: Delete ",
+				.. ") | Enter/Tab: Toggle | Ctrl+N: Install | u: Update | Ctrl+D: Delete ",
 			finder = finders.new_table({
 				results = items,
 				entry_maker = function(entry)
@@ -480,6 +487,28 @@ local function open_schema_picker(lang, root, active_data)
 					actions.close(prompt_bufnr)
 					vim.schedule(function()
 						install_flow("Enter NPM type package (e.g. node, express@18, react): ")
+					end)
+				end)
+
+				map_all({ { "n", "u" }, { "i", "<C-u>" } }, function()
+					local item = selected()
+					if not item or item.name == INSTALL_PLACEHOLDER then
+						return
+					end
+
+					if lang.key ~= "typescript_javascript" then
+						notify("⚠️ Updating is only supported for NPM TypeScript schemas.", vim.log.levels.WARN)
+						return
+					end
+
+					actions.close(prompt_bufnr)
+					vim.schedule(function()
+						M.update_npm_types(item.name, function(ok)
+							if ok then
+								persist()
+							end
+							open_schema_picker(lang, root, active_data)
+						end)
 					end)
 				end)
 

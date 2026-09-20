@@ -167,6 +167,31 @@ function M.apply_lsp_settings(root, core)
 end
 
 --- Installs a TypeScript type package into the schema store.
+--- Resolves the npm executable on the system, taking Windows (.cmd) into account.
+--- @return string|nil npm_path
+function M.get_npm_bin()
+	local bin = vim.fn.exepath("npm")
+	if bin ~= "" then
+		return bin
+	end
+	if vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1 then
+		bin = vim.fn.exepath("npm.cmd")
+		if bin ~= "" then
+			return bin
+		end
+		local scoop_npm = vim.fs.normalize(vim.env.USERPROFILE or "") .. "/scoop/apps/nodejs/current/npm.cmd"
+		if vim.fn.filereadable(scoop_npm) == 1 then
+			return scoop_npm
+		end
+		local prog_npm = "C:/Program Files/nodejs/npm.cmd"
+		if vim.fn.filereadable(prog_npm) == 1 then
+			return prog_npm
+		end
+	end
+	return nil
+end
+
+--- Installs a TypeScript type package into the schema store.
 --- Accepts `node`, `@scope/pkg`, and either with an `@version` suffix. A bare
 --- name is resolved as `@types/<name>`; a scoped name is taken as-is.
 ---
@@ -208,20 +233,111 @@ function M.install_npm_types(input_pkg, callback, core)
 		store.save(pkg_json, { name = "krs-schema-" .. schema_folder, private = true })
 	end
 
+	local npm_bin = M.get_npm_bin()
+	if not npm_bin then
+		core.notify("❌ 'npm' was not found on PATH. Please ensure Node.js and npm are installed.", vim.log.levels.ERROR)
+		if callback then
+			callback(false, schema_folder)
+		end
+		return
+	end
+
 	core.notify("📦 Installing " .. npm_package .. " via npm...")
 
-	vim.system({ "npm", "install", "--save-dev", npm_package }, { cwd = schema_dir }, function(obj)
-		vim.schedule(function()
-			if obj.code == 0 then
-				core.notify("✅ Installed " .. npm_package .. " successfully!")
-			else
-				core.notify("❌ Failed to install " .. npm_package .. ":\n" .. (obj.stderr or ""), vim.log.levels.ERROR)
-			end
-			if callback then
-				callback(obj.code == 0, schema_folder)
-			end
+	local ok, spawn_err = pcall(function()
+		vim.system({ npm_bin, "install", "--save-dev", npm_package }, { cwd = schema_dir }, function(obj)
+			vim.schedule(function()
+				if obj.code == 0 then
+					core.notify("✅ Installed " .. npm_package .. " successfully!")
+				else
+					local err_msg = (obj.stderr and obj.stderr ~= "") and obj.stderr or (obj.stdout or "unknown error")
+					core.notify("❌ Failed to install " .. npm_package .. ":\n" .. err_msg, vim.log.levels.ERROR)
+				end
+				if callback then
+					callback(obj.code == 0, schema_folder)
+				end
+			end)
 		end)
 	end)
+
+	if not ok then
+		core.notify("❌ Failed to launch npm: " .. tostring(spawn_err), vim.log.levels.ERROR)
+		if callback then
+			callback(false, schema_folder)
+		end
+	end
+end
+
+--- Updates an already downloaded TypeScript type package in the schema store.
+--- @param schema_folder string Schema folder name (e.g. "node", "react").
+--- @param callback fun(ok: boolean, schema_folder: string)|nil
+--- @param core table type_injector core module.
+function M.update_npm_types(schema_folder, callback, core)
+	core = core or require("plugins.krs.tools.type_injector")
+	local schema_dir = core.resolve_schema_dir("typescript_javascript", schema_folder)
+	if not schema_dir then
+		core.notify("❌ Schema folder not found: " .. schema_folder, vim.log.levels.ERROR)
+		if callback then
+			callback(false, schema_folder)
+		end
+		return
+	end
+
+	local pkg_json = path.join(schema_dir, "package.json")
+	if not path.is_file(pkg_json) then
+		core.notify("⚠️ No package.json found in " .. schema_folder .. " to update.", vim.log.levels.WARN)
+		if callback then
+			callback(false, schema_folder)
+		end
+		return
+	end
+
+	local manifest = store.load(pkg_json, {})
+	local dev_deps = manifest.devDependencies or manifest.dependencies or {}
+	local pkg_to_update
+	for dep_name, _ in pairs(dev_deps) do
+		pkg_to_update = dep_name
+		break
+	end
+
+	if not pkg_to_update then
+		pkg_to_update = schema_folder:find("^@") and schema_folder or ("@types/" .. schema_folder)
+	end
+
+	local npm_bin = M.get_npm_bin()
+	if not npm_bin then
+		core.notify("❌ 'npm' was not found on PATH. Please ensure Node.js and npm are installed.", vim.log.levels.ERROR)
+		if callback then
+			callback(false, schema_folder)
+		end
+		return
+	end
+
+	core.notify("📦 Updating " .. pkg_to_update .. " via npm...")
+
+	local target_pkg = pkg_to_update .. "@latest"
+	local ok, spawn_err = pcall(function()
+		vim.system({ npm_bin, "install", "--save-dev", target_pkg }, { cwd = schema_dir }, function(obj)
+			vim.schedule(function()
+				if obj.code == 0 then
+					core.notify("✅ Updated " .. pkg_to_update .. " successfully!")
+				else
+					local err_msg = (obj.stderr and obj.stderr ~= "") and obj.stderr or (obj.stdout or "unknown error")
+					core.notify("❌ Failed to update " .. pkg_to_update .. ":\n" .. err_msg, vim.log.levels.ERROR)
+				end
+				if callback then
+					callback(obj.code == 0, schema_folder)
+				end
+			end)
+		end)
+	end)
+
+	if not ok then
+		core.notify("❌ Failed to launch npm: " .. tostring(spawn_err), vim.log.levels.ERROR)
+		if callback then
+			callback(false, schema_folder)
+		end
+	end
 end
 
 return setmetatable({

@@ -421,6 +421,18 @@ return {
 			else
 				is_mobile = vim.env.TERMUX_VERSION ~= nil or vim.fn.isdirectory("/data/data/com.termux") == 1
 			end
+			-- Guard against malformed snippet entries (e.g. $schema keys without a body)
+			-- that cause table.concat(nil) errors in blink.cmp's default snippet registry.
+			local ok_utils, snip_utils = pcall(require, "blink.cmp.sources.snippets.utils")
+			if ok_utils and snip_utils.read_snippet then
+				local orig_read = snip_utils.read_snippet
+				snip_utils.read_snippet = function(snippet, fallback)
+					if type(snippet) ~= "table" or not snippet.body then
+						return {}
+					end
+					return orig_read(snippet, fallback)
+				end
+			end
 
 			local merged = vim.tbl_deep_extend("force", opts or {}, {
 				enabled = function()
@@ -511,6 +523,9 @@ return {
 						snippets = {
 							opts = {
 								search_paths = { vim.fn.stdpath("config") .. "/snippets" },
+								filter_snippets = function(_, file)
+									return not file:match("schema%.json$")
+								end,
 							},
 						},
 					},

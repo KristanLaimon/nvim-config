@@ -1,5 +1,4 @@
 {
-  "$schema": "./snippets.schema.json",
 
   "React Functional Component": {
     "prefix": ["rfc", "reactFunctionComponent"],
