@@ -68,6 +68,18 @@ M.settings = {
 --- Opens the file picker; picking a file opens it in a split.
 --- @param direction "h"|"j"|"k"|"l"
 local function open_find_files_split(direction)
+	local split = M.settings.splits[direction]
+	local dir_cmd = {
+		h = "TelescopeFindFilesSplitLeft",
+		j = "TelescopeFindFilesSplitBelow",
+		k = "TelescopeFindFilesSplitAbove",
+		l = "TelescopeFindFilesSplitRight",
+	}
+	if dir_cmd[direction] and vim.fn.exists(":" .. dir_cmd[direction]) > 0 then
+		vim.cmd(dir_cmd[direction])
+		return
+	end
+
 	local ok, builtin = pcall(require, "telescope.builtin")
 	if not ok then
 		vim.notify("Telescope is not ready", vim.log.levels.ERROR)
@@ -76,10 +88,10 @@ local function open_find_files_split(direction)
 
 	local actions = require("telescope.actions")
 	local action_state = require("telescope.actions.state")
-	local split = M.settings.splits[direction]
 
-	builtin.find_files({
+	local find_opts = {
 		prompt_title = " 🔍 Open File to the " .. (split and split.label or direction) .. " ",
+		file_ignore_patterns = { "node_modules[/\\]", "node_modules$", "%.git[/\\]", "%.git$" },
 		attach_mappings = function(prompt_bufnr)
 			actions.select_default:replace(function()
 				local selection = action_state.get_selected_entry()
@@ -92,7 +104,15 @@ local function open_find_files_split(direction)
 			end)
 			return true
 		end,
-	})
+	}
+	if vim.fn.executable("rg") == 1 then
+		find_opts.find_command =
+			{ "rg", "--files", "--color=never", "--hidden", "--no-require-git", "--glob", "!**/.git/*" }
+	elseif vim.fn.executable("fd") == 1 then
+		find_opts.find_command = { "fd", "--type", "f", "--hidden", "--no-require-git", "--exclude", ".git" }
+	end
+
+	builtin.find_files(find_opts)
 end
 
 -- ============================================================================
@@ -133,7 +153,7 @@ for _, key in ipairs(M.settings.keys.find_files) do
 		if _G.FindFilesGitignore then
 			_G.FindFilesGitignore()
 		else
-			require("telescope.builtin").git_files({ recurse_submodules = true })
+			vim.cmd("TelescopeFindFilesGitignore")
 		end
 	end, opts("Find files (respecting .gitignore)"))
 end
@@ -144,7 +164,7 @@ for _, key in ipairs(M.settings.keys.find_all_files) do
 		if _G.FindFilesNoIgnore then
 			_G.FindFilesNoIgnore()
 		else
-			require("telescope.builtin").find_files({ no_ignore = true, hidden = true })
+			vim.cmd("TelescopeFindFilesNoIgnore")
 		end
 	end, opts("Find all files (ignoring .gitignore)"))
 end

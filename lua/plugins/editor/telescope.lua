@@ -84,7 +84,7 @@ return {
 				if _G.FindFilesGitignore then
 					_G.FindFilesGitignore()
 				else
-					require("telescope.builtin").git_files({ recurse_submodules = true })
+					vim.cmd("TelescopeFindFilesGitignore")
 				end
 			end,
 			mode = { "n", "i" },
@@ -96,7 +96,7 @@ return {
 				if _G.FindFilesGitignore then
 					_G.FindFilesGitignore()
 				else
-					require("telescope.builtin").git_files({ recurse_submodules = true })
+					vim.cmd("TelescopeFindFilesGitignore")
 				end
 			end,
 			mode = { "n", "i" },
@@ -108,7 +108,7 @@ return {
 				if _G.FindFilesGitignore then
 					_G.FindFilesGitignore()
 				else
-					require("telescope.builtin").git_files({ recurse_submodules = true })
+					vim.cmd("TelescopeFindFilesGitignore")
 				end
 			end,
 			mode = { "n", "i" },
@@ -120,7 +120,7 @@ return {
 				if _G.FindFilesGitignore then
 					_G.FindFilesGitignore()
 				else
-					require("telescope.builtin").git_files({ recurse_submodules = true })
+					vim.cmd("TelescopeFindFilesGitignore")
 				end
 			end,
 			mode = { "n", "i" },
@@ -193,8 +193,29 @@ return {
 		local action_state = require("telescope.actions.state")
 		local themes = require("telescope.themes")
 
+		local default_ignore_patterns = {
+			"node_modules[/\\]",
+			"node_modules$",
+			"%.git[/\\]",
+			"%.git$",
+		}
+
 		telescope.setup({
 			defaults = {
+				file_ignore_patterns = default_ignore_patterns,
+				vimgrep_arguments = {
+					"rg",
+					"--color=never",
+					"--no-heading",
+					"--with-filename",
+					"--line-number",
+					"--column",
+					"--smart-case",
+					"--hidden",
+					"--no-require-git",
+					"--glob",
+					"!**/.git/*",
+				},
 				mappings = {
 					n = {
 						-- `?` shows the context help for whatever picker is open.
@@ -246,24 +267,31 @@ return {
 		end
 
 		--- Finds files, respecting .gitignore.
-		--- Inside a repository `git files` is both the fastest and the most correct
-		--- source; outside one, rg/fd apply the ignore rules themselves.
+		--- Uses rg/fd with --no-require-git so ignore rules are strictly honored
+		--- in git repos, non-git repos, subfolders, and WSL workspaces alike.
 		local function find_files_gitignore()
 			ensure_code_window()
-			if in_git_repo() then
-				if not pcall(builtin.git_files, { recurse_submodules = true }) then
-					if not pcall(builtin.git_files, { show_untracked = true }) then
-						builtin.find_files({ no_ignore = false, hidden = true })
-					end
-				end
-			elseif vim.fn.executable("rg") == 1 then
+			if vim.fn.executable("rg") == 1 then
 				builtin.find_files({
-					find_command = { "rg", "--files", "--color=never", "--hidden", "--glob", "!.git/*" },
+					find_command = { "rg", "--files", "--color=never", "--hidden", "--no-require-git", "--glob", "!**/.git/*" },
+					file_ignore_patterns = default_ignore_patterns,
 				})
 			elseif vim.fn.executable("fd") == 1 then
-				builtin.find_files({ find_command = { "fd", "--type", "f", "--hidden", "--exclude", ".git" } })
+				builtin.find_files({
+					find_command = { "fd", "--type", "f", "--hidden", "--no-require-git", "--exclude", ".git" },
+					file_ignore_patterns = default_ignore_patterns,
+				})
+			elseif in_git_repo() then
+				builtin.git_files({
+					recurse_submodules = true,
+					file_ignore_patterns = default_ignore_patterns,
+				})
 			else
-				builtin.find_files({ no_ignore = false, hidden = true })
+				builtin.find_files({
+					no_ignore = false,
+					hidden = true,
+					file_ignore_patterns = default_ignore_patterns,
+				})
 			end
 		end
 
@@ -273,14 +301,16 @@ return {
 			ensure_code_window()
 			if vim.fn.executable("rg") == 1 then
 				builtin.find_files({
-					find_command = { "rg", "--files", "--color=never", "--no-ignore", "--hidden", "--glob", "!.git/*" },
+					find_command = { "rg", "--files", "--color=never", "--no-ignore", "--hidden", "--glob", "!**/.git/*" },
+					file_ignore_patterns = {},
 				})
 			elseif vim.fn.executable("fd") == 1 then
 				builtin.find_files({
 					find_command = { "fd", "--type", "f", "--no-ignore", "--hidden", "--exclude", ".git" },
+					file_ignore_patterns = {},
 				})
 			else
-				builtin.find_files({ no_ignore = true, hidden = true })
+				builtin.find_files({ no_ignore = true, hidden = true, file_ignore_patterns = {} })
 			end
 		end
 
@@ -495,8 +525,9 @@ return {
 			ensure_code_window()
 			local split = settings.splits[direction]
 
-			builtin.find_files({
+			local find_opts = {
 				prompt_title = " 🔍 Find & Open File " .. (split and split.label or direction) .. " ",
+				file_ignore_patterns = default_ignore_patterns,
 				attach_mappings = function(prompt_bufnr)
 					actions.select_default:replace(function()
 						local selection = action_state.get_selected_entry()
@@ -509,7 +540,15 @@ return {
 					end)
 					return true
 				end,
-			})
+			}
+			if vim.fn.executable("rg") == 1 then
+				find_opts.find_command =
+					{ "rg", "--files", "--color=never", "--hidden", "--no-require-git", "--glob", "!**/.git/*" }
+			elseif vim.fn.executable("fd") == 1 then
+				find_opts.find_command = { "fd", "--type", "f", "--hidden", "--no-require-git", "--exclude", ".git" }
+			end
+
+			builtin.find_files(find_opts)
 		end
 
 		-- Keys for these live in lua/keymaps/search.lua (see the header).

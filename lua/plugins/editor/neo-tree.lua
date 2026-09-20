@@ -620,7 +620,7 @@ return {
 						if _G.FindFilesGitignore then
 							_G.FindFilesGitignore()
 						else
-							require("telescope.builtin").find_files({ no_ignore = false })
+							vim.cmd("TelescopeFindFilesGitignore")
 						end
 					end,
 
@@ -628,7 +628,7 @@ return {
 						if _G.FindFilesNoIgnore then
 							_G.FindFilesNoIgnore()
 						else
-							require("telescope.builtin").find_files({ no_ignore = true, hidden = true })
+							vim.cmd("TelescopeFindFilesNoIgnore")
 						end
 					end,
 
