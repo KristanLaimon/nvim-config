@@ -17,6 +17,12 @@ return {
 	{
 		"jwalton512/vim-blade",
 		ft = { "blade" },
+		init = function()
+			vim.g.blade_custom_directives_pairs = {
+				script = "endscript",
+				assets = "endassets",
+			}
+		end,
 	},
 
 	-- Laravel Blade component navigation & completion

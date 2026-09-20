@@ -9,7 +9,12 @@ local settings = {
 local M = {}
 
 function M.setup()
-	vim.filetype.add({ extension = settings.filetypes })
+	vim.filetype.add({
+		extension = settings.filetypes,
+		pattern = {
+			[".*%.blade%.php"] = "blade",
+		},
+	})
 
 	for filetype, language in pairs(settings.syntax_aliases) do
 		-- Treesitter needs the alias registered; `syntax` is the fallback highlighter.

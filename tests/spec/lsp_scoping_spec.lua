@@ -112,4 +112,51 @@ describe("LSP server scoping", function()
 		vim.fn.delete(temp_dir, "rf")
 		vim.api.nvim_buf_delete(sample_buf, { force = true })
 	end)
+
+	it("only activates Tailwind CSS LSP on Blade files when Tailwind classes are present", function()
+		local temp_dir = vim.fn.tempname()
+		vim.fn.mkdir(temp_dir, "p")
+		local config_path = temp_dir .. "/tailwind.config.js"
+		local f = io.open(config_path, "w")
+		if f then
+			f:write("// tailwind config")
+			f:close()
+		end
+
+		-- 1. Plain Blade buffer with no Tailwind classes
+		local plain_buf = vim.api.nvim_create_buf(false, true)
+		vim.api.nvim_buf_set_name(plain_buf, temp_dir .. "/plain.blade.php")
+		vim.api.nvim_buf_set_lines(plain_buf, 0, -1, false, {
+			"<div>",
+			"  <h1>No Tailwind Here</h1>",
+			"</div>",
+		})
+		vim.bo[plain_buf].filetype = "blade"
+
+		local called_dir = nil
+		web.lsp_config.tailwindcss.root_dir(plain_buf, function(dir)
+			called_dir = dir
+		end)
+		expect(called_dir).toBeNil()
+
+		-- 2. Blade buffer WITH Tailwind classes
+		local tw_buf = vim.api.nvim_create_buf(false, true)
+		vim.api.nvim_buf_set_name(tw_buf, temp_dir .. "/styled.blade.php")
+		vim.api.nvim_buf_set_lines(tw_buf, 0, -1, false, {
+			'<div class="flex items-center p-4 bg-white">',
+			'  <h1 class="text-xl font-bold">With Tailwind</h1>',
+			"</div>",
+		})
+		vim.bo[tw_buf].filetype = "blade"
+
+		called_dir = nil
+		web.lsp_config.tailwindcss.root_dir(tw_buf, function(dir)
+			called_dir = dir
+		end)
+		expect(called_dir).toBeDefined()
+
+		vim.fn.delete(temp_dir, "rf")
+		vim.api.nvim_buf_delete(plain_buf, { force = true })
+		vim.api.nvim_buf_delete(tw_buf, { force = true })
+	end)
 end)

@@ -64,4 +64,8 @@ if vim.g.neovide then
 	vim.g.neovide_cursor_animate_in_insert_mode = true
 	vim.g.neovide_cursor_animate_command_line = true
 	vim.g.neovide_cursor_unfocused_outline = true -- Draw outline cursor when window loses focus
+
+	vim.keymap.set("n", "<C-S-f>", function()
+		vim.g.neovide_fullscreen = not vim.g.neovide_fullscreen
+	end, { silent = true })
 end

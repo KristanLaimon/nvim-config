@@ -44,3 +44,23 @@ Press `<F5>` (`:DapContinue`) to launch the Debug Adapter Protocol (DAP) launche
 4. **`🌐 Debug Laravel App (artisan serve)`**: Launches `php artisan serve` with Xdebug enabled.
 
 > 🔴 **Blade Breakpoints**: Breakpoints can be toggled inside `.blade.php` files (`<A-b>` or `:DapToggleBreakpoint`), and Xdebug will pause execution during view rendering.
+
+---
+
+## ⚡ JavaScript in Blade Templates (`<script>` & `@script`)
+
+Blade templates frequently incorporate JavaScript blocks for frontend interactions and Livewire scripts:
+
+1. **Syntax Highlighting & Treesitter Injections**:
+   - Standard `<script>` and `<script type="module">` tags are automatically injected into `javascript`.
+   - `<script lang="ts">` or `<script lang="typescript">` tags are automatically injected into `typescript`.
+   - Livewire 3 `@script ... @endscript` blocks are parsed and injected as `javascript`.
+2. **Formatting**:
+   - `:FormatDocument` (`blade-formatter`) automatically cleans up and indents HTML, Blade directives, and embedded `<script>` blocks.
+3. **Autocompletion & Tooling**:
+   - `html-lsp` (`vscode-html-language-server`), `tailwindcss`, and `blade-nav` attach to Blade buffers, providing HTML/script completion, component navigation, and Tailwind utility class suggestions.
+4. **Tailwind CSS & SCSS Dynamic Scoping**:
+   - `tailwindcss` LSP only attaches to a `.blade.php` buffer if the file actually contains at least one Tailwind class, variant, or directive (e.g. `class="flex..."`, `@apply`, `hover:`). Buffers without Tailwind classes remain lean with no unnecessary background LSP overhead.
+   - Embedded `<style>` blocks default to standard `css`. Only when explicitly declared via `<style lang="scss">`, `<style type="text/scss">`, or containing SCSS syntax (`$variable:`, `@mixin`, `@include`), does it switch to `scss`.
+
+
