@@ -80,6 +80,7 @@ If you have just installed or launched KrsVim for the first time, follow these s
 | :--- | :--- |
 | 🌬️ [**Tailwind Organizer**](tailwind-organizer.md) | Automatic multi-row class sorting on save (`:TailwindOrganize`) |
 | 🧬 [**Type Injector**](type-injector.md) | Per-project Lua/TS type schemas and `@types` installer (`:TypeInjector`) |
+| 📝 [**Todo & Comments Sidebar**](todo-sidebar.md) | Right-docked interactive panel scanning TODO, FIXME & comment tags (`:TodoSidebar`, `<leader>td`) |
 | 📝 [**Input Modal Component**](input-modal.md) | Unified rounded floating input dialog replacing standard `vim.ui.input` |
 | 📄 [**JSON Schemas**](schemas-json.md) / [**TOML Schemas**](schemas-toml.md) | Local schema catalogs, auto-completion & validation |
 

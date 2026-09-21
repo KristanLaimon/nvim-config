@@ -203,6 +203,61 @@ describe("plugins.krs.git.diff_mode", function()
 		expect(diff_mode.state.file_list_win).toBeNil()
 	end)
 
+	it("closes diff mode completely when pressing 'q' in the sidebar", function()
+		diff_mode.start_same_branch()
+		expect(diff_mode.is_open()).toBeTruthy()
+		local sb_win = diff_mode.state.file_list_win
+		local sb_buf = diff_mode.state.file_list_buf
+		expect(sb_win ~= nil and vim.api.nvim_win_is_valid(sb_win)).toBeTruthy()
+
+		-- Trigger normal mode 'q' in sidebar buffer
+		local q_map = vim.api.nvim_buf_call(sb_buf, function()
+			return vim.fn.maparg("q", "n", false, true)
+		end)
+		expect(q_map.callback).toBeDefined()
+		q_map.callback()
+
+		expect(diff_mode.is_open()).toBeFalsy()
+		expect(diff_mode.state.is_active).toBeFalsy()
+		expect(diff_mode.state.file_list_win).toBeNil()
+	end)
+
+	it("closes diff mode completely when closing sidebar via :KrsQ / :q", function()
+		require("plugins.krs.editor.buffer_cleaner").setup()
+		diff_mode.start_same_branch()
+		expect(diff_mode.is_open()).toBeTruthy()
+		local sb_win = diff_mode.state.file_list_win
+		expect(sb_win ~= nil and vim.api.nvim_win_is_valid(sb_win)).toBeTruthy()
+
+		vim.api.nvim_set_current_win(sb_win)
+		vim.cmd("KrsQ")
+
+		expect(diff_mode.is_open()).toBeFalsy()
+		expect(diff_mode.state.is_active).toBeFalsy()
+		expect(diff_mode.state.file_list_win).toBeNil()
+	end)
+
+	it("closes between branches dual diff mode completely when pressing 'q' in sidebar", function()
+		diff_mode.start_between_branches("HEAD~1", "HEAD")
+		expect(diff_mode.is_open()).toBeTruthy()
+		local sb_win = diff_mode.state.file_list_win
+		local sb_buf = diff_mode.state.file_list_buf
+		expect(sb_win ~= nil and vim.api.nvim_win_is_valid(sb_win)).toBeTruthy()
+
+		vim.api.nvim_set_current_win(sb_win)
+		local q_map = vim.api.nvim_buf_call(sb_buf, function()
+			return vim.fn.maparg("q", "n", false, true)
+		end)
+		expect(q_map.callback).toBeDefined()
+		q_map.callback()
+
+		expect(diff_mode.is_open()).toBeFalsy()
+		expect(diff_mode.state.is_active).toBeFalsy()
+		expect(diff_mode.state.file_list_win).toBeNil()
+		expect(diff_mode.state.dual_left_win).toBeNil()
+		expect(diff_mode.state.dual_right_win).toBeNil()
+	end)
+
 	it("completely clears diff extmark highlights and virtual lines from all open buffers when closing", function()
 		local b1 = vim.api.nvim_create_buf(false, true)
 		local b2 = vim.api.nvim_create_buf(false, true)

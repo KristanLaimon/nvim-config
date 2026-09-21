@@ -65,6 +65,9 @@ M.commands = {
 	{ name = "🔄 Check & Reload External File Changes (SmartCheck)", cmd = "SmartCheck", category = "Files" },
 	{ name = "📝 Open Notes Folder (File Explorer)", cmd = "Notes", category = "Notes" },
 	{ name = "📁 Change Default Notes Folder", cmd = "NotesChangeFolder", category = "Notes" },
+	{ name = "📝 Toggle Todo & Comments Sidebar (Right)", cmd = "TodoToggle", category = "Files" },
+	{ name = "🔍 Search Todo & Comments (Telescope)", cmd = "TodoSearch", category = "Files" },
+	{ name = "🔄 Refresh Todo & Comments Workspace Scan", cmd = "TodoRefresh", category = "Files" },
 
 	-- --------------------------------------------------------------------------
 	-- 🦊 Workspaces & Sessions

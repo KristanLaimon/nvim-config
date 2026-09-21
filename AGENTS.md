@@ -99,6 +99,7 @@ Refer to the specific wiki documentation page for each feature or development us
 * 📋 [**Snippets Manager**](docs/snippets-manager.md) — Create, edit, override & list per-language VSCode JSON snippets (`:SnippetManager`).
 * 📚 [**Offline Documentation Store**](docs/offline-docs-manager.md) — Store & fuzzy search language docs offline per version (`:DocManager`).
 * 📝 [**Input Modal Dialog**](docs/input-modal.md) — Rounded floating dialog for `vim.ui.input`.
+* 📝 [**Todo & Comments Sidebar**](docs/todo-sidebar.md) — Right-docked interactive panel scanning TODO, FIXME & comment tags (`:TodoSidebar`, `<leader>td`).
 * 📄 [**JSON Schemas Catalog**](docs/schemas-json.md) & [**TOML Schemas Catalog**](docs/schemas-toml.md) — Local offline validation schemas.
 * ⚙️ [**VSCode Compatibility**](docs/vscode-support.md) — Native support for `.vscode/settings.json`, `launch.json` & `tasks.json` (`:VSCodeSettings`).
 

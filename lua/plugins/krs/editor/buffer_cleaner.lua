@@ -26,7 +26,7 @@ local M = {}
 
 M.settings = {
 	--- Filetypes that are UI, not files: they never count as "open work".
-	ui_filetypes = { "alpha", "neo-tree" },
+	ui_filetypes = { "alpha", "neo-tree", "krs_diff_sidebar", "krs_todo_sidebar" },
 
 	--- Dashboard filetype and the command that opens it.
 	dashboard_filetype = "alpha",
@@ -155,6 +155,20 @@ function _G.Smart_Close_Buffer(target_buf, force)
 		pcall(vim.cmd, "Neotree close")
 		return
 	end
+	if ft == "krs_diff_sidebar" then
+		local dm_ok, dm = pcall(require, "plugins.krs.git.diff_mode")
+		if dm_ok and dm.close then
+			dm.close()
+			return
+		end
+	end
+	if ft == "krs_todo_sidebar" then
+		local todo_ok, todo = pcall(require, "plugins.krs.tools.todo_sidebar")
+		if todo_ok and todo.close then
+			todo.close()
+			return
+		end
+	end
 
 	local bname = vim.api.nvim_buf_get_name(target_buf)
 	local is_deleted = false
@@ -260,6 +274,21 @@ function _G.Smart_Close_Tab(force)
 	local ft = vim.bo[cur_buf].filetype
 	local buftype = vim.bo[cur_buf].buftype
 
+	if ft == "krs_diff_sidebar" then
+		local dm_ok, dm = pcall(require, "plugins.krs.git.diff_mode")
+		if dm_ok and dm.close then
+			dm.close()
+			return
+		end
+	end
+	if ft == "krs_todo_sidebar" then
+		local todo_ok, todo = pcall(require, "plugins.krs.tools.todo_sidebar")
+		if todo_ok and todo.close then
+			todo.close()
+			return
+		end
+	end
+
 	-- Never close/delete neo-tree sidebar when Ctrl+W is pressed inside neo-tree;
 	-- shift focus back to code window to preserve UI layout.
 	if ft == "neo-tree" or ft == "NvimTree" then
@@ -316,6 +345,21 @@ function _G.Neotree_Smart_Quit(force)
 	if ft == M.settings.dashboard_filetype then
 		vim.cmd(force and "qa!" or "qa")
 		return
+	end
+
+	if ft == "krs_diff_sidebar" then
+		local dm_ok, dm = pcall(require, "plugins.krs.git.diff_mode")
+		if dm_ok and dm.close then
+			dm.close()
+			return
+		end
+	end
+	if ft == "krs_todo_sidebar" then
+		local todo_ok, todo = pcall(require, "plugins.krs.tools.todo_sidebar")
+		if todo_ok and todo.close then
+			todo.close()
+			return
+		end
 	end
 
 	if ft == "neo-tree" or ft == "NvimTree" or buftype == "terminal" then

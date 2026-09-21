@@ -319,7 +319,7 @@ local function is_valid_editor_win(win)
 	local b = vim.api.nvim_win_get_buf(win)
 	if b and vim.api.nvim_buf_is_valid(b) then
 		local ft = vim.bo[b].filetype
-		if ft == "krs_diff_sidebar" or ft == "neo-tree" or ft == "NvimTree" then
+		if ft == "krs_diff_sidebar" or ft == "krs_todo_sidebar" or ft == "neo-tree" or ft == "NvimTree" then
 			return false
 		end
 	end
@@ -1064,9 +1064,22 @@ function M.open_file_list_window(files, selected_idx)
 	M.state.file_list_win = win
 
 	-- Auto-close diff mode cleanly if sidebar window is closed externally (e.g. :q, :close, <C-w>c)
-	local win_str = tostring(win)
+	local win_id = win
 	vim.api.nvim_create_autocmd("WinClosed", {
-		pattern = win_str,
+		pattern = "*",
+		callback = function(args)
+			if tonumber(args.match) == win_id then
+				if M.is_open() then
+					M.close()
+				end
+				return true
+			end
+		end,
+	})
+
+	-- Auto-close diff mode cleanly if sidebar buffer is wiped or deleted
+	vim.api.nvim_create_autocmd({ "BufWipeout", "BufDelete" }, {
+		buffer = buf,
 		once = true,
 		callback = function()
 			if M.is_open() then
@@ -1172,6 +1185,7 @@ function M.open_file_list_window(files, selected_idx)
 	end
 
 	vim.keymap.set("n", "q", function()
+		M.focus_editor()
 		M.close()
 	end, opts)
 
@@ -1553,81 +1567,117 @@ function M.start_between_branches(branch1, branch2, cwd)
 	render_file_list()
 end
 
+local is_closing = false
+
 --- Closes Git Diff Mode and restores previous layout
 --- @param opts? { keep_state?: boolean }
 function M.close(opts)
-	opts = opts or {}
-	if not opts.keep_state then
-		M.state.is_active = false
-		M.state.stats = nil
-		M.state.change_counts = nil
-		M.state.current_mod_idx = 0
-		M.state.active_file = nil
-		M.state.current_modifications = {}
+	if is_closing then
+		return
 	end
+	is_closing = true
 
-	-- Delete live diff autocmd group
-	if M._augroup then
-		pcall(vim.api.nvim_del_augroup_by_id, M._augroup)
-		M._augroup = nil
-	end
+	local status, err = pcall(function()
+		local is_between_branches = (M.state.mode == "between_branches")
+			or (M.state.dual_left_win ~= nil)
+			or (M.state.dual_right_win ~= nil)
 
-	-- Clear diff highlights & extmarks from ALL open buffers in Neovim
-	M.clear_all_diff_highlights()
+		opts = opts or {}
+		if not opts.keep_state then
+			M.state.is_active = false
+			M.state.mode = nil
+			M.state.files = nil
+			M.state.selected_file_idx = 1
+			M.state.stats = nil
+			M.state.change_counts = nil
+			M.state.current_mod_idx = 0
+			M.state.active_file = nil
+			M.state.current_modifications = {}
+		end
 
-	-- Close file list window
-	if M.state.file_list_win and vim.api.nvim_win_is_valid(M.state.file_list_win) then
-		local sb_win = M.state.file_list_win
-		M.state.file_list_win = nil
-		ui.close(sb_win)
-	end
-	if M.state.file_list_buf and vim.api.nvim_buf_is_valid(M.state.file_list_buf) then
-		pcall(vim.api.nvim_buf_delete, M.state.file_list_buf, { force = true })
-	end
-	M.state.file_list_win = nil
-	M.state.file_list_buf = nil
+		-- Delete live diff autocmd group
+		if M._augroup then
+			pcall(vim.api.nvim_del_augroup_by_id, M._augroup)
+			M._augroup = nil
+		end
 
-	-- Restore windows from dual mode
-	if M.state.mode == "between_branches" then
-		local left_buf_to_wipe = M.state.dual_left_buf
-		local right_buf_to_wipe = M.state.dual_right_buf
+		-- Clear diff highlights & extmarks from ALL open buffers in Neovim
+		M.clear_all_diff_highlights()
 
-		if M.state.dual_left_win and vim.api.nvim_win_is_valid(M.state.dual_left_win) then
-			pcall(vim.api.nvim_set_option_value, "scrollbind", false, { win = M.state.dual_left_win })
-			pcall(vim.api.nvim_set_option_value, "cursorbind", false, { win = M.state.dual_left_win })
-			if M.state.prev_buf and vim.api.nvim_buf_is_valid(M.state.prev_buf) then
-				pcall(vim.api.nvim_win_set_buf, M.state.dual_left_win, M.state.prev_buf)
-			elseif M.state.active_file and M.state.cwd then
-				local full_p = path_util.join(M.state.cwd, M.state.active_file)
-				if vim.fn.filereadable(full_p) == 1 then
-					pcall(vim.api.nvim_win_call, M.state.dual_left_win, function()
-						vim.cmd("edit " .. vim.fn.fnameescape(full_p))
-					end)
-				end
+		-- Determine target editor window to restore focus to
+		local target_win = M.state.editor_win or M.state.prev_win
+		if not (target_win and vim.api.nvim_win_is_valid(target_win) and target_win ~= M.state.file_list_win) then
+			target_win = get_valid_editor_win()
+		end
+
+		-- Switch focus out of sidebar before closing if currently in sidebar
+		local cur_win = vim.api.nvim_get_current_win()
+		if cur_win == M.state.file_list_win then
+			if target_win and vim.api.nvim_win_is_valid(target_win) and target_win ~= M.state.file_list_win then
+				pcall(vim.api.nvim_set_current_win, target_win)
 			end
 		end
-		if M.state.dual_right_win and vim.api.nvim_win_is_valid(M.state.dual_right_win) then
-			pcall(vim.api.nvim_set_option_value, "scrollbind", false, { win = M.state.dual_right_win })
-			pcall(vim.api.nvim_set_option_value, "cursorbind", false, { win = M.state.dual_right_win })
-			ui.close(M.state.dual_right_win)
+
+		-- Close file list window
+		if M.state.file_list_win and vim.api.nvim_win_is_valid(M.state.file_list_win) then
+			local sb_win = M.state.file_list_win
+			M.state.file_list_win = nil
+			ui.close(sb_win)
+		end
+		if M.state.file_list_buf and vim.api.nvim_buf_is_valid(M.state.file_list_buf) then
+			pcall(vim.api.nvim_buf_delete, M.state.file_list_buf, { force = true })
+		end
+		M.state.file_list_win = nil
+		M.state.file_list_buf = nil
+
+		-- Restore windows from dual mode
+		if is_between_branches then
+			local left_buf_to_wipe = M.state.dual_left_buf
+			local right_buf_to_wipe = M.state.dual_right_buf
+
+			if M.state.dual_left_win and vim.api.nvim_win_is_valid(M.state.dual_left_win) then
+				pcall(vim.api.nvim_set_option_value, "scrollbind", false, { win = M.state.dual_left_win })
+				pcall(vim.api.nvim_set_option_value, "cursorbind", false, { win = M.state.dual_left_win })
+				if M.state.prev_buf and vim.api.nvim_buf_is_valid(M.state.prev_buf) then
+					pcall(vim.api.nvim_win_set_buf, M.state.dual_left_win, M.state.prev_buf)
+				elseif M.state.active_file and M.state.cwd then
+					local full_p = path_util.join(M.state.cwd, M.state.active_file)
+					if vim.fn.filereadable(full_p) == 1 then
+						pcall(vim.api.nvim_win_call, M.state.dual_left_win, function()
+							vim.cmd("edit " .. vim.fn.fnameescape(full_p))
+						end)
+					end
+				end
+			end
+			if M.state.dual_right_win and vim.api.nvim_win_is_valid(M.state.dual_right_win) then
+				pcall(vim.api.nvim_set_option_value, "scrollbind", false, { win = M.state.dual_right_win })
+				pcall(vim.api.nvim_set_option_value, "cursorbind", false, { win = M.state.dual_right_win })
+				ui.close(M.state.dual_right_win)
+			end
+
+			if left_buf_to_wipe and vim.api.nvim_buf_is_valid(left_buf_to_wipe) then
+				pcall(vim.api.nvim_buf_delete, left_buf_to_wipe, { force = true })
+			end
+			if right_buf_to_wipe and vim.api.nvim_buf_is_valid(right_buf_to_wipe) then
+				pcall(vim.api.nvim_buf_delete, right_buf_to_wipe, { force = true })
+			end
+
+			M.state.dual_left_win, M.state.dual_left_buf = nil, nil
+			M.state.dual_right_win, M.state.dual_right_buf = nil, nil
 		end
 
-		if left_buf_to_wipe and vim.api.nvim_buf_is_valid(left_buf_to_wipe) then
-			pcall(vim.api.nvim_buf_delete, left_buf_to_wipe, { force = true })
+		if target_win and vim.api.nvim_win_is_valid(target_win) then
+			pcall(vim.api.nvim_set_current_win, target_win)
 		end
-		if right_buf_to_wipe and vim.api.nvim_buf_is_valid(right_buf_to_wipe) then
-			pcall(vim.api.nvim_buf_delete, right_buf_to_wipe, { force = true })
-		end
+		M.state.editor_win = nil
+		M.state.prev_win = nil
+		M.state.prev_buf = nil
+	end)
 
-		M.state.dual_left_win, M.state.dual_left_buf = nil, nil
-		M.state.dual_right_win, M.state.dual_right_buf = nil, nil
+	is_closing = false
+	if not status then
+		error(err)
 	end
-
-	local target_win = M.state.editor_win or M.state.prev_win
-	if target_win and vim.api.nvim_win_is_valid(target_win) then
-		pcall(vim.api.nvim_set_current_win, target_win)
-	end
-	M.state.editor_win = nil
 end
 
 --- Opens two vertical menus to select Base Branch (left) and Target Branch (right)
