@@ -97,3 +97,23 @@ buffer-local `map_keys` function rather than a flat `M.settings.keys` table
 '"P"' lua/plugins/krs/git_center.lua` finds the exact `vim.keymap.set` call to
 edit directly.
 
+---
+
+## 🔍 VS Code-Style Git Blame (`git-blame.nvim`)
+
+KrsVim integrates `f-person/git-blame.nvim` configured to emulate the VS Code GitLens inline blame virtual text.
+
+### Features:
+- **Inline Virtual Text**: Displays `  <author>, <date> • <summary>` at the end of the active cursor line.
+- **Relative Dates**: Shows relative time format (e.g., `2 hours ago`, `3 days ago`) matching VS Code.
+- **Smart Highlighting**: Italicized, subtle text dynamically linked to the active colorscheme's `Comment` highlight.
+- **Filetype Gating**: Automatically suppressed in explorer, picker, help, and popup buffers (`neo-tree`, `TelescopePrompt`, `alpha`, `dashboard`, `help`, `gitcommit`, `lazy`, `mason`).
+
+### Commands & Palette Actions:
+- `:GitBlameToggle` — Toggle inline virtual text on / off.
+- `:GitBlameOpenCommitURL` — Open commit in web browser.
+- `:GitBlameCopySHA` — Copy commit SHA hash to clipboard.
+- `:GitBlameCopyCommitURL` — Copy web commit URL to clipboard.
+- `:GitBlameOpenFileURL` — Open file at commit in web browser.
+- All actions are discoverable via Command Palette (`<C-S-p>`).
+

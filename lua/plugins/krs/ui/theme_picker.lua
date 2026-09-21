@@ -64,15 +64,18 @@ function M.set_theme(name)
 		data.theme = name
 		local has_omarchy, omarchy_mod = pcall(require, "plugins.krs.ui.omarchy_theme")
 		if name == "omarchy-krs" then
+			data.omarchy_sync = true
+			store.save(M.settings.store_file, data)
 			if has_omarchy then
-				omarchy_mod.set_sync_enabled(true)
+				omarchy_mod.set_sync_enabled(true, { quiet = true })
 			end
-		elseif has_omarchy and omarchy_mod.is_sync_enabled() then
-			omarchy_mod.set_sync_enabled(false)
-			vim.notify("Omarchy Sync disabled to apply " .. name, vim.log.levels.INFO)
 		else
 			data.omarchy_sync = false
 			store.save(M.settings.store_file, data)
+			if has_omarchy and omarchy_mod.is_sync_enabled() then
+				omarchy_mod.set_sync_enabled(false, { restore_theme = false, new_theme = name, quiet = true })
+				vim.notify("Omarchy Sync disabled to apply " .. name, vim.log.levels.INFO)
+			end
 		end
 		vim.notify("Applied colorscheme: " .. name, vim.log.levels.INFO)
 	else
@@ -100,7 +103,7 @@ function M.open_picker()
 	local themes = M.discover_themes()
 	local original_theme = vim.g.colors_name or M.settings.default_theme
 
-	local has_telescope, builtin = pcall(require, "telescope.builtin")
+	local has_telescope = pcall(require, "telescope.builtin")
 	local has_actions, actions = pcall(require, "telescope.actions")
 	local has_action_state, action_state = pcall(require, "telescope.actions.state")
 
@@ -122,6 +125,11 @@ function M.open_picker()
 						end
 					end
 
+					local function cancel_selection()
+						actions.close(prompt_bufnr)
+						pcall(vim.cmd.colorscheme, original_theme)
+					end
+
 					map("i", "<Tab>", function()
 						actions.move_selection_next(prompt_bufnr)
 						preview_selection()
@@ -141,6 +149,30 @@ function M.open_picker()
 						actions.move_selection_previous(prompt_bufnr)
 						preview_selection()
 					end)
+
+					map("i", "<C-n>", function()
+						actions.move_selection_next(prompt_bufnr)
+						preview_selection()
+					end)
+
+					map("i", "<C-p>", function()
+						actions.move_selection_previous(prompt_bufnr)
+						preview_selection()
+					end)
+
+					map("n", "j", function()
+						actions.move_selection_next(prompt_bufnr)
+						preview_selection()
+					end)
+
+					map("n", "k", function()
+						actions.move_selection_previous(prompt_bufnr)
+						preview_selection()
+					end)
+
+					map("i", "<Esc>", cancel_selection)
+					map("n", "<Esc>", cancel_selection)
+					map("n", "q", cancel_selection)
 
 					actions.select_default:replace(function()
 						local selection = action_state.get_selected_entry()
@@ -183,6 +215,31 @@ function M.setup()
 			return M.discover_themes()
 		end,
 		desc = "Open Nagatoro theme picker",
+	})
+
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		group = vim.api.nvim_create_augroup("krs_theme_user_change", { clear = true }),
+		callback = function(args)
+			local name = args.match
+			if not name or name == "" or name == "default" then
+				return
+			end
+			local current_saved = M.get_current_theme()
+			if current_saved ~= name then
+				local data = store.load(M.settings.store_file, {})
+				data.theme = name
+				if name == "omarchy-krs" then
+					data.omarchy_sync = true
+				else
+					data.omarchy_sync = false
+					local has_omarchy, omarchy_mod = pcall(require, "plugins.krs.ui.omarchy_theme")
+					if has_omarchy and omarchy_mod.is_sync_enabled() then
+						omarchy_mod.set_sync_enabled(false, { restore_theme = false, new_theme = name, quiet = true })
+					end
+				end
+				store.save(M.settings.store_file, data)
+			end
+		end,
 	})
 
 	if M.settings.keymap then

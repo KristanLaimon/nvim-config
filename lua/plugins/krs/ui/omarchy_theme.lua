@@ -418,8 +418,10 @@ end
 
 --- Enables or disables Omarchy theme synchronization.
 --- @param enable boolean
+--- @param opts? { quiet?: boolean, restore_theme?: boolean, new_theme?: string }
 --- @return boolean success
-function M.set_sync_enabled(enable)
+function M.set_sync_enabled(enable, opts)
+	opts = opts or {}
 	if enable then
 		if not M.is_omarchy_available() then
 			vim.notify("⚠️ Omarchy Linux desktop was not detected on this system.", vim.log.levels.WARN)
@@ -431,32 +433,53 @@ function M.set_sync_enabled(enable)
 
 		-- Also update config theme.json for picker/backward compatibility
 		local cfg = store.load(M.settings.store_file, {})
-		cfg.previous_theme = cfg.theme or vim.g.colors_name or M.settings.default_fallback_theme
+		local current = cfg.theme or vim.g.colors_name or M.settings.default_fallback_theme
+		if current ~= "omarchy-krs" then
+			cfg.previous_theme = current
+		end
 		cfg.theme = "omarchy-krs"
 		cfg.omarchy_sync = true
 		store.save(M.settings.store_file, cfg)
 
 		M.start_watcher()
-		local ok, name = M.apply_omarchy_theme({ quiet = true })
-		if ok then
-			vim.notify("🎨 Omarchy Theme Sync: ENABLED (Current: " .. name .. ")", vim.log.levels.INFO)
-		else
-			vim.notify("🎨 Omarchy Theme Sync: ENABLED (Theme: " .. name .. ")", vim.log.levels.INFO)
+		local ok, name = M.apply_omarchy_theme({ quiet = opts.quiet == true })
+		if not opts.quiet then
+			if ok then
+				vim.notify("🎨 Omarchy Theme Sync: ENABLED (Current: " .. name .. ")", vim.log.levels.INFO)
+			else
+				vim.notify("🎨 Omarchy Theme Sync: ENABLED (Theme: " .. name .. ")", vim.log.levels.INFO)
+			end
 		end
 		return true
 	else
 		-- Persist boolean in nvim data
 		store.save(M.settings.sync_data_file, { enabled = false })
 
+		M.stop_watcher()
+
 		local cfg = store.load(M.settings.store_file, {})
 		cfg.omarchy_sync = false
-		local restored = cfg.previous_theme or M.settings.default_fallback_theme
-		cfg.theme = restored
-		store.save(M.settings.store_file, cfg)
 
-		M.stop_watcher()
-		pcall(vim.cmd.colorscheme, restored)
-		vim.notify("🎨 Omarchy Theme Sync: DISABLED (Restored: " .. restored .. ")", vim.log.levels.INFO)
+		if opts.new_theme then
+			cfg.theme = opts.new_theme
+			store.save(M.settings.store_file, cfg)
+			return true
+		end
+
+		if opts.restore_theme ~= false then
+			local restored = cfg.previous_theme or M.settings.default_fallback_theme
+			if restored == "omarchy-krs" then
+				restored = M.settings.default_fallback_theme
+			end
+			cfg.theme = restored
+			store.save(M.settings.store_file, cfg)
+			pcall(vim.cmd.colorscheme, restored)
+			if not opts.quiet then
+				vim.notify("🎨 Omarchy Theme Sync: DISABLED (Restored: " .. restored .. ")", vim.log.levels.INFO)
+			end
+		else
+			store.save(M.settings.store_file, cfg)
+		end
 		return true
 	end
 end
