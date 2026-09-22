@@ -56,6 +56,9 @@ return {
 			group = vim.api.nvim_create_augroup("krs_gitblame_hl", { clear = true }),
 			callback = set_gitblame_highlight,
 		})
-		require("gitblame").setup(opts)
+		local ok, gitblame = pcall(require, "gitblame")
+		if ok and gitblame and gitblame.setup then
+			gitblame.setup(opts)
+		end
 	end,
 }

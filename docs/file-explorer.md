@@ -11,7 +11,11 @@ KRS Neovim includes native floating file explorers for Desktop, WSL, folder pick
 1. **Desktop Explorer (`<C-S-f>`)**: Pure Lua floating file explorer starting at user Desktop or home directory.
 2. **WSL Explorer (`:TelescopeFileBrowserWSL`)**: Native WSL distribution filesystem explorer.
 3. **Sneak-Peek Project Modal (`<C-S-y>`)**: Open any folder in an on-top modal window (90% width x 90% height) with fresh LSP initialization and full process tree cleanup on close.
-4. **Neo-tree Move File Picker (`m`)**: Pressing `m` on a file in Neo-tree opens the floating file explorer starting at project root (`getcwd()`). Navigate to target folder and press `O` to move file without renaming.
+4. **Neo-tree Move ("En la mano" Workflow) (`m`)**:
+   - Press `m` on any file or folder to pick it up ("En la mano"). A persistent toast notification appears showing the held item.
+   - Navigate to the destination directory (or any file inside it) in Neo-tree and press `m` again to move it.
+   - If `m` is pressed in the same directory or on the same item, the move is cancelled and a warning notifies you that it was already in the same place.
+   - Press `<Esc>` at any time while holding an item to cancel the move.
 5. **Gitignore vs All Files Search in Neo-tree**:
    - `<C-k>` / `<C-K>` / `<C-/>` / `<C-_>`: Find files **respecting `.gitignore`**.
    - `<C-A-k>` / `<C-S-/>` / `<C-?>`: Find **all files ignoring `.gitignore`**.
@@ -29,8 +33,8 @@ KRS Neovim includes native floating file explorers for Desktop, WSL, folder pick
 - `<C-S-f>`: Open Desktop File Explorer
 - `<leader>fw`: Open WSL File Explorer
 - `<C-S-y>`: Open Sneak-Peek Project Modal (90% width & height)
-- `m` (in Neo-tree): Move file/folder via floating picker
-- `O` / `o` (in Move Picker): Confirm target folder to move file into
+- `m` (in Neo-tree): Pick up file/folder ("En la mano") / Move into target directory (or cancel if same place)
+- `<Esc>` (in Neo-tree): Cancel pending move operation if an item is held
 - `r` (in Neo-tree): Rename file/folder via `input_modal`
 - `a` (in Neo-tree): Create new file or folder via `input_modal`
 - `H` / `gh` (in Neo-tree): Mark selected file/folder as visually hidden

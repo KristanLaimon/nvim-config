@@ -17,7 +17,7 @@
 --   width is re-asserted on WinClosed as well.
 --
 -- SIDEBAR KEYS
---   a / <C-n> new file    A / <A-n> new folder    r rename    m move
+--   a / <C-n> new file    A / <A-n> new folder    r rename    m move (en la mano)
 --   <C-/> find files (gitignore)   <C-S-/> find all files   <C-;> terminal
 -- ============================================================================
 
@@ -50,7 +50,9 @@ local settings = {
 		["D"] = "delete_visual",
 		["r"] = "rename_with_modal",
 		["R"] = "refresh_neotree",
-		["m"] = "move_with_picker",
+		["m"] = "move_item",
+		["<esc>"] = "cancel_move",
+		["<Esc>"] = "cancel_move",
 		["a"] = "add_file_with_modal",
 		["A"] = "add_folder_with_modal",
 		["<C-n>"] = "add_file_with_modal",
@@ -458,6 +460,8 @@ return {
 			"NeotreeAddFolder",
 			"NeotreeRefresh",
 			"NeotreeRescan",
+			"NeotreeMove",
+			"NeotreeCancelMove",
 		},
 		keys = (function()
 			local k = {}
@@ -534,6 +538,18 @@ return {
 					end,
 					"Clear all marked custom hidden items in Neo-tree",
 				},
+				NeotreeMove = {
+					function()
+						require("plugins.krs.editor.neotree_mover").handle_move_ex()
+					end,
+					"Move selected file or folder in Neo-tree (En la mano)",
+				},
+				NeotreeCancelMove = {
+					function()
+						require("plugins.krs.editor.neotree_mover").cancel()
+					end,
+					"Cancel pending Neo-tree move operation",
+				},
 			}
 			for name, spec in pairs(user_cmds) do
 				if vim.fn.exists(":" .. name) == 0 then
@@ -598,6 +614,20 @@ return {
 							end,
 						})
 					end, true),
+
+					move_item = function(state)
+						local node = state and state.tree and state.tree:get_node()
+						require("plugins.krs.editor.neotree_mover").handle_move(node, state)
+					end,
+
+					cancel_move = function(state)
+						local mover = require("plugins.krs.editor.neotree_mover")
+						if mover.is_holding() then
+							mover.cancel()
+						else
+							pcall(require("neo-tree.sources.common.commands").cancel, state)
+						end
+					end,
 
 					move_with_picker = with_node(function(node)
 						require("plugins.krs.tools.file_explorer").open_move_picker({

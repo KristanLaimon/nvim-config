@@ -108,13 +108,20 @@ end
 
 -- Only self-execute when THIS file is the `-l` entry script (not when dofile'd by run_me.lua).
 local script_source = debug.getinfo(1, "S").source:sub(2)
-if vim.v.argv and #vim.v.argv >= 3 then
-	local entry = vim.fn.fnamemodify(vim.v.argv[#vim.v.argv], ":p")
-	if vim.fn.fnamemodify(script_source, ":p") == entry then
-		local root = vim.fn.fnamemodify(script_source, ":p:h:h")
-		bootstrap_paths(root)
-		os.exit(M.run(root, _G.arg and _G.arg[1] or nil))
+local is_entry = false
+if vim.v.argv then
+	local script_p = vim.fn.fnamemodify(script_source, ":p")
+	for i = 1, #vim.v.argv do
+		if vim.fn.fnamemodify(vim.v.argv[i], ":p") == script_p then
+			is_entry = true
+			break
+		end
 	end
+end
+if is_entry then
+	local root = vim.fn.fnamemodify(script_source, ":p:h:h")
+	bootstrap_paths(root)
+	os.exit(M.run(root, _G.arg and _G.arg[1] or nil))
 end
 
 return M

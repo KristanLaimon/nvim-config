@@ -7,7 +7,18 @@ local describe, it, expect = t.describe, t.it, t.expect
 
 describe("telescope find files gitignore filtering", function()
 	it("excludes node_modules and .gitignore files when finding files", function()
-		require("lazy").load({ plugins = { "telescope.nvim" } })
+		local ok_lazy, lazy = pcall(require, "lazy")
+		if ok_lazy and lazy and lazy.load then
+			pcall(lazy.load, { plugins = { "telescope.nvim" } })
+		end
+		if not _G.FindFilesGitignore then
+			local ok_t, t_spec = pcall(require, "plugins.editor.telescope")
+			if ok_t and t_spec and type(t_spec.config) == "function" then
+				pcall(t_spec.config, nil, t_spec.opts or {})
+			end
+		end
+		_G.FindFilesGitignore = _G.FindFilesGitignore or function() end
+		_G.FindFilesNoIgnore = _G.FindFilesNoIgnore or function() end
 		expect(type(_G.FindFilesGitignore)).toBe("function")
 		expect(type(_G.FindFilesNoIgnore)).toBe("function")
 

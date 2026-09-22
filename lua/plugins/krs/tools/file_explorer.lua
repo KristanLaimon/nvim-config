@@ -296,8 +296,8 @@ function M.open_desktop_explorer(opts, on_select_cb)
 	local curr_dir = resolve_dir(requested or fallback, vim.fn.getcwd())
 
 	if not (ok_pickers and ok_actions and ok_state) then
-		if on_select then
-			on_select(curr_dir)
+		if not (_G.krs_testing or vim.g.krs_testing) then
+			vim.notify("Telescope is required for the file explorer", vim.log.levels.WARN, { title = "File Explorer" })
 		end
 		return
 	end

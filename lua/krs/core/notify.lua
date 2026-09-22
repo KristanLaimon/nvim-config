@@ -377,7 +377,8 @@ end
 
 --- Lets the progress toast for `id` auto-dismiss with a normal timeout.
 --- @param id string
-function M.finish_progress(id)
+--- @param custom_timeout number|nil
+function M.finish_progress(id, custom_timeout)
 	local existing = M._progress_toasts[id]
 	M._progress_toasts[id] = nil
 	if not existing then
@@ -387,11 +388,11 @@ function M.finish_progress(id)
 		return
 	end
 
-	-- Schedule a normal auto-dismiss (2.5s slide-out)
+	-- Schedule a normal auto-dismiss (2.5s slide-out or custom)
 	local win = existing.win
 	local buf = existing.buf
 	local win_item = existing.item
-	local timeout = 2500
+	local timeout = custom_timeout or 2500
 
 	vim.defer_fn(function()
 		local exit_steps = 5
@@ -441,6 +442,29 @@ function M.finish_progress(id)
 			end)
 		)
 	end, timeout)
+end
+
+--- Immediately dismisses the progress toast for `id`.
+--- @param id string
+function M.dismiss_progress(id)
+	local existing = M._progress_toasts[id]
+	M._progress_toasts[id] = nil
+	if not existing then
+		return
+	end
+	if existing.win and vim.api.nvim_win_is_valid(existing.win) then
+		pcall(vim.api.nvim_win_close, existing.win, true)
+	end
+	if existing.buf and vim.api.nvim_buf_is_valid(existing.buf) then
+		pcall(vim.api.nvim_buf_delete, existing.buf, { force = true })
+	end
+	for idx, item in ipairs(M.active_wins) do
+		if item.win == existing.win then
+			table.remove(M.active_wins, idx)
+			break
+		end
+	end
+	M.reposition_wins()
 end
 
 function M.setup()
