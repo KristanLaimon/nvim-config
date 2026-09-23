@@ -104,8 +104,10 @@ M.diff_modal_win, M.diff_modal_buf = nil, nil
 M.log_win, M.log_buf = nil, nil
 M.log_right_win, M.log_right_buf = nil, nil
 M.branch_win, M.branch_buf = nil, nil
+M.graph_win, M.graph_buf = nil, nil
+M.graph_right_win, M.graph_right_buf = nil, nil
 
---- RAM-cached active screen in Git Center: "panel", "log", "branch", "diff", "diff_mode"
+--- RAM-cached active screen in Git Center: "panel", "log", "branch", "diff", "graph", "diff_mode"
 M.cached_view = "panel"
 M.cached_view_data = {}
 

@@ -34,10 +34,13 @@
 
 local lazy_req = require("krs.core.lazy_require")
 local conflicts = lazy_req("krs.git.conflicts")
+local project = lazy_req("krs.core.project")
+local store = lazy_req("krs.core.store")
 
 local M = {}
 
 M.ns_markers = vim.api.nvim_create_namespace("krs_conflict_markers")
+M.ns_spans = vim.api.nvim_create_namespace("krs_conflict_spans")
 
 M.settings = {
 	sidebar_width = 30,
@@ -69,6 +72,140 @@ M.state = {
 
 local function notify(msg, level)
 	vim.notify(msg, level or vim.log.levels.INFO, { title = M.settings.notify_title })
+end
+
+--- Resolves the per-project `.krsnvim/conflict_session.json` config path.
+--- @param cwd string|nil
+--- @return string
+function M.get_session_path(cwd)
+	cwd = cwd or M.state.cwd or vim.fn.getcwd()
+	local root = project.root() or cwd
+	if project.config_path then
+		return project.config_path("conflict_session.json", root)
+	end
+	return root .. "/.krsnvim/conflict_session.json"
+end
+
+--- Loads in-progress conflict resolution session data from `.krsnvim/conflict_session.json`.
+--- @param cwd string|nil
+--- @return table|nil
+function M.load_session(cwd)
+	local path = M.get_session_path(cwd)
+	local data = store.load(path, nil)
+	if data and type(data) == "table" and data.files then
+		return data
+	end
+	return nil
+end
+
+--- Saves in-progress conflict resolution state to `.krsnvim/conflict_session.json`.
+function M.save_session()
+	if not M.state.is_open or not M.state.files or #M.state.files == 0 then
+		return
+	end
+	local path = M.get_session_path(M.state.cwd)
+
+	-- Update active file lines and spans
+	local active_item = M.state.files[M.state.active_idx]
+	if active_item and M.state.result_buf and vim.api.nvim_buf_is_valid(M.state.result_buf) then
+		active_item.saved_lines = vim.api.nvim_buf_get_lines(M.state.result_buf, 0, -1, false)
+		active_item.saved_spans = vim.deepcopy(M.state.spans)
+	end
+
+	local files_map = {}
+	for _, f in ipairs(M.state.files) do
+		files_map[f.file] = {
+			conflict_count = f.conflict_count,
+			is_staged = f.is_staged,
+			lines = f.saved_lines,
+			spans = f.saved_spans,
+		}
+	end
+
+	local data = {
+		cwd = M.state.cwd,
+		active_idx = M.state.active_idx,
+		files = files_map,
+		timestamp = os.time(),
+	}
+	store.save(path, data)
+end
+
+local save_timer = nil
+--- Debounced version of save_session for rapid keystrokes/modifications in Result window.
+function M.debounced_save_session()
+	if save_timer then
+		save_timer:stop()
+		save_timer:close()
+		save_timer = nil
+	end
+	local uv = vim.uv or vim.loop
+	save_timer = uv.new_timer()
+	if save_timer then
+		save_timer:start(350, 0, vim.schedule_wrap(function()
+			if save_timer then
+				save_timer:stop()
+				save_timer:close()
+				save_timer = nil
+			end
+			M.save_session()
+		end))
+	else
+		M.save_session()
+	end
+end
+
+--- Deletes the `.krsnvim/conflict_session.json` persistence file.
+--- @param cwd string|nil
+function M.clear_session(cwd)
+	if save_timer then
+		save_timer:stop()
+		save_timer:close()
+		save_timer = nil
+	end
+	local path = M.get_session_path(cwd)
+	if vim.fn.filereadable(path) == 1 then
+		pcall(vim.fn.delete, path)
+	end
+end
+
+--- Returns the current 1-indexed (start_line, end_line) of a span based on its extmark in the result buffer.
+--- Dynamically updates even after free-form manual editing, insertions, and deletions.
+--- Safely clamps to current buffer line count.
+local function get_span_bounds(span)
+	if not span then
+		return 1, 1
+	end
+	local buf = M.state.result_buf
+	if not buf or not vim.api.nvim_buf_is_valid(buf) then
+		return span.start_line or 1, span.end_line or 1
+	end
+	local line_count = vim.api.nvim_buf_line_count(buf)
+	if line_count == 0 then
+		span.start_line = 1
+		span.end_line = 1
+		return 1, 1
+	end
+
+	if span.extmark_id then
+		local pos = vim.api.nvim_buf_get_extmark_by_id(buf, M.ns_spans, span.extmark_id, { details = true })
+		if pos and #pos >= 2 then
+			local sr = math.max(0, math.min(pos[1], line_count - 1))
+			local er = sr
+			if pos[3] and pos[3].end_row then
+				er = math.max(sr, math.min(pos[3].end_row, line_count - 1))
+			end
+			span.start_line = sr + 1
+			span.end_line = er + 1
+			return span.start_line, span.end_line
+		end
+	end
+
+	local s = math.max(1, math.min(span.start_line or 1, line_count))
+	local e = math.max(s, math.min(span.end_line or s, line_count))
+	span.start_line = s
+	span.end_line = e
+	return s, e
 end
 
 --- Retrieves the actual Neo-tree width (from disk or open window) to keep sidebar aligned.
@@ -321,8 +458,9 @@ function M.update_result_highlights()
 	end
 
 	for _, span in ipairs(M.state.spans or {}) do
-		local s_line = math.max(0, math.min(span.start_line - 1, #lines - 1))
-		local e_line = math.max(s_line, math.min(span.end_line - 1, #lines - 1))
+		local s_line, e_line = get_span_bounds(span)
+		local s_row = math.max(0, math.min(s_line - 1, #lines - 1))
+		local e_row = math.max(s_row, math.min(e_line - 1, #lines - 1))
 
 		local choice_badge
 		local badge_hl
@@ -347,7 +485,7 @@ function M.update_result_highlights()
 			choice_badge = " [CONFLICT: Ctrl+1/co: Ours (Green)  Ctrl+2/ct: Theirs (Blue)  Ctrl+3/cb: Both  Ctrl+z: Undo] "
 		end
 
-		pcall(vim.api.nvim_buf_set_extmark, buf, M.ns_markers, s_line, 0, {
+		pcall(vim.api.nvim_buf_set_extmark, buf, M.ns_markers, s_row, 0, {
 			virt_lines = {
 				{
 					{ string.format("⚔️ CONFLICT #%d%s", span.id, choice_badge), badge_hl },
@@ -356,7 +494,7 @@ function M.update_result_highlights()
 			virt_lines_above = true,
 		})
 
-		for l = s_line, e_line do
+		for l = s_row, e_row do
 			pcall(vim.api.nvim_buf_set_extmark, buf, M.ns_markers, l, 0, {
 				line_hl_group = line_hl,
 			})
@@ -514,7 +652,6 @@ local function unmap_result_keymaps(buf)
 		"<C-S>",
 		"u",
 		"<C-z>",
-		"<C-u>",
 		"gc",
 		"<A-c>",
 		"gi",
@@ -552,10 +689,19 @@ function M.load_file(idx)
 		return
 	end
 
-	-- Clean up previous result buffer if switching
-	if M.state.result_buf and vim.api.nvim_buf_is_valid(M.state.result_buf) then
+	-- Save previous result buffer state before switching files
+	if
+		M.state.result_buf
+		and vim.api.nvim_buf_is_valid(M.state.result_buf)
+		and M.state.files[M.state.active_idx]
+	then
+		local prev_item = M.state.files[M.state.active_idx]
+		prev_item.saved_lines = vim.api.nvim_buf_get_lines(M.state.result_buf, 0, -1, false)
+		prev_item.saved_spans = vim.deepcopy(M.state.spans)
+		M.save_session()
 		unmap_result_keymaps(M.state.result_buf)
 		pcall(vim.api.nvim_buf_clear_namespace, M.state.result_buf, M.ns_markers, 0, -1)
+		pcall(vim.api.nvim_buf_clear_namespace, M.state.result_buf, M.ns_spans, 0, -1)
 	end
 
 	M.state.active_idx = idx
@@ -637,46 +783,68 @@ function M.load_file(idx)
 			end)
 		end
 
-		-- Check if file contains conflict markers to generate the clean resulting code
-		local buf_lines = vim.api.nvim_buf_get_lines(res_buf, 0, -1, false)
-		if #buf_lines <= 1 and (buf_lines[1] == "" or buf_lines[1] == nil) then
-			buf_lines = working_lines
-		end
-
-		local parsed = conflicts.parse_markers(buf_lines)
-		if #parsed == 0 and #marker_list > 0 then
-			buf_lines = working_lines
-			parsed = marker_list
-		end
-
-		if #parsed > 0 then
-			-- Generate clean resulting code with Current as initial candidate
-			local clean_lines, spans = conflicts.build_resolved_lines(buf_lines, parsed, "current")
-			for _, s in ipairs(spans) do
-				s.resolved = false
-			end
-			M.state.spans = spans
-			item.conflict_count = #spans
-			vim.api.nvim_buf_set_lines(res_buf, 0, -1, false, clean_lines)
-
-			-- Save initial state for unlimited undo back to the beginning
-			if not M.state.history then
-				M.state.history = {}
-			end
-			if not M.state.history[idx] then
-				M.state.history[idx] = {
-					stack = {},
-					initial_lines = vim.deepcopy(clean_lines),
-					initial_spans = vim.deepcopy(spans),
-					initial_count = #spans,
-				}
-			end
+		local restored_from_saved = false
+		if item.saved_lines and #item.saved_lines > 0 then
+			vim.api.nvim_buf_set_lines(res_buf, 0, -1, false, item.saved_lines)
+			M.state.spans = vim.deepcopy(item.saved_spans or {})
+			restored_from_saved = true
 		else
-			M.state.spans = {}
-			item.conflict_count = 0
-			if #buf_lines > 0 then
-				vim.api.nvim_buf_set_lines(res_buf, 0, -1, false, buf_lines)
+			-- Check if file contains conflict markers to generate the clean resulting code
+			local buf_lines = vim.api.nvim_buf_get_lines(res_buf, 0, -1, false)
+			if #buf_lines <= 1 and (buf_lines[1] == "" or buf_lines[1] == nil) then
+				buf_lines = working_lines
 			end
+
+			local parsed = conflicts.parse_markers(buf_lines)
+			if #parsed == 0 and #marker_list > 0 then
+				buf_lines = working_lines
+				parsed = marker_list
+			end
+
+			if #parsed > 0 then
+				-- Generate clean resulting code with Current as initial candidate
+				local clean_lines, spans = conflicts.build_resolved_lines(buf_lines, parsed, "current")
+				for _, s in ipairs(spans) do
+					s.resolved = false
+				end
+				M.state.spans = spans
+				item.conflict_count = #spans
+				vim.api.nvim_buf_set_lines(res_buf, 0, -1, false, clean_lines)
+
+				-- Save initial state for unlimited undo back to the beginning
+				if not M.state.history then
+					M.state.history = {}
+				end
+				if not M.state.history[idx] then
+					M.state.history[idx] = {
+						stack = {},
+						initial_lines = vim.deepcopy(clean_lines),
+						initial_spans = vim.deepcopy(spans),
+						initial_count = #spans,
+					}
+				end
+			else
+				M.state.spans = {}
+				item.conflict_count = 0
+				if #buf_lines > 0 then
+					vim.api.nvim_buf_set_lines(res_buf, 0, -1, false, buf_lines)
+				end
+			end
+		end
+
+		-- Setup extmarks for dynamic span tracking in result buffer
+		pcall(vim.api.nvim_buf_clear_namespace, res_buf, M.ns_spans, 0, -1)
+		local total_lines = vim.api.nvim_buf_line_count(res_buf)
+		for _, s in ipairs(M.state.spans or {}) do
+			local s_row = math.max(0, math.min((s.start_line or 1) - 1, total_lines - 1))
+			local e_row = math.max(s_row, math.min((s.end_line or s.start_line or 1) - 1, total_lines - 1))
+			local extmark_id = vim.api.nvim_buf_set_extmark(res_buf, M.ns_spans, s_row, 0, {
+				end_row = e_row,
+				end_col = 0,
+				right_gravity = false,
+				end_right_gravity = true,
+			})
+			s.extmark_id = extmark_id
 		end
 
 		M.attach_result_keymaps(res_buf)
@@ -685,8 +853,11 @@ function M.load_file(idx)
 		M.update_result_highlights()
 
 		if M.state.spans and #M.state.spans > 0 then
-			pcall(vim.api.nvim_win_set_cursor, M.state.result_win, { M.state.spans[1].start_line, 0 })
-			pcall(vim.cmd, "normal! zz")
+			M.center_all_on_span(1)
+		end
+
+		if restored_from_saved then
+			notify(string.format("💾 Restored conflict progress for %s", rel_path))
 		end
 	end
 
@@ -704,7 +875,15 @@ local function get_target_span()
 	if not M.state.spans or #M.state.spans == 0 then
 		return nil
 	end
-	local cursor_line = vim.api.nvim_win_get_cursor(M.state.result_win)[1]
+	local cursor_line = 1
+	if M.state.result_win and vim.api.nvim_win_is_valid(M.state.result_win) then
+		cursor_line = vim.api.nvim_win_get_cursor(M.state.result_win)[1]
+	end
+
+	-- Refresh all bounds from extmarks
+	for _, s in ipairs(M.state.spans) do
+		get_span_bounds(s)
+	end
 
 	for _, s in ipairs(M.state.spans) do
 		if cursor_line >= s.start_line and cursor_line <= s.end_line then
@@ -730,12 +909,17 @@ local function apply_span_choice(choice)
 		return
 	end
 
+	local buf = M.state.result_buf
+	if not buf or not vim.api.nvim_buf_is_valid(buf) then
+		return
+	end
+
 	-- Save snapshot to undo stack before modifying buffer
 	local hist = M.state.history and M.state.history[M.state.active_idx]
-	if hist and M.state.result_buf and vim.api.nvim_buf_is_valid(M.state.result_buf) then
+	if hist then
 		local item = M.state.files[M.state.active_idx]
 		local snapshot = {
-			lines = vim.api.nvim_buf_get_lines(M.state.result_buf, 0, -1, false),
+			lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false),
 			spans = vim.deepcopy(M.state.spans),
 			conflict_count = item and item.conflict_count or 0,
 			cursor = pcall(vim.api.nvim_win_get_cursor, M.state.result_win) and vim.api.nvim_win_get_cursor(
@@ -747,44 +931,53 @@ local function apply_span_choice(choice)
 
 	local new_chunk = {}
 	if choice == "current" or choice == "ours" then
-		new_chunk = span.current_lines
+		new_chunk = span.current_lines or {}
 		span.choice = "current"
 	elseif choice == "incoming" or choice == "theirs" then
-		new_chunk = span.incoming_lines
+		new_chunk = span.incoming_lines or {}
 		span.choice = "incoming"
 	elseif choice == "both_incoming_first" then
-		for _, l in ipairs(span.incoming_lines) do
+		for _, l in ipairs(span.incoming_lines or {}) do
 			table.insert(new_chunk, l)
 		end
-		for _, l in ipairs(span.current_lines) do
+		for _, l in ipairs(span.current_lines or {}) do
 			table.insert(new_chunk, l)
 		end
 		span.choice = "both"
 	else
-		for _, l in ipairs(span.current_lines) do
+		for _, l in ipairs(span.current_lines or {}) do
 			table.insert(new_chunk, l)
 		end
-		for _, l in ipairs(span.incoming_lines) do
+		for _, l in ipairs(span.incoming_lines or {}) do
 			table.insert(new_chunk, l)
 		end
 		span.choice = "both"
 	end
 
-	local buf = M.state.result_buf
-	local old_count = (span.end_line - span.start_line + 1)
-	local new_count = #new_chunk
-	local delta = new_count - old_count
+	local s_line, e_line = get_span_bounds(span)
+	local line_count = vim.api.nvim_buf_line_count(buf)
+	local s_idx = math.max(0, math.min(s_line - 1, line_count))
+	local e_idx = math.max(s_idx, math.min(e_line, line_count))
 
-	vim.api.nvim_buf_set_lines(buf, span.start_line - 1, span.end_line, false, new_chunk)
-	span.end_line = span.start_line + math.max(1, new_count) - 1
-	span.resolved = true
-
-	-- Shift subsequent spans
-	for i = span.id + 1, #M.state.spans do
-		local next_s = M.state.spans[i]
-		next_s.start_line = next_s.start_line + delta
-		next_s.end_line = next_s.end_line + delta
+	local set_ok = pcall(vim.api.nvim_buf_set_lines, buf, s_idx, e_idx, false, new_chunk)
+	if not set_ok then
+		pcall(vim.api.nvim_buf_set_lines, buf, s_idx, s_idx, false, new_chunk)
 	end
+
+	local new_count = #new_chunk
+	local new_end_row = math.max(s_idx, s_idx + math.max(1, new_count) - 1)
+	if span.extmark_id then
+		pcall(vim.api.nvim_buf_del_extmark, buf, M.ns_spans, span.extmark_id)
+	end
+	span.extmark_id = vim.api.nvim_buf_set_extmark(buf, M.ns_spans, s_idx, 0, {
+		end_row = new_end_row,
+		end_col = 0,
+		right_gravity = false,
+		end_right_gravity = true,
+	})
+	span.start_line = s_idx + 1
+	span.end_line = new_end_row + 1
+	span.resolved = true
 
 	-- Recalculate remaining unresolved conflicts for active file
 	local item = M.state.files[M.state.active_idx]
@@ -801,7 +994,12 @@ local function apply_span_choice(choice)
 	M.update_result_highlights()
 	M.render_sidebar()
 	M.update_winbars()
-	pcall(vim.api.nvim_win_set_cursor, M.state.result_win, { math.max(1, span.start_line), 0 })
+
+	-- Keep all panels synchronized on the span that was just resolved
+	M.center_all_on_span(span.id)
+
+	-- Persist session immediately
+	M.save_session()
 
 	local label = (choice == "incoming" or choice == "theirs") and "📥 Incoming (Theirs)"
 		or ((choice:find("both")) and "🔀 Both Changes" or "🌿 Current (Ours)")
@@ -835,6 +1033,21 @@ function M.undo()
 		item.is_staged = false
 	end
 
+	-- Re-create extmarks for restored spans
+	pcall(vim.api.nvim_buf_clear_namespace, buf, M.ns_spans, 0, -1)
+	local total_lines = vim.api.nvim_buf_line_count(buf)
+	for _, s in ipairs(M.state.spans or {}) do
+		local s_row = math.max(0, math.min((s.start_line or 1) - 1, total_lines - 1))
+		local e_row = math.max(s_row, math.min((s.end_line or s.start_line or 1) - 1, total_lines - 1))
+		local extmark_id = vim.api.nvim_buf_set_extmark(buf, M.ns_spans, s_row, 0, {
+			end_row = e_row,
+			end_col = 0,
+			right_gravity = false,
+			end_right_gravity = true,
+		})
+		s.extmark_id = extmark_id
+	end
+
 	if prev.cursor and M.state.result_win and vim.api.nvim_win_is_valid(M.state.result_win) then
 		pcall(vim.api.nvim_win_set_cursor, M.state.result_win, prev.cursor)
 	end
@@ -842,6 +1055,7 @@ function M.undo()
 	M.update_result_highlights()
 	M.render_sidebar()
 	M.update_winbars()
+	M.save_session()
 
 	local remaining = (item and item.conflict_count) or 0
 	local steps_left = #hist.stack
@@ -899,9 +1113,25 @@ function M.reset_to_initial()
 		item.is_staged = false
 	end
 
+	-- Re-create extmarks for reset spans
+	pcall(vim.api.nvim_buf_clear_namespace, buf, M.ns_spans, 0, -1)
+	local total_lines = vim.api.nvim_buf_line_count(buf)
+	for _, s in ipairs(M.state.spans or {}) do
+		local s_row = math.max(0, math.min((s.start_line or 1) - 1, total_lines - 1))
+		local e_row = math.max(s_row, math.min((s.end_line or s.start_line or 1) - 1, total_lines - 1))
+		local extmark_id = vim.api.nvim_buf_set_extmark(buf, M.ns_spans, s_row, 0, {
+			end_row = e_row,
+			end_col = 0,
+			right_gravity = false,
+			end_right_gravity = true,
+		})
+		s.extmark_id = extmark_id
+	end
+
 	M.update_result_highlights()
 	M.render_sidebar()
 	M.update_winbars()
+	M.save_session()
 
 	notify(
 		string.format("🔄 Reset file back to original merge state at the beginning (%d conflicts)", hist.initial_count)
@@ -921,23 +1151,278 @@ function M.accept_both(order)
 	apply_span_choice(order == "incoming_first" and "both_incoming_first" or "both_current_first")
 end
 
+-- ---------------------------------------------------------------------------
+-- Panel Scrolling & Cursor Synchronization
+-- ---------------------------------------------------------------------------
+
+local is_syncing = false
+
+--- Centers all panels (Result, Current, Incoming) on the given conflict span index.
+--- @param span_id integer
+function M.center_all_on_span(span_id)
+	if not span_id then
+		return
+	end
+	local s = M.state.spans and M.state.spans[span_id]
+	local c_s = M.state.current_spans and M.state.current_spans[span_id]
+	local i_s = M.state.incoming_spans and M.state.incoming_spans[span_id]
+
+	if s and M.state.result_win and vim.api.nvim_win_is_valid(M.state.result_win) then
+		local sl, _ = get_span_bounds(s)
+		pcall(vim.api.nvim_win_set_cursor, M.state.result_win, { math.max(1, sl), 0 })
+		pcall(vim.api.nvim_win_call, M.state.result_win, function()
+			vim.cmd("normal! zz")
+		end)
+	end
+	if c_s and M.state.current_win and vim.api.nvim_win_is_valid(M.state.current_win) then
+		pcall(vim.api.nvim_win_set_cursor, M.state.current_win, { math.max(1, c_s.start_line), 0 })
+		pcall(vim.api.nvim_win_call, M.state.current_win, function()
+			vim.cmd("normal! zz")
+		end)
+	end
+	if i_s and M.state.incoming_win and vim.api.nvim_win_is_valid(M.state.incoming_win) then
+		pcall(vim.api.nvim_win_set_cursor, M.state.incoming_win, { math.max(1, i_s.start_line), 0 })
+		pcall(vim.api.nvim_win_call, M.state.incoming_win, function()
+			vim.cmd("normal! zz")
+		end)
+	end
+end
+
+--- Maps a line number in the Result buffer to corresponding lines in Current (Ours) and Incoming (Theirs).
+--- @param res_line integer
+--- @return integer cur_line, integer inc_line
+function M.map_result_line_to_top(res_line)
+	local spans = M.state.spans or {}
+	local c_spans = M.state.current_spans or {}
+	local i_spans = M.state.incoming_spans or {}
+
+	if #spans == 0 or #c_spans == 0 or #i_spans == 0 then
+		return res_line, res_line
+	end
+
+	-- Before first span
+	local first_s = spans[1]
+	local first_s_start, _ = get_span_bounds(first_s)
+	if res_line < first_s_start then
+		return res_line, res_line
+	end
+
+	-- Inside or between spans
+	for idx = 1, #spans do
+		local s = spans[idx]
+		local c_s = c_spans[idx] or c_spans[#c_spans]
+		local i_s = i_spans[idx] or i_spans[#i_spans]
+		local s_start, s_end = get_span_bounds(s)
+
+		if res_line >= s_start and res_line <= s_end then
+			local offset = res_line - s_start
+			local c_line = c_s.start_line + math.min(offset, math.max(0, c_s.end_line - c_s.start_line))
+			local i_line = i_s.start_line + math.min(offset, math.max(0, i_s.end_line - i_s.start_line))
+			return c_line, i_line
+		end
+
+		local next_s = spans[idx + 1]
+		if next_s then
+			local next_s_start, _ = get_span_bounds(next_s)
+			if res_line > s_end and res_line < next_s_start then
+				local dist = res_line - s_end
+				local c_line = c_s.end_line + dist
+				local i_line = i_s.end_line + dist
+				return c_line, i_line
+			end
+		end
+	end
+
+	-- After last span
+	local last_s = spans[#spans]
+	local last_c_s = c_spans[#c_spans]
+	local last_i_s = i_spans[#i_spans]
+	local _, last_s_end = get_span_bounds(last_s)
+	local dist = res_line - last_s_end
+	local c_line = last_c_s.end_line + dist
+	local i_line = last_i_s.end_line + dist
+	return c_line, i_line
+end
+
+--- Maps a line number from Current (Ours) or Incoming (Theirs) to the Result buffer.
+--- @param top_line integer
+--- @param is_incoming boolean
+--- @return integer res_line
+function M.map_top_line_to_result(top_line, is_incoming)
+	local spans = M.state.spans or {}
+	local target_spans = is_incoming and (M.state.incoming_spans or {}) or (M.state.current_spans or {})
+
+	if #spans == 0 or #target_spans == 0 then
+		return top_line
+	end
+
+	local first_t = target_spans[1]
+	if top_line < first_t.start_line then
+		return top_line
+	end
+
+	for idx = 1, #target_spans do
+		local t_s = target_spans[idx]
+		local s = spans[idx]
+		if not s then
+			break
+		end
+		local s_start, s_end = get_span_bounds(s)
+
+		if top_line >= t_s.start_line and top_line <= t_s.end_line then
+			local offset = top_line - t_s.start_line
+			local res_line = s_start + math.min(offset, math.max(0, s_end - s_start))
+			return res_line
+		end
+
+		local next_t = target_spans[idx + 1]
+		if next_t then
+			if top_line > t_s.end_line and top_line < next_t.start_line then
+				local dist = top_line - t_s.end_line
+				local res_line = s_end + dist
+				return res_line
+			end
+		end
+	end
+
+	local last_t = target_spans[#target_spans]
+	local last_s = spans[#spans]
+	local _, last_s_end = get_span_bounds(last_s)
+	local dist = top_line - last_t.end_line
+	return last_s_end + dist
+end
+
+--- Synchronizes the top panels (Current & Incoming) to match the Result window's cursor position.
+function M.sync_top_panels_from_result()
+	if is_syncing or not M.state.is_open then
+		return
+	end
+	if not M.state.result_win or not vim.api.nvim_win_is_valid(M.state.result_win) then
+		return
+	end
+	if vim.api.nvim_get_current_win() ~= M.state.result_win then
+		return
+	end
+
+	is_syncing = true
+	pcall(function()
+		local cursor = vim.api.nvim_win_get_cursor(M.state.result_win)
+		local res_line = cursor[1]
+		local cur_line, inc_line = M.map_result_line_to_top(res_line)
+		local winline = vim.fn.winline()
+
+		if M.state.current_win and vim.api.nvim_win_is_valid(M.state.current_win) and M.state.current_buf then
+			local max_l = vim.api.nvim_buf_line_count(M.state.current_buf)
+			local target = math.max(1, math.min(cur_line, max_l))
+			local top_l = math.max(1, target - winline + 1)
+			vim.api.nvim_win_call(M.state.current_win, function()
+				pcall(vim.fn.winrestview, { topline = top_l, lnum = target, col = 0 })
+			end)
+		end
+
+		if M.state.incoming_win and vim.api.nvim_win_is_valid(M.state.incoming_win) and M.state.incoming_buf then
+			local max_l = vim.api.nvim_buf_line_count(M.state.incoming_buf)
+			local target = math.max(1, math.min(inc_line, max_l))
+			local top_l = math.max(1, target - winline + 1)
+			vim.api.nvim_win_call(M.state.incoming_win, function()
+				pcall(vim.fn.winrestview, { topline = top_l, lnum = target, col = 0 })
+			end)
+		end
+	end)
+	is_syncing = false
+end
+
+--- Synchronizes the Result window and Incoming window when moving inside Current (Ours).
+function M.sync_from_current_win()
+	if is_syncing or not M.state.is_open then
+		return
+	end
+	if not M.state.current_win or not vim.api.nvim_win_is_valid(M.state.current_win) then
+		return
+	end
+	is_syncing = true
+	pcall(function()
+		local cur_line = vim.api.nvim_win_get_cursor(M.state.current_win)[1]
+		local res_line = M.map_top_line_to_result(cur_line, false)
+		local winline = vim.fn.winline()
+
+		if M.state.result_win and vim.api.nvim_win_is_valid(M.state.result_win) and M.state.result_buf then
+			local max_l = vim.api.nvim_buf_line_count(M.state.result_buf)
+			local target = math.max(1, math.min(res_line, max_l))
+			local top_l = math.max(1, target - winline + 1)
+			vim.api.nvim_win_call(M.state.result_win, function()
+				pcall(vim.fn.winrestview, { topline = top_l, lnum = target, col = 0 })
+			end)
+		end
+
+		if M.state.incoming_win and vim.api.nvim_win_is_valid(M.state.incoming_win) and M.state.incoming_buf then
+			local _, inc_line = M.map_result_line_to_top(res_line)
+			local max_l = vim.api.nvim_buf_line_count(M.state.incoming_buf)
+			local target = math.max(1, math.min(inc_line, max_l))
+			local top_l = math.max(1, target - winline + 1)
+			vim.api.nvim_win_call(M.state.incoming_win, function()
+				pcall(vim.fn.winrestview, { topline = top_l, lnum = target, col = 0 })
+			end)
+		end
+	end)
+	is_syncing = false
+end
+
+--- Synchronizes the Result window and Current window when moving inside Incoming (Theirs).
+function M.sync_from_incoming_win()
+	if is_syncing or not M.state.is_open then
+		return
+	end
+	if not M.state.incoming_win or not vim.api.nvim_win_is_valid(M.state.incoming_win) then
+		return
+	end
+	is_syncing = true
+	pcall(function()
+		local inc_line = vim.api.nvim_win_get_cursor(M.state.incoming_win)[1]
+		local res_line = M.map_top_line_to_result(inc_line, true)
+		local winline = vim.fn.winline()
+
+		if M.state.result_win and vim.api.nvim_win_is_valid(M.state.result_win) and M.state.result_buf then
+			local max_l = vim.api.nvim_buf_line_count(M.state.result_buf)
+			local target = math.max(1, math.min(res_line, max_l))
+			local top_l = math.max(1, target - winline + 1)
+			vim.api.nvim_win_call(M.state.result_win, function()
+				pcall(vim.fn.winrestview, { topline = top_l, lnum = target, col = 0 })
+			end)
+		end
+
+		if M.state.current_win and vim.api.nvim_win_is_valid(M.state.current_win) and M.state.current_buf then
+			local cur_line, _ = M.map_result_line_to_top(res_line)
+			local max_l = vim.api.nvim_buf_line_count(M.state.current_buf)
+			local target = math.max(1, math.min(cur_line, max_l))
+			local top_l = math.max(1, target - winline + 1)
+			vim.api.nvim_win_call(M.state.current_win, function()
+				pcall(vim.fn.winrestview, { topline = top_l, lnum = target, col = 0 })
+			end)
+		end
+	end)
+	is_syncing = false
+end
+
 function M.next_conflict()
 	if not M.state.spans or #M.state.spans == 0 then
 		notify("No conflicts in this file")
 		return
 	end
-	local cursor_line = vim.api.nvim_win_get_cursor(M.state.result_win)[1]
+	local cursor_line = 1
+	if M.state.result_win and vim.api.nvim_win_is_valid(M.state.result_win) then
+		cursor_line = vim.api.nvim_win_get_cursor(M.state.result_win)[1]
+	end
 
-	for _, s in ipairs(M.state.spans) do
-		if s.start_line > cursor_line then
-			pcall(vim.api.nvim_win_set_cursor, M.state.result_win, { s.start_line, 0 })
-			pcall(vim.cmd, "normal! zz")
+	for idx, s in ipairs(M.state.spans) do
+		local s_start, _ = get_span_bounds(s)
+		if s_start > cursor_line then
+			M.center_all_on_span(idx)
 			return
 		end
 	end
 
-	pcall(vim.api.nvim_win_set_cursor, M.state.result_win, { M.state.spans[1].start_line, 0 })
-	pcall(vim.cmd, "normal! zz")
+	M.center_all_on_span(1)
 	notify("Wrapped to first conflict")
 end
 
@@ -946,20 +1431,59 @@ function M.prev_conflict()
 		notify("No conflicts in this file")
 		return
 	end
-	local cursor_line = vim.api.nvim_win_get_cursor(M.state.result_win)[1]
+	local cursor_line = 1
+	if M.state.result_win and vim.api.nvim_win_is_valid(M.state.result_win) then
+		cursor_line = vim.api.nvim_win_get_cursor(M.state.result_win)[1]
+	end
 
 	for i = #M.state.spans, 1, -1 do
 		local s = M.state.spans[i]
-		if s.start_line < cursor_line then
-			pcall(vim.api.nvim_win_set_cursor, M.state.result_win, { s.start_line, 0 })
-			pcall(vim.cmd, "normal! zz")
+		local s_start, _ = get_span_bounds(s)
+		if s_start < cursor_line then
+			M.center_all_on_span(i)
 			return
 		end
 	end
 
-	pcall(vim.api.nvim_win_set_cursor, M.state.result_win, { M.state.spans[#M.state.spans].start_line, 0 })
-	pcall(vim.cmd, "normal! zz")
+	M.center_all_on_span(#M.state.spans)
 	notify("Wrapped to last conflict")
+end
+
+--- Aborts the in-progress Git merge and discards saved conflict session.
+function M.abort_merge()
+	local cwd = M.state.cwd or vim.fn.getcwd()
+	local confirm_code = vim.fn.confirm(
+		"⚠️ Are you sure you want to abort the Git merge?\nAll uncommitted conflict resolutions will be discarded.",
+		"&Abort Merge\n&Cancel",
+		2
+	)
+	if confirm_code ~= 1 then
+		return
+	end
+
+	local ok_git, git = pcall(require, "krs.core.git")
+	local success = false
+	if ok_git and git and git.spawn then
+		local proc = git.spawn({ "merge", "--abort" }, cwd)
+		local res = proc and proc:wait()
+		if res and res.code == 0 then
+			success = true
+		end
+	end
+
+	if not success then
+		local out = vim.fn.system("git -C " .. vim.fn.shellescape(cwd) .. " merge --abort")
+		if vim.v.shell_error == 0 then
+			success = true
+		else
+			notify("Failed to abort merge: " .. tostring(out), vim.log.levels.ERROR)
+			return
+		end
+	end
+
+	M.clear_session(cwd)
+	notify("❌ Git merge aborted and conflict session cleared.", vim.log.levels.WARN)
+	M.close()
 end
 
 --- Saves the current result file to disk and stages it via `git add`.
@@ -998,6 +1522,7 @@ function M.stage_current_file()
 
 		if all_done then
 			notify("🎉 All conflicted files staged! You can now commit with <C-S-g> or git commit.")
+			M.clear_session(M.state.cwd)
 		else
 			-- Advance to next conflicted file
 			for next_idx, f in ipairs(M.state.files) do
@@ -1054,8 +1579,8 @@ function M.attach_result_keymaps(buf)
 		end, opts)
 	end
 
-	-- Undo resolution (Ctrl+z / u / Ctrl+u)
-	for _, k in ipairs({ "<C-z>", "u", "<C-u>" }) do
+	-- Undo resolution (Ctrl+z / u)
+	for _, k in ipairs({ "<C-z>", "u" }) do
 		vim.keymap.set({ "n", "i" }, k, function()
 			stop_insert_if_needed()
 			M.undo()
@@ -1155,7 +1680,7 @@ function M.attach_sidebar_keymaps()
 		end, opts)
 	end
 
-	for _, k in ipairs({ "<C-z>", "u", "<C-u>" }) do
+	for _, k in ipairs({ "<C-z>", "u" }) do
 		vim.keymap.set("n", k, function()
 			M.undo()
 			M.focus_result()
@@ -1230,7 +1755,7 @@ function M.attach_current_keymaps()
 		end, opts)
 	end
 
-	for _, k in ipairs({ "<C-z>", "u", "<C-u>" }) do
+	for _, k in ipairs({ "<C-z>", "u" }) do
 		vim.keymap.set("n", k, function()
 			M.undo()
 			M.focus_result()
@@ -1306,7 +1831,7 @@ function M.attach_incoming_keymaps()
 		end, opts)
 	end
 
-	for _, k in ipairs({ "<C-z>", "u", "<C-u>" }) do
+	for _, k in ipairs({ "<C-z>", "u" }) do
 		vim.keymap.set("n", k, function()
 			M.undo()
 			M.focus_result()
@@ -1491,6 +2016,27 @@ function M.open(files_or_cwd, cwd_arg)
 	end
 	M.state.active_idx = 1
 
+	-- Check for existing saved session in .krsnvim/conflict_session.json
+	local session = M.load_session(cwd)
+	if session and session.files then
+		for _, item in ipairs(M.state.files) do
+			local s_f = session.files[item.file]
+			if s_f then
+				item.saved_lines = s_f.lines
+				item.saved_spans = s_f.spans
+				if s_f.conflict_count ~= nil then
+					item.conflict_count = s_f.conflict_count
+				end
+				if s_f.is_staged ~= nil then
+					item.is_staged = s_f.is_staged
+				end
+			end
+		end
+		if session.active_idx and session.active_idx >= 1 and session.active_idx <= #M.state.files then
+			M.state.active_idx = session.active_idx
+		end
+	end
+
 	M.state.prev_win = vim.api.nvim_get_current_win()
 	M.state.prev_tab = vim.api.nvim_get_current_tabpage()
 
@@ -1574,13 +2120,13 @@ function M.open(files_or_cwd, cwd_arg)
 	M.attach_current_keymaps()
 	M.attach_incoming_keymaps()
 
-	-- Load first conflicted file
-	M.load_file(1)
+	-- Load active or first conflicted file (restores saved progress if present)
+	M.load_file(M.state.active_idx or 1)
 
 	-- Focus on result window
 	M.focus_result()
 
-	-- Navigation watcher to remember which top panel (Current/Ours vs Incoming/Theirs) was last active
+	-- Navigation watcher & Synchronized Scrolling across panels
 	M.state.last_top_win = current_win
 	local nav_group = vim.api.nvim_create_augroup("KrsConflictResolverNav", { clear = true })
 	vim.api.nvim_create_autocmd("WinEnter", {
@@ -1598,12 +2144,43 @@ function M.open(files_or_cwd, cwd_arg)
 		end,
 	})
 
+	vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI", "WinScrolled" }, {
+		group = nav_group,
+		callback = function()
+			if not M.state.is_open then
+				return
+			end
+			local cur_win = vim.api.nvim_get_current_win()
+			if cur_win == M.state.result_win then
+				M.sync_top_panels_from_result()
+			elseif cur_win == M.state.current_win then
+				M.sync_from_current_win()
+			elseif cur_win == M.state.incoming_win then
+				M.sync_from_incoming_win()
+			end
+		end,
+	})
+
+	vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
+		group = nav_group,
+		callback = function()
+			if not M.state.is_open then
+				return
+			end
+			local cur_buf = vim.api.nvim_get_current_buf()
+			if cur_buf == M.state.result_buf then
+				M.debounced_save_session()
+			end
+		end,
+	})
+
 	-- Tab closed autocmd to reset state if user closes tab manually
 	local augroup = vim.api.nvim_create_augroup("KrsConflictResolverTab", { clear = true })
 	vim.api.nvim_create_autocmd("TabClosed", {
 		group = augroup,
 		callback = function()
 			if M.state.tab and not pcall(vim.api.nvim_tabpage_is_valid, M.state.tab) then
+				M.save_session()
 				M.state.is_open = false
 				M.state.tab = nil
 				M.state.sidebar_win = nil
@@ -1637,6 +2214,22 @@ function M.close()
 		return
 	end
 
+	-- Save in-progress progress to .krsnvim/conflict_session.json unless all files are staged
+	local all_staged = true
+	if M.state.files and #M.state.files > 0 then
+		for _, f in ipairs(M.state.files) do
+			if not f.is_staged and (f.conflict_count or 0) > 0 then
+				all_staged = false
+				break
+			end
+		end
+	end
+	if all_staged then
+		M.clear_session(M.state.cwd)
+	else
+		M.save_session()
+	end
+
 	M.state.is_open = false
 	pcall(vim.api.nvim_del_augroup_by_name, "KrsConflictResolverResize")
 	pcall(vim.api.nvim_del_augroup_by_name, "KrsConflictResolverNav")
@@ -1644,6 +2237,7 @@ function M.close()
 	if M.state.result_buf and vim.api.nvim_buf_is_valid(M.state.result_buf) then
 		unmap_result_keymaps(M.state.result_buf)
 		pcall(vim.api.nvim_buf_clear_namespace, M.state.result_buf, M.ns_markers, 0, -1)
+		pcall(vim.api.nvim_buf_clear_namespace, M.state.result_buf, M.ns_spans, 0, -1)
 	end
 	if M.state.current_buf and vim.api.nvim_buf_is_valid(M.state.current_buf) then
 		pcall(vim.api.nvim_buf_clear_namespace, M.state.current_buf, M.ns_markers, 0, -1)
@@ -1758,6 +2352,18 @@ function M.setup()
 	end, {
 		desc = "Reset current file back to initial merge conflict state",
 	})
+
+	vim.api.nvim_create_user_command("GitConflictAbortMerge", function()
+		M.abort_merge()
+	end, {
+		desc = "Abort git merge and clear conflict session",
+	})
+
+	vim.api.nvim_create_user_command("KrsConflictAbortMerge", function()
+		M.abort_merge()
+	end, {
+		desc = "Abort git merge and clear conflict session",
+	})
 end
 
 return setmetatable({
@@ -1774,6 +2380,8 @@ return setmetatable({
 		"GitConflictStage",
 		"GitConflictUndo",
 		"GitConflictReset",
+		"GitConflictAbortMerge",
+		"KrsConflictAbortMerge",
 	},
 	config = function()
 		M.setup()

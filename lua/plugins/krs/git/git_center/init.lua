@@ -31,6 +31,11 @@ M.open_branch_modal = modals.open_branch_modal
 M.open_commit_log_modal = modals.open_commit_log_modal
 M.open_diff_modal = modals.open_diff_modal
 
+-- Re-export graph viewer
+local graph_viewer = require("plugins.krs.git.git_center.graph_viewer")
+M.graph_viewer = graph_viewer
+M.open_graph_viewer = graph_viewer.open
+
 -- Re-export diff_mode
 local diff_mode = require("plugins.krs.git.diff_mode")
 M.diff_mode = diff_mode
@@ -69,6 +74,16 @@ function M.setup()
 		M.open_commit_log_modal()
 	end, { desc = "Open Git Commit Log & History Viewer" })
 
+	pcall(vim.api.nvim_create_user_command, "GitGraph", function(cmd_opts)
+		local mode = cmd_opts.args ~= "" and cmd_opts.args or nil
+		graph_viewer.open(nil, mode)
+	end, { nargs = "?", desc = "Open GitKraken-Style Commit Graph Viewer (Optional: 'branch' or 'all')" })
+
+	pcall(vim.api.nvim_create_user_command, "GitCenterGraph", function(cmd_opts)
+		local mode = cmd_opts.args ~= "" and cmd_opts.args or nil
+		graph_viewer.open(nil, mode)
+	end, { nargs = "?", desc = "Open GitKraken-Style Commit Graph Viewer" })
+
 	pcall(vim.api.nvim_create_user_command, "GitDiffMode", function()
 		diff_mode.open()
 	end, { desc = "Open Git Diff Mode Manager (Same Branch / Between Branches)" })
@@ -102,6 +117,7 @@ function M.setup()
 		package.loaded["plugins.krs.git.git_center.render"] = nil
 		package.loaded["plugins.krs.git.git_center.modals"] = nil
 		package.loaded["plugins.krs.git.git_center.panel"] = nil
+		package.loaded["plugins.krs.git.git_center.graph_viewer"] = nil
 		_G.GitCenter = nil
 		local reloaded = require("plugins.krs.git.git_center")
 		if reloaded and reloaded.config then
@@ -188,6 +204,8 @@ return setmetatable({
 		"GitDiffBetweenBranches",
 		"GitDiffClose",
 		"GitDiffToggle",
+		"GitGraph",
+		"GitCenterGraph",
 	},
 	keys = {
 		{ "<C-S-g>", mode = { "n", "i", "v", "t" }, desc = "Open Git Control Center" },

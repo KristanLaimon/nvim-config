@@ -15,6 +15,7 @@ The **Git Control Center** (`<C-S-g>`) is a high-speed, interactive floating Git
 - **Branch Management & Checkout (`b`)**: Switch/checkout branches, create new branches, delete branches (with `-D` force delete fallback), and rename branches (`b`).
 - **Lazygit-Style Visual Aesthetics**: Vibrant section headers, status badges (`✓` staged green, `M` modified yellow, `?` untracked cyan, `D` deleted red), color-coded keybind badges `[c]`, `[s]`, `[u]`, `[P]`, `[b]`, `[l]`, and capsule repository tab indicators.
 - **Commit Log & History Viewer (`l`/`L`) & Full-Page Commit Diff**: Open floating commit history showing `git log --all`. Pressing `<CR>` or `d` on any file listed under "Files Changed" opens the full-screen side-by-side diff modal (`open_diff_modal`) showing that commit file's diff full page!
+- **GitKraken-Style Commit Graph Viewer (`g` / `:GitGraph`)**: Interactive dual-pane commit graph with 2 modes (🌿 Current Branch only vs 🌐 `--all` branches, toggleable via `a`). Renders GitKraken visual aesthetics with 8-color branch lanes, circular commit nodes (`●`), pill badges (`[🌿 branch]`, `[☁️ remote]`, `[🏷️ tag]`), short SHA, and relative dates. Supports on-the-fly lazy loading / infinite scroll when navigating down using Vim half-page motions (`d`, `u`, `<C-d>`, `<C-u>`, `j`, `k`, `G`, `gg`). Right preview pane displays full commit metadata, author details, changed files list with status badges, and interactive side-by-side diffs.
 - **Staging & Unstaging**: Single file staging/unstaging (`s`/`u`) and bulk staging/unstaging (`S`/`U`) scoped to the selected submodule repository.
 - **File & Section Restore**: Discard changes for single file (`r`) or entire section (`R`) with confirmation dialogs.
 - **Remote Push**: Execute `git push` (`P`) with automatic upstream tracking detection or interactive remote branch selection.
@@ -39,6 +40,7 @@ The **Git Control Center** (`<C-S-g>`) is a high-speed, interactive floating Git
 | `M` | Normal | Open 3-Way Merge Conflict Resolver |
 | `<leader>gm` | Normal | Open 3-Way Merge Conflict Resolver from anywhere |
 | `b` | Normal | Open Branch Management Modal (Create, Delete, Switch, Rename) |
+| `g` | Normal | Open GitKraken Commit Graph Viewer (`:GitGraph`, 2 modes: Current / `--all`, on-the-fly fetch) |
 | `l` / `L` | Normal | Open Commit Log & History Modal (`git log --all` with per-file diffs & jump) |
 | `<CR>` (Commit Log) | Normal | Press Enter on file in "Files Changed" to jump directly to its diff |
 | `s` | Normal, Visual | Stage selected file or selection |

@@ -650,6 +650,7 @@ function M.build_panel_content(info, width)
 	local help_items = {
 		"   [Alt+h / Alt+l] Switch Submodule Tab  │  [< / >] Resize Split Width",
 		"   [b] Branch Manager (Create / Delete / Switch / Rename)",
+		"   [g] 📊 GitKraken Commit Graph Viewer (Current / --all)",
 		"   [l / L] Commit Log & History Viewer (--all)",
 		"   [s] Stage file  │  [S] Stage All  │  [u] Unstage file  │  [U] Unstage All",
 		"   [r] Restore File  │  [R] Restore Section  │  [d] Side-by-Side Diff Modal",

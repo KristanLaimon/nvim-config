@@ -1244,4 +1244,12 @@ function M.open_diff_modal(target_file, target_type, target_cwd, commit_hash, in
 	end
 end
 
+--- Opens the GitKraken-Style Commit Graph Viewer.
+--- @param target_cwd string|nil Repository directory.
+--- @param initial_mode? "branch"|"all" Defaults to "branch".
+function M.open_graph_viewer(target_cwd, initial_mode)
+	local gv = require("plugins.krs.git.git_center.graph_viewer")
+	gv.open(target_cwd, initial_mode)
+end
+
 return M

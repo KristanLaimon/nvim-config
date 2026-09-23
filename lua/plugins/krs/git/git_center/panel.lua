@@ -36,6 +36,7 @@ function M.is_open()
 		or (config.diff_modal_win ~= nil and vim.api.nvim_win_is_valid(config.diff_modal_win))
 		or (config.log_win ~= nil and vim.api.nvim_win_is_valid(config.log_win))
 		or (config.branch_win ~= nil and vim.api.nvim_win_is_valid(config.branch_win))
+		or (config.graph_win ~= nil and vim.api.nvim_win_is_valid(config.graph_win))
 end
 
 --- Resizes the horizontal split between the left panel and preview pane.
@@ -91,6 +92,8 @@ function M.close_git_center(opts)
 			if ok and row then
 				config.cached_view_data.log_row = row[1]
 			end
+		elseif config.graph_win and vim.api.nvim_win_is_valid(config.graph_win) then
+			config.cached_view = "graph"
 		elseif config.branch_win and vim.api.nvim_win_is_valid(config.branch_win) then
 			config.cached_view = "branch"
 		elseif config.diff_modal_win and vim.api.nvim_win_is_valid(config.diff_modal_win) then
@@ -111,6 +114,7 @@ function M.close_git_center(opts)
 		config.diff_modal_win, config.preview_win, config.tab_win, config.main_win
 	local log_win, log_r_win = config.log_win, config.log_right_win
 	local branch_win = config.branch_win
+	local graph_win, graph_r_win = config.graph_win, config.graph_right_win
 
 	config.main_win, config.main_buf = nil, nil
 	config.preview_win, config.preview_buf = nil, nil
@@ -119,11 +123,15 @@ function M.close_git_center(opts)
 	config.log_win, config.log_buf = nil, nil
 	config.log_right_win, config.log_right_buf = nil, nil
 	config.branch_win, config.branch_buf = nil, nil
+	config.graph_win, config.graph_buf = nil, nil
+	config.graph_right_win, config.graph_right_buf = nil, nil
 
 	ui.close(diff_win)
 	ui.close(log_win)
 	ui.close(log_r_win)
 	ui.close(branch_win)
+	ui.close(graph_win)
+	ui.close(graph_r_win)
 	ui.close(prev_win)
 	ui.close(tab_win)
 	ui.close(main_win)
@@ -253,7 +261,12 @@ function M.open_git_center()
 	config.root_dir = root
 
 	-- Restore RAM cached screen if user previously closed on another screen
-	if config.cached_view == "log" then
+	if config.cached_view == "graph" then
+		local target_cwd = config.cached_view_data.cwd or root
+		local gv = require("plugins.krs.git.git_center.graph_viewer")
+		gv.open(target_cwd, config.cached_view_data.mode)
+		return
+	elseif config.cached_view == "log" then
 		local target_cwd = config.cached_view_data.cwd or root
 		modals.open_commit_log_modal(target_cwd, config.cached_view_data.log_row)
 		return
@@ -1085,6 +1098,11 @@ function M.open_git_center()
 
 	vim.keymap.set("n", "L", function()
 		modals.open_commit_log_modal(get_active_target().full_path)
+	end, key_opts)
+
+	vim.keymap.set("n", "g", function()
+		local gv = require("plugins.krs.git.git_center.graph_viewer")
+		gv.open(get_active_target().full_path)
 	end, key_opts)
 
 	local commit_fields = {
