@@ -343,4 +343,5 @@ end
 return setmetatable({
 	name = "krs_type_injector_typescript",
 	dir = require("krs.core.lazyspec").for_module(),
+	lazy = true,
 }, { __index = M })

@@ -68,6 +68,9 @@ M.state = {
 	last_top_win = nil,
 	prev_win = nil,
 	prev_tab = nil,
+	attached_bufs = {},
+	pre_open_bufs = {},
+	pre_pinned_files = {},
 }
 
 local function notify(msg, level)
@@ -651,6 +654,7 @@ local function unmap_result_keymaps(buf)
 		"<C-s>",
 		"<C-S>",
 		"u",
+		"cu",
 		"<C-z>",
 		"gc",
 		"<A-c>",
@@ -693,6 +697,9 @@ function M.load_file(idx)
 	if
 		M.state.result_buf
 		and vim.api.nvim_buf_is_valid(M.state.result_buf)
+		and M.state.active_idx
+		and M.state.active_idx ~= idx
+		and vim.bo[M.state.result_buf].buftype ~= "nofile"
 		and M.state.files[M.state.active_idx]
 	then
 		local prev_item = M.state.files[M.state.active_idx]
@@ -783,8 +790,19 @@ function M.load_file(idx)
 			end)
 		end
 
+		if not vim.tbl_contains(M.state.attached_bufs or {}, res_buf) then
+			table.insert(M.state.attached_bufs, res_buf)
+		end
+
 		local restored_from_saved = false
+		local has_valid_saved = false
 		if item.saved_lines and #item.saved_lines > 0 then
+			if #item.saved_lines > 1 or (item.saved_lines[1] and item.saved_lines[1] ~= "") or (item.saved_spans and #item.saved_spans > 0) then
+				has_valid_saved = true
+			end
+		end
+
+		if has_valid_saved then
 			vim.api.nvim_buf_set_lines(res_buf, 0, -1, false, item.saved_lines)
 			M.state.spans = vim.deepcopy(item.saved_spans or {})
 			restored_from_saved = true
@@ -824,10 +842,54 @@ function M.load_file(idx)
 					}
 				end
 			else
-				M.state.spans = {}
-				item.conflict_count = 0
-				if #buf_lines > 0 then
-					vim.api.nvim_buf_set_lines(res_buf, 0, -1, false, buf_lines)
+				-- Stage-based conflicts without markers (e.g. deleted by them / modified by us, or binary/add-add)
+				local fallback_lines = nil
+				if current_lines and #current_lines > 0 and (not incoming_lines or #incoming_lines == 0) then
+					fallback_lines = current_lines
+				elseif incoming_lines and #incoming_lines > 0 and (not current_lines or #current_lines == 0) then
+					fallback_lines = incoming_lines
+				elseif current_lines and #current_lines > 0 then
+					fallback_lines = current_lines
+				elseif #buf_lines > 0 and not (#buf_lines == 1 and buf_lines[1] == "") then
+					fallback_lines = buf_lines
+				elseif #working_lines > 0 then
+					fallback_lines = working_lines
+				end
+
+				if fallback_lines and #fallback_lines > 0 then
+					vim.api.nvim_buf_set_lines(res_buf, 0, -1, false, fallback_lines)
+					local span_count = math.max(1, #fallback_lines)
+					local synthetic_span = {
+						id = 1,
+						start_line = 1,
+						end_line = span_count,
+						choice = "current",
+						current_lines = current_lines or {},
+						incoming_lines = incoming_lines or {},
+						base_lines = {},
+						current_label = "Current",
+						incoming_label = "Incoming",
+						resolved = false,
+					}
+					M.state.spans = { synthetic_span }
+					item.conflict_count = 1
+					if not M.state.history then
+						M.state.history = {}
+					end
+					if not M.state.history[idx] then
+						M.state.history[idx] = {
+							stack = {},
+							initial_lines = vim.deepcopy(fallback_lines),
+							initial_spans = vim.deepcopy(M.state.spans),
+							initial_count = 1,
+						}
+					end
+				else
+					M.state.spans = {}
+					item.conflict_count = 0
+					if #buf_lines > 0 then
+						vim.api.nvim_buf_set_lines(res_buf, 0, -1, false, buf_lines)
+					end
 				end
 			end
 		end
@@ -1550,64 +1612,98 @@ function M.attach_result_keymaps(buf)
 		end
 	end
 
-	-- Conflict resolution actions (Ctrl+ prefixed as requested, plus single-key aliases)
-	for _, k in ipairs({ "<C-1>", "<C-o>", "<C-O>", "co", "1" }) do
-		vim.keymap.set({ "n", "i" }, k, function()
+	-- Insert mode: ONLY map Ctrl-combinations, NEVER plain characters like 1, 2, s, u
+	for _, k in ipairs({ "<C-1>", "<C-o>", "<C-O>" }) do
+		vim.keymap.set("i", k, function()
 			stop_insert_if_needed()
 			M.accept_current()
 		end, opts)
 	end
 
-	for _, k in ipairs({ "<C-2>", "<C-t>", "<C-T>", "ct", "2" }) do
-		vim.keymap.set({ "n", "i" }, k, function()
+	for _, k in ipairs({ "<C-2>", "<C-t>", "<C-T>" }) do
+		vim.keymap.set("i", k, function()
 			stop_insert_if_needed()
 			M.accept_incoming()
 		end, opts)
 	end
 
-	for _, k in ipairs({ "<C-3>", "<C-b>", "<C-B>", "cb", "3" }) do
-		vim.keymap.set({ "n", "i" }, k, function()
+	for _, k in ipairs({ "<C-3>", "<C-b>", "<C-B>" }) do
+		vim.keymap.set("i", k, function()
 			stop_insert_if_needed()
 			M.accept_both("current_first")
 		end, opts)
 	end
 
-	for _, k in ipairs({ "<C-4>", "cB", "4" }) do
-		vim.keymap.set({ "n", "i" }, k, function()
+	for _, k in ipairs({ "<C-4>" }) do
+		vim.keymap.set("i", k, function()
 			stop_insert_if_needed()
 			M.accept_both("incoming_first")
 		end, opts)
 	end
 
-	-- Undo resolution (Ctrl+z / u)
-	for _, k in ipairs({ "<C-z>", "u" }) do
-		vim.keymap.set({ "n", "i" }, k, function()
+	for _, k in ipairs({ "<C-z>" }) do
+		vim.keymap.set("i", k, function()
 			stop_insert_if_needed()
 			M.undo()
 		end, opts)
 	end
 
-	-- Conflict jumps (Ctrl+n / Ctrl+p / Ctrl+Down / Ctrl+Up, plus ]c / [c / ]x / [x)
-	for _, k in ipairs({ "<C-n>", "<C-Down>", "]c", "]x" }) do
-		vim.keymap.set({ "n", "i" }, k, function()
+	for _, k in ipairs({ "<C-n>", "<C-Down>" }) do
+		vim.keymap.set("i", k, function()
 			stop_insert_if_needed()
 			M.next_conflict()
 		end, opts)
 	end
 
-	for _, k in ipairs({ "<C-p>", "<C-Up>", "[c", "[x" }) do
-		vim.keymap.set({ "n", "i" }, k, function()
+	for _, k in ipairs({ "<C-p>", "<C-Up>" }) do
+		vim.keymap.set("i", k, function()
 			stop_insert_if_needed()
 			M.prev_conflict()
 		end, opts)
 	end
 
-	-- Save & Stage (Ctrl+s, s)
-	for _, k in ipairs({ "<C-s>", "<C-S>", "s" }) do
-		vim.keymap.set({ "n", "i" }, k, function()
+	for _, k in ipairs({ "<C-s>", "<C-S>" }) do
+		vim.keymap.set("i", k, function()
 			stop_insert_if_needed()
 			M.stage_current_file()
 		end, opts)
+	end
+
+	-- Normal mode mappings (preserves standard vim editing keys: no plain s, u, 1..4, or Esc):
+	for _, k in ipairs({ "<C-1>", "<C-o>", "<C-O>", "co" }) do
+		vim.keymap.set("n", k, M.accept_current, opts)
+	end
+
+	for _, k in ipairs({ "<C-2>", "<C-t>", "<C-T>", "ct" }) do
+		vim.keymap.set("n", k, M.accept_incoming, opts)
+	end
+
+	for _, k in ipairs({ "<C-3>", "<C-b>", "<C-B>", "cb" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_both("current_first")
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-4>", "cB" }) do
+		vim.keymap.set("n", k, function()
+			M.accept_both("incoming_first")
+		end, opts)
+	end
+
+	for _, k in ipairs({ "<C-z>", "cu" }) do
+		vim.keymap.set("n", k, M.undo, opts)
+	end
+
+	for _, k in ipairs({ "<C-n>", "<C-Down>", "]c", "]x" }) do
+		vim.keymap.set("n", k, M.next_conflict, opts)
+	end
+
+	for _, k in ipairs({ "<C-p>", "<C-Up>", "[c", "[x" }) do
+		vim.keymap.set("n", k, M.prev_conflict, opts)
+	end
+
+	for _, k in ipairs({ "<C-s>", "<C-S>" }) do
+		vim.keymap.set("n", k, M.stage_current_file, opts)
 	end
 
 	-- Direct panel navigation (Ctrl+h/k/l/j, Alt+c/i/s, gc/gi/gs)
@@ -1626,13 +1722,11 @@ function M.attach_result_keymaps(buf)
 	vim.keymap.set("n", "<Tab>", M.cycle_next_panel, opts)
 	vim.keymap.set("n", "<S-Tab>", M.cycle_prev_panel, opts)
 
-	-- Help & Close
+	-- Help & Close (Only <C-q> and ? in editable result window, NOT plain Esc or q)
 	vim.keymap.set("n", "?", M.show_help_popup, opts)
 	vim.keymap.set("n", "<C-/>", M.show_help_popup, opts)
 	vim.keymap.set("n", "<C-_>", M.show_help_popup, opts)
 	vim.keymap.set("n", "<C-q>", M.close, opts)
-	vim.keymap.set("n", "q", M.close, opts)
-	vim.keymap.set("n", "<Esc>", M.close, opts)
 end
 
 function M.attach_sidebar_keymaps()
@@ -1953,7 +2047,13 @@ end
 function M.open(files_or_cwd, cwd_arg)
 	local cwd = cwd_arg
 	if type(files_or_cwd) == "string" and not cwd then
-		cwd = files_or_cwd
+		if vim.fn.isdirectory(files_or_cwd) == 1 then
+			cwd = files_or_cwd
+			files_or_cwd = nil
+		else
+			cwd = vim.fn.getcwd()
+			files_or_cwd = { files_or_cwd }
+		end
 	end
 	cwd = cwd or vim.fn.getcwd()
 	M.state.cwd = cwd
@@ -1980,6 +2080,21 @@ function M.open(files_or_cwd, cwd_arg)
 		})
 		return false
 	end
+
+	-- Capture pre-existing buffer and pinned tabs state
+	M.state.pre_open_bufs = {}
+	for _, b in ipairs(vim.api.nvim_list_bufs()) do
+		if vim.api.nvim_buf_is_valid(b) and vim.bo[b].buflisted then
+			M.state.pre_open_bufs[b] = {
+				name = vim.api.nvim_buf_get_name(b),
+				modified = vim.bo[b].modified,
+			}
+		end
+	end
+
+	local ok_pins, pinned_tabs = pcall(require, "plugins.krs.ui.pinned_tabs")
+	M.state.pre_pinned_files = (ok_pins and pinned_tabs.load_pins) and pinned_tabs.load_pins() or {}
+	M.state.attached_bufs = {}
 
 	-- Initialize files list with conflict counts from disk
 	M.state.files = {}
@@ -2021,14 +2136,17 @@ function M.open(files_or_cwd, cwd_arg)
 	if session and session.files then
 		for _, item in ipairs(M.state.files) do
 			local s_f = session.files[item.file]
-			if s_f then
-				item.saved_lines = s_f.lines
-				item.saved_spans = s_f.spans
-				if s_f.conflict_count ~= nil then
-					item.conflict_count = s_f.conflict_count
-				end
-				if s_f.is_staged ~= nil then
-					item.is_staged = s_f.is_staged
+			if s_f and s_f.lines and type(s_f.lines) == "table" and #s_f.lines > 0 then
+				local is_blank = (#s_f.lines == 1 and s_f.lines[1] == "")
+				if not is_blank or (item.conflict_count or 0) == 0 then
+					item.saved_lines = s_f.lines
+					item.saved_spans = s_f.spans
+					if s_f.conflict_count ~= nil then
+						item.conflict_count = s_f.conflict_count
+					end
+					if s_f.is_staged ~= nil then
+						item.is_staged = s_f.is_staged
+					end
 				end
 			end
 		end
@@ -2072,7 +2190,7 @@ function M.open(files_or_cwd, cwd_arg)
 		height = res_height,
 	})
 	M.state.result_win = result_win
-	M.state.result_buf = result_buf
+	M.state.result_buf = nil
 
 	-- 3. base_win is now the top-left (Current / Ours)
 	local current_win = base_win
@@ -2121,7 +2239,9 @@ function M.open(files_or_cwd, cwd_arg)
 	M.attach_incoming_keymaps()
 
 	-- Load active or first conflicted file (restores saved progress if present)
-	M.load_file(M.state.active_idx or 1)
+	local target_idx = M.state.active_idx or 1
+	M.state.active_idx = nil
+	M.load_file(target_idx)
 
 	-- Focus on result window
 	M.focus_result()
@@ -2180,16 +2300,7 @@ function M.open(files_or_cwd, cwd_arg)
 		group = augroup,
 		callback = function()
 			if M.state.tab and not pcall(vim.api.nvim_tabpage_is_valid, M.state.tab) then
-				M.save_session()
-				M.state.is_open = false
-				M.state.tab = nil
-				M.state.sidebar_win = nil
-				M.state.current_win = nil
-				M.state.incoming_win = nil
-				M.state.result_win = nil
-				M.state.last_top_win = nil
-				M.state.history = {}
-				pcall(vim.api.nvim_del_augroup_by_name, "KrsConflictResolverNav")
+				M.close()
 			end
 		end,
 	})
@@ -2233,6 +2344,47 @@ function M.close()
 	M.state.is_open = false
 	pcall(vim.api.nvim_del_augroup_by_name, "KrsConflictResolverResize")
 	pcall(vim.api.nvim_del_augroup_by_name, "KrsConflictResolverNav")
+	pcall(vim.api.nvim_del_augroup_by_name, "KrsConflictResolverTab")
+
+	-- Clean up all attached result buffers
+	if M.state.attached_bufs then
+		for _, b in ipairs(M.state.attached_bufs) do
+			if vim.api.nvim_buf_is_valid(b) then
+				unmap_result_keymaps(b)
+				pcall(vim.api.nvim_buf_clear_namespace, b, M.ns_markers, 0, -1)
+				pcall(vim.api.nvim_buf_clear_namespace, b, M.ns_spans, 0, -1)
+
+				local was_pre_open = M.state.pre_open_bufs and M.state.pre_open_bufs[b] ~= nil
+				local bname = vim.api.nvim_buf_get_name(b)
+
+				if not was_pre_open then
+					-- If the buffer was NOT open before opening GitConflictResolve:
+					-- Unlist it so it doesn't leave unwanted clutter tabs in bufferline
+					if not vim.bo[b].modified then
+						vim.bo[b].buflisted = false
+					end
+				else
+					-- If the buffer WAS already open before:
+					-- Check if it was staged. If not staged and modified by conflict resolver,
+					-- reload from disk so the pre-existing buffer returns to clean disk state.
+					local is_staged = false
+					for _, f in ipairs(M.state.files or {}) do
+						if f.full_path == bname and f.is_staged then
+							is_staged = true
+							break
+						end
+					end
+					if not is_staged and vim.bo[b].modified and vim.fn.filereadable(bname) == 1 then
+						pcall(function()
+							vim.api.nvim_buf_call(b, function()
+								vim.cmd("silent! edit!")
+							end)
+						end)
+					end
+				end
+			end
+		end
+	end
 
 	if M.state.result_buf and vim.api.nvim_buf_is_valid(M.state.result_buf) then
 		unmap_result_keymaps(M.state.result_buf)
@@ -2245,6 +2397,20 @@ function M.close()
 	if M.state.incoming_buf and vim.api.nvim_buf_is_valid(M.state.incoming_buf) then
 		pcall(vim.api.nvim_buf_clear_namespace, M.state.incoming_buf, M.ns_markers, 0, -1)
 	end
+
+	-- Restore pinned tabs state into buffers and bufferline
+	local ok_pins, pinned_tabs = pcall(require, "plugins.krs.ui.pinned_tabs")
+	if ok_pins and pinned_tabs.restore_pins then
+		pcall(function()
+			if M.state.pre_pinned_files and #M.state.pre_pinned_files > 0 then
+				pinned_tabs.save_pins(M.state.pre_pinned_files)
+			end
+			pinned_tabs.restore_pins({ focus = false })
+		end)
+	end
+
+	local prev_tab = M.state.prev_tab
+	local prev_win = M.state.prev_win
 
 	if M.state.tab and pcall(vim.api.nvim_tabpage_is_valid, M.state.tab) then
 		local total_tabs = #vim.api.nvim_list_tabpages()
@@ -2273,13 +2439,16 @@ function M.close()
 	M.state.history = {}
 	M.state.current_spans = {}
 	M.state.incoming_spans = {}
+	M.state.attached_bufs = {}
+	M.state.pre_open_bufs = {}
+	M.state.pre_pinned_files = {}
 
-	if
-		M.state.prev_win
-		and pcall(vim.api.nvim_win_is_valid, M.state.prev_win)
-		and vim.api.nvim_win_is_valid(M.state.prev_win)
-	then
-		pcall(vim.api.nvim_set_current_win, M.state.prev_win)
+	if prev_tab and pcall(vim.api.nvim_tabpage_is_valid, prev_tab) and vim.api.nvim_tabpage_is_valid(prev_tab) then
+		pcall(vim.api.nvim_set_current_tabpage, prev_tab)
+	end
+
+	if prev_win and pcall(vim.api.nvim_win_is_valid, prev_win) and vim.api.nvim_win_is_valid(prev_win) then
+		pcall(vim.api.nvim_set_current_win, prev_win)
 	end
 end
 

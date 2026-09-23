@@ -2,54 +2,46 @@
 -- KRS PLUGIN: Git Center (Ctrl + Shift + G) -- Stage, commit, push, review.
 -- ============================================================================
 
-local config = require("plugins.krs.git.git_center.config")
-local queries = require("plugins.krs.git.git_center.queries")
-local render = require("plugins.krs.git.git_center.render")
-local modals = require("plugins.krs.git.git_center.modals")
-local panel = require("plugins.krs.git.git_center.panel")
+local lazy_req = require("krs.core.lazy_require")
+local config = lazy_req("plugins.krs.git.git_center.config")
+local queries = lazy_req("plugins.krs.git.git_center.queries")
+local render = lazy_req("plugins.krs.git.git_center.render")
+local modals = lazy_req("plugins.krs.git.git_center.modals")
+local panel = lazy_req("plugins.krs.git.git_center.panel")
+local graph_viewer = lazy_req("plugins.krs.git.git_center.graph_viewer")
+local diff_mode = lazy_req("plugins.krs.git.diff_mode")
 
-local M = config
-
--- Re-export queries
-M.git_lines = queries.git_lines
-M.git_run = queries.git_run
-M.get_git_info = queries.get_git_info
-M.raw_diff_for = queries.raw_diff_for
-M.stage_all_with_modal = queries.stage_all_with_modal
-M.get_local_branches = queries.get_local_branches
-M.get_commit_graph = queries.get_commit_graph
-
--- Re-export render
-M.submodule_statuses = render.submodule_statuses
-M.fetching_submodules = render.fetching_submodules
-M.toggle_colored_tab_indicators = render.toggle_colored_tab_indicators
-M.render_tab_bar = render.render_tab_bar
-M.build_panel_content = render.build_panel_content
-
--- Re-export modals
-M.open_branch_modal = modals.open_branch_modal
-M.open_commit_log_modal = modals.open_commit_log_modal
-M.open_diff_modal = modals.open_diff_modal
-
--- Re-export graph viewer
-local graph_viewer = require("plugins.krs.git.git_center.graph_viewer")
-M.graph_viewer = graph_viewer
-M.open_graph_viewer = graph_viewer.open
-
--- Re-export diff_mode
-local diff_mode = require("plugins.krs.git.diff_mode")
-M.diff_mode = diff_mode
-M.open_diff_mode = diff_mode.open
-M.toggle_diff_mode = diff_mode.toggle
-M.close_diff_mode = diff_mode.close
-
--- Re-export panel & window controls
-M.is_open = panel.is_open
-M.resize_split = panel.resize_split
-M.close_git_center = panel.close_git_center
-M.open_file_in_tab = panel.open_file_in_tab
-M.toggle_git_center = panel.toggle_git_center
-M.open_git_center = panel.open_git_center
+local M = setmetatable({}, {
+	__index = function(_, k)
+		if k == "graph_viewer" then
+			return graph_viewer
+		elseif k == "open_graph_viewer" then
+			return graph_viewer.open
+		elseif k == "diff_mode" then
+			return diff_mode
+		elseif k == "open_diff_mode" then
+			return diff_mode.open
+		elseif k == "toggle_diff_mode" then
+			return diff_mode.toggle
+		elseif k == "close_diff_mode" then
+			return diff_mode.close
+		elseif config[k] ~= nil then
+			return config[k]
+		elseif queries[k] ~= nil then
+			return queries[k]
+		elseif render[k] ~= nil then
+			return render[k]
+		elseif modals[k] ~= nil then
+			return modals[k]
+		elseif panel[k] ~= nil then
+			return panel[k]
+		end
+		return nil
+	end,
+	__newindex = function(_, k, v)
+		config[k] = v
+	end,
+})
 
 --- Registers user commands and global keymaps.
 function M.setup()

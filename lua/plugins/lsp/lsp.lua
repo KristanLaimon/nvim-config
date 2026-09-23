@@ -25,7 +25,6 @@
 --   in blink_sources.lua and editorconfig.lua.
 -- ============================================================================
 
-local langs = require("krs.langs").langs
 
 local function get_schema_uri(category, filename)
 	local path = vim.fs.normalize(vim.fn.stdpath("config") .. "/schemas/" .. category .. "/" .. filename)
@@ -103,6 +102,7 @@ end
 
 --- Merges every language module's `lsp_config` into one servers table.
 local function build_servers()
+	local langs = require("krs.langs").langs
 	local servers = generic_servers()
 	for _, lang in pairs(langs) do
 		if lang.lsp_config then
@@ -145,9 +145,11 @@ return {
 			"williamboman/mason-lspconfig.nvim",
 			"b0o/schemastore.nvim",
 		},
-		opts = {
-			servers = build_servers(),
-		},
+		opts = function()
+			return {
+				servers = build_servers(),
+			}
+		end,
 		config = function(_, opts)
 			local has_blink, blink = pcall(require, "blink.cmp")
 
@@ -272,9 +274,23 @@ return {
 			-- Re-trigger FileType autocmd for loaded buffers so newly enabled LSP servers attach
 			-- immediately to the buffer whose opening triggered lazy-loading of nvim-lspconfig.
 			vim.schedule(function()
+				local ignored_ui = {
+					["alpha"] = true,
+					["dashboard"] = true,
+					["neo-tree"] = true,
+					["help"] = true,
+					["lazy"] = true,
+					["mason"] = true,
+					["notify"] = true,
+					["qf"] = true,
+				}
 				for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-					if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].filetype ~= "" then
-						pcall(vim.api.nvim_exec_autocmds, "FileType", { buffer = buf })
+					if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
+						local ft = vim.bo[buf].filetype
+						local bt = vim.bo[buf].buftype
+						if ft ~= "" and bt == "" and not ignored_ui[ft] then
+							pcall(vim.api.nvim_exec_autocmds, "FileType", { buffer = buf })
+						end
 					end
 				end
 			end)

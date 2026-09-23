@@ -40,6 +40,7 @@ local settings = {
 	--- Editor options, applied through `vim.opt`.
 	options = {
 		-- Appearance
+		background = "dark", -- Explicitly set dark background to avoid terminal DSR query timeout on startup.
 		number = true,
 		relativenumber = true,
 		cursorline = true,
@@ -59,7 +60,7 @@ local settings = {
 		encoding = "utf-8",
 
 		-- Folding: Treesitter folding for HTML tags, functions, and scope blocks with mouse click foldcolumn support.
-		foldmethod = "expr",
+		foldmethod = "manual",
 		foldexpr = "v:lua.vim.treesitter.foldexpr()",
 		foldlevel = 99,
 		foldlevelstart = 99,
@@ -138,6 +139,37 @@ vim.api.nvim_create_autocmd({ "FileType", "BufReadPost", "BufNewFile" }, {
 	pattern = "*",
 	callback = function(args)
 		vim.bo[args.buf].autoindent = true
+	end,
+})
+
+-- Treesitter folding for normal code buffers, keeping UI buffers on fast manual folding.
+local ignored_fold_ft = {
+	[""] = true,
+	["alpha"] = true,
+	["dashboard"] = true,
+	["neo-tree"] = true,
+	["help"] = true,
+	["lazy"] = true,
+	["mason"] = true,
+	["notify"] = true,
+	["qf"] = true,
+	["prompt"] = true,
+	["TelescopePrompt"] = true,
+	["terminal"] = true,
+}
+
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "*",
+	callback = function(args)
+		local bt = vim.bo[args.buf].buftype
+		local ft = vim.bo[args.buf].filetype
+		if bt == "" and not ignored_fold_ft[ft] then
+			local win = vim.fn.bufwinid(args.buf)
+			if win ~= -1 then
+				vim.wo[win].foldmethod = "expr"
+				vim.wo[win].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+			end
+		end
 	end,
 })
 

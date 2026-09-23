@@ -358,3 +358,88 @@ describe("git conflicts resolver top panel memory", function()
 		resolver.state.last_top_win = nil
 	end)
 end)
+
+describe("git conflicts resolver edge cases and buffer preservation", function()
+	it("does not hijack regular characters or Esc in insert/normal mode in result buffer", function()
+		local buf = vim.api.nvim_create_buf(false, true)
+		resolver.attach_result_keymaps(buf)
+
+		local keymaps = vim.api.nvim_buf_get_keymap(buf, "i")
+		local insert_keys = {}
+		for _, km in ipairs(keymaps) do
+			insert_keys[km.lhs] = true
+		end
+
+		-- Plain characters like 1, 2, s, u MUST NOT be mapped in insert mode
+		expect(insert_keys["1"]).toBeNil()
+		expect(insert_keys["2"]).toBeNil()
+		expect(insert_keys["s"]).toBeNil()
+		expect(insert_keys["u"]).toBeNil()
+		expect(insert_keys["co"]).toBeNil()
+
+		-- Ctrl chords SHOULD be mapped in insert mode
+		expect(insert_keys["<C-1>"]).toBe(true)
+		expect(insert_keys["<C-2>"]).toBe(true)
+		expect(insert_keys["<C-S>"]).toBe(true)
+
+		local n_keymaps = vim.api.nvim_buf_get_keymap(buf, "n")
+		local normal_keys = {}
+		for _, km in ipairs(n_keymaps) do
+			normal_keys[km.lhs] = true
+		end
+		-- Normal mode: no plain 's', 'u', '1' or '<Esc>' to preserve standard vim editing
+		expect(normal_keys["s"]).toBeNil()
+		expect(normal_keys["u"]).toBeNil()
+		expect(normal_keys["1"]).toBeNil()
+		expect(normal_keys["<Esc>"]).toBeNil()
+		expect(normal_keys["<C-Q>"]).toBe(true)
+
+		pcall(vim.api.nvim_buf_delete, buf, { force = true })
+	end)
+
+	it("preserves pre-existing buffers and unlists temporary buffers on close", function()
+		local pre_buf = vim.api.nvim_create_buf(true, false)
+		vim.api.nvim_buf_set_name(pre_buf, "/fake/project/existing.lua")
+		vim.bo[pre_buf].buflisted = true
+
+		local temp_buf = vim.api.nvim_create_buf(true, false)
+		vim.api.nvim_buf_set_name(temp_buf, "/fake/project/temp.lua")
+		vim.bo[temp_buf].buflisted = true
+
+		resolver.state.is_open = true
+		resolver.state.pre_open_bufs = {
+			[pre_buf] = { name = "/fake/project/existing.lua", modified = false },
+		}
+		resolver.state.attached_bufs = { pre_buf, temp_buf }
+		resolver.state.files = {
+			{ file = "existing.lua", full_path = "/fake/project/existing.lua", conflict_count = 0, is_staged = true },
+			{ file = "temp.lua", full_path = "/fake/project/temp.lua", conflict_count = 0, is_staged = false },
+		}
+
+		resolver.close()
+
+		-- pre_buf should remain listed
+		expect(vim.bo[pre_buf].buflisted).toBe(true)
+		-- temp_buf should be unlisted so it does not clutter user tabs
+		expect(vim.bo[temp_buf].buflisted).toBe(false)
+
+		pcall(vim.api.nvim_buf_delete, pre_buf, { force = true })
+		pcall(vim.api.nvim_buf_delete, temp_buf, { force = true })
+	end)
+
+	it("restores pinned tabs on close without losing pin status", function()
+		local pinned_tabs = require("plugins.krs.ui.pinned_tabs")
+		local fake_pins = { "init.lua", "lua/vim_options.lua" }
+
+		resolver.state.is_open = true
+		resolver.state.pre_pinned_files = fake_pins
+
+		resolver.close()
+
+		local loaded = pinned_tabs.load_pins()
+		expect(loaded).toEqual(fake_pins)
+
+		-- Clean up pins
+		pinned_tabs.save_pins({})
+	end)
+end)

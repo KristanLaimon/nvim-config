@@ -22,10 +22,9 @@
 --   <leader>ff (see lua/keymaps/lsp.lua).
 -- ============================================================================
 
-local langs = require("krs.langs").langs
-
 --- Merges every language module's `formatters_by_ft` into one table.
 local function build_formatters_by_ft()
+	local langs = require("krs.langs").langs
 	local by_ft = {}
 	for _, lang in pairs(langs) do
 		if lang.formatters_by_ft then
@@ -40,6 +39,7 @@ end
 --- Merges every language module's `conform_formatters` (per-formatter condition/args
 --- overrides) into one table.
 local function build_conform_formatters()
+	local langs = require("krs.langs").langs
 	local formatters = {}
 	for _, lang in pairs(langs) do
 		if lang.conform_formatters then
@@ -56,21 +56,23 @@ return {
 		"stevearc/conform.nvim",
 		event = { "BufReadPre", "BufNewFile" },
 		cmd = { "ConformInfo" },
-		opts = {
-			formatters_by_ft = build_formatters_by_ft(),
-			formatters = build_conform_formatters(),
-			format_on_save = {
-				timeout_ms = 1000,
-				lsp_fallback = true,
-			},
-			default_format_opts = {
-				lsp_format = "fallback",
-				-- biome mangles Astro and Svelte components; let their own LSP do it.
-				filter = function(client)
-					return not (client.name == "biome" and vim.tbl_contains({ "astro", "svelte" }, vim.bo.filetype))
-				end,
-			},
-		},
+		opts = function()
+			return {
+				formatters_by_ft = build_formatters_by_ft(),
+				formatters = build_conform_formatters(),
+				format_on_save = {
+					timeout_ms = 1000,
+					lsp_fallback = true,
+				},
+				default_format_opts = {
+					lsp_format = "fallback",
+					-- biome mangles Astro and Svelte components; let their own LSP do it.
+					filter = function(client)
+						return not (client.name == "biome" and vim.tbl_contains({ "astro", "svelte" }, vim.bo.filetype))
+					end,
+				},
+			}
+		end,
 		config = function(_, opts)
 			require("conform").setup(opts)
 
@@ -97,11 +99,19 @@ return {
 				is_mobile = vim.env.TERMUX_VERSION ~= nil or vim.fn.isdirectory("/data/data/com.termux") == 1
 			end
 
-			local ok, installer = pcall(require, "krs.core.installer")
 			local ignore_list = {}
-
-			local base_list = (ok and type(installer.mason_packages) == "table") and installer.mason_packages
-				or {
+			local langs_ok, langs_mod = pcall(require, "krs.langs")
+			if langs_ok and langs_mod.langs then
+				for _, lang in pairs(langs_mod.langs) do
+					if lang.mason_order then
+						for _, pkg in ipairs(lang.mason_order) do
+							table.insert(ignore_list, pkg)
+						end
+					end
+				end
+			end
+			if #ignore_list == 0 then
+				local fallback_pkgs = {
 					"stylua",
 					"gofumpt",
 					"goimports",
@@ -113,9 +123,9 @@ return {
 					"biome",
 					"eslint",
 				}
-
-			for _, pkg in ipairs(base_list) do
-				table.insert(ignore_list, pkg)
+				for _, pkg in ipairs(fallback_pkgs) do
+					table.insert(ignore_list, pkg)
+				end
 			end
 
 			-- Conditional & project-specific formatters MUST NOT be auto-installed by mason-conform on any platform

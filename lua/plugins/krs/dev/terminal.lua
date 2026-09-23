@@ -994,7 +994,7 @@ package.loaded["plugins.krs.dev.terminal"] = M
 return setmetatable({
 	name = "krs_terminal",
 	dir = require("krs.core.lazyspec").for_module(),
-	event = { "TermOpen", "BufEnter" },
+	event = { "TermOpen" },
 	cmd = {
 		"TerminalToggle",
 		"TerminalSelect",

@@ -293,8 +293,8 @@ end
 -- LANGUAGE WIRING (DELEGATED)
 -- ============================================================================
 
-local lua_injector = require("plugins.krs.tools.type_injector_lua")
-local ts_injector = require("plugins.krs.tools.type_injector_typescript")
+local lua_injector = lazy_req("plugins.krs.tools.type_injector_lua")
+local ts_injector = lazy_req("plugins.krs.tools.type_injector_typescript")
 
 -- Forwarding for any external references
 function M.get_active_lua_libraries(root)

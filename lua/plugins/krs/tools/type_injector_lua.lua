@@ -125,4 +125,5 @@ end
 return setmetatable({
 	name = "krs_type_injector_lua",
 	dir = require("krs.core.lazyspec").for_module(),
+	lazy = true,
 }, { __index = M })

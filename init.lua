@@ -24,6 +24,8 @@ if vim.loader then
 	vim.loader.enable()
 end
 
+vim.o.background = "dark"
+
 require("vim_options")
 require("krs.core.keymap_registry").install()
 require("keymaps")

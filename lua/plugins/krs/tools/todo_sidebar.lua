@@ -1007,7 +1007,7 @@ end
 local plugin_spec = {
 	name = "krs_todo_sidebar",
 	dir = require("krs.core.lazyspec").for_module(),
-	lazy = false,
+	lazy = true,
 	cmd = { "TodoSidebar", "TodoToggle", "TodoRefresh", "TodoSearch", "TodoFilter" },
 	keys = {
 		{ "<leader>td", desc = "Toggle Todo Sidebar (Right)" },
