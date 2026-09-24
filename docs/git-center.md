@@ -120,3 +120,22 @@ KrsVim integrates `f-person/git-blame.nvim` configured to emulate the VS Code Gi
 - `:GitBlameOpenFileURL` — Open file at commit in web browser.
 - All actions are discoverable via Command Palette (`<C-S-p>`).
 
+---
+
+## 📦 Binary Files Blacklist & Safe Preview
+
+Git repositories frequently track binary assets (e.g. `.zip`, `.img`, `.png`, `.jpg`, `.pdf`, `.exe`, `.tar.gz`, `.sqlite3`). In text-based diff viewers, attempting to read raw bytes causes NUL-byte encoding exceptions, corrupted buffer rendering, or infinite parsing loops.
+
+Git Center implements an internal **Binary Blacklist & Safe Preview Handler**:
+- **Blacklisted Extensions**:
+  - Archives: `.zip`, `.tar`, `.gz`, `.tgz`, `.bz2`, `.7z`, `.rar`, `.xz`, `.zst`, `.iso`, `.jar`, `.apk`
+  - Images: `.img`, `.png`, `.jpg`, `.jpeg`, `.gif`, `.bmp`, `.ico`, `.webp`, `.tiff`, `.psd`
+  - Executables & Bytecode: `.exe`, `.dll`, `.so`, `.dylib`, `.bin`, `.class`, `.pyc`, `.wasm`, `.o`
+  - Documents & Media: `.pdf`, `.epub`, `.mp3`, `.mp4`, `.wav`, `.avi`, `.mov`, `.mkv`
+  - Databases: `.db`, `.sqlite`, `.sqlite3`, `.pcap`, `.dat`
+- **Safe Rendering**:
+  - Automatically identifies blacklisted extensions via `diff.is_binary_file(filename)`.
+  - Detects `Binary files ... differ` git output headers and embedded NUL bytes (`\0`).
+  - Renders clean fallback banners: `[ 📦 Binary File: <filename> - Preview & diff analysis disabled ]`.
+  - Suppresses Tree-sitter parsing and line diff highlighting on binary files to ensure rock-solid stability.
+

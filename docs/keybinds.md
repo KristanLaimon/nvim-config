@@ -4,7 +4,7 @@
 
 All keymappings in KrsVim are designed to be frictionless, non-modal where possible, and VSCode-style (`Ctrl+Shift+<letter>`, `Ctrl+<letter>`, or direct function keys). Global mappings live in `lua/keymaps/` — one file per domain (`editor`, `search`, `lsp`, `debug`, `krs`) — while module-local ones are defined by the module itself in its settings block.
 
-Forgot a shortcut? Press `?` or `<F1>` to see context-aware help, or press `<C-S-p>` to fuzzy-search every registered command in the Command Palette.
+Forgot a shortcut? Press `<F1>` to open the interactive **Help Menu & Cheatsheet Manager** (introspects all runtime shortcuts across topics), `?` for quick context-aware help, or press `<C-S-p>` to fuzzy-search every registered command in the Command Palette.
 
 ---
 
@@ -19,6 +19,7 @@ Forgot a shortcut? Press `?` or `<F1>` to see context-aware help, or press `<C-S
 | `<C-y>` / `<C-S-z>` | n, i | Redo |
 | `<C-w>` | n | Close current buffer (smart tab-close style) |
 | `<C-'>` / `<C-S-'>` / `<C-">` / `` <C-`> `` / `<C-~>` / `<C-^>` / `<C-acute>` | n, i, v, t | Toggle comment — line, or selection in visual mode |
+| `<F1>` / `:KrsHelp` / `:Cheatsheet` | n, i, v, t | Open Help Menu & Runtime Cheatsheet Manager |
 | `<F2>` | n | Rename symbol, file on disk, or Neo-tree item |
 | `<C-+>` / `<C-=>` | n, i, v, t | Increase font size (persisted) |
 | `<C-->` | n, i, v, t | Decrease font size |

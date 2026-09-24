@@ -25,9 +25,37 @@ And it keeps `_G.OpenedFolders`, the record of folders you've opened as projects
 
 ---
 
+## 💡 Help Menu & Cheatsheet Manager (`help_modal.lua`)
+
+Press `<F1>` (or run `:KrsHelp`, `:Cheatsheet`, `:HelpMenu`, or pick from the Command Palette `<C-S-p>`) to open the **Help Menu & Cheatsheet Manager**.
+
+A dual-pane modal mirroring the Wiki UI:
+- **Left Panel (Topic Index)**: Categorized domains:
+  - `🌐 Environments` — Multi-CWD project slots (`<C-S-1..9>`), CRUD menu (`<C-S-e>`, `<leader>ee`).
+  - `🐙 Git-Center` — Git Center (`<C-S-g>`), staging (`<C-S-x>` / `<A-s>`), diff navigation (`[d`/`]d`).
+  - `📁 Neo-tree` — Sidebar file explorer (`<C-e>`), file operations, desktop explorer (`<C-/>`).
+  - `📑 InTab` — Buffer tab hopping (`<A-h>` / `<A-l>`), pin tabs (`<C-p>`), buffer cleaner (`<C-w>`).
+  - `🖥️ Terminal` — Multi-terminal drawer (`<C-;>`), terminal slots (`<A-1..9>`), resize keys.
+  - `🛠️ Task Runner` — Tasks picker (`<C-S-t>`), default task (`<C-S-a>`), output drawers (`<C-1..4>`).
+  - `🚀 Launch & Debug` — Launch profiles (`<C-S-q>`), default runner (`<C-S-s>`), DAP debugging (`<F5>`).
+  - `🗂️ Workspaces` — Workspaces UI (`<C-S-w>`), project session persistence.
+  - `🧰 Command Palette` — Fuzzy actions (`<C-S-p>`), recent projects (`<C-S-r>`), find files (`<C-S-f>`).
+  - `✂️ Editor & Navigation` — Save, clipboard bridge, undo/redo, comment toggling, and code folding.
+- **Right Panel (Live Runtime Shortcuts)**:
+  - **Zero Hardcoded Keys**: Introspects Neovim's active runtime keymap registry on the fly.
+  - **Clean & Filtered**: All `<leader>###` keymaps are suppressed (except `<leader>ee`), focusing on clean chords.
+- **Controls**:
+  - `j` / `k` / `Down` / `Up`: Navigate topics (live-updates cheatsheet in right panel).
+  - `<Tab>` / `<Right>`: Focus reader cheatsheet pane.
+  - `<S-Tab>` / `<Left>`: Return focus to left index.
+  - `/` or `<C-f>`: Search text within pane.
+  - `q` / `<Esc>` / `<F1>`: Dismiss help modal.
+
+---
+
 ## ❓ Context Help (`context_help.lua`)
 
-`?` or `<F1>` shows a short cheatsheet for **whatever is focused**, as a notification — not a modal you have to dismiss, and not the 200-line reference you didn't want.
+`?` shows a quick notification cheatsheet for **whatever window is currently focused** without opening a modal.
 
 Four contexts, detected from the filetype and buffer name:
 

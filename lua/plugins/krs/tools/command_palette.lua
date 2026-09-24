@@ -233,6 +233,8 @@ M.commands = {
 	-- --------------------------------------------------------------------------
 	-- 🎨 UI & Configuration
 	-- --------------------------------------------------------------------------
+	{ name = "💡 Open Help Menu & Cheatsheet Manager (<F1>)", cmd = "KrsHelp", category = "UI" },
+	{ name = "⌨️ View Active Runtime Shortcuts Cheatsheet", cmd = "Cheatsheet", category = "UI" },
 	{ name = "📚 Open Documentation Center & Wiki (Ctrl+Shift+D)", cmd = "KrsWiki", category = "UI" },
 	{ name = "🎨 Open Nagatoro & NvChad Theme Picker", cmd = "KrsThemePicker", category = "UI" },
 	{

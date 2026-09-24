@@ -62,6 +62,57 @@ M.separator_width = 65
 M.untracked_banner =
 	" ─── 📄 New Untracked File ──────────────────────────────────────────"
 
+--- Extensions of binary files that should NOT be analyzed or parsed in Git Center.
+M.binary_blacklist = {
+	-- Archives & compressed files
+	"zip", "tar", "gz", "tgz", "bz2", "tbz2", "7z", "rar", "xz", "txz", "zst", "iso", "jar", "war", "ear", "deb", "rpm", "apk", "pkg", "dmg",
+	-- Image formats
+	"img", "png", "jpg", "jpeg", "gif", "bmp", "ico", "webp", "tiff", "tif", "psd", "raw", "heic", "svgz", "ai", "eps",
+	-- Audio & Video
+	"mp3", "mp4", "m4a", "wav", "flac", "ogg", "avi", "mov", "mkv", "webm", "wmv", "mpg", "mpeg",
+	-- Executables, bytecode & binaries
+	"exe", "dll", "so", "dylib", "bin", "o", "obj", "a", "lib", "class", "pyc", "pyo", "wasm", "elf", "appimage",
+	-- Documents & Fonts
+	"pdf", "epub", "ttf", "otf", "woff", "woff2", "eot",
+	-- Database & capture files
+	"db", "sqlite", "sqlite3", "pcap", "pcapng", "dat", "bak",
+}
+
+M.binary_blacklist_set = {}
+for _, ext in ipairs(M.binary_blacklist) do
+	M.binary_blacklist_set[ext:lower()] = true
+end
+
+--- Checks if a filename matches the binary blacklist.
+--- @param filename string|nil
+--- @return boolean
+function M.is_binary_file(filename)
+	if not filename or filename == "" then
+		return false
+	end
+	local clean = filename:gsub("\\", "/"):match("[^/]+$") or filename
+	local ext = clean:match("%.([%w_-]+)$")
+	if ext and M.binary_blacklist_set[ext:lower()] then
+		return true
+	end
+	return false
+end
+
+--- Checks if raw diff lines indicate a binary file difference.
+--- @param raw_lines string[]|nil
+--- @return boolean
+function M.is_binary_diff(raw_lines)
+	if not raw_lines or #raw_lines == 0 then
+		return false
+	end
+	for _, line in ipairs(raw_lines) do
+		if line:match("^Binary files .* differ") or line:match("^GIT binary patch") or line:find("\0", 1, true) then
+			return true
+		end
+	end
+	return false
+end
+
 --- Shown when a file has no visible changes (mode change, whitespace only).
 M.empty_message = " (no visible changes in this file)"
 
@@ -112,9 +163,10 @@ end
 --- @param raw_lines string[] Output of `git diff --color=never`, or the file's
 ---   own contents when `is_untracked` is true.
 --- @param is_untracked boolean|nil Render every line as an addition.
+--- @param filename string|nil Optional filename to check against binary blacklist.
 --- @return string[] lines Buffer-ready lines.
 --- @return string[] kinds Line kind per line: "add" | "delete" | "header" | "context".
-function M.format(raw_lines, is_untracked)
+function M.format(raw_lines, is_untracked, filename)
 	local lines, kinds = {}, {}
 
 	--- Appends one logical line, splitting any embedded newlines.
@@ -123,6 +175,18 @@ function M.format(raw_lines, is_untracked)
 			table.insert(lines, part)
 			table.insert(kinds, kind)
 		end
+	end
+
+	if (filename and M.is_binary_file(filename)) or M.is_binary_diff(raw_lines) then
+		local b_name = filename or "Binary File"
+		local banner = string.format(" ─── 📦 Binary File: %s ", b_name)
+		if #banner < M.separator_width then
+			banner = banner .. string.rep("─", M.separator_width - #banner)
+		end
+		push(banner, "header")
+		push(" [ Binary file differs or cannot be analyzed as text ]", "context")
+		push(" [ Preview and diff analysis disabled for binary files ]", "context")
+		return lines, kinds
 	end
 
 	if is_untracked then
@@ -298,7 +362,7 @@ function M.apply_highlights(bufnr, kinds, filename)
 	end
 
 	local lang = M.get_file_language(filename)
-	if not lang then
+	if not lang or M.is_binary_file(filename) then
 		return
 	end
 
@@ -348,11 +412,12 @@ end
 --- Formats raw diff output into side-by-side dual buffer structures (Left = Before, Right = After).
 --- @param raw_lines string[] Output of `git diff --color=never` or untracked file lines.
 --- @param is_untracked boolean|nil
+--- @param filename string|nil Optional filename to check against binary blacklist.
 --- @return string[] left_lines
 --- @return string[] left_kinds ("delete" | "context" | "header" | "filler")
 --- @return string[] right_lines
 --- @return string[] right_kinds ("add" | "context" | "header" | "filler")
-function M.format_side_by_side_dual(raw_lines, is_untracked)
+function M.format_side_by_side_dual(raw_lines, is_untracked, filename)
 	local left_lines, left_kinds = {}, {}
 	local right_lines, right_kinds = {}, {}
 
@@ -361,6 +426,22 @@ function M.format_side_by_side_dual(raw_lines, is_untracked)
 		table.insert(left_kinds, l_kind)
 		table.insert(right_lines, r_text)
 		table.insert(right_kinds, r_kind)
+	end
+
+	if (filename and M.is_binary_file(filename)) or M.is_binary_diff(raw_lines) then
+		local b_name = filename or "Binary File"
+		local banner_l = string.format(" ─── 📦 Before: %s ", b_name)
+		local banner_r = string.format(" ─── 📦 After: %s ", b_name)
+		if #banner_l < M.separator_width then
+			banner_l = banner_l .. string.rep("─", M.separator_width - #banner_l)
+		end
+		if #banner_r < M.separator_width then
+			banner_r = banner_r .. string.rep("─", M.separator_width - #banner_r)
+		end
+		local msg = " [ Binary file - preview and diff analysis disabled ]"
+		push(banner_l, "header", banner_r, "header")
+		push(msg, "context", msg, "context")
+		return left_lines, left_kinds, right_lines, right_kinds
 	end
 
 	if is_untracked then
@@ -473,14 +554,15 @@ end
 --- @param raw_lines string[]
 --- @param is_untracked boolean|nil
 --- @param width integer Total available width in characters.
+--- @param filename string|nil Optional filename to check against binary blacklist.
 --- @return string[] lines
 --- @return string[] left_kinds
 --- @return string[] right_kinds
 --- @return integer col_w Left column width.
-function M.format_side_by_side_single(raw_lines, is_untracked, width)
+function M.format_side_by_side_single(raw_lines, is_untracked, width, filename)
 	width = math.max(40, width or 80)
 	local col_w = math.floor((width - 3) / 2)
-	local left_lines, left_kinds, right_lines, right_kinds = M.format_side_by_side_dual(raw_lines, is_untracked)
+	local left_lines, left_kinds, right_lines, right_kinds = M.format_side_by_side_dual(raw_lines, is_untracked, filename)
 
 	local combined = {}
 	for i = 1, #left_lines do
@@ -579,7 +661,7 @@ function M.apply_highlights_side_by_side_dual(left_buf, left_kinds, right_buf, r
 	end
 
 	local lang = M.get_file_language(filename)
-	if not lang then
+	if not lang or M.is_binary_file(filename) then
 		return
 	end
 

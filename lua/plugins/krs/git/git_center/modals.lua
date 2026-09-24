@@ -1064,7 +1064,7 @@ function M.open_diff_modal(target_file, target_type, target_cwd, commit_hash, in
 		local item = files[index]
 
 		local raw_lines, is_untracked = queries.raw_diff_for(item.file, item.type, active_cwd, item.commit_hash or hash)
-		local l_lines, l_kinds, r_lines, r_kinds = diff.format_side_by_side_dual(raw_lines, is_untracked)
+		local l_lines, l_kinds, r_lines, r_kinds = diff.format_side_by_side_dual(raw_lines, is_untracked, item.file)
 
 		local label = (item.commit_hash or hash) and ("📌 Commit " .. (item.commit_hash or hash):sub(1, 7))
 			or (item.type == "staged" and "🟢 Staged" or (item.type == "unstaged" and "🔴 Unstaged" or "❓ Untracked"))

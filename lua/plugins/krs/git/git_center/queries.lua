@@ -5,6 +5,7 @@
 local lazy_req = require("krs.core.lazy_require")
 local git = lazy_req("krs.git.cmd")
 local status = lazy_req("krs.git.status")
+local diff = lazy_req("krs.git.diff")
 local path_util = lazy_req("krs.core.path")
 local config = require("plugins.krs.git.git_center.config")
 
@@ -132,6 +133,13 @@ function M.raw_diff_for(file, file_type, cwd, commit_hash)
 	local target = config.get_active_target()
 	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
 
+	if diff.is_binary_file(file) then
+		return {
+			string.format("Binary files for %s differ (binary blacklist)", file),
+			"[ Binary file: preview and diff analysis disabled ]",
+		}, false
+	end
+
 	if commit_hash or file_type == "commit" then
 		local hash = commit_hash or (file_type ~= "commit" and file_type or nil)
 		if hash then
@@ -160,10 +168,20 @@ function M.raw_diff_for(file, file_type, cwd, commit_hash)
 
 	local full_path = cwd and (cwd .. "/" .. file) or file
 	if vim.fn.filereadable(full_path) == 1 then
-		if is_mobile_or_proot then
-			return vim.fn.readfile(full_path, "", 500), true
+		local max_lines = is_mobile_or_proot and 500 or 5000
+		local ok_read, lines = pcall(vim.fn.readfile, full_path, "", max_lines)
+		if ok_read and lines then
+			for _, line in ipairs(lines) do
+				if line:find("\0", 1, true) then
+					return {
+						string.format("Binary files for %s differ (binary content detected)", file),
+						"[ Binary file: preview and diff analysis disabled ]",
+					}, false
+				end
+			end
+			return lines, true
 		end
-		return vim.fn.readfile(full_path), true
+		return { "[ Error reading file contents ]" }, true
 	end
 	return { "[ Empty or New File ]" }, true
 end

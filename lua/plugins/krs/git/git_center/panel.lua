@@ -720,7 +720,7 @@ function M.open_git_center()
 				local p_width = (config.preview_win and vim.api.nvim_win_is_valid(config.preview_win))
 						and vim.api.nvim_win_get_width(config.preview_win)
 					or right_width
-				local formatted, l_kinds, r_kinds, col_w = diff.format_side_by_side_single(raw_lines, is_untracked, p_width)
+				local formatted, l_kinds, r_kinds, col_w = diff.format_side_by_side_single(raw_lines, is_untracked, p_width, item.file)
 				config.diff_cache[cache_key] =
 					{ lines = formatted, l_kinds = l_kinds, r_kinds = r_kinds, col_w = col_w, file = item.file }
 			end

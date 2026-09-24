@@ -1258,6 +1258,10 @@ end
 --- @param opts? { keep_focus?: boolean }
 function M.open_file_same_branch(file_path, opts)
 	opts = opts or {}
+	if diff.is_binary_file(file_path) then
+		notify(string.format("Binary file cannot be opened in text diff mode: %s", file_path), vim.log.levels.WARN)
+		return
+	end
 	M.state.active_file = file_path
 	local full_path = path_util.join(M.state.cwd, file_path)
 
@@ -1489,7 +1493,7 @@ function M.open_file_between_branches(file_path, opts)
 
 	-- Compute side-by-side diff
 	local raw_diff = git.lines({ "diff", "-U0", "--no-ext-diff", base_b, target_b, "--", file_path }, cwd)
-	local l_lines, left_kinds, r_lines, right_kinds = diff.format_side_by_side_dual(raw_diff, false)
+	local l_lines, left_kinds, r_lines, right_kinds = diff.format_side_by_side_dual(raw_diff, false, file_path)
 
 	vim.bo[left_buf].modifiable = true
 	vim.api.nvim_buf_set_lines(left_buf, 0, -1, false, l_lines)

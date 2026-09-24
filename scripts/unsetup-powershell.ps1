@@ -39,10 +39,11 @@ for ($i = 65; $i -le 90; $i++) {
     $Atajos += @{ Codigo = $i; Mod = "6u"; Tecla = "ctrl+shift+$letra" }
 }
 
-# Agregamos TODOS los números para limpiar
+# Agregamos TODOS los números para limpiar (tanto 5u como 6u)
 for ($i = 48; $i -le 57; $i++) {
     $numero = ([char]$i).ToString()
     $Atajos += @{ Codigo = $i; Mod = "5u"; Tecla = "ctrl+$numero" }
+    $Atajos += @{ Codigo = $i; Mod = "6u"; Tecla = "ctrl+shift+$numero" }
 }
 
 # --- ELIMINACIÓN DINÁMICA ---
