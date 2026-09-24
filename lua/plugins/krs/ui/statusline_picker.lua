@@ -50,6 +50,19 @@ function M.lsp_status()
 	return " " .. table.concat(names, ", ")
 end
 
+--- Formats active environment indicator for statusline when > 1 environments are active.
+--- @return string env_info
+function M.environment_status()
+	if _G.Environments and _G.Environments.indicator_status then
+		return _G.Environments.indicator_status()
+	end
+	local ok, envs = pcall(require, "plugins.krs.tools.environments")
+	if ok and envs.indicator_status then
+		return envs.indicator_status()
+	end
+	return ""
+end
+
 --- Formats editor mode into NvChad style pill string.
 --- @param mode_str string
 --- @return string formatted
@@ -354,7 +367,13 @@ function M.get_lualine_config(theme_name)
 			},
 			sections = {
 				lualine_a = { { "mode", fmt = M.format_mode } },
-				lualine_b = { M.fileformat_status, { M.git_branch, icon = "" }, common_diff, common_diagnostics },
+				lualine_b = {
+					M.fileformat_status,
+					M.environment_status,
+					{ M.git_branch, icon = "" },
+					common_diff,
+					common_diagnostics,
+				},
 				lualine_c = { common_filename },
 				lualine_x = { M.python_status, M.lsp_status, "filetype" },
 				lualine_y = { "encoding", "fileformat" },
@@ -371,7 +390,13 @@ function M.get_lualine_config(theme_name)
 			},
 			sections = {
 				lualine_a = { { "mode", fmt = M.format_mode } },
-				lualine_b = { M.fileformat_status, { M.git_branch, icon = "" }, common_diff, common_diagnostics },
+				lualine_b = {
+					M.fileformat_status,
+					M.environment_status,
+					{ M.git_branch, icon = "" },
+					common_diff,
+					common_diagnostics,
+				},
 				lualine_c = { common_filename },
 				lualine_x = { M.python_status, M.lsp_status, "filetype" },
 				lualine_y = { "encoding" },
@@ -388,7 +413,7 @@ function M.get_lualine_config(theme_name)
 			},
 			sections = {
 				lualine_a = { "mode" },
-				lualine_b = { M.fileformat_status, { M.git_branch, icon = "" }, common_diagnostics },
+				lualine_b = { M.fileformat_status, M.environment_status, { M.git_branch, icon = "" }, common_diagnostics },
 				lualine_c = { common_filename },
 				lualine_x = { M.python_status, M.lsp_status, "filetype" },
 				lualine_y = { "progress" },
@@ -405,7 +430,7 @@ function M.get_lualine_config(theme_name)
 			},
 			sections = {
 				lualine_a = { "mode" },
-				lualine_b = { M.fileformat_status, common_filename },
+				lualine_b = { M.fileformat_status, M.environment_status, common_filename },
 				lualine_c = {},
 				lualine_x = { M.python_status, { M.git_branch, icon = "" }, M.lsp_status },
 				lualine_y = { "filetype" },
@@ -419,7 +444,13 @@ function M.get_lualine_config(theme_name)
 				globalstatus = true,
 			},
 			sections = {
-				lualine_a = { M.fileformat_status, { M.git_branch, icon = "🌿" }, common_diff, common_diagnostics },
+				lualine_a = {
+					M.fileformat_status,
+					M.environment_status,
+					{ M.git_branch, icon = "🌿" },
+					common_diff,
+					common_diagnostics,
+				},
 				lualine_b = { common_filename },
 				lualine_c = {},
 				lualine_x = {
@@ -450,7 +481,13 @@ function M.get_lualine_config(theme_name)
 		},
 		sections = {
 			lualine_a = { { "mode", fmt = M.format_mode } },
-			lualine_b = { M.fileformat_status, { M.git_branch, icon = "" }, common_diff, common_diagnostics },
+			lualine_b = {
+				M.fileformat_status,
+				M.environment_status,
+				{ M.git_branch, icon = "" },
+				common_diff,
+				common_diagnostics,
+			},
 			lualine_c = { common_filename },
 			lualine_x = { M.python_status, M.lsp_status, "filetype" },
 			lualine_y = { "encoding" },

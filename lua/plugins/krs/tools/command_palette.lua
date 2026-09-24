@@ -78,6 +78,26 @@ M.commands = {
 	{ name = "🚪 Close Workspace & Go to Main Menu", cmd = "WorkspaceClose", category = "Workspace" },
 
 	-- --------------------------------------------------------------------------
+	-- 🌐 Environments (Concurrent Project Slots 1..9)
+	-- --------------------------------------------------------------------------
+	{ name = "🌐 Open Environments Manager Menu (Ctrl+Shift+E)", cmd = "EnvironmentMenu", category = "Environments" },
+	{ name = "➕ Add / Create New Environment Slot", cmd = "EnvironmentNew", category = "Environments" },
+	{ name = "💾 Save All Environments Session State", cmd = "EnvironmentSave", category = "Environments" },
+	{ name = "🔄 Restore Saved Environments Session", cmd = "EnvironmentRestore", category = "Environments" },
+	{ name = "📋 List All Environment Slots (Status & LSPs)", cmd = "EnvironmentList", category = "Environments" },
+	{ name = "🚪 Close Current Environment Slot", cmd = "EnvironmentClose", category = "Environments" },
+	{ name = "⚡ Switch to Environment Slot 1 (Ctrl+Shift+1)", cmd = "EnvironmentSwitch 1", category = "Environments" },
+	{ name = "⚡ Switch to Environment Slot 2 (Ctrl+Shift+2)", cmd = "EnvironmentSwitch 2", category = "Environments" },
+	{ name = "⚡ Switch to Environment Slot 3 (Ctrl+Shift+3)", cmd = "EnvironmentSwitch 3", category = "Environments" },
+	{ name = "⚡ Switch to Environment Slot 4 (Ctrl+Shift+4)", cmd = "EnvironmentSwitch 4", category = "Environments" },
+	{ name = "⚡ Switch to Environment Slot 5 (Ctrl+Shift+5)", cmd = "EnvironmentSwitch 5", category = "Environments" },
+	{ name = "⚡ Switch to Environment Slot 6 (Ctrl+Shift+6)", cmd = "EnvironmentSwitch 6", category = "Environments" },
+	{ name = "⚡ Switch to Environment Slot 7 (Ctrl+Shift+7)", cmd = "EnvironmentSwitch 7", category = "Environments" },
+	{ name = "⚡ Switch to Environment Slot 8 (Ctrl+Shift+8)", cmd = "EnvironmentSwitch 8", category = "Environments" },
+	{ name = "⚡ Switch to Environment Slot 9 (Ctrl+Shift+9)", cmd = "EnvironmentSwitch 9", category = "Environments" },
+	{ name = "💼 Save Environment Slot as Workspace", cmd = "EnvironmentSaveAsWorkspace", category = "Environments" },
+
+	-- --------------------------------------------------------------------------
 	-- 🌲 File Explorer & Git
 	-- --------------------------------------------------------------------------
 	{ name = "🌳 Toggle File Explorer (Neo-tree)", cmd = "Neotree toggle", category = "Explorer" },

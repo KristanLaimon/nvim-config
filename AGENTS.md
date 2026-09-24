@@ -80,6 +80,7 @@ Refer to the specific wiki documentation page for each feature or development us
 * 🧰 [**Command Palette**](docs/command-palette.md) — `<C-S-p>` action runner, command registration API & fuzzy search.
 * ⌨️ [**Keybinds Reference**](docs/keybinds.md) — Comprehensive keyboard shortcuts organized by feature domain.
 * 🗂️ [**Workspaces & Sessions**](docs/workspaces.md) — Per-project session slots (`<C-S-w>`), tab persistence & buffer cleaner.
+* 🌐 [**Environments Manager**](docs/environments.md) — 9 concurrent project slots (`<C-S-1..9>`), scoped LSPs, per-env terminals & CRUD menu (`<C-S-e>`).
 * 🐙 [**Git Control Center**](docs/git-center.md) — Interactive staging, side-by-side diffs, branch switcher & commit form (`<C-S-g>`).
 * 📁 [**File Explorers**](docs/file-explorer.md) — Desktop & WSL file browsers (`<C-S-f>`) and Neo-tree sidebar integration.
 * 🖥️ [**Multi-Terminal Manager**](docs/terminals.md) — 9 background terminal slots (`<A-1>`..`<A-9>`), height memory & toggle (`<C-;>`).

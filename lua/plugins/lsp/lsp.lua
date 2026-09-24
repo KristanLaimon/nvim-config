@@ -408,11 +408,21 @@ return {
 
 			-- The TS server advertises `diagnosticProvider`, so nvim pulls and refreshes
 
-			-- Stop all active LSP clients whenever the working directory/project changes.
-			-- When you open a file in the new project, Neovim will automatically launch only the needed LSP.
+			-- Stop active LSP clients whenever the working directory/project changes in single-project mode.
+			-- In multi-environment mode, each environment preserves its scoped LSPs until explicitly closed.
 			vim.api.nvim_create_autocmd("DirChanged", {
 				group = vim.api.nvim_create_augroup("LspProjectAutoStop", { clear = true }),
 				callback = function()
+					if vim.g._krs_environment_switching then
+						return
+					end
+					if
+						_G.Environments
+						and _G.Environments.has_multiple_environments
+						and _G.Environments.has_multiple_environments()
+					then
+						return
+					end
 					for _, client in ipairs(vim.lsp.get_clients()) do
 						client:stop()
 					end

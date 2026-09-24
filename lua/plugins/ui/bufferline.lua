@@ -86,7 +86,15 @@ return {
 					if name == "" or name:match("^%a[%a%d+.-]+://") or name:match("^node:") then
 						return false
 					end
-					return not name:match("[/\\]node_modules[/\\]")
+					if name:match("[/\\]node_modules[/\\]") then
+						return false
+					end
+					if _G.Environments and _G.Environments.is_buffer_in_current_environment then
+						if not _G.Environments.is_buffer_in_current_environment(bufnr) then
+							return false
+						end
+					end
+					return true
 				end,
 			},
 			highlights = {
