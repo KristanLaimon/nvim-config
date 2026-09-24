@@ -2532,6 +2532,54 @@ function M.import_diff_files_from_zip(zip_path, target_dir, manifest)
 							end
 						end
 
+						-- Normalize line endings between dest, base, and incoming so line ending differences
+						-- (e.g. Windows CRLF vs git LF) do not cause false merge conflicts
+						local dest_has_crlf = dest_content and (dest_content:find("\r\n") ~= nil)
+						if base_file_to_use and vim.fn.filereadable(base_file_to_use) == 1 and dest_content then
+							local base_raw = read_file(base_file_to_use)
+							if base_raw then
+								local base_has_crlf = base_raw:find("\r\n") ~= nil
+								if dest_has_crlf and not base_has_crlf then
+									base_raw = base_raw:gsub("([^\r])\n", "%1\r\n"):gsub("^\n", "\r\n")
+									local tbf = vim.fn.tempname() .. "_base_norm"
+									local f = io.open(tbf, "wb")
+									if f then
+										f:write(base_raw)
+										f:close()
+										base_file_to_use = tbf
+									end
+								elseif not dest_has_crlf and base_has_crlf then
+									base_raw = base_raw:gsub("\r\n", "\n")
+									local tbf = vim.fn.tempname() .. "_base_norm"
+									local f = io.open(tbf, "wb")
+									if f then
+										f:write(base_raw)
+										f:close()
+										base_file_to_use = tbf
+									end
+								end
+							end
+						end
+
+						if incoming_path and vim.fn.filereadable(incoming_path) == 1 and inc_content and dest_content then
+							local inc_has_crlf = inc_content:find("\r\n") ~= nil
+							if dest_has_crlf and not inc_has_crlf then
+								local norm_inc = inc_content:gsub("([^\r])\n", "%1\r\n"):gsub("^\n", "\r\n")
+								local f = io.open(incoming_path, "wb")
+								if f then
+									f:write(norm_inc)
+									f:close()
+								end
+							elseif not dest_has_crlf and inc_has_crlf then
+								local norm_inc = inc_content:gsub("\r\n", "\n")
+								local f = io.open(incoming_path, "wb")
+								if f then
+									f:write(norm_inc)
+									f:close()
+								end
+							end
+						end
+
 						-- Merge using git merge-file
 						local merge_ok = false
 						if vim.fn.executable("git") == 1 and base_file_to_use then

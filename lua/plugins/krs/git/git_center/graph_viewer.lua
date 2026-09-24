@@ -579,10 +579,7 @@ function M.open(target_cwd, initial_mode)
 
 		local raw_diff = {}
 		if current_target_file then
-			raw_diff = queries.git_lines(
-				{ "show", "--color=never", commit.full_hash, "--", current_target_file },
-				active_cwd
-			)
+			raw_diff = queries.git_lines({ "show", "--color=never", commit.full_hash, "--", current_target_file }, active_cwd)
 		else
 			raw_diff = queries.git_lines({ "show", "--color=never", commit.full_hash }, active_cwd)
 		end
@@ -593,7 +590,10 @@ function M.open(target_cwd, initial_mode)
 		table.insert(content, string.format(" 👤 Author:      %s <%s>", commit.author, commit.email))
 		table.insert(content, string.format(" 🕒 Date:        %s (%s)", commit.date, commit.rel_date))
 		if commit.refs and commit.refs ~= "" then
-			table.insert(content, string.format(" 🏷️ Refs:        %s", commit.refs:gsub("^%s*%(?", ""):gsub("%)?%s*$", "")))
+			table.insert(
+				content,
+				string.format(" 🏷️ Refs:        %s", commit.refs:gsub("^%s*%(?", ""):gsub("%)?%s*$", ""))
+			)
 		end
 		table.insert(content, string.format(" 💬 Title:       %s", commit.subject))
 
@@ -811,15 +811,7 @@ function M.open(target_cwd, initial_mode)
 				vim.api.nvim_buf_clear_namespace(left_buf, M.ns_graph, 0, -1)
 				for row_idx, spans in ipairs(all_spans) do
 					for _, s in ipairs(spans) do
-						pcall(
-							vim.api.nvim_buf_add_highlight,
-							left_buf,
-							M.ns_graph,
-							s.hl_group,
-							row_idx - 1,
-							s.col_start,
-							s.col_end
-						)
+						pcall(vim.api.nvim_buf_add_highlight, left_buf, M.ns_graph, s.hl_group, row_idx - 1, s.col_start, s.col_end)
 					end
 				end
 			end
@@ -1092,12 +1084,17 @@ function M.open(target_cwd, initial_mode)
 			local hash = line_commits[row]
 			if not hash then
 				local commit = get_commit_at_row(row)
-				if commit then hash = commit.full_hash end
+				if commit then
+					hash = commit.full_hash
+				end
 			end
 			if hash then
-				local details = queries.git_lines({ "show", "--stat", "--format=Author: %an <%ae>%nDate:   %cr%n%n%s%n%n%b", hash }, active_cwd)
-				local detail_buf = ui.scratch_buffer(details)
-				local popup = ui.float(detail_buf, {
+				local details = queries.git_lines(
+					{ "show", "--stat", "--format=Author: %an <%ae>%nDate:   %cr%n%n%s%n%n%b", hash },
+					active_cwd
+				)
+				local detail_buf, detail_win = ui.float({
+					lines = details,
 					width = 0.6,
 					height = math.min(#details + 2, 30),
 					title = string.format(" Commit %s ", hash:sub(1, 7)),
@@ -1105,8 +1102,8 @@ function M.open(target_cwd, initial_mode)
 					relative = "editor",
 					zindex = graph_z + 10,
 				})
-				if popup and popup.win then
-					ui.close_on_keys(detail_buf, popup.win, { "q", "<Esc>", "<CR>" })
+				if detail_win and vim.api.nvim_win_is_valid(detail_win) then
+					ui.close_on_keys(detail_buf, detail_win, { "q", "<Esc>", "<CR>" })
 				end
 			end
 			return
@@ -1114,7 +1111,7 @@ function M.open(target_cwd, initial_mode)
 		toggle_focus()
 	end, opts)
 	vim.keymap.set("n", "<CR>", handle_right_enter, right_opts)
-	
+
 	-- Canvas Mode
 	vim.keymap.set("n", "f", toggle_canvas_mode, opts)
 

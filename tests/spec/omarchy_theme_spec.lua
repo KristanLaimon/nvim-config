@@ -170,7 +170,15 @@ blue = "#89b4fa"
 	end)
 
 	it("discovers omarchy-krs in theme_picker", function()
+		local real_env = package.loaded["krs.core.environment"]
+		local omarchy_env = {
+			detect = function()
+				return { is_windows = false, is_wsl = false, is_mac = false, is_termux = false, is_omarchy = true }
+			end,
+		}
+		package.loaded["krs.core.environment"] = omarchy_env
 		local themes = theme_picker.discover_themes()
+		package.loaded["krs.core.environment"] = real_env
 		expect(themes).toContain("omarchy-krs")
 	end)
 end)

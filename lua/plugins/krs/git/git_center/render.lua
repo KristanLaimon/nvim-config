@@ -630,7 +630,9 @@ function M.build_panel_content(info, width)
 	local stash_list = {}
 	local q = require("plugins.krs.git.git_center.queries")
 	local ok_stash, sl = pcall(q.get_stash_list, nil)
-	if ok_stash and sl then stash_list = sl end
+	if ok_stash and sl then
+		stash_list = sl
+	end
 
 	section_lines[6] = add(string.format(" 6 Stash (%d)", #stash_list))
 	add_hl(section_lines[6] - 1, 0, -1, "KRSGitSectionActions")

@@ -145,7 +145,11 @@ Forgot a shortcut? Press `?` or `<F1>` to see context-aware help, or press `<C-S
 | `s` / `S` | Git Center | Stage selected / stage all |
 | `u` / `U` | Git Center | Unstage selected / unstage all |
 | `r` / `R` | Git Center | Restore file under cursor / whole section |
-| `c` / `m` / `t` | Git Center | Edit commit title / description / tag |
+| `c` / `m` / `t` | Git Center | Edit commit title / description / tag (in §1) |
+| `t` / `T` | Git Center | 🧪 Dry-Run Merge / Rebase simulator (predict conflicts without touching CWD) |
+| `b` | Git Center | Open Branch Manager modal |
+| `l` / `L` | Git Center | GitKraken-style commit graph viewer (current / all branches) |
+| `v` / `V` | Git Center | Open / Toggle Git Diff Mode |
 | `C` | Git Center | Commit (and tag) |
 | `P` | Git Center | Push (with remote branch selector) |
 

@@ -90,9 +90,12 @@ end
 --- Lines are sanitized via `M.sanitize_lines` before being written, so
 --- callers do not need to strip embedded newlines themselves.
 ---
---- @param opts table|nil { lines?: string[], filetype?: string, modifiable?: boolean }
+--- @param opts table|nil { lines?: string[], filetype?: string, modifiable?: boolean } or string[] of lines
 --- @return integer buf Buffer handle.
 function M.scratch_buffer(opts)
+	if type(opts) == "table" and opts[1] and not opts.lines then
+		opts = { lines = opts }
+	end
 	opts = opts or {}
 	local buf = vim.api.nvim_create_buf(false, true)
 	vim.bo[buf].buftype = "nofile"
@@ -109,7 +112,8 @@ end
 
 --- Opens a centered floating window over a scratch buffer.
 ---
---- @param opts table|nil Options:
+--- @param buf_or_opts table|integer|nil Options table or buffer handle.
+--- @param maybe_opts table|nil Options table if buffer handle was passed first.
 ---   lines      string[]  Initial content.
 ---   buf        integer   Existing buffer to reuse instead of creating one.
 ---   width      number    Cells, or a 0-1 fraction of the editor. Default 0.6.
@@ -121,10 +125,18 @@ end
 ---   border     string    Overrides `M.border`.
 --- @return integer buf Buffer handle.
 --- @return integer win Window handle.
-function M.float(opts)
-	opts = opts or {}
-	local buf = opts.buf
-		or M.scratch_buffer({ lines = opts.lines, filetype = opts.filetype, modifiable = opts.modifiable })
+function M.float(buf_or_opts, maybe_opts)
+	local opts
+	local buf
+	if type(buf_or_opts) == "number" then
+		buf = buf_or_opts
+		opts = maybe_opts or {}
+	else
+		opts = buf_or_opts or {}
+		buf = opts.buf
+	end
+
+	buf = buf or M.scratch_buffer({ lines = opts.lines, filetype = opts.filetype, modifiable = opts.modifiable })
 
 	local width = M.resolve_size(opts.width or 0.6, vim.o.columns or 80)
 	local height = M.resolve_size(opts.height or (opts.lines and #opts.lines) or 0.6, vim.o.lines or 24)

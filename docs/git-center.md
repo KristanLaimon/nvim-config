@@ -39,9 +39,10 @@ The **Git Control Center** (`<C-S-g>`) is a high-speed, interactive floating Git
 | `<A-l>` / `<M-l>` | Normal, Visual, Insert, Terminal | Switch to Next Submodule Tab (Right) |
 | `M` | Normal | Open 3-Way Merge Conflict Resolver |
 | `<leader>gm` | Normal | Open 3-Way Merge Conflict Resolver from anywhere |
-| `b` | Normal | Open Branch Management Modal (Create, Delete, Switch, Rename) |
-| `g` | Normal | Open GitKraken Commit Graph Viewer (`:GitGraph`, 2 modes: Current / `--all`, on-the-fly fetch) |
-| `l` / `L` | Normal | Open Commit Log & History Modal (`git log --all` with per-file diffs & jump) |
+| `b` | Normal | Open Branch Management Modal (Create, Delete, Switch, Rename, Dry-Run) |
+| `l` / `L` | Normal | Open GitKraken Commit Graph Viewer (`:GitGraph`, 2 modes: Current / `--all`, on-the-fly fetch) |
+| `t` | Normal | 🧪 Dry-Run Merge simulation (predict conflicts between branches without touching CWD) |
+| `T` | Normal | 🧪 Dry-Run Rebase simulation (predict conflicts between branches without touching CWD) |
 | `<CR>` (Commit Log) | Normal | Press Enter on file in "Files Changed" to jump directly to its diff |
 | `s` | Normal, Visual | Stage selected file or selection |
 | `S` | Normal, Visual | Stage all files |

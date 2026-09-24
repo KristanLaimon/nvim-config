@@ -102,6 +102,42 @@ function M.setup()
 		diff_mode.toggle()
 	end, { desc = "Toggle Git Diff Mode (Same Branch)" })
 
+	pcall(vim.api.nvim_create_user_command, "GitMergeSimulate", function(cmd_opts)
+		local args = cmd_opts.fargs or {}
+		local active_cwd = (config.get_active_target() and config.get_active_target().full_path) or vim.fn.getcwd()
+		local current_branch = (queries.get_git_info(active_cwd) or {}).branch or "HEAD"
+		local target = args[2] and args[1] or current_branch
+		local incoming = args[2] or args[1]
+		if not incoming or incoming == "" then
+			modals.open_branch_modal(active_cwd)
+			return
+		end
+		local res = queries.simulate_merge(target, incoming, active_cwd)
+		modals.open_simulation_modal(res, active_cwd)
+	end, { nargs = "*", desc = "Simulate Git Merge between 2 branches without altering CWD" })
+
+	pcall(vim.api.nvim_create_user_command, "GitRebaseSimulate", function(cmd_opts)
+		local args = cmd_opts.fargs or {}
+		local active_cwd = (config.get_active_target() and config.get_active_target().full_path) or vim.fn.getcwd()
+		local current_branch = (queries.get_git_info(active_cwd) or {}).branch or "HEAD"
+		local upstream = args[2] and args[1] or current_branch
+		local topic = args[2] or args[1]
+		if not topic or topic == "" then
+			modals.open_branch_modal(active_cwd)
+			return
+		end
+		local res = queries.simulate_rebase(upstream, topic, active_cwd)
+		modals.open_simulation_modal(res, active_cwd)
+	end, { nargs = "*", desc = "Simulate Git Rebase of branch onto upstream without altering CWD" })
+
+	pcall(vim.api.nvim_create_user_command, "GitDryRunMerge", function(cmd_opts)
+		vim.cmd("GitMergeSimulate " .. (cmd_opts.args or ""))
+	end, { nargs = "*", desc = "Dry-run Git Merge simulation without altering CWD" })
+
+	pcall(vim.api.nvim_create_user_command, "GitDryRunRebase", function(cmd_opts)
+		vim.cmd("GitRebaseSimulate " .. (cmd_opts.args or ""))
+	end, { nargs = "*", desc = "Dry-run Git Rebase simulation without altering CWD" })
+
 	local function reload()
 		package.loaded["plugins.krs.git.git_center"] = nil
 		package.loaded["plugins.krs.git.git_center.config"] = nil
@@ -198,6 +234,9 @@ return setmetatable({
 		"GitDiffToggle",
 		"GitGraph",
 		"GitCenterGraph",
+		"GitMergeSimulate",
+		"GitRebaseSimulate",
+		"GitDryRunMerge",
 	},
 	keys = {
 		{ "<C-S-g>", mode = { "n", "i", "v", "t" }, desc = "Open Git Control Center" },

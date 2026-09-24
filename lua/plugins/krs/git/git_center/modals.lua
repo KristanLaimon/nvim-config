@@ -88,7 +88,7 @@ function M.open_branch_modal(target_cwd)
 	local buf, win = ui.float({
 		width = 0.68,
 		height = math.min(18, math.max(6, #lines + 3)),
-		title = " 🌿 Branch Manager | [Enter]: Switch | [c/n]: Create | [d]: Delete | [D]: Force Delete | [r]: Rename ",
+		title = " 🌿 Branch Manager | [Enter]: Switch | [c/n]: Create | [t/T]: Dry-Run | [d/D]: Del | [r]: Rename ",
 		lines = lines,
 		modifiable = false,
 		zindex = 100,
@@ -287,6 +287,56 @@ function M.open_branch_modal(target_cwd)
 		})
 	end
 
+	local function simulate_branch_merge()
+		local cursor_row = vim.api.nvim_win_get_cursor(win)[1]
+		local target_b = branches[cursor_row]
+		if not target_b then
+			return
+		end
+		local res = queries.simulate_merge(current_branch, target_b.name, active_cwd)
+		M.open_simulation_modal(res, active_cwd)
+	end
+
+	local function simulate_branch_rebase()
+		local cursor_row = vim.api.nvim_win_get_cursor(win)[1]
+		local target_b = branches[cursor_row]
+		if not target_b then
+			return
+		end
+		local res = queries.simulate_rebase(current_branch, target_b.name, active_cwd)
+		M.open_simulation_modal(res, active_cwd)
+	end
+
+	local function show_branch_help()
+		local help_lines = {
+			"",
+			"  Branch Manager — Shortcuts",
+			"  ─────────────────────────────────────",
+			"  Enter        Checkout selected branch",
+			"  c / n        Create & checkout new branch",
+			"  d            Delete branch (safe delete -d)",
+			"  D            Force delete branch (-D)",
+			"  r            Rename selected branch",
+			"  t / m        🧪 Test / Simulate Merge with active branch",
+			"  T            🧪 Test / Simulate Rebase onto active branch",
+			"  ? / F1       Show this help",
+			"  q / Esc      Close modal",
+			"",
+		}
+		local hb, hw = ui.float({
+			lines = help_lines,
+			width = 54,
+			height = #help_lines,
+			title = " ❓ Branch Help (? / <F1>) ",
+			border = "rounded",
+			relative = "editor",
+			zindex = 250,
+		})
+		if hw and vim.api.nvim_win_is_valid(hw) then
+			ui.close_on_keys(hb, hw, { "q", "<Esc>", "<CR>", "<Space>", "?", "<F1>" })
+		end
+	end
+
 	vim.keymap.set("n", "<CR>", checkout_selected, opts)
 	vim.keymap.set("n", "c", create_branch, opts)
 	vim.keymap.set("n", "n", create_branch, opts)
@@ -297,6 +347,13 @@ function M.open_branch_modal(target_cwd)
 		delete_branch(true)
 	end, opts)
 	vim.keymap.set("n", "r", rename_branch, opts)
+	vim.keymap.set("n", "t", simulate_branch_merge, opts)
+	vim.keymap.set("n", "T", simulate_branch_rebase, opts)
+	vim.keymap.set("n", "m", simulate_branch_merge, opts)
+	vim.keymap.set("n", "?", show_branch_help, opts)
+	vim.keymap.set("n", "<F1>", show_branch_help, opts)
+	vim.keymap.set("n", "<C-?>", show_branch_help, opts)
+	vim.keymap.set("n", "<C-/>", show_branch_help, opts)
 
 	for _, key in ipairs(config.settings.keys.modal_close) do
 		vim.keymap.set("n", key, close_modal, opts)
@@ -1250,6 +1307,310 @@ end
 function M.open_graph_viewer(target_cwd, initial_mode)
 	local gv = require("plugins.krs.git.git_center.graph_viewer")
 	gv.open(target_cwd, initial_mode)
+end
+
+--- Opens the Merge / Rebase Conflict Simulation modal.
+--- Predicts cleanly whether combining two branches will conflict without touching CWD or index.
+--- @param result table Result from queries.simulate_merge or queries.simulate_rebase.
+--- @param target_cwd string|nil Repository directory.
+function M.open_simulation_modal(result, target_cwd)
+	if not result then
+		notify("No simulation result data provided", vim.log.levels.WARN)
+		return
+	end
+
+	local active_cwd = target_cwd or (get_active_target() and get_active_target().full_path) or vim.fn.getcwd()
+	local lines = {}
+	local highlights = {}
+	local file_map = {}
+
+	local function add(text, hl)
+		table.insert(lines, text)
+		local row = #lines - 1
+		if hl then
+			table.insert(highlights, { row = row, col_start = 0, col_end = -1, hl = hl })
+		end
+		return row
+	end
+
+	local function add_hl(row, s, e, hl)
+		table.insert(highlights, { row = row, col_start = s, col_end = e, hl = hl })
+	end
+
+	add("")
+	local is_rebase = result.mode == "rebase"
+	local mode_name = is_rebase and "REBASE" or "MERGE"
+
+	if result.error then
+		add(string.format("  ❌ %s SIMULATION ERROR: %s", mode_name, result.error), "KRSGitGraphRed")
+		add("")
+	elseif result.is_clean then
+		add(
+			"  ╔════════════════════════════════════════════════════════════════════════╗",
+			"KRSGitFileStaged"
+		)
+		add(
+			string.format("  ║  ✅ CLEAN %s — ZERO CONFLICTS DETECTED                               ║", mode_name),
+			"KRSGitFileStaged"
+		)
+		add(
+			string.format(
+				"  ║  ✨ '%s' can be combined cleanly into '%s'!               ║",
+				result.incoming or "",
+				result.target or ""
+			),
+			"KRSGitFileStaged"
+		)
+		add(
+			"  ╚════════════════════════════════════════════════════════════════════════╝",
+			"KRSGitFileStaged"
+		)
+		add("")
+	else
+		local num_conf = #result.conflicted_files
+		add(
+			"  ╔════════════════════════════════════════════════════════════════════════╗",
+			"KRSGitFileDeleted"
+		)
+		add(
+			string.format(
+				"  ║  ❌ %s CONFLICTS DETECTED (%d conflicted file%s)                    ║",
+				mode_name,
+				num_conf,
+				num_conf == 1 and "" or "s"
+			),
+			"KRSGitFileDeleted"
+		)
+		add("  ║  ⚠️ Merging will produce conflicts. Workspace was NOT modified.       ║", "KRSGitConflictWarning")
+		add(
+			"  ╚════════════════════════════════════════════════════════════════════════╝",
+			"KRSGitFileDeleted"
+		)
+		add("")
+	end
+
+	if is_rebase and result.first_conflicting_commit then
+		local fc = result.first_conflicting_commit
+		add(
+			string.format("  ⚠️ Rebase will halt at commit #%d/%d (%s):", fc.index, fc.total, fc.hash),
+			"KRSGitConflictWarning"
+		)
+		add(string.format("     Subject: '%s' by %s", fc.subject, fc.author), "KRSGitGraphYellow")
+		add("")
+	end
+
+	-- Branch & Ancestor Overview
+	add(
+		"  ────────────────────────────────────────────────────────────────────────",
+		"KRSGitSeparator"
+	)
+	add("  📊 SIMULATION OVERVIEW", "KRSGitSectionBranch")
+	add(
+		"  ────────────────────────────────────────────────────────────────────────",
+		"KRSGitSeparator"
+	)
+
+	local r_target = add(string.format("   🌿 Target Branch:    %s", result.target or "HEAD"))
+	add_hl(r_target, 3, 22, "KRSGitKeyBadge")
+	add_hl(r_target, 24, -1, "KRSGitHeaderBranch")
+
+	local r_inc = add(string.format("   🌲 Incoming Branch:  %s", result.incoming or ""))
+	add_hl(r_inc, 3, 24, "KRSGitKeyBadge")
+	add_hl(r_inc, 25, -1, "KRSGitGraphYellow")
+
+	if result.merge_base then
+		local base_str = result.merge_base:sub(1, 8)
+		if result.merge_base_info then
+			base_str = string.format(
+				'%s ("%s" by %s, %s)',
+				base_str,
+				result.merge_base_info.subject,
+				result.merge_base_info.author,
+				result.merge_base_info.date
+			)
+		end
+		local r_base = add(string.format("   🧬 Common Ancestor:  %s", base_str))
+		add_hl(r_base, 3, 24, "KRSGitKeyBadge")
+		add_hl(r_base, 25, 33, "KRSGitGraphCyan")
+	end
+
+	local r_counts = add(
+		string.format(
+			"   📈 Commit Drift:     +%d incoming commits │ -%d commits behind target",
+			result.commits_ahead or 0,
+			result.commits_behind or 0
+		)
+	)
+	add_hl(r_counts, 3, 24, "KRSGitKeyBadge")
+
+	if result.is_fast_forward then
+		local r_ff = add("   ⚡ Fast-Forward:     YES (Can fast-forward without merge commit)", "KRSGitFileStaged")
+		add_hl(r_ff, 3, 24, "KRSGitKeyBadge")
+	else
+		local r_ff = add("   ⚡ Fast-Forward:     NO (Requires 3-way merge commit)")
+		add_hl(r_ff, 3, 24, "KRSGitKeyBadge")
+	end
+	add("")
+
+	-- Conflicted Files Section
+	if result.conflicted_files and #result.conflicted_files > 0 then
+		add(
+			"  ────────────────────────────────────────────────────────────────────────",
+			"KRSGitSeparator"
+		)
+		add(
+			string.format("  ⚠️ CONFLICTED FILES (%d) — Will require manual resolution:", #result.conflicted_files),
+			"KRSGitFileDeleted"
+		)
+		add(
+			"  ────────────────────────────────────────────────────────────────────────",
+			"KRSGitSeparator"
+		)
+		for _, conf in ipairs(result.conflicts or {}) do
+			local line_text = string.format("   🔴 [CONFLICT] %s %s", conf.file, conf.reason or "")
+			local row = add(line_text)
+			file_map[row + 1] = conf.file
+			add_hl(row, 3, 16, "KRSGitFileDeleted")
+			add_hl(row, 17, 17 + #conf.file, "KRSGitGraphWhite")
+			if conf.reason then
+				add_hl(row, 18 + #conf.file, -1, "KRSGitGraphDim")
+			end
+		end
+		add("")
+	end
+
+	-- Auto-Merged Clean Files Section
+	if result.auto_merged and #result.auto_merged > 0 then
+		add(
+			"  ────────────────────────────────────────────────────────────────────────",
+			"KRSGitSeparator"
+		)
+		add(
+			string.format("  ✓ AUTO-MERGED FILES (%d) — Merges cleanly without conflicts:", #result.auto_merged),
+			"KRSGitFileStaged"
+		)
+		add(
+			"  ────────────────────────────────────────────────────────────────────────",
+			"KRSGitSeparator"
+		)
+		for _, f in ipairs(result.auto_merged) do
+			local line_text = string.format("   🟢 [CLEAN]    %s", f)
+			local row = add(line_text)
+			file_map[row + 1] = f
+			add_hl(row, 3, 16, "KRSGitFileStaged")
+			add_hl(row, 17, -1, "KRSGitGraphWhite")
+		end
+		add("")
+	end
+
+	-- All Changed Files in Incoming
+	if result.changed_files and #result.changed_files > 0 then
+		add(
+			"  ────────────────────────────────────────────────────────────────────────",
+			"KRSGitSeparator"
+		)
+		add(string.format("  📂 ALL FILES CHANGED IN INCOMING (%d):", #result.changed_files), "KRSGitSectionBranch")
+		add(
+			"  ────────────────────────────────────────────────────────────────────────",
+			"KRSGitSeparator"
+		)
+		for _, item in ipairs(result.changed_files) do
+			local st_hl = item.status == "A" and "KRSGitFileStaged"
+				or (item.status == "D" and "KRSGitFileDeleted" or "KRSGitFileModified")
+			local line_text = string.format("   • [%s] %s", item.status, item.file)
+			local row = add(line_text)
+			file_map[row + 1] = item.file
+			add_hl(row, 5, 8, st_hl)
+			add_hl(row, 9, -1, "KRSGitGraphWhite")
+		end
+		add("")
+	end
+
+	-- Incoming Commits List
+	if result.incoming_commits and #result.incoming_commits > 0 then
+		add(
+			"  ────────────────────────────────────────────────────────────────────────",
+			"KRSGitSeparator"
+		)
+		add(string.format("  📜 INCOMING COMMITS (%d):", #result.incoming_commits), "KRSGitSectionCommit")
+		add(
+			"  ────────────────────────────────────────────────────────────────────────",
+			"KRSGitSeparator"
+		)
+		for _, c in ipairs(result.incoming_commits) do
+			local line_text = string.format("   • %s  %s (%s, %s)", c.hash, c.subject, c.author, c.date)
+			local row = add(line_text)
+			add_hl(row, 5, 5 + #c.hash, "KRSGitGraphYellow")
+			add_hl(row, 6 + #c.hash, -1, "KRSGitGraphWhite")
+		end
+		add("")
+	end
+
+	add(
+		"  ────────────────────────────────────────────────────────────────────────",
+		"KRSGitSeparator"
+	)
+	local r_foot = add("   [q / Esc] Close  │  [d / Enter] View File Diff  │  [? / F1] Shortcuts Help")
+	add_hl(r_foot, 3, 12, "KRSGitKeyBadge")
+	add_hl(r_foot, 23, 34, "KRSGitKeyBadge")
+	add_hl(r_foot, 54, 63, "KRSGitKeyBadge")
+	add("")
+
+	local win_title = is_rebase
+			and string.format(" 🧪 Rebase Simulation: %s onto %s ", result.incoming or "", result.target or "")
+		or string.format(" 🧪 Merge Simulation: %s ➜ %s ", result.incoming or "", result.target or "")
+
+	local buf, win = ui.float({
+		lines = lines,
+		width = 0.76,
+		height = 0.85,
+		title = win_title,
+		border = "rounded",
+		relative = "editor",
+		zindex = 220,
+	})
+
+	if not win or not vim.api.nvim_win_is_valid(win) then
+		return
+	end
+
+	local ns = vim.api.nvim_create_namespace("krs_git_sim_modal")
+	for _, hl in ipairs(highlights) do
+		pcall(vim.api.nvim_buf_add_highlight, buf, ns, hl.hl, hl.row, hl.col_start, hl.col_end)
+	end
+
+	local opts = { noremap = true, silent = true, buffer = buf }
+
+	local function open_file_diff()
+		local row = vim.api.nvim_win_get_cursor(win)[1]
+		local target_file = file_map[row]
+		if target_file and result.incoming then
+			M.open_diff_modal(target_file, "unstaged", active_cwd, result.incoming)
+		end
+	end
+
+	vim.keymap.set("n", "<CR>", open_file_diff, opts)
+	vim.keymap.set("n", "d", open_file_diff, opts)
+	vim.keymap.set("n", "?", function()
+		notify(
+			"Simulation Modal:\n  [Enter / d]: Open diff for selected file\n  [q / Esc]: Close modal\n  [j / k]: Navigate list",
+			vim.log.levels.INFO
+		)
+	end, opts)
+	vim.keymap.set("n", "<F1>", function()
+		notify(
+			"Simulation Modal:\n  [Enter / d]: Open diff for selected file\n  [q / Esc]: Close modal\n  [j / k]: Navigate list",
+			vim.log.levels.INFO
+		)
+	end, opts)
+	vim.keymap.set("n", "<C-?>", function()
+		notify(
+			"Simulation Modal:\n  [Enter / d]: Open diff for selected file\n  [q / Esc]: Close modal\n  [j / k]: Navigate list",
+			vim.log.levels.INFO
+		)
+	end, opts)
+
+	ui.close_on_keys(buf, win, { "q", "<Esc>", "<C-c>" })
 end
 
 return M

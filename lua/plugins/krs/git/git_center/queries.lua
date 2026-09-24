@@ -259,4 +259,28 @@ function M.get_stash_list(cwd)
 	return stashes
 end
 
+--- Simulates merge of incoming_branch into target_branch without modifying CWD or index.
+--- @param target_branch string|nil Defaults to active branch.
+--- @param incoming_branch string
+--- @param cwd string|nil
+--- @return table result
+function M.simulate_merge(target_branch, incoming_branch, cwd)
+	local sim = require("krs.git.simulate")
+	local target = config.get_active_target()
+	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+	return sim.simulate_merge(target_branch, incoming_branch, cwd)
+end
+
+--- Simulates rebase of topic_branch onto upstream_branch without modifying CWD or index.
+--- @param upstream_branch string
+--- @param topic_branch string|nil Defaults to active branch.
+--- @param cwd string|nil
+--- @return table result
+function M.simulate_rebase(upstream_branch, topic_branch, cwd)
+	local sim = require("krs.git.simulate")
+	local target = config.get_active_target()
+	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+	return sim.simulate_rebase(upstream_branch, topic_branch, cwd)
+end
+
 return M

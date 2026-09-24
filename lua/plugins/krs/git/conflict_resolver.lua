@@ -145,14 +145,18 @@ function M.debounced_save_session()
 	local uv = vim.uv or vim.loop
 	save_timer = uv.new_timer()
 	if save_timer then
-		save_timer:start(350, 0, vim.schedule_wrap(function()
-			if save_timer then
-				save_timer:stop()
-				save_timer:close()
-				save_timer = nil
-			end
-			M.save_session()
-		end))
+		save_timer:start(
+			350,
+			0,
+			vim.schedule_wrap(function()
+				if save_timer then
+					save_timer:stop()
+					save_timer:close()
+					save_timer = nil
+				end
+				M.save_session()
+			end)
+		)
 	else
 		M.save_session()
 	end
@@ -797,7 +801,11 @@ function M.load_file(idx)
 		local restored_from_saved = false
 		local has_valid_saved = false
 		if item.saved_lines and #item.saved_lines > 0 then
-			if #item.saved_lines > 1 or (item.saved_lines[1] and item.saved_lines[1] ~= "") or (item.saved_spans and #item.saved_spans > 0) then
+			if
+				#item.saved_lines > 1
+				or (item.saved_lines[1] and item.saved_lines[1] ~= "")
+				or (item.saved_spans and #item.saved_spans > 0)
+			then
 				has_valid_saved = true
 			end
 		end

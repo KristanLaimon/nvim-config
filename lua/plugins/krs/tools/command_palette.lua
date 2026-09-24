@@ -113,6 +113,8 @@ M.commands = {
 	{ name = "👤 Git Accounts Manager (Select Identity)", cmd = "GitAccounts", category = "Git" },
 	{ name = "⚔️ Resolve Merge Conflicts (3-Way VSCode Merge Editor)", cmd = "GitConflictResolve", category = "Git" },
 	{ name = "🛑 Abort Git Merge & Clear Conflict State", cmd = "GitConflictAbortMerge", category = "Git" },
+	{ name = "🧪 Dry-Run Git Merge Simulation (Predict Conflicts)", cmd = "GitDryRunMerge", category = "Git" },
+	{ name = "🧪 Dry-Run Git Rebase Simulation (Predict Conflicts)", cmd = "GitDryRunRebase", category = "Git" },
 	{ name = "📊 GitKraken Commit Graph Viewer (Current / --all)", cmd = "GitGraph", category = "Git" },
 	{ name = "👀 Toggle Git Blame Inline Virtual Text (VSCode Style)", cmd = "GitBlameToggle", category = "Git" },
 	{ name = "🌐 Open Git Blame Commit URL in Browser", cmd = "GitBlameOpenCommitURL", category = "Git" },

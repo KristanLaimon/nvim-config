@@ -25,7 +25,6 @@
 --   in blink_sources.lua and editorconfig.lua.
 -- ============================================================================
 
-
 local function get_schema_uri(category, filename)
 	local path = vim.fs.normalize(vim.fn.stdpath("config") .. "/schemas/" .. category .. "/" .. filename)
 	return vim.uri_from_fname(path)

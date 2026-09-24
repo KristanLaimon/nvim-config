@@ -36,6 +36,10 @@ $Atajos = @(
     @{ Codigo = 44; Mod = "5u"; Tecla = "ctrl+," }
     @{ Codigo = 46; Mod = "5u"; Tecla = "ctrl+." }
     @{ Codigo = 32; Mod = "6u"; Tecla = "ctrl+shift+space" }
+    @{ Codigo = 47; Mod = "5u"; Tecla = "ctrl+/" }
+    @{ Codigo = 63; Mod = "6u"; Tecla = "ctrl+shift+/" }
+    @{ Codigo = 63; Mod = "5u"; Tecla = "ctrl+?" }
+    @{ Codigo = 31; Mod = "5u"; Tecla = "ctrl+_" }
 )
 
 # Generar números del 0 al 9 para Ctrl+[Número]

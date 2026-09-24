@@ -50,7 +50,8 @@ describe("plugins.krs.git.git_center.graph_viewer", function()
 	end)
 
 	it("parses raw git graph commit lines with delimiter", function()
-		local raw = "* 87a6e94\x1f (HEAD -> main, origin/main, tag: v1.0.0)\x1fKristanLaimon\x1f25 hours ago\x1ffeat: Neo-tree mover"
+		local raw =
+			"* 87a6e94\x1f (HEAD -> main, origin/main, tag: v1.0.0)\x1fKristanLaimon\x1f25 hours ago\x1ffeat: Neo-tree mover"
 		local parsed = graph_viewer.parse_raw_graph_line(raw)
 
 		expect(parsed.is_commit).toBeTruthy()

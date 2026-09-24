@@ -357,7 +357,7 @@ function M.open_git_center()
 		style = "minimal",
 		border = "rounded",
 		zindex = base_z,
-		title = " 🐙 Git Center | [v/V]: Diff Mode | [l]: Log | [b]: Branch | [Esc]: Close ",
+		title = " 🐙 Git Center | [t/T]: Dry-Run | [b]: Branch | [l]: Graph | [v/V]: Diff | [Esc]: Close ",
 		title_pos = "center",
 	})
 
@@ -668,7 +668,7 @@ function M.open_git_center()
 				if #stash_diff > 0 then
 					local diff_mod = require("krs.git.diff")
 					local formatted = diff_mod.format_diff(stash_diff)
-					
+
 					vim.bo[preview_buf].modifiable = true
 					vim.bo[preview_buf].filetype = ""
 					vim.api.nvim_buf_set_lines(preview_buf, 0, -1, false, formatted.lines or stash_diff)
@@ -676,7 +676,7 @@ function M.open_git_center()
 					vim.api.nvim_buf_clear_namespace(preview_buf, diff.namespace, 0, -1)
 					vim.api.nvim_buf_clear_namespace(preview_buf, diff.ts_namespace, 0, -1)
 					vim.api.nvim_buf_clear_namespace(preview_buf, render.ns_panel, 0, -1)
-					
+
 					if formatted.highlights then
 						diff_mod.apply_diff_highlights(preview_buf, formatted.highlights)
 					end
@@ -1135,6 +1135,8 @@ function M.open_git_center()
 			"  d            Side-by-side diff modal",
 			"  r            Restore file (or rename branch in §4)",
 			"  R            Restore section",
+			"  t            🧪 Test/Simulate merge with active branch",
+			"  T            🧪 Test/Simulate rebase onto active branch",
 			"  K            Checkout commit",
 			"  b            Branch manager",
 			"  l / L        Git Graph (current / all branches)",
@@ -1142,19 +1144,20 @@ function M.open_git_center()
 			"  M            Merge conflict resolver",
 			"  z            Stash menu",
 			"  F5 / Ctrl+r  Refresh",
+			"  ? / F1       Help shortcuts (? / <F1> / Ctrl+?)",
 			"  q / Esc      Close",
 			"",
 		}
-		local help_buf = ui_mod.scratch_buffer(help_lines)
-		local help_float = ui_mod.float(help_buf, {
-			width = 50,
+		local help_buf, help_win = ui_mod.float({
+			lines = help_lines,
+			width = 54,
 			height = #help_lines,
-			title = " ❓ Help (Ctrl+?) ",
+			title = " ❓ Help (? or <F1>) ",
 			border = "rounded",
 			relative = "editor",
 			zindex = 250,
 		})
-		if help_float and help_float.win and vim.api.nvim_win_is_valid(help_float.win) then
+		if help_win and vim.api.nvim_win_is_valid(help_win) then
 			-- Title highlight
 			vim.api.nvim_buf_add_highlight(help_buf, -1, "KRSGitSectionBranch", 1, 0, -1)
 			-- Section title highlights
@@ -1168,15 +1171,97 @@ function M.open_git_center()
 					vim.api.nvim_buf_add_highlight(help_buf, -1, "KRSGitKeyBadge", i - 1, 2, key_end - 1)
 				end
 			end
-			ui_mod.close_on_keys(help_buf, help_float.win, { "q", "<Esc>", "<CR>", "<Space>", "<C-?>", "?", "<C-S-/>", "<C-/>", "<C-_>" })
+			ui_mod.close_on_keys(
+				help_buf,
+				help_win,
+				{ "q", "<Esc>", "<CR>", "<Space>", "<C-?>", "?", "<F1>", "<C-S-/>", "<C-/>", "<C-_>" }
+			)
 		end
 	end
 
-	vim.keymap.set("n", "<C-?>", show_help_overlay, key_opts)
-	vim.keymap.set("n", "?", show_help_overlay, key_opts)
-	vim.keymap.set("n", "<C-S-/>", show_help_overlay, key_opts)
-	vim.keymap.set("n", "<C-/>", show_help_overlay, key_opts)
-	vim.keymap.set("n", "<C-_>", show_help_overlay, key_opts)
+	local help_keys = { "<C-?>", "?", "<F1>", "<C-S-/>", "<C-/>", "<C-_>", "<A-?>" }
+	for _, hk in ipairs(help_keys) do
+		vim.keymap.set("n", hk, show_help_overlay, key_opts)
+		vim.keymap.set("n", hk, show_help_overlay, preview_opts)
+	end
+
+	local function select_and_simulate(mode)
+		local active_cwd = get_active_target().full_path
+		local current_branch = (queries.get_git_info(active_cwd) or {}).branch or "HEAD"
+		local raw_branches = queries.git_lines({ "branch", "-a", "--sort=-committerdate" }, active_cwd)
+		local candidates = {}
+		local seen = {}
+		for _, line in ipairs(raw_branches) do
+			local clean = line:gsub("^%*%s*", ""):gsub("^%s*", ""):gsub("%s*$", "")
+			if clean ~= "" and not clean:match("HEAD %->") and not clean:match("HEAD detached") then
+				local display_name = clean:gsub("^remotes/origin/", ""):gsub("^remotes/", ""):gsub("^origin/", "")
+				if display_name ~= current_branch and not seen[display_name] then
+					seen[display_name] = true
+					table.insert(candidates, display_name)
+				end
+			end
+		end
+
+		if #candidates == 0 then
+			notify("No other branches available in repository to simulate against", vim.log.levels.WARN)
+			return
+		end
+
+		local prompt_text = mode == "rebase"
+				and ("🧪 Dry-Run Rebase: Select upstream branch to test rebase on '" .. current_branch .. "':")
+			or ("🧪 Dry-Run Merge: Select incoming branch to test merge into '" .. current_branch .. "':")
+
+		vim.ui.select(candidates, { prompt = prompt_text }, function(choice)
+			if not choice then
+				return
+			end
+			local res = mode == "rebase" and queries.simulate_rebase(current_branch, choice, active_cwd)
+				or queries.simulate_merge(current_branch, choice, active_cwd)
+			modals.open_simulation_modal(res, active_cwd)
+		end)
+	end
+
+	local function simulate_branch_merge()
+		local item = current_item()
+		local active_cwd = get_active_target().full_path
+		local current_branch = (queries.get_git_info(active_cwd) or {}).branch or "HEAD"
+		if
+			item
+			and item.type == "branch"
+			and item.branch
+			and item.branch ~= ""
+			and not item.is_current
+			and item.branch ~= current_branch
+		then
+			local res = queries.simulate_merge(current_branch, item.branch, active_cwd)
+			modals.open_simulation_modal(res, active_cwd)
+			return
+		end
+		select_and_simulate("merge")
+	end
+
+	local function simulate_branch_rebase()
+		local item = current_item()
+		local active_cwd = get_active_target().full_path
+		local current_branch = (queries.get_git_info(active_cwd) or {}).branch or "HEAD"
+		if
+			item
+			and item.type == "branch"
+			and item.branch
+			and item.branch ~= ""
+			and not item.is_current
+			and item.branch ~= current_branch
+		then
+			local res = queries.simulate_rebase(current_branch, item.branch, active_cwd)
+			modals.open_simulation_modal(res, active_cwd)
+			return
+		end
+		select_and_simulate("rebase")
+	end
+
+	vim.keymap.set("n", "T", simulate_branch_rebase, key_opts)
+	vim.keymap.set("n", "T", simulate_branch_rebase, preview_opts)
+	vim.keymap.set("n", "t", simulate_branch_merge, preview_opts)
 
 	vim.keymap.set("n", "b", function()
 		modals.open_branch_modal(get_active_target().full_path)
@@ -1219,6 +1304,10 @@ function M.open_git_center()
 				create_branch_dialog()
 				return
 			end
+			if entry.key == "t" and not is_in_section(1) then
+				simulate_branch_merge()
+				return
+			end
 			require("plugins.krs.ui.input_modal").open({
 				label = entry.label,
 				default_value = config.commit_data[entry.field],
@@ -1243,14 +1332,18 @@ function M.open_git_center()
 			{ "Save (stash push)", "Pop (stash pop)", "Apply (stash apply)", "Drop (stash drop)", "Cancel" },
 			{ prompt = "Stash Action:" },
 			function(choice)
-				if not choice or choice == "Cancel" then return end
+				if not choice or choice == "Cancel" then
+					return
+				end
 				if choice:match("^Save") then
 					require("plugins.krs.ui.input_modal").open({
 						label = "Stash Message (optional)",
 						default_value = "",
 						relative = "editor",
 						callback = function(ok_input, msg)
-							if not ok_input then return end
+							if not ok_input then
+								return
+							end
 							local args = { "stash", "push" }
 							if msg and msg ~= "" then
 								table.insert(args, "-m")
