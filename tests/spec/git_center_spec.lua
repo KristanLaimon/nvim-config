@@ -217,7 +217,7 @@ describe("plugins.krs.git.git_center", function()
 		expect(type(git_center.open_commit_log_modal)).toBe("function")
 	end)
 
-	it("binds branch (b) and commit log (l, L) keymaps in main panel", function()
+	it("binds branch (b) and graph viewer (l, L) keymaps in main panel", function()
 		git_center.open_git_center()
 		local main_buf = git_center.main_buf
 
@@ -438,15 +438,15 @@ describe("plugins.krs.git.git_center", function()
 		expect(#graph).toBeGreaterThan(0)
 	end)
 
-	it("renders section 4 (branches), section 5 (commits log), and section 6 (shortcuts) in main panel", function()
+	it("renders section 4 (branches), section 5 (commits), and section 6 (stash) in main panel", function()
 		git_center.open_git_center()
 		local main_buf = git_center.main_buf
 		local lines = vim.api.nvim_buf_get_lines(main_buf, 0, -1, false)
 		local full_text = table.concat(lines, "\n")
 
-		expect(full_text:match("SECTION 4: LOCAL BRANCHES") ~= nil).toBeTruthy()
-		expect(full_text:match("SECTION 5: COMMIT HISTORY LOG") ~= nil).toBeTruthy()
-		expect(full_text:match("SECTION 6: QUICK ACTIONS & SHORTCUTS") ~= nil).toBeTruthy()
+		expect(full_text:match("4 Branches") ~= nil).toBeTruthy()
+		expect(full_text:match("5 Commits") ~= nil).toBeTruthy()
+		expect(full_text:match("6 Stash") ~= nil).toBeTruthy()
 
 		-- Check section jumping keymaps 1 to 6
 		for sec = 1, 6 do

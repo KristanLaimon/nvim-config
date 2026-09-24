@@ -8,6 +8,6 @@
 
 return {
 	"windwp/nvim-ts-autotag",
-	event = { "BufReadPre", "BufNewFile" },
+	ft = { "html", "xml", "javascriptreact", "typescriptreact", "javascript", "typescript", "vue", "svelte", "astro", "php", "blade", "jsx", "tsx", "markdown" },
 	opts = {},
 }

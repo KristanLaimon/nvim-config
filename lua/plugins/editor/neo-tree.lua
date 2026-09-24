@@ -773,7 +773,7 @@ return {
 	-- tree's own create/rename/move commands.
 	{
 		"Crysthamus/nvim-file-operations",
-		event = { "BufReadPre", "BufNewFile" },
+		lazy = true,
 		dependencies = { "nvim-neo-tree/neo-tree.nvim" },
 		config = function()
 			require("nvim-file-operations").setup()

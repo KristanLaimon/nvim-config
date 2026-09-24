@@ -87,7 +87,7 @@ return {
 	},
 	{
 		"zapling/mason-conform.nvim",
-		event = { "BufReadPre", "BufNewFile" },
+		event = "VeryLazy",
 		dependencies = { "williamboman/mason.nvim", "stevearc/conform.nvim" },
 		config = function()
 			local env_ok, env_mod = pcall(require, "krs.core.environment")

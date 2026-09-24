@@ -241,4 +241,22 @@ function M.stage_all_with_modal(cwd)
 	execute(false)
 end
 
+--- Gets the list of stash entries.
+--- @param cwd string|nil
+--- @return table[] stashes Each entry has { index, message, branch }
+function M.get_stash_list(cwd)
+	local target = config.get_active_target()
+	cwd = cwd or (target and target.full_path) or vim.fn.getcwd()
+	local raw = M.git_lines({ "stash", "list", "--pretty=format:%gd%x1f%s%x1f%gs" }, cwd)
+	local stashes = {}
+	for _, line in ipairs(raw) do
+		local index, subject, gs = line:match("([^\31]+)\31([^\31]*)\31?(.*)")
+		if index then
+			local branch = gs:match("on ([^:]+)") or ""
+			table.insert(stashes, { index = index, message = subject, branch = branch })
+		end
+	end
+	return stashes
+end
+
 return M

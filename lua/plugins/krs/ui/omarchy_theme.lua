@@ -612,7 +612,7 @@ end
 local plugin_spec = {
 	name = "krs_omarchy_theme",
 	dir = require("krs.core.lazyspec").for_module(),
-	lazy = false,
+	lazy = true,
 	cmd = { "KrsOmarchySyncToggle", "KrsOmarchySyncNow", "KrsOmarchySyncStatus" },
 	config = M.setup,
 }

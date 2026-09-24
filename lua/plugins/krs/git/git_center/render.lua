@@ -520,9 +520,8 @@ function M.build_panel_content(info, width)
 	end
 	separator("═")
 
-	section_lines[1] = add(" 󰜘 [SECTION 1: COMMIT BOX & TAG] (Press 1)")
+	section_lines[1] = add(" 1 Commit")
 	add_hl(section_lines[1] - 1, 0, -1, "KRSGitSectionCommit")
-	highlight_brackets(section_lines[1] - 1, lines[section_lines[1]])
 
 	local title_display = config.commit_data.title ~= "" and config.commit_data.title or "<Press c to edit title>"
 	local r_title = add("   [c] Title:       " .. title_display) - 1
@@ -555,10 +554,8 @@ function M.build_panel_content(info, width)
 	highlight_brackets(r_exec, lines[r_exec + 1])
 	separator("─")
 
-	section_lines[2] =
-		add(string.format(" 󰈔 [SECTION 2: STAGED FILES (%d)] (Press 2 | [u] Unstage / [U] Unstage All)", #info.staged))
+	section_lines[2] = add(string.format(" 2 Staged (%d)", #info.staged))
 	add_hl(section_lines[2] - 1, 0, -1, "KRSGitSectionStaged")
-	highlight_brackets(section_lines[2] - 1, lines[section_lines[2]])
 
 	for _, file in ipairs(info.staged) do
 		add_file("✓", file, "staged", "KRSGitFileStaged")
@@ -569,11 +566,8 @@ function M.build_panel_content(info, width)
 	separator("─")
 
 	local pending = #info.unstaged + #info.untracked
-	section_lines[3] = add(
-		string.format(" 󰈔 [SECTION 3: UNSTAGED & UNTRACKED FILES (%d)] (Press 3 | [s] Stage / [S] Stage All)", pending)
-	)
+	section_lines[3] = add(string.format(" 3 Changes (%d)", pending))
 	add_hl(section_lines[3] - 1, 0, -1, "KRSGitSectionUnstaged")
-	highlight_brackets(section_lines[3] - 1, lines[section_lines[3]])
 
 	for _, file in ipairs(info.unstaged) do
 		add_file("M", file, "unstaged", "KRSGitFileModified")
@@ -587,14 +581,8 @@ function M.build_panel_content(info, width)
 	separator("─")
 
 	local local_branches = info.local_branches or {}
-	section_lines[4] = add(
-		string.format(
-			" 🌿 [SECTION 4: LOCAL BRANCHES (%d)] (Press 4 | [Enter] Switch / [c] Create / [d] Delete / [r] Rename)",
-			#local_branches
-		)
-	)
+	section_lines[4] = add(string.format(" 4 Branches (%d)", #local_branches))
 	add_hl(section_lines[4] - 1, 0, -1, "KRSGitSectionBranch")
-	highlight_brackets(section_lines[4] - 1, lines[section_lines[4]])
 
 	for _, b in ipairs(local_branches) do
 		local prefix = b.is_current and "✓" or " "
@@ -618,14 +606,8 @@ function M.build_panel_content(info, width)
 	separator("─")
 
 	local graph_raw = info.commit_graph or {}
-	section_lines[5] = add(
-		string.format(
-			" 📜 [SECTION 5: COMMIT HISTORY LOG (CURRENT BRANCH)] (Press 5 | [Enter/d] Details / [K] Checkout)",
-			#graph_raw
-		)
-	)
+	section_lines[5] = add(" 5 Commits")
 	add_hl(section_lines[5] - 1, 0, -1, "KRSGitSectionCommit")
-	highlight_brackets(section_lines[5] - 1, lines[section_lines[5]])
 
 	for _, raw_line in ipairs(graph_raw) do
 		local clean_text, spans = M.parse_ansi_line(raw_line)
@@ -644,29 +626,26 @@ function M.build_panel_content(info, width)
 	end
 	separator("─")
 
-	section_lines[6] = add(" 󰜴 [SECTION 6: QUICK ACTIONS & SHORTCUTS] (Press 6)")
+	-- Section 6: Stash
+	local stash_list = {}
+	local q = require("plugins.krs.git.git_center.queries")
+	local ok_stash, sl = pcall(q.get_stash_list, nil)
+	if ok_stash and sl then stash_list = sl end
+
+	section_lines[6] = add(string.format(" 6 Stash (%d)", #stash_list))
 	add_hl(section_lines[6] - 1, 0, -1, "KRSGitSectionActions")
 
-	local help_items = {
-		"   [Alt+h / Alt+l] Switch Submodule Tab  │  [< / >] Resize Split Width",
-		"   [b] Branch Manager (Create / Delete / Switch / Rename)",
-		"   [g] 📊 GitKraken Commit Graph Viewer (Current / --all)",
-		"   [l / L] Commit Log & History Viewer (--all)",
-		"   [s] Stage file  │  [S] Stage All  │  [u] Unstage file  │  [U] Unstage All",
-		"   [r] Restore File  │  [R] Restore Section  │  [d] Side-by-Side Diff Modal",
-		"   [c] Commit Title  │  [C] Execute Commit & Tag  │  [P] Push to Remote",
-	}
-	if info.conflicted and #info.conflicted > 0 then
-		table.insert(help_items, "   [M] ⚔️ Resolve Merge Conflicts (3-Way Merge Editor)")
+	for _, entry in ipairs(stash_list) do
+		local stash_text = string.format("   %s: %s", entry.index, entry.message)
+		if entry.branch ~= "" then
+			stash_text = stash_text .. " (" .. entry.branch .. ")"
+		end
+		local r = add(stash_text) - 1
+		line_map[r + 1] = { type = "stash", stash_index = entry.index, message = entry.message }
+		add_hl(r, 3, 3 + #entry.index, "KRSGitGraphYellow")
 	end
-	table.insert(
-		help_items,
-		"   [1-6] Jump to Section 1-6  │  [Tab] Focus preview  │  [Ctrl+Shift+J/K] Scroll preview"
-	)
-
-	for _, help in ipairs(help_items) do
-		local r_h = add(help) - 1
-		highlight_brackets(r_h, help)
+	if #stash_list == 0 then
+		add("   (no stash entries)")
 	end
 
 	return lines, line_map, section_lines, highlights

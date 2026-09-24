@@ -21,7 +21,7 @@ end
 
 return {
 	"f-person/git-blame.nvim",
-	event = { "BufReadPre", "BufNewFile" },
+	event = { "BufReadPost" },
 	cmd = {
 		"GitBlameToggle",
 		"GitBlameEnable",

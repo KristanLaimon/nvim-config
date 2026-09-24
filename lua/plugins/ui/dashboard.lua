@@ -32,6 +32,7 @@ local settings = {
 return {
 	"goolord/alpha-nvim",
 	dependencies = { "nvim-tree/nvim-web-devicons" },
+	cond = function() return vim.fn.argc() == 0 end,
 	config = function()
 		local alpha = require("alpha")
 		local dashboard = require("alpha.themes.dashboard")

@@ -559,7 +559,7 @@ return setmetatable({
 	name = "krs_tailwind_organizer",
 	dir = require("krs.core.lazyspec").for_module(),
 	cmd = { "TailwindOrganize", "TailwindOrganizerToggle", "TailwindOrganizerStatus", "TailwindOrganizerReload" },
-	event = { "BufReadPost", "BufNewFile" },
+	ft = { "html", "xml", "javascriptreact", "typescriptreact", "javascript", "typescript", "vue", "svelte", "astro", "php", "blade", "jsx", "tsx", "markdown" },
 	keys = {},
 	config = M.setup,
 }, { __index = M })

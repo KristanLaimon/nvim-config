@@ -13,7 +13,7 @@ end
 
 return {
 	"lewis6991/gitsigns.nvim",
-	event = { "BufReadPre", "BufNewFile" },
+	event = { "BufReadPost" },
 	opts = {
 		signs = {
 			add = { text = "▎" },

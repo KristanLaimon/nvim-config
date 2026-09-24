@@ -662,6 +662,38 @@ function M.open_git_center()
 					title_pos = "center",
 				})
 				return
+			elseif item and item.type == "stash" then
+				-- Show stash diff in preview
+				local stash_diff = git_lines({ "stash", "show", "-p", item.stash_index }, cur_target.full_path)
+				if #stash_diff > 0 then
+					local diff_mod = require("krs.git.diff")
+					local formatted = diff_mod.format_diff(stash_diff)
+					
+					vim.bo[preview_buf].modifiable = true
+					vim.bo[preview_buf].filetype = ""
+					vim.api.nvim_buf_set_lines(preview_buf, 0, -1, false, formatted.lines or stash_diff)
+					vim.bo[preview_buf].modifiable = false
+					vim.api.nvim_buf_clear_namespace(preview_buf, diff.namespace, 0, -1)
+					vim.api.nvim_buf_clear_namespace(preview_buf, diff.ts_namespace, 0, -1)
+					vim.api.nvim_buf_clear_namespace(preview_buf, render.ns_panel, 0, -1)
+					
+					if formatted.highlights then
+						diff_mod.apply_diff_highlights(preview_buf, formatted.highlights)
+					end
+				else
+					vim.bo[preview_buf].modifiable = true
+					vim.bo[preview_buf].filetype = ""
+					vim.api.nvim_buf_set_lines(preview_buf, 0, -1, false, { "  (empty stash)" })
+					vim.bo[preview_buf].modifiable = false
+					vim.api.nvim_buf_clear_namespace(preview_buf, diff.namespace, 0, -1)
+					vim.api.nvim_buf_clear_namespace(preview_buf, diff.ts_namespace, 0, -1)
+					vim.api.nvim_buf_clear_namespace(preview_buf, render.ns_panel, 0, -1)
+				end
+				pcall(vim.api.nvim_win_set_config, config.preview_win, {
+					title = string.format(" 👁️ Stash: %s ", item.stash_index),
+					title_pos = "center",
+				})
+				return
 			end
 
 			if not item.file then
@@ -1072,6 +1104,80 @@ function M.open_git_center()
 		end, key_opts)
 	end
 
+	-- Help overlay (Ctrl+?)
+	local function show_help_overlay()
+		local ui_mod = require("krs.core.ui")
+		local help_lines = {
+			"",
+			"  Git Center — Keyboard Shortcuts",
+			"",
+			"  Navigation",
+			"  ─────────────────────────────────────",
+			"  1-5          Jump to section",
+			"  Tab          Toggle focus (panel ↔ preview)",
+			"  < / >        Resize split",
+			"  Ctrl+j/k     Scroll preview",
+			"  Alt+h/l      Switch submodule tab",
+			"",
+			"  Staging & Committing",
+			"  ─────────────────────────────────────",
+			"  s / S        Stage file / Stage all",
+			"  u / U        Unstage file / Unstage all",
+			"  c            Edit commit title (or create branch in §4)",
+			"  m            Edit commit description",
+			"  t            Edit tag",
+			"  C            Execute commit & tag",
+			"  P            Push to remote",
+			"",
+			"  Actions",
+			"  ─────────────────────────────────────",
+			"  Enter        Checkout branch / View commit / Open diff",
+			"  d            Side-by-side diff modal",
+			"  r            Restore file (or rename branch in §4)",
+			"  R            Restore section",
+			"  K            Checkout commit",
+			"  b            Branch manager",
+			"  l / L        Git Graph (current / all branches)",
+			"  v / V        Diff mode / Toggle diff mode",
+			"  M            Merge conflict resolver",
+			"  z            Stash menu",
+			"  F5 / Ctrl+r  Refresh",
+			"  q / Esc      Close",
+			"",
+		}
+		local help_buf = ui_mod.scratch_buffer(help_lines)
+		local help_float = ui_mod.float(help_buf, {
+			width = 50,
+			height = #help_lines,
+			title = " ❓ Help (Ctrl+?) ",
+			border = "rounded",
+			relative = "editor",
+			zindex = 250,
+		})
+		if help_float and help_float.win and vim.api.nvim_win_is_valid(help_float.win) then
+			-- Title highlight
+			vim.api.nvim_buf_add_highlight(help_buf, -1, "KRSGitSectionBranch", 1, 0, -1)
+			-- Section title highlights
+			for i, line in ipairs(help_lines) do
+				if line:match("^  [A-Z]") and not line:match("─") then
+					vim.api.nvim_buf_add_highlight(help_buf, -1, "KRSGitSectionActions", i - 1, 0, -1)
+				end
+				-- Highlight key portion (before first space-space after key)
+				local key_end = line:find("%s%s%s+")
+				if key_end and key_end > 2 then
+					vim.api.nvim_buf_add_highlight(help_buf, -1, "KRSGitKeyBadge", i - 1, 2, key_end - 1)
+				end
+			end
+			ui_mod.close_on_keys(help_buf, help_float.win, { "q", "<Esc>", "<CR>", "<Space>", "<C-?>", "?", "<C-S-/>", "<C-/>", "<C-_>" })
+		end
+	end
+
+	vim.keymap.set("n", "<C-?>", show_help_overlay, key_opts)
+	vim.keymap.set("n", "?", show_help_overlay, key_opts)
+	vim.keymap.set("n", "<C-S-/>", show_help_overlay, key_opts)
+	vim.keymap.set("n", "<C-/>", show_help_overlay, key_opts)
+	vim.keymap.set("n", "<C-_>", show_help_overlay, key_opts)
+
 	vim.keymap.set("n", "b", function()
 		modals.open_branch_modal(get_active_target().full_path)
 	end, key_opts)
@@ -1093,16 +1199,13 @@ function M.open_git_center()
 	end, key_opts)
 
 	vim.keymap.set("n", "l", function()
-		modals.open_commit_log_modal(get_active_target().full_path)
+		local gv = require("plugins.krs.git.git_center.graph_viewer")
+		gv.open(get_active_target().full_path)
 	end, key_opts)
 
 	vim.keymap.set("n", "L", function()
-		modals.open_commit_log_modal(get_active_target().full_path)
-	end, key_opts)
-
-	vim.keymap.set("n", "g", function()
 		local gv = require("plugins.krs.git.git_center.graph_viewer")
-		gv.open(get_active_target().full_path)
+		gv.open(get_active_target().full_path, "all")
 	end, key_opts)
 
 	local commit_fields = {
@@ -1132,6 +1235,68 @@ function M.open_git_center()
 			})
 		end, key_opts)
 	end
+
+	-- Stash operations
+	vim.keymap.set("n", "z", function()
+		local target_cwd = get_active_target().full_path
+		vim.ui.select(
+			{ "Save (stash push)", "Pop (stash pop)", "Apply (stash apply)", "Drop (stash drop)", "Cancel" },
+			{ prompt = "Stash Action:" },
+			function(choice)
+				if not choice or choice == "Cancel" then return end
+				if choice:match("^Save") then
+					require("plugins.krs.ui.input_modal").open({
+						label = "Stash Message (optional)",
+						default_value = "",
+						relative = "editor",
+						callback = function(ok_input, msg)
+							if not ok_input then return end
+							local args = { "stash", "push" }
+							if msg and msg ~= "" then
+								table.insert(args, "-m")
+								table.insert(args, msg)
+							end
+							git_run(args, function(ok_result, output)
+								if ok_result then
+									notify("✅ Changes stashed successfully!")
+								else
+									notify("❌ Stash failed: " .. output, vim.log.levels.ERROR)
+								end
+								refresh()
+							end, target_cwd)
+						end,
+					})
+				elseif choice:match("^Pop") then
+					git_run({ "stash", "pop" }, function(ok_result, output)
+						if ok_result then
+							notify("✅ Stash popped!")
+						else
+							notify("❌ Stash pop failed: " .. output, vim.log.levels.ERROR)
+						end
+						refresh()
+					end, target_cwd)
+				elseif choice:match("^Apply") then
+					git_run({ "stash", "apply" }, function(ok_result, output)
+						if ok_result then
+							notify("✅ Stash applied!")
+						else
+							notify("❌ Stash apply failed: " .. output, vim.log.levels.ERROR)
+						end
+						refresh()
+					end, target_cwd)
+				elseif choice:match("^Drop") then
+					git_run({ "stash", "drop" }, function(ok_result, output)
+						if ok_result then
+							notify("✅ Stash dropped!")
+						else
+							notify("❌ Stash drop failed: " .. output, vim.log.levels.ERROR)
+						end
+						refresh()
+					end, target_cwd)
+				end
+			end
+		)
+	end, key_opts)
 
 	vim.keymap.set("n", "s", function()
 		local item = current_item()

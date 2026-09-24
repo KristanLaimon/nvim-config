@@ -18,6 +18,7 @@ local queries = require("plugins.krs.git.git_center.queries")
 local z_index = require("krs.core.z_index")
 
 local M = {}
+local canvas_mode = false
 
 M.ns_graph = vim.api.nvim_create_namespace("KRSGitKrakenGraphSpans")
 
@@ -428,10 +429,17 @@ function M.open(target_cwd, initial_mode)
 		if is_closed or not (left_win and vim.api.nvim_win_is_valid(left_win)) then
 			return
 		end
-		vim.api.nvim_win_set_config(left_win, {
-			title = format_title(loading),
-			title_pos = "center",
-		})
+		if canvas_mode then
+			vim.api.nvim_win_set_config(left_win, {
+				title = " 📊 Git Graph — Canvas Mode (f: split, ?: help) ",
+				title_pos = "center",
+			})
+		else
+			vim.api.nvim_win_set_config(left_win, {
+				title = format_title(loading),
+				title_pos = "center",
+			})
+		end
 	end
 
 	local function close_viewer(keep_screen)
@@ -542,6 +550,9 @@ function M.open(target_cwd, initial_mode)
 
 	local function update_commit_details(target_filepath)
 		if is_closed or not (left_win and vim.api.nvim_win_is_valid(left_win)) then
+			return
+		end
+		if canvas_mode then
 			return
 		end
 		local row = vim.api.nvim_win_get_cursor(left_win)[1]
@@ -823,6 +834,40 @@ function M.open(target_cwd, initial_mode)
 		end)
 	end
 
+	-- Canvas Mode Toggle
+	local function toggle_canvas_mode()
+		canvas_mode = not canvas_mode
+		if canvas_mode then
+			-- Close right pane
+			if right_win and vim.api.nvim_win_is_valid(right_win) then
+				ui.close(right_win)
+				config.graph_right_win = nil
+			end
+			-- Resize left pane to full width
+			if left_win and vim.api.nvim_win_is_valid(left_win) then
+				local total_w = math.floor(vim.o.columns * config.settings.width_ratio)
+				local s_col = math.floor((vim.o.columns - total_w) / 2)
+				vim.api.nvim_win_set_config(left_win, {
+					width = total_w - 2,
+					col = s_col,
+				})
+				-- Update title
+				vim.api.nvim_win_set_config(left_win, {
+					title = " 📊 Git Graph — Canvas Mode (f: split, ?: help) ",
+				})
+				-- Enable mouse scrolling
+				vim.wo[left_win].scrolloff = 0
+				vim.wo[left_win].mousescroll = "ver:3,hor:0"
+			end
+		else
+			-- Re-open right pane and restore split
+			local cwd = active_cwd
+			local current_mode = mode
+			close_viewer(false)
+			M.open(cwd, current_mode)
+		end
+	end
+
 	-- Split resizing
 	local function resize_split(delta)
 		if is_closed or not (left_win and vim.api.nvim_win_is_valid(left_win)) then
@@ -955,6 +1000,7 @@ function M.open(target_cwd, initial_mode)
 		local help_lines = {
 			" 📊 GitKraken Commit Graph Shortcuts",
 			" ──────────────────────────────────────────────────────────",
+			"  [f]            Toggle Canvas Mode (fullscreen graph)",
 			"  [a]            Toggle Mode (🌿 Current Branch <-> 🌐 --all)",
 			"  [d / <C-d>]    Half-Page Down (Fetches on the fly)",
 			"  [u / <C-u>]    Half-Page Up",
@@ -1039,8 +1085,38 @@ function M.open(target_cwd, initial_mode)
 	-- Focus & Details navigation
 	vim.keymap.set({ "n", "v" }, "<Tab>", toggle_focus, opts)
 	vim.keymap.set({ "n", "v" }, "<Tab>", toggle_focus, right_opts)
-	vim.keymap.set("n", "<CR>", toggle_focus, opts)
+	vim.keymap.set("n", "<CR>", function()
+		if canvas_mode then
+			-- Show commit details in a floating popup
+			local row = vim.api.nvim_win_get_cursor(left_win)[1]
+			local hash = line_commits[row]
+			if not hash then
+				local commit = get_commit_at_row(row)
+				if commit then hash = commit.full_hash end
+			end
+			if hash then
+				local details = queries.git_lines({ "show", "--stat", "--format=Author: %an <%ae>%nDate:   %cr%n%n%s%n%n%b", hash }, active_cwd)
+				local detail_buf = ui.scratch_buffer(details)
+				local popup = ui.float(detail_buf, {
+					width = 0.6,
+					height = math.min(#details + 2, 30),
+					title = string.format(" Commit %s ", hash:sub(1, 7)),
+					border = "rounded",
+					relative = "editor",
+					zindex = graph_z + 10,
+				})
+				if popup and popup.win then
+					ui.close_on_keys(detail_buf, popup.win, { "q", "<Esc>", "<CR>" })
+				end
+			end
+			return
+		end
+		toggle_focus()
+	end, opts)
 	vim.keymap.set("n", "<CR>", handle_right_enter, right_opts)
+	
+	-- Canvas Mode
+	vim.keymap.set("n", "f", toggle_canvas_mode, opts)
 
 	-- Actions
 	vim.keymap.set("n", "y", yank_sha, opts)

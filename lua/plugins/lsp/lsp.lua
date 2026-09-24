@@ -423,7 +423,7 @@ return {
 	},
 	{
 		"saghen/blink.cmp",
-		event = { "BufReadPre", "BufReadPost", "BufNewFile", "InsertEnter" },
+		event = { "InsertEnter", "CmdlineEnter" },
 		dependencies = { "rafamadriz/friendly-snippets" },
 		-- Prebuilt fuzzy-match libraries are published for release tags. Tracking
 		-- main leaves Blink unable to determine which binary to download.
