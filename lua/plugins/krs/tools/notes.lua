@@ -207,4 +207,4 @@ return setmetatable({
 	config = function()
 		M.setup()
 	end,
-}, { __index = M })
+}, { __index = M, __newindex = M })

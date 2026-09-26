@@ -187,49 +187,35 @@ end
 --- Loads completion state from disk.
 --- @return table state { completed = boolean, timestamp = string|nil }
 function M.load_state()
-	local path = get_state_path()
-	local file = io.open(path, "r")
-	if not file then
-		return { completed = false }
-	end
-	local content = file:read("*a")
-	file:close()
-	if not content or content == "" then
-		return { completed = false }
-	end
-	local ok, decoded = pcall(vim.json.decode, content)
-	if ok and type(decoded) == "table" then
-		return decoded
-	end
-	return { completed = false }
+	return require("krs.core.store").load(get_state_path(), { completed = false })
 end
 
---- Saves completion state to disk.
+--- Saves completion state to disk, creating the data directory if necessary.
 --- @param completed boolean
+--- @return boolean ok
+--- @return string|nil err
 function M.save_state(completed)
-	local path = get_state_path()
-	local state = {
+	return require("krs.core.store").save(get_state_path(), {
 		completed = completed == true,
 		timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
 		version = "1.0",
-	}
-	local ok, json = pcall(vim.json.encode, state)
-	if ok and json then
-		local file = io.open(path, "w")
-		if file then
-			file:write(json)
-			file:close()
-		end
-	end
+	})
 end
 
 --- Resets completion state file to force a full setup re-validation.
+--- @return boolean ok
+--- @return string|nil err
 function M.reset_state()
 	local path = get_state_path()
-	pcall(os.remove, path)
+	local ok, err, code = os.remove(path)
+	if not ok and code ~= 2 then
+		vim.notify("Cannot reset setup state: " .. tostring(err), vim.log.levels.ERROR, { title = "KRS System Setup" })
+		return false, err
+	end
 	vim.notify("🔄 Setup state reset. Full system setup re-validation enabled.", vim.log.levels.INFO, {
 		title = "KRS System Setup",
 	})
+	return true
 end
 
 --- Renders a Unicode progress bar.
@@ -441,7 +427,7 @@ function M.run_setup_script(sudo_pass)
 	add_log("Starting system dependency setup via setup script...")
 
 	local script_path = vim.fn.stdpath("config") .. "/scripts/setup.sh"
-	local cmd = {}
+	local cmd
 
 	if vim.fn.has("win32") == 1 then
 		script_path = vim.fn.stdpath("config") .. "/scripts/setup.ps1"
@@ -697,7 +683,7 @@ end
 --- Performs automated incremental installation (Stage 1 Essentials + Stage 2 Heavy LSPs).
 --- Displays real-time progress toast bar & live modal UI feed.
 function M.install_all()
-	M.ensure_sudo_pass(function(sudo_pass)
+	M.ensure_sudo_pass(function()
 		M.open_ui()
 		add_log("Starting automated incremental system setup...")
 
@@ -736,7 +722,6 @@ function M.install_all()
 				pcall(vim.cmd, "MasonInstall " .. table.concat(missing_mason_names, " "))
 
 				-- Track progress by checking installed directories on disk periodically
-				local mason_share = vim.fn.stdpath("data") .. "/mason/packages"
 				local start_time = (vim.uv or vim.loop).now()
 				local max_wait_ms = 90000 -- 90 second maximum safety timeout
 				local timer = (vim.uv or vim.loop).new_timer()
@@ -807,7 +792,7 @@ function M.run_install_agy(sudo_pass)
 	M.open_ui()
 	add_log("Starting installation of Google Antigravity CLI (agy)...")
 
-	local cmd = {}
+	local cmd
 	if vim.fn.has("win32") == 1 then
 		cmd = {
 			"powershell.exe",
@@ -913,7 +898,7 @@ function M.run_install_claude(sudo_pass)
 	M.open_ui()
 	add_log("Starting installation of Claude Code CLI (claude)...")
 
-	local cmd = {}
+	local cmd
 	if vim.fn.has("win32") == 1 then
 		cmd = { "powershell.exe", "-ExecutionPolicy", "Bypass", "-Command", "irm https://claude.ai/install.ps1 | iex" }
 	else

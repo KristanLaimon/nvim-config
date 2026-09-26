@@ -7,6 +7,19 @@ local describe, it, expect = t.describe, t.it, t.expect
 local installer = require("krs.core.installer")
 
 describe("krs.core.installer", function()
+	local stdpath, data_dir
+	t.beforeEach(function()
+		stdpath = vim.fn.stdpath
+		data_dir = vim.fn.tempname()
+		vim.fn.stdpath = function(kind)
+			return kind == "data" and data_dir or stdpath(kind)
+		end
+	end)
+	t.afterEach(function()
+		vim.fn.stdpath = stdpath
+		vim.fn.delete(data_dir, "rf")
+	end)
+
 	it("includes Tree-sitter and Lua quality CLIs in the health check", function()
 		local health_tools = {}
 		for _, category in ipairs(installer.health_categories) do
@@ -36,13 +49,35 @@ describe("krs.core.installer", function()
 	end)
 
 	it("saves, loads, and resets completion state", function()
-		installer.save_state(true)
+		expect(installer.save_state(true)).toBe(true)
 		local state = installer.load_state()
 		expect(state.completed).toBe(true)
 
-		installer.reset_state()
+		expect(installer.reset_state()).toBe(true)
 		local reset_state = installer.load_state()
 		expect(reset_state.completed).toBe(false)
+	end)
+
+	it("reports reset failure and preserves state when the path cannot be removed", function()
+		local state_path = data_dir .. "/krs_setup_completed.json"
+		vim.fn.mkdir(state_path, "p")
+		vim.fn.writefile({ "keep" }, state_path .. "/child")
+		local notify = vim.notify
+		local level
+		vim.notify = function(_, severity)
+			level = severity
+		end
+		local ok, err = installer.reset_state()
+		vim.notify = notify
+		expect(ok).toBe(false)
+		expect(type(err)).toBe("string")
+		expect(level).toBe(vim.log.levels.ERROR)
+		expect(vim.fn.readfile(state_path .. "/child")).toEqual({ "keep" })
+	end)
+
+	it("treats an already absent state file as reset", function()
+		expect(installer.reset_state()).toBe(true)
+		expect(installer.load_state().completed).toBe(false)
 	end)
 
 	it("opens Live Setup Floating Modal UI cleanly", function()

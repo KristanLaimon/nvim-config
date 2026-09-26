@@ -296,7 +296,7 @@ function M.table(headers, rows)
 	-- Rows
 	for _, row in ipairs(rows) do
 		local row_parts = {}
-		for i, h in ipairs(headers) do
+		for i in ipairs(headers) do
 			local val = tostring(row[i] or "")
 			local w = col_widths[i] or #val
 			table.insert(row_parts, string.format("%-" .. w .. "s", val))
@@ -355,7 +355,7 @@ function M.confirm(label, default_bool)
 	return answer:lower():sub(1, 1) == "y"
 end
 
---- Runs an animated loading spinner frame while executing a task.
+--- Reports progress before and after executing a synchronous task.
 ---
 --- @param message string Status message displayed next to the spinner.
 --- @param work_fn function Function to execute during spinner run.
@@ -366,9 +366,6 @@ end
 --- @example
 --- local res = cli.spinner("Building project assets...", function() return 42 end)
 function M.spinner(message, work_fn)
-	local frames = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
-	local idx = 1
-
 	if vim and vim.notify then
 		vim.notify("⏳ " .. message, vim.log.levels.INFO, { title = "CLI Task" })
 	end
@@ -496,11 +493,22 @@ function M.menu(title, options, callback)
 			title = " 🦊 KRS Interactive Menu ",
 			title_pos = "center",
 		})
+		local function close_menu()
+			if vim.api.nvim_win_is_valid(win) then
+				pcall(vim.api.nvim_win_close, win, true)
+			end
+			-- Closing a float can fail during another window's event handler.
+			-- This unlisted buffer belongs only to this menu, so deleting it also
+			-- removes any window that still displays it.
+			if vim.api.nvim_buf_is_valid(buf) then
+				pcall(vim.api.nvim_buf_delete, buf, { force = true })
+			end
+		end
 
 		local function confirm_choice()
 			local idx = selected_idx
 			local item = items[idx]
-			pcall(vim.api.nvim_win_close, win, true)
+			close_menu()
 			if callback then
 				callback(item, idx)
 			end
@@ -563,13 +571,15 @@ function M.menu(title, options, callback)
 		-- Mouse support
 		vim.keymap.set("n", "<LeftMouse>", mouse_click, map_opts)
 
-		-- Cancel
-		vim.keymap.set("n", "q", function()
-			pcall(vim.api.nvim_win_close, win, true)
-		end, map_opts)
-		vim.keymap.set("n", "<Esc>", function()
-			pcall(vim.api.nvim_win_close, win, true)
-		end, map_opts)
+		-- Match selection's callback contract when the user dismisses the menu.
+		local function cancel()
+			close_menu()
+			if callback then
+				callback(nil, nil)
+			end
+		end
+		vim.keymap.set("n", "q", cancel, map_opts)
+		vim.keymap.set("n", "<Esc>", cancel, map_opts)
 
 		return
 	else
@@ -780,7 +790,7 @@ end
 --- Supports `--key=value`, `--flag` (`true`), `-f` (`true`), and raw positional strings.
 ---
 --- @param raw_args string[]|nil Array of raw argument strings. Defaults to `arg` or `{}`.
---- @param schema table|nil Optional schema definition for flag validation.
+--- @param _schema table|nil Reserved for compatibility.
 --- @return ParsedArgs parsed Parsed flags and positional arguments structure.
 ---
 --- @see [krsnvim-testing.lua](file:///c:/Users/Kristan/AppData/Local/nvim/docs/krsnvim-testing.lua)
@@ -790,9 +800,8 @@ end
 --- print(args.flags.env)     -- "production"
 --- print(args.flags.verbose) -- true
 --- print(args.positional[1]) -- "build"
-function M.parse_args(raw_args, schema)
+function M.parse_args(raw_args, _schema)
 	raw_args = raw_args or arg or {}
-	schema = schema or {}
 
 	local parsed = {
 		flags = {},

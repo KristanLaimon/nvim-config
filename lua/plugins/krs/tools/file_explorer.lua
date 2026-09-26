@@ -393,10 +393,10 @@ function M.open_desktop_explorer(opts, on_select_cb)
 								vim.fn.mkdir(full_path, "p")
 								vim.notify("📁 Folder created: " .. name, vim.log.levels.INFO)
 							else
-								local file = io.open(full_path, "w")
-								if file then
-									file:close()
+								if require("krs.core.new_file").create(full_path) then
 									vim.notify("📄 File created: " .. name, vim.log.levels.INFO)
+									vim.cmd("edit " .. vim.fn.fnameescape(full_path))
+									return
 								end
 							end
 							M.open_desktop_explorer({ path = curr_dir })

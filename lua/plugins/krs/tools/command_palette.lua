@@ -25,7 +25,7 @@ local M = {}
 -- CONFIGURATION
 -- ============================================================================
 
-local is_mobile_cp = false
+local is_mobile_cp
 local env_ok_cp, env_mod_cp = pcall(require, "krs.core.environment")
 if env_ok_cp then
 	local env = env_mod_cp.detect()
@@ -216,6 +216,7 @@ M.commands = {
 	-- ⚙️ Setup & Dependencies
 	-- --------------------------------------------------------------------------
 	{ name = "🛠️ Create New .NET Project (dotnet new template picker)", cmd = "DotnetNew", category = "C#" },
+	{ name = "Create C# Type (class, interface, record…)", cmd = "CsharpNewType", category = "C#" },
 	{ name = "📦 Open NuGet Package Manager (.csproj references)", cmd = "NugetManager", category = "C#" },
 	{
 		name = "📦 Install Dependencies & Toolchains (Per-Language Bundles)",
@@ -492,8 +493,6 @@ function M.execute_item(item)
 		item.fn()
 	end
 end
-
-local execute_item = M.execute_item
 
 --- Opens the palette picker.
 function M.open_palette()

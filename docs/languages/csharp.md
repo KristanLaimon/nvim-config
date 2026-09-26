@@ -23,10 +23,50 @@ KrsVim provides a full **C#**, **.NET**, and **Blazor** development environment,
 
 Accessible via **Command Palette** (`<C-S-p>` / `:CommandPalette`):
 
+* `:CsharpNewType` – Reopen the type template popup for the current empty `.cs` buffer.
 * `:DotnetNew` – Interactive `.NET` project creator (`dotnet new` template picker).
 * `:NugetManager` – Open NuGet package manager to search and add package references to `.csproj`.
 * `:FormatDocument` – Format active `.cs` file using CSharpier or LSP fallback.
 * `:LanguageManager` – Install or uninstall the C# / .NET language bundle.
+
+---
+
+## New C# files
+
+Creating a `.cs` file through Neo-tree, the desktop file explorer, or `:edit NewType.cs`
+opens a floating template menu. Opening an empty `.cs` file created by another tool
+also offers the menu once per buffer. Choose with `j`/`k` or the arrow keys and press Enter.
+Escape cancels; `:CsharpNewType` (also in the Command Palette) opens it again.
+
+Templates include class, interface, record, struct, record struct, enum, static class,
+abstract class, sealed class, delegate, and an empty file. Every generated type uses
+explicit `internal` access and takes its name from the filename. Records require
+C# 9+, and record structs require C# 10+.
+
+The nearest ancestor `.csproj` supplies `RootNamespace`, falling back to the project
+filename. Subfolders become namespace segments. For example, `Models/Customer.cs`
+in a project with `RootNamespace` set to `Acme.App` produces:
+
+```csharp
+namespace Acme.App.Models
+{
+    internal class Customer
+    {
+    }
+}
+```
+
+Templates use block namespaces for compatibility with older projects. Without a
+project, the type is created in the global namespace. Keywords are escaped with
+`@`; punctuation and non-ASCII characters in generated identifiers become `_`.
+Namespace detection reads a literal `RootNamespace` and expands
+`$(MSBuildProjectName)`; it does not evaluate imported properties, conditions, or
+`Directory.Build.props`. With multiple projects in one folder, the first discovered
+project is used. Adjust the generated namespace for those layouts.
+
+The template is inserted into the buffer; save it normally. Existing content and
+edits made while the menu is open are preserved. Creating a file with an existing
+name reports an error without overwriting it.
 
 ---
 

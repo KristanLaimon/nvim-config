@@ -139,21 +139,15 @@ end
 function M.has_project_config(buf, config_files)
 	buf = (buf and buf ~= 0) and buf or vim.api.nvim_get_current_buf()
 
-	if M.has_editorconfig(buf) then
+	if vim.b[buf].editorconfig ~= nil or vim.b[buf].editorconfig_applied then
 		return true
 	end
 
-	if config_files and #config_files > 0 then
-		local name = vim.api.nvim_buf_get_name(buf)
-		if name and name ~= "" then
-			local dir = vim.fs.dirname(name)
-			if dir and dir ~= "" then
-				local found = vim.fs.find(config_files, { upward = true, path = dir })
-				if found and #found > 0 then
-					return true
-				end
-			end
-		end
+	local name = vim.api.nvim_buf_get_name(buf)
+	if name ~= "" then
+		local markers = { ".editorconfig" }
+		vim.list_extend(markers, config_files or {})
+		return #vim.fs.find(markers, { upward = true, path = vim.fs.dirname(name) }) > 0
 	end
 
 	return false

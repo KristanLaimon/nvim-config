@@ -100,7 +100,10 @@ describe("plugins.krs.editor.caps_lock state management and notification trigger
 		end
 
 		vim.notify = function(msg, level, opts)
-			table.insert(notified_messages, { msg = msg, level = level, opts = opts })
+			-- Other specs can still have scheduled notifications in the event loop.
+			if opts and opts.title == caps_lock.settings.notification_title then
+				table.insert(notified_messages, { msg = msg, level = level, opts = opts })
+			end
 		end
 
 		open_buffer("neo-tree")
@@ -112,7 +115,9 @@ describe("plugins.krs.editor.caps_lock state management and notification trigger
 		caps_lock.set_caps_on_since(now - 3500)
 
 		caps_lock.check(true)
-		vim.wait(50)
+		vim.wait(1000, function()
+			return #notified_messages > 0
+		end)
 
 		local state = caps_lock.get_state()
 		expect(state.notified).toBe(true)

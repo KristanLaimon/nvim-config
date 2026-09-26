@@ -396,19 +396,9 @@ local function create_entry(parent_dir, kind)
 				vim.fn.mkdir(target, "p")
 				vim.notify("Created folder: " .. clean, vim.log.levels.INFO, { title = "Neo-tree" })
 			else
-				-- Support "sub/dir/file.lua" by creating the missing directories.
-				local target_parent = vim.fn.fnamemodify(target, ":h")
-				if vim.fn.isdirectory(target_parent) == 0 then
-					vim.fn.mkdir(target_parent, "p")
-				end
-
-				local file = io.open(target, "w")
-				if file then
-					file:close()
+				if require("krs.core.new_file").create(target) then
 					vim.cmd("edit " .. vim.fn.fnameescape(target))
 					vim.notify("Created file: " .. clean, vim.log.levels.INFO, { title = "Neo-tree" })
-				else
-					vim.notify("Failed to create file: " .. clean, vim.log.levels.ERROR, { title = "Neo-tree" })
 				end
 			end
 
@@ -662,7 +652,7 @@ return {
 						end
 					end,
 
-					delete = with_node(function(node, state)
+					delete = with_node(function(node)
 						local inputs = require("neo-tree.ui.inputs")
 						local path = node.path
 						local name = node.name
@@ -740,6 +730,12 @@ return {
 					},
 				},
 				event_handlers = {
+					{
+						event = "file_added",
+						handler = function(filename)
+							vim.api.nvim_exec_autocmds("User", { pattern = "KrsFileCreated", data = { path = filename } })
+						end,
+					},
 					{
 						event = "file_renamed",
 						handler = function(args)
