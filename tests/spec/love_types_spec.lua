@@ -33,4 +33,37 @@ describe("plugins.krs.tools.type_injector.love_types", function()
 		expect(err).toBe(nil)
 		expect(type(fn)).toBe("function")
 	end)
+
+	it("covers the released LÖVE 11.5 catalog with linked API docs", function()
+		local dir = type_injector.resolve_schema_dir("lua", "love")
+		local file = assert(io.open(dir .. "/love_types.lua", "r"))
+		local source = file:read("*a")
+		file:close()
+
+		local _, aliases = source:gsub("---@alias love%.", "")
+		local _, links = source:gsub("--- See: https://love2d%.org/wiki/", "")
+		local functions = 0
+		for line in source:gmatch("[^\n]+") do
+			if line:match("^%-%-%-@field ") and line:find("(fun(", 1, true) then
+				functions = functions + 1
+			end
+		end
+		expect(functions).toBe(965)
+		expect(aliases).toBe(59)
+		expect(links >= 1149).toBe(true)
+		for _, entry in ipairs({
+			"---@class love.Mesh",
+			"---@class love.SpriteBatch",
+			"---@class love.RevoluteJoint",
+			"---@class love.RecordingDevice",
+			"---@class love.window_setMode_flags",
+			"---@alias love.RenderTargetSetup",
+			"---@field getVersion ",
+			"---@field gamepadpressed? ",
+			"---@field newMesh ",
+			"---@field newQueueableSource ",
+		}) do
+			expect(source:find(entry, 1, true) ~= nil).toBe(true)
+		end
+	end)
 end)

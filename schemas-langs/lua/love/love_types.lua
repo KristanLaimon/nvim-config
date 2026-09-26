@@ -1,388 +1,5894 @@
 ---@meta
--- LÖVE 2D Game Engine Global Types Definition
--- Injected dynamically by KRS Type Injector
+-- LÖVE 11.5 API types. Generated from love2d-community/love-api (wiki-derived).
+-- Regenerate with: lua scripts/generate_love_types.lua /path/to/love-api
+-- Reference: https://love2d.org/wiki/love
 
----@class love.Object
----@field release fun(self: love.Object): boolean Destroys the object's Lua reference and frees C memory.
----@field type fun(self: love.Object): string Gets the type of the object as a string.
----@field typeOf fun(self: love.Object, name: string): boolean Checks whether an object is of a certain type.
----@field isDestroyed fun(self: love.Object): boolean Checks whether an object has been released.
+--- A Canvas or a table selecting its mipmap, layer, or cubemap face.
+--- See: https://love2d.org/wiki/love.graphics.setCanvas
+---@alias love.RenderTargetSetup love.Canvas|table
 
+--- Options and values documented for love.audio.setEffect.
+--- See: https://love2d.org/wiki/love.audio.setEffect
+---@class love.audio_setEffect_settings
+---@field type love.EffectType The type of effect to use.
+---@field volume number The volume of the effect.
+
+--- Options and values documented for Source:getEffect.
+--- See: https://love2d.org/wiki/Source:getEffect
+---@class love.Source_getEffect_filtersettingsResult
+---@field volume number The overall volume of the audio.
+---@field highgain number Volume of high-frequency audio.
+---@field lowgain number Volume of low-frequency audio.
+
+--- Options and values documented for Source:getFilter.
+--- See: https://love2d.org/wiki/Source:getFilter
+---@class love.Source_getFilter_settingsResult
+---@field type love.FilterType The type of filter to use.
+---@field volume number The overall volume of the audio.
+---@field highgain number Volume of high-frequency audio.
+---@field lowgain number Volume of low-frequency audio.
+
+--- Options and values documented for Source:setEffect.
+--- See: https://love2d.org/wiki/Source:setEffect
+---@class love.Source_setEffect_filtersettings
+---@field type love.FilterType The type of filter to use.
+---@field volume number The overall volume of the audio.
+---@field highgain number Volume of high-frequency audio.
+---@field lowgain number Volume of low-frequency audio.
+
+--- Options and values documented for Source:setFilter.
+--- See: https://love2d.org/wiki/Source:setFilter
+---@class love.Source_setFilter_settings
+---@field type love.FilterType The type of filter to use.
+---@field volume number The overall volume of the audio.
+---@field highgain number Volume of high-frequency audio.
+---@field lowgain number Volume of low-frequency audio.
+
+--- Options and values documented for love.filesystem.getInfo.
+--- See: https://love2d.org/wiki/love.filesystem.getInfo
+---@class love.filesystem_getInfo_infoResult
+---@field type love.FileType The type of the object at the path (file, directory, symlink, etc.)
+---@field size number The size in bytes of the file, or nil if it can't be determined.
+---@field modtime number The file's last modification time in seconds since the unix epoch, or nil if it can't be determined.
+
+--- Options and values documented for love.filesystem.getInfo.
+--- See: https://love2d.org/wiki/love.filesystem.getInfo
+---@class love.filesystem_getInfo_infoResult2
+---@field type love.FileType The type of the object at the path (file, directory, symlink, etc.)
+---@field size number The size in bytes of the file, or nil if it can't be determined.
+---@field modtime number The file's last modification time in seconds since the unix epoch, or nil if it can't be determined.
+
+--- Options and values documented for love.filesystem.getInfo.
+--- See: https://love2d.org/wiki/love.filesystem.getInfo
+---@class love.filesystem_getInfo_infoResult3
+---@field type love.FileType The type of the object at the path (file, directory, symlink, etc.)
+---@field size number The size in bytes of the file, or nil if it can't be determined.
+---@field modtime number The file's last modification time in seconds since the unix epoch, or nil if it can't be determined.
+
+--- Options and values documented for love.graphics.getStats.
+--- See: https://love2d.org/wiki/love.graphics.getStats
+---@class love.graphics_getStats_statsResult
+---@field drawcalls number The number of draw calls made so far during the current frame.
+---@field canvasswitches number The number of times the active Canvas has been switched so far during the current frame.
+---@field texturememory number The estimated total size in bytes of video memory used by all loaded Images, Canvases, and Fonts.
+---@field images number The number of Image objects currently loaded.
+---@field canvases number The number of Canvas objects currently loaded.
+---@field fonts number The number of Font objects currently loaded.
+---@field shaderswitches number The number of times the active Shader has been changed so far during the current frame.
+---@field drawcallsbatched number The number of draw calls that were saved by LÖVE's automatic batching, since the start of the frame.
+
+--- Options and values documented for love.graphics.getStats.
+--- See: https://love2d.org/wiki/love.graphics.getStats
+---@class love.graphics_getStats_statsResult2
+---@field drawcalls number The number of draw calls made so far during the current frame.
+---@field canvasswitches number The number of times the active Canvas has been switched so far during the current frame.
+---@field texturememory number The estimated total size in bytes of video memory used by all loaded Images, Canvases, and Fonts.
+---@field images number The number of Image objects currently loaded.
+---@field canvases number The number of Canvas objects currently loaded.
+---@field fonts number The number of Font objects currently loaded.
+---@field shaderswitches number The number of times the active Shader has been changed so far during the current frame.
+---@field drawcallsbatched number The number of draw calls that were saved by LÖVE's automatic batching, since the start of the frame.
+
+--- Options and values documented for love.graphics.newArrayImage.
+--- See: https://love2d.org/wiki/love.graphics.newArrayImage
+---@class love.graphics_newArrayImage_settings
+---@field mipmaps? boolean True to make the image use mipmaps, false to disable them.
+---@field linear? boolean True to treat the image's pixels as linear instead of sRGB, when gamma correct rendering is enabled.
+---@field dpiscale? number The DPI scale to use when drawing the array image and calling getWidth/getHeight.
+
+--- Options and values documented for love.graphics.newCanvas.
+--- See: https://love2d.org/wiki/love.graphics.newCanvas
+---@class love.graphics_newCanvas_settings
+---@field type? love.TextureType The type of Canvas to create.
+---@field format? love.PixelFormat The format of the Canvas.
+---@field readable boolean Whether the Canvas is readable (drawable and accessible in a Shader).
+---@field msaa? number The desired number of multisample antialiasing (MSAA) samples used when drawing to the Canvas.
+---@field dpiscale? number The DPI scale factor of the Canvas, used when drawing to the Canvas as well as when drawing the Canvas to the screen.
+---@field mipmaps? love.MipmapMode Whether the Canvas has mipmaps, and whether to automatically regenerate them if so.
+
+--- Options and values documented for love.graphics.newCanvas.
+--- See: https://love2d.org/wiki/love.graphics.newCanvas
+---@class love.graphics_newCanvas_settings2
+---@field type? love.TextureType The type of Canvas to create.
+---@field format? love.PixelFormat The format of the Canvas.
+---@field readable? boolean Whether the Canvas is readable (drawable and accessible in a Shader).
+---@field msaa? number The desired number of multisample antialiasing (MSAA) samples used when drawing to the Canvas.
+---@field dpiscale? number The DPI scale factor of the Canvas, used when drawing to the Canvas as well as when drawing the Canvas to the screen.
+---@field mipmaps? love.MipmapMode Whether the Canvas has mipmaps, and whether to automatically regenerate them if so.
+
+--- Options and values documented for love.graphics.newCubeImage.
+--- See: https://love2d.org/wiki/love.graphics.newCubeImage
+---@class love.graphics_newCubeImage_settings
+---@field mipmaps? boolean True to make the image use mipmaps, false to disable them.
+---@field linear? boolean True to treat the image's pixels as linear instead of sRGB, when gamma correct rendering is enabled.
+
+--- Options and values documented for love.graphics.newCubeImage.
+--- See: https://love2d.org/wiki/love.graphics.newCubeImage
+---@class love.graphics_newCubeImage_settings2
+---@field mipmaps? boolean True to make the image use mipmaps, false to disable them.
+---@field linear? boolean True to treat the image's pixels as linear instead of sRGB, when gamma correct rendering is enabled.
+
+--- Options and values documented for love.graphics.newImage.
+--- See: https://love2d.org/wiki/love.graphics.newImage
+---@class love.graphics_newImage_settings
+---@field dpiscale? number The DPI scale to use when drawing the image and calling getWidth/getHeight.
+---@field linear? boolean True to treat the image's pixels as linear instead of sRGB, when gamma correct rendering is enabled.
+---@field mipmaps? boolean If true, mipmaps for the image will be automatically generated (or taken from the images's file if possible, if the image originated from a CompressedImageData).
+
+--- Options and values documented for love.graphics.newImage.
+--- See: https://love2d.org/wiki/love.graphics.newImage
+---@class love.graphics_newImage_settings2
+---@field dpiscale? number The DPI scale to use when drawing the image and calling getWidth/getHeight.
+---@field linear? boolean True to treat the image's pixels as linear instead of sRGB, when gamma correct rendering is enabled.
+---@field mipmaps? boolean If true, mipmaps for the image will be automatically generated (or taken from the images's file if possible, if the image originated from a CompressedImageData).
+
+--- Options and values documented for love.graphics.newImage.
+--- See: https://love2d.org/wiki/love.graphics.newImage
+---@class love.graphics_newImage_settings3
+---@field dpiscale? number The DPI scale to use when drawing the image and calling getWidth/getHeight.
+---@field linear? boolean True to treat the image's pixels as linear instead of sRGB, when gamma correct rendering is enabled.
+---@field mipmaps? boolean If true, mipmaps for the image will be automatically generated (or taken from the images's file if possible, if the image originated from a CompressedImageData).
+
+--- Options and values documented for love.graphics.newImage.
+--- See: https://love2d.org/wiki/love.graphics.newImage
+---@class love.graphics_newImage_settings4
+---@field dpiscale? number The DPI scale to use when drawing the image and calling getWidth/getHeight.
+---@field linear? boolean True to treat the image's pixels as linear instead of sRGB, when gamma correct rendering is enabled.
+---@field mipmaps? boolean If true, mipmaps for the image will be automatically generated (or taken from the images's file if possible, if the image originated from a CompressedImageData).
+
+--- Options and values documented for love.graphics.newMesh.
+--- See: https://love2d.org/wiki/love.graphics.newMesh
+---@class love.graphics_newMesh_vertices
+---@field arg1 number The position of the vertex on the x-axis.
+---@field arg2 number The position of the vertex on the y-axis.
+---@field arg3? number The u texture coordinate of the vertex.
+---@field arg4? number The v texture coordinate of the vertex.
+---@field arg5? number The red component of the vertex color.
+---@field arg6? number The green component of the vertex color.
+---@field arg7? number The blue component of the vertex color.
+---@field arg8? number The alpha component of the vertex color.
+
+--- Options and values documented for love.graphics.newMesh.
+--- See: https://love2d.org/wiki/love.graphics.newMesh
+---@class love.graphics_newMesh_vertexformat
+---@field attribute table A table containing the attribute's name, it's data type, and the number of components in the attribute, in the form of {name, datatype, components}.
+
+--- Options and values documented for love.graphics.newMesh.
+--- See: https://love2d.org/wiki/love.graphics.newMesh
+---@class love.graphics_newMesh_vertices2
+---@field attributecomponent number The first component of the first vertex attribute in the vertex.
+
+--- Options and values documented for love.graphics.newMesh.
+--- See: https://love2d.org/wiki/love.graphics.newMesh
+---@class love.graphics_newMesh_vertexformat2
+---@field attribute table A table containing the attribute's name, it's data type, and the number of components in the attribute, in the form of {name, datatype, components}.
+
+--- Options and values documented for love.graphics.newText.
+--- See: https://love2d.org/wiki/love.graphics.newText
+---@class love.graphics_newText_coloredtext
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for love.graphics.newVideo.
+--- See: https://love2d.org/wiki/love.graphics.newVideo
+---@class love.graphics_newVideo_settings
+---@field audio? boolean Whether to try to load the video's audio into an audio Source.
+---@field dpiscale? number The DPI scale factor of the video.
+
+--- Options and values documented for love.graphics.newVolumeImage.
+--- See: https://love2d.org/wiki/love.graphics.newVolumeImage
+---@class love.graphics_newVolumeImage_settings
+---@field mipmaps? boolean True to make the image use mipmaps, false to disable them.
+---@field linear? boolean True to treat the image's pixels as linear instead of sRGB, when gamma correct rendering is enabled.
+
+--- Options and values documented for love.graphics.points.
+--- See: https://love2d.org/wiki/love.graphics.points
+---@class love.graphics_points_points
+---@field point table A table containing the position and color of the first point, in the form of {x, y, r, g, b, a}.
+
+--- Options and values documented for love.graphics.print.
+--- See: https://love2d.org/wiki/love.graphics.print
+---@class love.graphics_print_coloredtext
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for love.graphics.print.
+--- See: https://love2d.org/wiki/love.graphics.print
+---@class love.graphics_print_coloredtext2
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for love.graphics.print.
+--- See: https://love2d.org/wiki/love.graphics.print
+---@class love.graphics_print_coloredtext3
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for love.graphics.printf.
+--- See: https://love2d.org/wiki/love.graphics.printf
+---@class love.graphics_printf_coloredtext
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for love.graphics.printf.
+--- See: https://love2d.org/wiki/love.graphics.printf
+---@class love.graphics_printf_coloredtext2
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for love.graphics.printf.
+--- See: https://love2d.org/wiki/love.graphics.printf
+---@class love.graphics_printf_coloredtext3
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for love.graphics.printf.
+--- See: https://love2d.org/wiki/love.graphics.printf
+---@class love.graphics_printf_coloredtext4
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for love.graphics.setCanvas.
+--- See: https://love2d.org/wiki/love.graphics.setCanvas
+---@class love.graphics_setCanvas_setup
+---@field arg1 love.RenderTargetSetup The Canvas to render to.
+---@field arg2? love.RenderTargetSetup An additional Canvas to render to, if multiple simultaneous render targets are wanted.
+---@field stencil? boolean Whether an internally managed stencil buffer should be used, if the depthstencil field isn't set.
+---@field depth? boolean Whether an internally managed depth buffer should be used, if the depthstencil field isn't set.
+---@field depthstencil? love.RenderTargetSetup An optional custom depth/stencil formatted Canvas to use for the depth and/or stencil buffer.
+
+--- Options and values documented for Font:getWrap.
+--- See: https://love2d.org/wiki/Font:getWrap
+---@class love.Font_getWrap_coloredtext
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for Mesh:getVertexFormat.
+--- See: https://love2d.org/wiki/Mesh:getVertexFormat
+---@class love.Mesh_getVertexFormat_formatResult
+---@field attribute table A table containing the attribute's name, it's data type, and the number of components in the attribute, in the form of {name, datatype, components}.
+
+--- Options and values documented for Mesh:setVertex.
+--- See: https://love2d.org/wiki/Mesh:setVertex
+---@class love.Mesh_setVertex_vertex
+---@field attributecomponent number The first component of the first vertex attribute in the specified vertex.
+
+--- Options and values documented for Mesh:setVertex.
+--- See: https://love2d.org/wiki/Mesh:setVertex
+---@class love.Mesh_setVertex_vertex2
+---@field arg1 number The position of the vertex on the x-axis.
+---@field arg2 number The position of the vertex on the y-axis.
+---@field arg3 number The u texture coordinate.
+---@field arg4 number The v texture coordinate.
+---@field arg5? number The red color component.
+---@field arg6? number The green color component.
+---@field arg7? number The blue color component.
+---@field arg8? number The alpha color component.
+
+--- Options and values documented for Mesh:setVertices.
+--- See: https://love2d.org/wiki/Mesh:setVertices
+---@class love.Mesh_setVertices_vertices
+---@field attributecomponent number The first component of the first vertex attribute in the vertex.
+
+--- Options and values documented for Mesh:setVertices.
+--- See: https://love2d.org/wiki/Mesh:setVertices
+---@class love.Mesh_setVertices_vertices2
+---@field arg1 number The position of the vertex on the x-axis.
+---@field arg2 number The position of the vertex on the y-axis.
+---@field arg3 number The horizontal component of the texture coordinate.
+---@field arg4 number The vertical component of the texture coordinate.
+---@field arg5? number The red color component.
+---@field arg6? number The green color component.
+---@field arg7? number The blue color component.
+---@field arg8? number The alpha color component.
+
+--- Options and values documented for Text:add.
+--- See: https://love2d.org/wiki/Text:add
+---@class love.Text_add_coloredtext
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for Text:addf.
+--- See: https://love2d.org/wiki/Text:addf
+---@class love.Text_addf_coloredtext
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for Text:set.
+--- See: https://love2d.org/wiki/Text:set
+---@class love.Text_set_coloredtext
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for Text:setf.
+--- See: https://love2d.org/wiki/Text:setf
+---@class love.Text_setf_coloredtext
+---@field color1 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string1 string A string of text which has a color specified by the previous color.
+---@field color2 table A table containing red, green, blue, and optional alpha components to use as a color for the next string in the table, in the form of {red, green, blue, alpha}.
+---@field string2 string A string of text which has a color specified by the previous color.
+
+--- Options and values documented for love.window.getFullscreenModes.
+--- See: https://love2d.org/wiki/love.window.getFullscreenModes
+---@class love.window_getFullscreenModes_modesResult
+---@field width number Window fullscreen width.
+---@field height number Window fullscreen height.
+
+--- Options and values documented for love.window.getMode.
+--- See: https://love2d.org/wiki/love.window.getMode
+---@class love.window_getMode_flagsResult
+---@field fullscreen boolean Fullscreen (true), or windowed (false).
+---@field fullscreentype love.FullscreenType The type of fullscreen mode used.
+---@field vsync integer True if the graphics framerate is synchronized with the monitor's refresh rate, false otherwise.
+---@field msaa number The number of antialiasing samples used (0 if MSAA is disabled).
+---@field resizable boolean True if the window is resizable in windowed mode, false otherwise.
+---@field borderless boolean True if the window is borderless in windowed mode, false otherwise.
+---@field centered boolean True if the window is centered in windowed mode, false otherwise.
+---@field display number The index of the display the window is currently in, if multiple monitors are available.
+---@field minwidth number The minimum width of the window, if it's resizable.
+---@field minheight number The minimum height of the window, if it's resizable.
+---@field highdpi boolean True if high-dpi mode is allowed on Retina displays in OS X.
+---@field refreshrate number The refresh rate of the screen's current display mode, in Hz.
+---@field x number The x-coordinate of the window's position in its current display.
+---@field y number The y-coordinate of the window's position in its current display.
+---@field srgb boolean Removed in 0.10.0 (use love.graphics.isGammaCorrect instead).
+
+--- Options and values documented for love.window.setMode.
+--- See: https://love2d.org/wiki/love.window.setMode
+---@class love.window_setMode_flags
+---@field fullscreen? boolean Fullscreen (true), or windowed (false).
+---@field fullscreentype? love.FullscreenType The type of fullscreen to use.
+---@field vsync? integer True if LÖVE should wait for vsync, false otherwise.
+---@field msaa? number The number of antialiasing samples.
+---@field stencil? boolean Whether a stencil buffer should be allocated.
+---@field depth? number The number of bits in the depth buffer.
+---@field resizable? boolean True if the window should be resizable in windowed mode, false otherwise.
+---@field borderless? boolean True if the window should be borderless in windowed mode, false otherwise.
+---@field centered? boolean True if the window should be centered in windowed mode, false otherwise.
+---@field display? number The index of the display to show the window in, if multiple monitors are available.
+---@field minwidth? number The minimum width of the window, if it's resizable.
+---@field minheight? number The minimum height of the window, if it's resizable.
+---@field highdpi? boolean True if high-dpi mode should be used on Retina displays in macOS and iOS.
+---@field x? number The x-coordinate of the window's position in the specified display.
+---@field y? number The y-coordinate of the window's position in the specified display.
+---@field usedpiscale? boolean Disables automatic DPI scaling when false.
+---@field srgb? boolean Removed in 0.10.0 (set t.gammacorrect in conf.lua instead).
+
+--- Options and values documented for love.window.updateMode.
+--- See: https://love2d.org/wiki/love.window.updateMode
+---@class love.window_updateMode_settings
+---@field fullscreen boolean Fullscreen (true), or windowed (false).
+---@field fullscreentype love.FullscreenType The type of fullscreen to use.
+---@field vsync integer True if LÖVE should wait for vsync, false otherwise.
+---@field msaa number The number of antialiasing samples.
+---@field resizable boolean True if the window should be resizable in windowed mode, false otherwise.
+---@field borderless boolean True if the window should be borderless in windowed mode, false otherwise.
+---@field centered boolean True if the window should be centered in windowed mode, false otherwise.
+---@field display number The index of the display to show the window in, if multiple monitors are available.
+---@field minwidth number The minimum width of the window, if it's resizable.
+---@field minheight number The minimum height of the window, if it's resizable.
+---@field highdpi boolean True if high-dpi mode should be used on Retina displays in macOS and iOS.
+---@field x number The x-coordinate of the window's position in the specified display.
+---@field y number The y-coordinate of the window's position in the specified display.
+
+--- Options and values documented for love.conf.
+--- See: https://love2d.org/wiki/love.conf
+---@class love.conf_t
+---@field identity? string This flag determines the name of the save directory for your game.
+---@field appendidentity? boolean This flag determines if game directory should be searched first then save directory (true) or otherwise (false)
+---@field version? string t.version should be a string, representing the version of LÖVE for which your game was made.
+---@field console? boolean Determines whether a console should be opened alongside the game window (Windows only) or not.
+---@field accelerometerjoystick? boolean Sets whether the device accelerometer on iOS and Android should be exposed as a 3-axis Joystick.
+---@field externalstorage? boolean Sets whether files are saved in external storage (true) or internal storage (false) on Android.
+---@field gammacorrect? boolean Determines whether gamma-correct rendering is enabled, when the system supports it.
+---@field audio table Audio options.
+---@field window table It is possible to defer window creation until love.window.setMode is first called in your code.
+---@field modules table Module options.
+
+--- The different distance models.
+--- See: https://love2d.org/wiki/DistanceModel
+---@alias love.DistanceModel "none"|"inverse"|"inverseclamped"|"linear"|"linearclamped"|"exponent"|"exponentclamped"
+
+--- The different types of effects supported by love.audio.setEffect.
+--- See: https://love2d.org/wiki/EffectType
+---@alias love.EffectType "chorus"|"compressor"|"distortion"|"echo"|"equalizer"|"flanger"|"reverb"|"ringmodulator"
+
+--- The different types of waveforms that can be used with the '''ringmodulator''' EffectType.
+--- See: https://love2d.org/wiki/EffectWaveform
+---@alias love.EffectWaveform "sawtooth"|"sine"|"square"|"triangle"
+
+--- Types of filters for Sources.
+--- See: https://love2d.org/wiki/FilterType
+---@alias love.FilterType "lowpass"|"highpass"|"bandpass"
+
+--- Types of audio sources.
+--- See: https://love2d.org/wiki/SourceType
+---@alias love.SourceType "static"|"stream"|"queue"
+
+--- Units that represent time.
+--- See: https://love2d.org/wiki/TimeUnit
+---@alias love.TimeUnit "seconds"|"samples"
+
+--- Compressed data formats.
+--- See: https://love2d.org/wiki/CompressedDataFormat
+---@alias love.CompressedDataFormat "lz4"|"zlib"|"gzip"|"deflate"
+
+--- Return type of various data-returning functions.
+--- See: https://love2d.org/wiki/ContainerType
+---@alias love.ContainerType "data"|"string"
+
+--- Encoding format used to encode or decode data.
+--- See: https://love2d.org/wiki/EncodeFormat
+---@alias love.EncodeFormat "base64"|"hex"
+
+--- Hash algorithm of love.data.hash.
+--- See: https://love2d.org/wiki/HashFunction
+---@alias love.HashFunction "md5"|"sha1"|"sha224"|"sha256"|"sha384"|"sha512"
+
+--- Arguments to love.event.push() and the like.
+--- See: https://love2d.org/wiki/Event
+---@alias love.Event "focus"|"joystickpressed"|"joystickreleased"|"keypressed"|"keyreleased"|"mousepressed"|"mousereleased"|"quit"|"resize"|"visible"|"mousefocus"|"threaderror"|"joystickadded"|"joystickremoved"|"joystickaxis"|"joystickhat"|"gamepadpressed"|"gamepadreleased"|"gamepadaxis"|"textinput"|"mousemoved"|"lowmemory"|"textedited"|"wheelmoved"|"touchpressed"|"touchreleased"|"touchmoved"|"directorydropped"|"filedropped"|"jp"|"jr"|"kp"|"kr"|"mp"|"mr"|"q"|"f"
+
+--- Buffer modes for File objects.
+--- See: https://love2d.org/wiki/BufferMode
+---@alias love.BufferMode "none"|"line"|"full"
+
+--- How to decode a given FileData.
+--- See: https://love2d.org/wiki/FileDecoder
+---@alias love.FileDecoder "file"|"base64"
+
+--- The different modes you can open a File in.
+--- See: https://love2d.org/wiki/FileMode
+---@alias love.FileMode "r"|"w"|"a"|"c"
+
+--- The type of a file.
+--- See: https://love2d.org/wiki/FileType
+---@alias love.FileType "file"|"directory"|"symlink"|"other"
+
+--- True Type hinting mode.
+--- See: https://love2d.org/wiki/HintingMode
+---@alias love.HintingMode "normal"|"light"|"mono"|"none"
+
+--- Text alignment.
+--- See: https://love2d.org/wiki/AlignMode
+---@alias love.AlignMode "center"|"left"|"right"|"justify"
+
+--- Different types of arcs that can be drawn.
+--- See: https://love2d.org/wiki/ArcType
+---@alias love.ArcType "pie"|"open"|"closed"
+
+--- Types of particle area spread distribution.
+--- See: https://love2d.org/wiki/AreaSpreadDistribution
+---@alias love.AreaSpreadDistribution "uniform"|"normal"|"ellipse"|"borderellipse"|"borderrectangle"|"none"
+
+--- Different ways alpha affects color blending.
+--- See: https://love2d.org/wiki/BlendAlphaMode
+---@alias love.BlendAlphaMode "alphamultiply"|"premultiplied"
+
+--- Different ways to do color blending.
+--- See: https://love2d.org/wiki/BlendMode
+---@alias love.BlendMode "alpha"|"replace"|"screen"|"add"|"subtract"|"multiply"|"lighten"|"darken"|"additive"|"subtractive"|"multiplicative"|"premultiplied"
+
+--- Different types of per-pixel stencil test and depth test comparisons.
+--- See: https://love2d.org/wiki/CompareMode
+---@alias love.CompareMode "equal"|"notequal"|"less"|"lequal"|"gequal"|"greater"|"never"|"always"
+
+--- How Mesh geometry is culled when rendering.
+--- See: https://love2d.org/wiki/CullMode
+---@alias love.CullMode "back"|"front"|"none"
+
+--- Controls whether shapes are drawn as an outline, or filled.
+--- See: https://love2d.org/wiki/DrawMode
+---@alias love.DrawMode "fill"|"line"
+
+--- How the image is filtered when scaling.
+--- See: https://love2d.org/wiki/FilterMode
+---@alias love.FilterMode "linear"|"nearest"
+
+--- Graphics features that can be checked for with love.graphics.getSupported.
+--- See: https://love2d.org/wiki/GraphicsFeature
+---@alias love.GraphicsFeature "clampzero"|"lighten"|"multicanvasformats"|"glsl3"|"instancing"|"fullnpot"|"pixelshaderhighp"|"shaderderivatives"
+
+--- Types of system-dependent graphics limits checked for using love.graphics.getSystemLimits.
+--- See: https://love2d.org/wiki/GraphicsLimit
+---@alias love.GraphicsLimit "pointsize"|"texturesize"|"multicanvas"|"canvasmsaa"|"texturelayers"|"volumetexturesize"|"cubetexturesize"|"anisotropy"
+
+--- Vertex map datatype for Data variant of Mesh:setVertexMap.
+--- See: https://love2d.org/wiki/IndexDataType
+---@alias love.IndexDataType "uint16"|"uint32"
+
+--- Line join style.
+--- See: https://love2d.org/wiki/LineJoin
+---@alias love.LineJoin "miter"|"none"|"bevel"
+
+--- The styles in which lines are drawn.
+--- See: https://love2d.org/wiki/LineStyle
+---@alias love.LineStyle "rough"|"smooth"
+
+--- How a Mesh's vertices are used when drawing.
+--- See: https://love2d.org/wiki/MeshDrawMode
+---@alias love.MeshDrawMode "fan"|"strip"|"triangles"|"points"
+
+--- Controls whether a Canvas has mipmaps, and its behaviour when it does.
+--- See: https://love2d.org/wiki/MipmapMode
+---@alias love.MipmapMode "none"|"auto"|"manual"
+
+--- How newly created particles are added to the ParticleSystem.
+--- See: https://love2d.org/wiki/ParticleInsertMode
+---@alias love.ParticleInsertMode "top"|"bottom"|"random"
+
+--- Usage hints for SpriteBatches and Meshes to optimize data storage and access.
+--- See: https://love2d.org/wiki/SpriteBatchUsage
+---@alias love.SpriteBatchUsage "dynamic"|"static"|"stream"
+
+--- Graphics state stack types used with love.graphics.push.
+--- See: https://love2d.org/wiki/StackType
+---@alias love.StackType "transform"|"all"
+
+--- How a stencil function modifies the stencil values of pixels it touches.
+--- See: https://love2d.org/wiki/StencilAction
+---@alias love.StencilAction "replace"|"increment"|"decrement"|"incrementwrap"|"decrementwrap"|"invert"
+
+--- Types of textures (2D, cubemap, etc.)
+--- See: https://love2d.org/wiki/TextureType
+---@alias love.TextureType "2d"|"array"|"cube"|"volume"
+
+--- The frequency at which a vertex shader fetches the vertex attribute's data from the Mesh when it's drawn.
+--- See: https://love2d.org/wiki/VertexAttributeStep
+---@alias love.VertexAttributeStep "pervertex"|"perinstance"
+
+--- How Mesh geometry vertices are ordered.
+--- See: https://love2d.org/wiki/VertexWinding
+---@alias love.VertexWinding "cw"|"ccw"
+
+--- How the image wraps inside a Quad with a larger quad size than image size.
+--- See: https://love2d.org/wiki/WrapMode
+---@alias love.WrapMode "clamp"|"repeat"|"mirroredrepeat"|"clampzero"
+
+--- Compressed image data formats.
+--- See: https://love2d.org/wiki/CompressedImageFormat
+---@alias love.CompressedImageFormat "DXT1"|"DXT3"|"DXT5"|"BC4"|"BC4s"|"BC5"|"BC5s"|"BC6h"|"BC6hs"|"BC7"|"ETC1"|"ETC2rgb"|"ETC2rgba"|"ETC2rgba1"|"EACr"|"EACrs"|"EACrg"|"EACrgs"|"PVR1rgb2"|"PVR1rgb4"|"PVR1rgba2"|"PVR1rgba4"|"ASTC4x4"|"ASTC5x4"|"ASTC5x5"|"ASTC6x5"|"ASTC6x6"|"ASTC8x5"|"ASTC8x6"|"ASTC8x8"|"ASTC10x5"|"ASTC10x6"|"ASTC10x8"|"ASTC10x10"|"ASTC12x10"|"ASTC12x12"
+
+--- Encoded image formats.
+--- See: https://love2d.org/wiki/ImageFormat
+---@alias love.ImageFormat "tga"|"png"|"jpg"|"bmp"
+
+--- Pixel formats for Textures, ImageData, and CompressedImageData.
+--- See: https://love2d.org/wiki/PixelFormat
+---@alias love.PixelFormat "unknown"|"normal"|"hdr"|"r8"|"rg8"|"rgba8"|"srgba8"|"r16"|"rg16"|"rgba16"|"r16f"|"rg16f"|"rgba16f"|"r32f"|"rg32f"|"rgba32f"|"la8"|"rgba4"|"rgb5a1"|"rgb565"|"rgb10a2"|"rg11b10f"|"stencil8"|"depth16"|"depth24"|"depth32f"|"depth24stencil8"|"depth32fstencil8"|"DXT1"|"DXT3"|"DXT5"|"BC4"|"BC4s"|"BC5"|"BC5s"|"BC6h"|"BC6hs"|"BC7"|"ETC1"|"ETC2rgb"|"ETC2rgba"|"ETC2rgba1"|"EACr"|"EACrs"|"EACrg"|"EACrgs"|"PVR1rgb2"|"PVR1rgb4"|"PVR1rgba2"|"PVR1rgba4"|"ASTC4x4"|"ASTC5x4"|"ASTC5x5"|"ASTC6x5"|"ASTC6x6"|"ASTC8x5"|"ASTC8x6"|"ASTC8x8"|"ASTC10x5"|"ASTC10x6"|"ASTC10x8"|"ASTC10x10"|"ASTC12x10"|"ASTC12x12"
+
+--- Virtual gamepad axes.
+--- See: https://love2d.org/wiki/GamepadAxis
+---@alias love.GamepadAxis "leftx"|"lefty"|"rightx"|"righty"|"triggerleft"|"triggerright"
+
+--- Virtual gamepad buttons.
+--- See: https://love2d.org/wiki/GamepadButton
+---@alias love.GamepadButton "a"|"b"|"x"|"y"|"back"|"guide"|"start"|"leftstick"|"rightstick"|"leftshoulder"|"rightshoulder"|"dpup"|"dpdown"|"dpleft"|"dpright"
+
+--- Joystick hat positions.
+--- See: https://love2d.org/wiki/JoystickHat
+---@alias love.JoystickHat "c"|"d"|"l"|"ld"|"lu"|"r"|"rd"|"ru"|"u"
+
+--- Types of Joystick inputs.
+--- See: https://love2d.org/wiki/JoystickInputType
+---@alias love.JoystickInputType "axis"|"button"|"hat"
+
+--- All the keys you can press.
+--- See: https://love2d.org/wiki/KeyConstant
+---@alias love.KeyConstant "a"|"b"|"c"|"d"|"e"|"f"|"g"|"h"|"i"|"j"|"k"|"l"|"m"|"n"|"o"|"p"|"q"|"r"|"s"|"t"|"u"|"v"|"w"|"x"|"y"|"z"|"0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"space"|"!"|"\""|"#"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|"-"|"."|"/"|":"|";"|"<"|"="|">"|"?"|"@"|"["|"\\"|"]"|"^"|"_"|"`"|"kp0"|"kp1"|"kp2"|"kp3"|"kp4"|"kp5"|"kp6"|"kp7"|"kp8"|"kp9"|"kp."|"kp/"|"kp*"|"kp-"|"kp+"|"kpenter"|"kp="|"up"|"down"|"right"|"left"|"home"|"end"|"pageup"|"pagedown"|"insert"|"backspace"|"tab"|"clear"|"return"|"delete"|"f1"|"f2"|"f3"|"f4"|"f5"|"f6"|"f7"|"f8"|"f9"|"f10"|"f11"|"f12"|"f13"|"f14"|"f15"|"numlock"|"capslock"|"scrollock"|"rshift"|"lshift"|"rctrl"|"lctrl"|"ralt"|"lalt"|"rmeta"|"lmeta"|"lsuper"|"rsuper"|"mode"|"compose"|"pause"|"escape"|"help"|"print"|"sysreq"|"break"|"menu"|"power"|"euro"|"undo"|"www"|"mail"|"calculator"|"appsearch"|"apphome"|"appback"|"appforward"|"apprefresh"|"appbookmarks"
+
+--- Keyboard scancodes.
+--- See: https://love2d.org/wiki/Scancode
+---@alias love.Scancode "a"|"b"|"c"|"d"|"e"|"f"|"g"|"h"|"i"|"j"|"k"|"l"|"m"|"n"|"o"|"p"|"q"|"r"|"s"|"t"|"u"|"v"|"w"|"x"|"y"|"z"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"0"|"return"|"escape"|"backspace"|"tab"|"space"|"-"|"="|"["|"]"|"\\"|"nonus#"|";"|"'"|"`"|","|"."|"/"|"capslock"|"f1"|"f2"|"f3"|"f4"|"f5"|"f6"|"f7"|"f8"|"f9"|"f10"|"f11"|"f12"|"f13"|"f14"|"f15"|"f16"|"f17"|"f18"|"f19"|"f20"|"f21"|"f22"|"f23"|"f24"|"lctrl"|"lshift"|"lalt"|"lgui"|"rctrl"|"rshift"|"ralt"|"rgui"|"printscreen"|"scrolllock"|"pause"|"insert"|"home"|"numlock"|"pageup"|"delete"|"end"|"pagedown"|"right"|"left"|"down"|"up"|"nonusbackslash"|"application"|"execute"|"help"|"menu"|"select"|"stop"|"again"|"undo"|"cut"|"copy"|"paste"|"find"|"kp/"|"kp*"|"kp-"|"kp+"|"kp="|"kpenter"|"kp1"|"kp2"|"kp3"|"kp4"|"kp5"|"kp6"|"kp7"|"kp8"|"kp9"|"kp0"|"kp."|"international1"|"international2"|"international3"|"international4"|"international5"|"international6"|"international7"|"international8"|"international9"|"lang1"|"lang2"|"lang3"|"lang4"|"lang5"|"mute"|"volumeup"|"volumedown"|"audionext"|"audioprev"|"audiostop"|"audioplay"|"audiomute"|"mediaselect"|"www"|"mail"|"calculator"|"computer"|"acsearch"|"achome"|"acback"|"acforward"|"acstop"|"acrefresh"|"acbookmarks"|"power"|"brightnessdown"|"brightnessup"|"displayswitch"|"kbdillumtoggle"|"kbdillumdown"|"kbdillumup"|"eject"|"sleep"|"alterase"|"sysreq"|"cancel"|"clear"|"prior"|"return2"|"separator"|"out"|"oper"|"clearagain"|"crsel"|"exsel"|"kp00"|"kp000"|"thsousandsseparator"|"decimalseparator"|"currencyunit"|"currencysubunit"|"app1"|"app2"|"unknown"
+
+--- The layout of matrix elements (row-major or column-major).
+--- See: https://love2d.org/wiki/MatrixLayout
+---@alias love.MatrixLayout "row"|"column"
+
+--- Types of hardware cursors.
+--- See: https://love2d.org/wiki/CursorType
+---@alias love.CursorType "image"|"arrow"|"ibeam"|"wait"|"waitarrow"|"crosshair"|"sizenwse"|"sizenesw"|"sizewe"|"sizens"|"sizeall"|"no"|"hand"
+
+--- The types of a Body.
+--- See: https://love2d.org/wiki/BodyType
+---@alias love.BodyType "static"|"dynamic"|"kinematic"
+
+--- Different types of joints.
+--- See: https://love2d.org/wiki/JointType
+---@alias love.JointType "distance"|"friction"|"gear"|"mouse"|"prismatic"|"pulley"|"revolute"|"rope"|"weld"
+
+--- The different types of Shapes, as returned by Shape:getType.
+--- See: https://love2d.org/wiki/ShapeType
+---@alias love.ShapeType "circle"|"polygon"|"edge"|"chain"
+
+--- The basic state of the system's power supply.
+--- See: https://love2d.org/wiki/PowerState
+---@alias love.PowerState "unknown"|"battery"|"nobattery"|"charging"|"charged"
+
+--- Types of device display orientation.
+--- See: https://love2d.org/wiki/DisplayOrientation
+---@alias love.DisplayOrientation "unknown"|"landscape"|"landscapeflipped"|"portrait"|"portraitflipped"
+
+--- Types of fullscreen modes.
+--- See: https://love2d.org/wiki/FullscreenType
+---@alias love.FullscreenType "desktop"|"exclusive"|"normal"
+
+--- Types of message box dialogs.
+--- See: https://love2d.org/wiki/MessageBoxType
+---@alias love.MessageBoxType "info"|"warning"|"error"
+
+--- A Bézier curve object that can evaluate and render Bézier curves of arbitrary degree.
+--- See: https://love2d.org/wiki/BezierCurve
+---@class love.BezierCurve : love.Object
+--- Evaluate Bézier curve at parameter t.
+--- Parameter `t` (number): Where to evaluate the curve.
+--- Returns `x` (number): x coordinate of the curve at parameter t.
+--- Returns `y` (number): y coordinate of the curve at parameter t.
+--- See: https://love2d.org/wiki/BezierCurve:evaluate
+---@field evaluate (fun(self: love.BezierCurve, t: number): number, number) Evaluate Bézier curve at parameter t.
+--- Get coordinates of the i-th control point.
+--- Parameter `i` (number): Index of the control point.
+--- Returns `x` (number): Position of the control point along the x axis.
+--- Returns `y` (number): Position of the control point along the y axis.
+--- See: https://love2d.org/wiki/BezierCurve:getControlPoint
+---@field getControlPoint (fun(self: love.BezierCurve, i: number): number, number) Get coordinates of the i-th control point.
+--- Get the number of control points in the Bézier curve.
+--- Returns `count` (number): The number of control points.
+--- See: https://love2d.org/wiki/BezierCurve:getControlPointCount
+---@field getControlPointCount (fun(self: love.BezierCurve): number) Get the number of control points in the Bézier curve.
+--- Get degree of the Bézier curve.
+--- Returns `degree` (number): Degree of the Bézier curve.
+--- See: https://love2d.org/wiki/BezierCurve:getDegree
+---@field getDegree (fun(self: love.BezierCurve): number) Get degree of the Bézier curve.
+--- Get the derivative of the Bézier curve.
+--- Returns `derivative` (love.BezierCurve): The derivative curve.
+--- See: https://love2d.org/wiki/BezierCurve:getDerivative
+---@field getDerivative (fun(self: love.BezierCurve): love.BezierCurve) Get the derivative of the Bézier curve.
+--- Gets a BezierCurve that corresponds to the specified segment of this BezierCurve.
+--- Parameter `startpoint` (number): The starting point along the curve.
+--- Parameter `endpoint` (number): The end of the segment.
+--- Returns `curve` (love.BezierCurve): A BezierCurve that corresponds to the specified segment.
+--- See: https://love2d.org/wiki/BezierCurve:getSegment
+---@field getSegment (fun(self: love.BezierCurve, startpoint: number, endpoint: number): love.BezierCurve) Gets a BezierCurve that corresponds to the specified segment of this BezierCurve.
+--- Insert control point as the new i-th control point.
+--- Parameter `x` (number): Position of the control point along the x axis.
+--- Parameter `y` (number): Position of the control point along the y axis.
+--- Parameter `i` (number): Index of the control point. Default: `-1`.
+--- See: https://love2d.org/wiki/BezierCurve:insertControlPoint
+---@field insertControlPoint (fun(self: love.BezierCurve, x: number, y: number, i?: number)) Insert control point as the new i-th control point.
+--- Removes the specified control point.
+--- Parameter `index` (number): The index of the control point to remove.
+--- See: https://love2d.org/wiki/BezierCurve:removeControlPoint
+---@field removeControlPoint (fun(self: love.BezierCurve, index: number)) Removes the specified control point.
+--- Get a list of coordinates to be used with love.graphics.line.
+--- Parameter `depth` (number): Number of recursive subdivision steps. Default: `5`.
+--- Returns `coordinates` (table): List of x,y-coordinate pairs of points on the curve.
+--- See: https://love2d.org/wiki/BezierCurve:render
+---@field render (fun(self: love.BezierCurve, depth?: number): table) Get a list of coordinates to be used with love.graphics.line.
+--- Get a list of coordinates on a specific part of the curve, to be used with love.graphics.line.
+--- Parameter `startpoint` (number): The starting point along the curve.
+--- Parameter `endpoint` (number): The end of the segment to render.
+--- Parameter `depth` (number): Number of recursive subdivision steps. Default: `5`.
+--- Returns `coordinates` (table): List of x,y-coordinate pairs of points on the specified part of the curve.
+--- See: https://love2d.org/wiki/BezierCurve:renderSegment
+---@field renderSegment (fun(self: love.BezierCurve, startpoint: number, endpoint: number, depth?: number): table) Get a list of coordinates on a specific part of the curve, to be used with love.graphics.line.
+--- Rotate the Bézier curve by an angle.
+--- Parameter `angle` (number): Rotation angle in radians.
+--- Parameter `ox` (number): X coordinate of the rotation center. Default: `0`.
+--- Parameter `oy` (number): Y coordinate of the rotation center. Default: `0`.
+--- See: https://love2d.org/wiki/BezierCurve:rotate
+---@field rotate (fun(self: love.BezierCurve, angle: number, ox?: number, oy?: number)) Rotate the Bézier curve by an angle.
+--- Scale the Bézier curve by a factor.
+--- Parameter `s` (number): Scale factor.
+--- Parameter `ox` (number): X coordinate of the scaling center. Default: `0`.
+--- Parameter `oy` (number): Y coordinate of the scaling center. Default: `0`.
+--- See: https://love2d.org/wiki/BezierCurve:scale
+---@field scale (fun(self: love.BezierCurve, s: number, ox?: number, oy?: number)) Scale the Bézier curve by a factor.
+--- Set coordinates of the i-th control point.
+--- Parameter `i` (number): Index of the control point.
+--- Parameter `x` (number): Position of the control point along the x axis.
+--- Parameter `y` (number): Position of the control point along the y axis.
+--- See: https://love2d.org/wiki/BezierCurve:setControlPoint
+---@field setControlPoint (fun(self: love.BezierCurve, i: number, x: number, y: number)) Set coordinates of the i-th control point.
+--- Move the Bézier curve by an offset.
+--- Parameter `dx` (number): Offset along the x axis.
+--- Parameter `dy` (number): Offset along the y axis.
+--- See: https://love2d.org/wiki/BezierCurve:translate
+---@field translate (fun(self: love.BezierCurve, dx: number, dy: number)) Move the Bézier curve by an offset.
+
+--- Bodies are objects with velocity and position.
+--- See: https://love2d.org/wiki/Body
+---@class love.Body : love.Object
+--- Applies an angular impulse to a body.
+--- Parameter `impulse` (number): The impulse in kilogram-square meter per second.
+--- See: https://love2d.org/wiki/Body:applyAngularImpulse
+---@field applyAngularImpulse (fun(self: love.Body, impulse: number)) Applies an angular impulse to a body.
+--- Apply force to a Body.
+--- Parameter `fx` (number): The x component of force to apply to the center of mass.
+--- Parameter `fy` (number): The y component of force to apply to the center of mass.
+--- See: https://love2d.org/wiki/Body:applyForce
+---@field applyForce (fun(self: love.Body, fx: number, fy: number))|(fun(self: love.Body, fx: number, fy: number, x: number, y: number)) Apply force to a Body.
+--- Applies an impulse to a body.
+--- Parameter `ix` (number): The x component of the impulse applied to the center of mass.
+--- Parameter `iy` (number): The y component of the impulse applied to the center of mass.
+--- See: https://love2d.org/wiki/Body:applyLinearImpulse
+---@field applyLinearImpulse (fun(self: love.Body, ix: number, iy: number))|(fun(self: love.Body, ix: number, iy: number, x: number, y: number)) Applies an impulse to a body.
+--- Apply torque to a body.
+--- Parameter `torque` (number): The torque to apply.
+--- See: https://love2d.org/wiki/Body:applyTorque
+---@field applyTorque (fun(self: love.Body, torque: number)) Apply torque to a body.
+--- Explicitly destroys the Body and all fixtures and joints attached to it.
+--- See: https://love2d.org/wiki/Body:destroy
+---@field destroy (fun(self: love.Body)) Explicitly destroys the Body and all fixtures and joints attached to it.
+--- Get the angle of the body.
+--- Returns `angle` (number): The angle in radians.
+--- See: https://love2d.org/wiki/Body:getAngle
+---@field getAngle (fun(self: love.Body): number) Get the angle of the body.
+--- Gets the Angular damping of the Body The angular damping is the ''rate of decrease of the angular velocity over time'': A spinning body with no damping and no external forces will continue spinning indefinitely.
+--- Returns `damping` (number): The value of the angular damping.
+--- See: https://love2d.org/wiki/Body:getAngularDamping
+---@field getAngularDamping (fun(self: love.Body): number) Gets the Angular damping of the Body The angular damping is the ''rate of decrease of the angular velocity over time'': A spinning body with no damping and no external forces will continue spinning indefinitely.
+--- Get the angular velocity of the Body.
+--- Returns `w` (number): The angular velocity in radians/second.
+--- See: https://love2d.org/wiki/Body:getAngularVelocity
+---@field getAngularVelocity (fun(self: love.Body): number) Get the angular velocity of the Body.
+--- Gets a list of all Contacts attached to the Body.
+--- Returns `contacts` (table): A list with all contacts associated with the Body.
+--- See: https://love2d.org/wiki/Body:getContacts
+---@field getContacts (fun(self: love.Body): table) Gets a list of all Contacts attached to the Body.
+--- Returns a table with all fixtures.
+--- Returns `fixtures` (table): A sequence with all fixtures.
+--- See: https://love2d.org/wiki/Body:getFixtures
+---@field getFixtures (fun(self: love.Body): table) Returns a table with all fixtures.
+--- Returns the gravity scale factor.
+--- Returns `scale` (number): The gravity scale factor.
+--- See: https://love2d.org/wiki/Body:getGravityScale
+---@field getGravityScale (fun(self: love.Body): number) Returns the gravity scale factor.
+--- Gets the rotational inertia of the body.
+--- Returns `inertia` (number): The rotational inertial of the body.
+--- See: https://love2d.org/wiki/Body:getInertia
+---@field getInertia (fun(self: love.Body): number) Gets the rotational inertia of the body.
+--- Returns a table containing the Joints attached to this Body.
+--- Returns `joints` (table): A sequence with the Joints attached to the Body.
+--- See: https://love2d.org/wiki/Body:getJoints
+---@field getJoints (fun(self: love.Body): table) Returns a table containing the Joints attached to this Body.
+--- Gets the linear damping of the Body.
+--- Returns `damping` (number): The value of the linear damping.
+--- See: https://love2d.org/wiki/Body:getLinearDamping
+---@field getLinearDamping (fun(self: love.Body): number) Gets the linear damping of the Body.
+--- Gets the linear velocity of the Body from its center of mass.
+--- Returns `x` (number): The x-component of the velocity vector
+--- Returns `y` (number): The y-component of the velocity vector
+--- See: https://love2d.org/wiki/Body:getLinearVelocity
+---@field getLinearVelocity (fun(self: love.Body): number, number) Gets the linear velocity of the Body from its center of mass.
+--- Get the linear velocity of a point on the body.
+--- Parameter `x` (number): The x position to measure velocity.
+--- Parameter `y` (number): The y position to measure velocity.
+--- Returns `vx` (number): The x component of velocity at point (x,y).
+--- Returns `vy` (number): The y component of velocity at point (x,y).
+--- See: https://love2d.org/wiki/Body:getLinearVelocityFromLocalPoint
+---@field getLinearVelocityFromLocalPoint (fun(self: love.Body, x: number, y: number): number, number) Get the linear velocity of a point on the body.
+--- Get the linear velocity of a point on the body.
+--- Parameter `x` (number): The x position to measure velocity.
+--- Parameter `y` (number): The y position to measure velocity.
+--- Returns `vx` (number): The x component of velocity at point (x,y).
+--- Returns `vy` (number): The y component of velocity at point (x,y).
+--- See: https://love2d.org/wiki/Body:getLinearVelocityFromWorldPoint
+---@field getLinearVelocityFromWorldPoint (fun(self: love.Body, x: number, y: number): number, number) Get the linear velocity of a point on the body.
+--- Get the center of mass position in local coordinates.
+--- Returns `x` (number): The x coordinate of the center of mass.
+--- Returns `y` (number): The y coordinate of the center of mass.
+--- See: https://love2d.org/wiki/Body:getLocalCenter
+---@field getLocalCenter (fun(self: love.Body): number, number) Get the center of mass position in local coordinates.
+--- Transform a point from world coordinates to local coordinates.
+--- Parameter `worldX` (number): The x position in world coordinates.
+--- Parameter `worldY` (number): The y position in world coordinates.
+--- Returns `localX` (number): The x position in local coordinates.
+--- Returns `localY` (number): The y position in local coordinates.
+--- See: https://love2d.org/wiki/Body:getLocalPoint
+---@field getLocalPoint (fun(self: love.Body, worldX: number, worldY: number): number, number) Transform a point from world coordinates to local coordinates.
+--- Transforms multiple points from world coordinates to local coordinates.
+--- Parameter `x1` (number): (Argument) The x position of the first point.
+--- Parameter `y1` (number): (Argument) The y position of the first point.
+--- Parameter `x2` (number): (Argument) The x position of the second point.
+--- Parameter `y2` (number): (Argument) The y position of the second point.
+--- Parameter `...` (number): (Argument) You can continue passing x and y position of the points.
+--- Returns `x1` (number): (Result) The transformed x position of the first point.
+--- Returns `y1` (number): (Result) The transformed y position of the first point.
+--- Returns `x2` (number): (Result) The transformed x position of the second point.
+--- Returns `y2` (number): (Result) The transformed y position of the second point.
+--- Returns `...` (number): (Result) Additional transformed x and y position of the points.
+--- See: https://love2d.org/wiki/Body:getLocalPoints
+---@field getLocalPoints (fun(self: love.Body, x1: number, y1: number, x2: number, y2: number, ...: number): number, number, number, number, number) Transforms multiple points from world coordinates to local coordinates.
+--- Transform a vector from world coordinates to local coordinates.
+--- Parameter `worldX` (number): The vector x component in world coordinates.
+--- Parameter `worldY` (number): The vector y component in world coordinates.
+--- Returns `localX` (number): The vector x component in local coordinates.
+--- Returns `localY` (number): The vector y component in local coordinates.
+--- See: https://love2d.org/wiki/Body:getLocalVector
+---@field getLocalVector (fun(self: love.Body, worldX: number, worldY: number): number, number) Transform a vector from world coordinates to local coordinates.
+--- Get the mass of the body.
+--- Returns `mass` (number): The mass of the body (in kilograms).
+--- See: https://love2d.org/wiki/Body:getMass
+---@field getMass (fun(self: love.Body): number) Get the mass of the body.
+--- Returns the mass, its center, and the rotational inertia.
+--- Returns `x` (number): The x position of the center of mass.
+--- Returns `y` (number): The y position of the center of mass.
+--- Returns `mass` (number): The mass of the body.
+--- Returns `inertia` (number): The rotational inertia.
+--- See: https://love2d.org/wiki/Body:getMassData
+---@field getMassData (fun(self: love.Body): number, number, number, number) Returns the mass, its center, and the rotational inertia.
+--- Get the position of the body.
+--- Returns `x` (number): The x position.
+--- Returns `y` (number): The y position.
+--- See: https://love2d.org/wiki/Body:getPosition
+---@field getPosition (fun(self: love.Body): number, number) Get the position of the body.
+--- Get the position and angle of the body.
+--- Returns `x` (number): The x component of the position.
+--- Returns `y` (number): The y component of the position.
+--- Returns `angle` (number): The angle in radians.
+--- See: https://love2d.org/wiki/Body:getTransform
+---@field getTransform (fun(self: love.Body): number, number, number) Get the position and angle of the body.
+--- Returns the type of the body.
+--- Returns `type` (love.BodyType): The body type.
+--- See: https://love2d.org/wiki/Body:getType
+---@field getType (fun(self: love.Body): love.BodyType) Returns the type of the body.
+--- Returns the Lua value associated with this Body.
+--- Returns `value` (any): The Lua value associated with the Body.
+--- See: https://love2d.org/wiki/Body:getUserData
+---@field getUserData (fun(self: love.Body): any) Returns the Lua value associated with this Body.
+--- Gets the World the body lives in.
+--- Returns `world` (love.World): The world the body lives in.
+--- See: https://love2d.org/wiki/Body:getWorld
+---@field getWorld (fun(self: love.Body): love.World) Gets the World the body lives in.
+--- Get the center of mass position in world coordinates.
+--- Returns `x` (number): The x coordinate of the center of mass.
+--- Returns `y` (number): The y coordinate of the center of mass.
+--- See: https://love2d.org/wiki/Body:getWorldCenter
+---@field getWorldCenter (fun(self: love.Body): number, number) Get the center of mass position in world coordinates.
+--- Transform a point from local coordinates to world coordinates.
+--- Parameter `localX` (number): The x position in local coordinates.
+--- Parameter `localY` (number): The y position in local coordinates.
+--- Returns `worldX` (number): The x position in world coordinates.
+--- Returns `worldY` (number): The y position in world coordinates.
+--- See: https://love2d.org/wiki/Body:getWorldPoint
+---@field getWorldPoint (fun(self: love.Body, localX: number, localY: number): number, number) Transform a point from local coordinates to world coordinates.
+--- Transforms multiple points from local coordinates to world coordinates.
+--- Parameter `x1` (number): The x position of the first point.
+--- Parameter `y1` (number): The y position of the first point.
+--- Parameter `x2` (number): The x position of the second point.
+--- Parameter `y2` (number): The y position of the second point.
+--- Returns `x1` (number): The transformed x position of the first point.
+--- Returns `y1` (number): The transformed y position of the first point.
+--- Returns `x2` (number): The transformed x position of the second point.
+--- Returns `y2` (number): The transformed y position of the second point.
+--- See: https://love2d.org/wiki/Body:getWorldPoints
+---@field getWorldPoints (fun(self: love.Body, x1: number, y1: number, x2: number, y2: number): number, number, number, number) Transforms multiple points from local coordinates to world coordinates.
+--- Transform a vector from local coordinates to world coordinates.
+--- Parameter `localX` (number): The vector x component in local coordinates.
+--- Parameter `localY` (number): The vector y component in local coordinates.
+--- Returns `worldX` (number): The vector x component in world coordinates.
+--- Returns `worldY` (number): The vector y component in world coordinates.
+--- See: https://love2d.org/wiki/Body:getWorldVector
+---@field getWorldVector (fun(self: love.Body, localX: number, localY: number): number, number) Transform a vector from local coordinates to world coordinates.
+--- Get the x position of the body in world coordinates.
+--- Returns `x` (number): The x position in world coordinates.
+--- See: https://love2d.org/wiki/Body:getX
+---@field getX (fun(self: love.Body): number) Get the x position of the body in world coordinates.
+--- Get the y position of the body in world coordinates.
+--- Returns `y` (number): The y position in world coordinates.
+--- See: https://love2d.org/wiki/Body:getY
+---@field getY (fun(self: love.Body): number) Get the y position of the body in world coordinates.
+--- Returns whether the body is actively used in the simulation.
+--- Returns `status` (boolean): True if the body is active or false if not.
+--- See: https://love2d.org/wiki/Body:isActive
+---@field isActive (fun(self: love.Body): boolean) Returns whether the body is actively used in the simulation.
+--- Returns the sleep status of the body.
+--- Returns `status` (boolean): True if the body is awake or false if not.
+--- See: https://love2d.org/wiki/Body:isAwake
+---@field isAwake (fun(self: love.Body): boolean) Returns the sleep status of the body.
+--- Get the bullet status of a body.
+--- Returns `status` (boolean): The bullet status of the body.
+--- See: https://love2d.org/wiki/Body:isBullet
+---@field isBullet (fun(self: love.Body): boolean) Get the bullet status of a body.
+--- Gets whether the Body is destroyed.
+--- Returns `destroyed` (boolean): Whether the Body is destroyed.
+--- See: https://love2d.org/wiki/Body:isDestroyed
+---@field isDestroyed (fun(self: love.Body): boolean) Gets whether the Body is destroyed.
+--- Returns whether the body rotation is locked.
+--- Returns `fixed` (boolean): True if the body's rotation is locked or false if not.
+--- See: https://love2d.org/wiki/Body:isFixedRotation
+---@field isFixedRotation (fun(self: love.Body): boolean) Returns whether the body rotation is locked.
+--- Returns the sleeping behaviour of the body.
+--- Returns `allowed` (boolean): True if the body is allowed to sleep or false if not.
+--- See: https://love2d.org/wiki/Body:isSleepingAllowed
+---@field isSleepingAllowed (fun(self: love.Body): boolean) Returns the sleeping behaviour of the body.
+--- Gets whether the Body is touching the given other Body.
+--- Parameter `otherbody` (love.Body): The other body to check.
+--- Returns `touching` (boolean): True if this body is touching the other body, false otherwise.
+--- See: https://love2d.org/wiki/Body:isTouching
+---@field isTouching (fun(self: love.Body, otherbody: love.Body): boolean) Gets whether the Body is touching the given other Body.
+--- Resets the mass of the body by recalculating it from the mass properties of the fixtures.
+--- See: https://love2d.org/wiki/Body:resetMassData
+---@field resetMassData (fun(self: love.Body)) Resets the mass of the body by recalculating it from the mass properties of the fixtures.
+--- Sets whether the body is active in the world.
+--- Parameter `active` (boolean): If the body is active or not.
+--- See: https://love2d.org/wiki/Body:setActive
+---@field setActive (fun(self: love.Body, active: boolean)) Sets whether the body is active in the world.
+--- Set the angle of the body.
+--- Parameter `angle` (number): The angle in radians.
+--- See: https://love2d.org/wiki/Body:setAngle
+---@field setAngle (fun(self: love.Body, angle: number)) Set the angle of the body.
+--- Sets the angular damping of a Body See Body:getAngularDamping for a definition of angular damping.
+--- Parameter `damping` (number): The new angular damping.
+--- See: https://love2d.org/wiki/Body:setAngularDamping
+---@field setAngularDamping (fun(self: love.Body, damping: number)) Sets the angular damping of a Body See Body:getAngularDamping for a definition of angular damping.
+--- Sets the angular velocity of a Body.
+--- Parameter `w` (number): The new angular velocity, in radians per second
+--- See: https://love2d.org/wiki/Body:setAngularVelocity
+---@field setAngularVelocity (fun(self: love.Body, w: number)) Sets the angular velocity of a Body.
+--- Wakes the body up or puts it to sleep.
+--- Parameter `awake` (boolean): The body sleep status.
+--- See: https://love2d.org/wiki/Body:setAwake
+---@field setAwake (fun(self: love.Body, awake: boolean)) Wakes the body up or puts it to sleep.
+--- Set the bullet status of a body.
+--- Parameter `status` (boolean): The bullet status of the body.
+--- See: https://love2d.org/wiki/Body:setBullet
+---@field setBullet (fun(self: love.Body, status: boolean)) Set the bullet status of a body.
+--- Set whether a body has fixed rotation.
+--- Parameter `isFixed` (boolean): Whether the body should have fixed rotation.
+--- See: https://love2d.org/wiki/Body:setFixedRotation
+---@field setFixedRotation (fun(self: love.Body, isFixed: boolean)) Set whether a body has fixed rotation.
+--- Sets a new gravity scale factor for the body.
+--- Parameter `scale` (number): The new gravity scale factor.
+--- See: https://love2d.org/wiki/Body:setGravityScale
+---@field setGravityScale (fun(self: love.Body, scale: number)) Sets a new gravity scale factor for the body.
+--- Set the inertia of a body.
+--- Parameter `inertia` (number): The new moment of inertia, in kilograms * pixel squared.
+--- See: https://love2d.org/wiki/Body:setInertia
+---@field setInertia (fun(self: love.Body, inertia: number)) Set the inertia of a body.
+--- Sets the linear damping of a Body See Body:getLinearDamping for a definition of linear damping.
+--- Parameter `ld` (number): The new linear damping
+--- See: https://love2d.org/wiki/Body:setLinearDamping
+---@field setLinearDamping (fun(self: love.Body, ld: number)) Sets the linear damping of a Body See Body:getLinearDamping for a definition of linear damping.
+--- Sets a new linear velocity for the Body.
+--- Parameter `x` (number): The x-component of the velocity vector.
+--- Parameter `y` (number): The y-component of the velocity vector.
+--- See: https://love2d.org/wiki/Body:setLinearVelocity
+---@field setLinearVelocity (fun(self: love.Body, x: number, y: number)) Sets a new linear velocity for the Body.
+--- Sets a new body mass.
+--- Parameter `mass` (number): The mass, in kilograms.
+--- See: https://love2d.org/wiki/Body:setMass
+---@field setMass (fun(self: love.Body, mass: number)) Sets a new body mass.
+--- Overrides the calculated mass data.
+--- Parameter `x` (number): The x position of the center of mass.
+--- Parameter `y` (number): The y position of the center of mass.
+--- Parameter `mass` (number): The mass of the body.
+--- Parameter `inertia` (number): The rotational inertia.
+--- See: https://love2d.org/wiki/Body:setMassData
+---@field setMassData (fun(self: love.Body, x: number, y: number, mass: number, inertia: number)) Overrides the calculated mass data.
+--- Set the position of the body.
+--- Parameter `x` (number): The x position.
+--- Parameter `y` (number): The y position.
+--- See: https://love2d.org/wiki/Body:setPosition
+---@field setPosition (fun(self: love.Body, x: number, y: number)) Set the position of the body.
+--- Sets the sleeping behaviour of the body.
+--- Parameter `allowed` (boolean): True if the body is allowed to sleep or false if not.
+--- See: https://love2d.org/wiki/Body:setSleepingAllowed
+---@field setSleepingAllowed (fun(self: love.Body, allowed: boolean)) Sets the sleeping behaviour of the body.
+--- Set the position and angle of the body.
+--- Parameter `x` (number): The x component of the position.
+--- Parameter `y` (number): The y component of the position.
+--- Parameter `angle` (number): The angle in radians.
+--- See: https://love2d.org/wiki/Body:setTransform
+---@field setTransform (fun(self: love.Body, x: number, y: number, angle: number)) Set the position and angle of the body.
+--- Sets a new body type.
+--- Parameter `type` (love.BodyType): The new type.
+--- See: https://love2d.org/wiki/Body:setType
+---@field setType (fun(self: love.Body, type: love.BodyType)) Sets a new body type.
+--- Associates a Lua value with the Body.
+--- Parameter `value` (any): The Lua value to associate with the Body.
+--- See: https://love2d.org/wiki/Body:setUserData
+---@field setUserData (fun(self: love.Body, value: any)) Associates a Lua value with the Body.
+--- Set the x position of the body.
+--- Parameter `x` (number): The x position.
+--- See: https://love2d.org/wiki/Body:setX
+---@field setX (fun(self: love.Body, x: number)) Set the x position of the body.
+--- Set the y position of the body.
+--- Parameter `y` (number): The y position.
+--- See: https://love2d.org/wiki/Body:setY
+---@field setY (fun(self: love.Body, y: number)) Set the y position of the body.
+
+--- Data object containing arbitrary bytes in an contiguous memory.
+--- See: https://love2d.org/wiki/ByteData
+---@class love.ByteData : love.Object
+
+--- A Canvas is used for off-screen rendering.
+--- See: https://love2d.org/wiki/Canvas
+---@class love.Canvas : love.Texture
+--- Generates mipmaps for the Canvas, based on the contents of the highest-resolution mipmap level.
+--- See: https://love2d.org/wiki/Canvas:generateMipmaps
+---@field generateMipmaps (fun(self: love.Canvas)) Generates mipmaps for the Canvas, based on the contents of the highest-resolution mipmap level.
+--- Gets the number of multisample antialiasing (MSAA) samples used when drawing to the Canvas.
+--- Returns `samples` (number): The number of multisample antialiasing samples used by the canvas when drawing to it.
+--- See: https://love2d.org/wiki/Canvas:getMSAA
+---@field getMSAA (fun(self: love.Canvas): number) Gets the number of multisample antialiasing (MSAA) samples used when drawing to the Canvas.
+--- Gets the MipmapMode this Canvas was created with.
+--- Returns `mode` (love.MipmapMode): The mipmap mode this Canvas was created with.
+--- See: https://love2d.org/wiki/Canvas:getMipmapMode
+---@field getMipmapMode (fun(self: love.Canvas): love.MipmapMode) Gets the MipmapMode this Canvas was created with.
+--- Generates ImageData from the contents of the Canvas.
+--- Returns `data` (love.ImageData): The new ImageData made from the Canvas' contents.
+--- See: https://love2d.org/wiki/Canvas:newImageData
+---@field newImageData (fun(self: love.Canvas): love.ImageData)|(fun(self: love.Canvas, slice: number, mipmap?: number, x: number, y: number, width: number, height: number): love.ImageData) Generates ImageData from the contents of the Canvas.
+--- Render to the Canvas using a function.
+--- Parameter `func` (function): A function performing drawing operations.
+--- Parameter `...` (any): Additional arguments to call the function with.
+--- See: https://love2d.org/wiki/Canvas:renderTo
+---@field renderTo (fun(self: love.Canvas, func: function, ...: any)) Render to the Canvas using a function.
+
+--- A ChainShape consists of multiple line segments.
+--- See: https://love2d.org/wiki/ChainShape
+---@class love.ChainShape : love.Shape
+--- Returns a child of the shape as an EdgeShape.
+--- Parameter `index` (number): The index of the child.
+--- Returns `shape` (love.EdgeShape): The child as an EdgeShape.
+--- See: https://love2d.org/wiki/ChainShape:getChildEdge
+---@field getChildEdge (fun(self: love.ChainShape, index: number): love.EdgeShape) Returns a child of the shape as an EdgeShape.
+--- Gets the vertex that establishes a connection to the next shape.
+--- Returns `x` (number): The x-component of the vertex, or nil if ChainShape:setNextVertex hasn't been called.
+--- Returns `y` (number): The y-component of the vertex, or nil if ChainShape:setNextVertex hasn't been called.
+--- See: https://love2d.org/wiki/ChainShape:getNextVertex
+---@field getNextVertex (fun(self: love.ChainShape): number, number) Gets the vertex that establishes a connection to the next shape.
+--- Returns a point of the shape.
+--- Parameter `index` (number): The index of the point to return.
+--- Returns `x` (number): The x-coordinate of the point.
+--- Returns `y` (number): The y-coordinate of the point.
+--- See: https://love2d.org/wiki/ChainShape:getPoint
+---@field getPoint (fun(self: love.ChainShape, index: number): number, number) Returns a point of the shape.
+--- Returns all points of the shape.
+--- Returns `x1` (number): The x-coordinate of the first point.
+--- Returns `y1` (number): The y-coordinate of the first point.
+--- Returns `x2` (number): The x-coordinate of the second point.
+--- Returns `y2` (number): The y-coordinate of the second point.
+--- See: https://love2d.org/wiki/ChainShape:getPoints
+---@field getPoints (fun(self: love.ChainShape): number, number, number, number) Returns all points of the shape.
+--- Gets the vertex that establishes a connection to the previous shape.
+--- Returns `x` (number): The x-component of the vertex, or nil if ChainShape:setPreviousVertex hasn't been called.
+--- Returns `y` (number): The y-component of the vertex, or nil if ChainShape:setPreviousVertex hasn't been called.
+--- See: https://love2d.org/wiki/ChainShape:getPreviousVertex
+---@field getPreviousVertex (fun(self: love.ChainShape): number, number) Gets the vertex that establishes a connection to the previous shape.
+--- Returns the number of vertices the shape has.
+--- Returns `count` (number): The number of vertices.
+--- See: https://love2d.org/wiki/ChainShape:getVertexCount
+---@field getVertexCount (fun(self: love.ChainShape): number) Returns the number of vertices the shape has.
+--- Sets a vertex that establishes a connection to the next shape.
+--- Parameter `x` (number): The x-component of the vertex.
+--- Parameter `y` (number): The y-component of the vertex.
+--- See: https://love2d.org/wiki/ChainShape:setNextVertex
+---@field setNextVertex (fun(self: love.ChainShape, x: number, y: number)) Sets a vertex that establishes a connection to the next shape.
+--- Sets a vertex that establishes a connection to the previous shape.
+--- Parameter `x` (number): The x-component of the vertex.
+--- Parameter `y` (number): The y-component of the vertex.
+--- See: https://love2d.org/wiki/ChainShape:setPreviousVertex
+---@field setPreviousVertex (fun(self: love.ChainShape, x: number, y: number)) Sets a vertex that establishes a connection to the previous shape.
+
+--- An object which can be used to send and receive data between different threads.
+--- See: https://love2d.org/wiki/Channel
+---@class love.Channel : love.Object
+--- Clears all the messages in the Channel queue.
+--- See: https://love2d.org/wiki/Channel:clear
+---@field clear (fun(self: love.Channel)) Clears all the messages in the Channel queue.
+--- Retrieves the value of a Channel message and removes it from the message queue.
+--- Returns `value` (string|number|boolean|love.Object|table): The contents of the message.
+--- See: https://love2d.org/wiki/Channel:demand
+---@field demand (fun(self: love.Channel): string|number|boolean|love.Object|table)|(fun(self: love.Channel, timeout: number): string|number|boolean|love.Object|table) Retrieves the value of a Channel message and removes it from the message queue.
+--- Retrieves the number of messages in the thread Channel queue.
+--- Returns `count` (number): The number of messages in the queue.
+--- See: https://love2d.org/wiki/Channel:getCount
+---@field getCount (fun(self: love.Channel): number) Retrieves the number of messages in the thread Channel queue.
+--- Gets whether a pushed value has been popped or otherwise removed from the Channel.
+--- Parameter `id` (number): An id value previously returned by Channel:push.
+--- Returns `hasread` (boolean): Whether the value represented by the id has been removed from the Channel via Channel:pop, Channel:demand, or Channel:clear.
+--- See: https://love2d.org/wiki/Channel:hasRead
+---@field hasRead (fun(self: love.Channel, id: number): boolean) Gets whether a pushed value has been popped or otherwise removed from the Channel.
+--- Retrieves the value of a Channel message, but leaves it in the queue.
+--- Returns `value` (string|number|boolean|love.Object|table): The contents of the message.
+--- See: https://love2d.org/wiki/Channel:peek
+---@field peek (fun(self: love.Channel): string|number|boolean|love.Object|table) Retrieves the value of a Channel message, but leaves it in the queue.
+--- Executes the specified function atomically with respect to this Channel.
+--- Parameter `func` (function): The function to call, the form of function(channel, arg1, arg2, ...) end.
+--- Parameter `...` (any): Additional arguments that the given function will receive when it is called.
+--- Returns `ret1` (any): The first return value of the given function (if any.)
+--- Returns `...` (any): Any other return values.
+--- See: https://love2d.org/wiki/Channel:performAtomic
+---@field performAtomic (fun(self: love.Channel, func: function, ...: any): any, any) Executes the specified function atomically with respect to this Channel.
+--- Retrieves the value of a Channel message and removes it from the message queue.
+--- Returns `value` (string|number|boolean|love.Object|table): The contents of the message.
+--- See: https://love2d.org/wiki/Channel:pop
+---@field pop (fun(self: love.Channel): string|number|boolean|love.Object|table) Retrieves the value of a Channel message and removes it from the message queue.
+--- Send a message to the thread Channel.
+--- Parameter `value` (string|number|boolean|love.Object|table): The contents of the message.
+--- Returns `id` (number): Identifier which can be supplied to Channel:hasRead
+--- See: https://love2d.org/wiki/Channel:push
+---@field push (fun(self: love.Channel, value: string|number|boolean|love.Object|table): number) Send a message to the thread Channel.
+--- Send a message to the thread Channel and wait for a thread to accept it.
+--- Parameter `value` (string|number|boolean|love.Object|table): The contents of the message.
+--- Returns `success` (boolean): Whether the message was successfully supplied (always true).
+--- See: https://love2d.org/wiki/Channel:supply
+---@field supply (fun(self: love.Channel, value: string|number|boolean|love.Object|table): boolean)|(fun(self: love.Channel, value: string|number|boolean|love.Object|table, timeout: number): boolean) Send a message to the thread Channel and wait for a thread to accept it.
+
+--- Circle extends Shape and adds a radius and a local position.
+--- See: https://love2d.org/wiki/CircleShape
+---@class love.CircleShape : love.Shape
+--- Gets the center point of the circle shape.
+--- Returns `x` (number): The x-component of the center point of the circle.
+--- Returns `y` (number): The y-component of the center point of the circle.
+--- See: https://love2d.org/wiki/CircleShape:getPoint
+---@field getPoint (fun(self: love.CircleShape): number, number) Gets the center point of the circle shape.
+--- Gets the radius of the circle shape.
+--- Returns `radius` (number): The radius of the circle
+--- See: https://love2d.org/wiki/CircleShape:getRadius
+---@field getRadius (fun(self: love.CircleShape): number) Gets the radius of the circle shape.
+--- Sets the location of the center of the circle shape.
+--- Parameter `x` (number): The x-component of the new center point of the circle.
+--- Parameter `y` (number): The y-component of the new center point of the circle.
+--- See: https://love2d.org/wiki/CircleShape:setPoint
+---@field setPoint (fun(self: love.CircleShape, x: number, y: number)) Sets the location of the center of the circle shape.
+--- Sets the radius of the circle.
+--- Parameter `radius` (number): The radius of the circle
+--- See: https://love2d.org/wiki/CircleShape:setRadius
+---@field setRadius (fun(self: love.CircleShape, radius: number)) Sets the radius of the circle.
+
+--- Represents byte data compressed using a specific algorithm.
+--- See: https://love2d.org/wiki/CompressedData
+---@class love.CompressedData : love.Data
+--- Gets the compression format of the CompressedData.
+--- Returns `format` (love.CompressedDataFormat): The format of the CompressedData.
+--- See: https://love2d.org/wiki/CompressedData:getFormat
+---@field getFormat (fun(self: love.CompressedData): love.CompressedDataFormat) Gets the compression format of the CompressedData.
+
+--- Represents compressed image data designed to stay compressed in RAM.
+--- See: https://love2d.org/wiki/CompressedImageData
+---@class love.CompressedImageData : love.Data
+--- Gets the width and height of the CompressedImageData.
+--- Returns `width` (number): The width of the CompressedImageData.
+--- Returns `height` (number): The height of the CompressedImageData.
+--- See: https://love2d.org/wiki/CompressedImageData:getDimensions
+---@field getDimensions (fun(self: love.CompressedImageData): number, number)|(fun(self: love.CompressedImageData, level: number): number, number) Gets the width and height of the CompressedImageData.
+--- Gets the format of the CompressedImageData.
+--- Returns `format` (love.CompressedImageFormat): The format of the CompressedImageData.
+--- See: https://love2d.org/wiki/CompressedImageData:getFormat
+---@field getFormat (fun(self: love.CompressedImageData): love.CompressedImageFormat) Gets the format of the CompressedImageData.
+--- Gets the height of the CompressedImageData.
+--- Returns `height` (number): The height of the CompressedImageData.
+--- See: https://love2d.org/wiki/CompressedImageData:getHeight
+---@field getHeight (fun(self: love.CompressedImageData): number)|(fun(self: love.CompressedImageData, level: number): number) Gets the height of the CompressedImageData.
+--- Gets the number of mipmap levels in the CompressedImageData.
+--- Returns `mipmaps` (number): The number of mipmap levels stored in the CompressedImageData.
+--- See: https://love2d.org/wiki/CompressedImageData:getMipmapCount
+---@field getMipmapCount (fun(self: love.CompressedImageData): number) Gets the number of mipmap levels in the CompressedImageData.
+--- Gets the width of the CompressedImageData.
+--- Returns `width` (number): The width of the CompressedImageData.
+--- See: https://love2d.org/wiki/CompressedImageData:getWidth
+---@field getWidth (fun(self: love.CompressedImageData): number)|(fun(self: love.CompressedImageData, level: number): number) Gets the width of the CompressedImageData.
+
+--- Contacts are objects created to manage collisions in worlds.
+--- See: https://love2d.org/wiki/Contact
+---@class love.Contact : love.Object
+--- Gets the child indices of the shapes of the two colliding fixtures.
+--- Returns `indexA` (number): The child index of the first fixture's shape.
+--- Returns `indexB` (number): The child index of the second fixture's shape.
+--- See: https://love2d.org/wiki/Contact:getChildren
+---@field getChildren (fun(self: love.Contact): number, number) Gets the child indices of the shapes of the two colliding fixtures.
+--- Gets the two Fixtures that hold the shapes that are in contact.
+--- Returns `fixtureA` (love.Fixture): The first Fixture.
+--- Returns `fixtureB` (love.Fixture): The second Fixture.
+--- See: https://love2d.org/wiki/Contact:getFixtures
+---@field getFixtures (fun(self: love.Contact): love.Fixture, love.Fixture) Gets the two Fixtures that hold the shapes that are in contact.
+--- Get the friction between two shapes that are in contact.
+--- Returns `friction` (number): The friction of the contact.
+--- See: https://love2d.org/wiki/Contact:getFriction
+---@field getFriction (fun(self: love.Contact): number) Get the friction between two shapes that are in contact.
+--- Get the normal vector between two shapes that are in contact.
+--- Returns `nx` (number): The x component of the normal vector.
+--- Returns `ny` (number): The y component of the normal vector.
+--- See: https://love2d.org/wiki/Contact:getNormal
+---@field getNormal (fun(self: love.Contact): number, number) Get the normal vector between two shapes that are in contact.
+--- Returns the contact points of the two colliding fixtures.
+--- Returns `x1` (number): The x coordinate of the first contact point.
+--- Returns `y1` (number): The y coordinate of the first contact point.
+--- Returns `x2` (number): The x coordinate of the second contact point.
+--- Returns `y2` (number): The y coordinate of the second contact point.
+--- See: https://love2d.org/wiki/Contact:getPositions
+---@field getPositions (fun(self: love.Contact): number, number, number, number) Returns the contact points of the two colliding fixtures.
+--- Get the restitution between two shapes that are in contact.
+--- Returns `restitution` (number): The restitution between the two shapes.
+--- See: https://love2d.org/wiki/Contact:getRestitution
+---@field getRestitution (fun(self: love.Contact): number) Get the restitution between two shapes that are in contact.
+--- Returns whether the contact is enabled.
+--- Returns `enabled` (boolean): True if enabled, false otherwise.
+--- See: https://love2d.org/wiki/Contact:isEnabled
+---@field isEnabled (fun(self: love.Contact): boolean) Returns whether the contact is enabled.
+--- Returns whether the two colliding fixtures are touching each other.
+--- Returns `touching` (boolean): True if they touch or false if not.
+--- See: https://love2d.org/wiki/Contact:isTouching
+---@field isTouching (fun(self: love.Contact): boolean) Returns whether the two colliding fixtures are touching each other.
+--- Resets the contact friction to the mixture value of both fixtures.
+--- See: https://love2d.org/wiki/Contact:resetFriction
+---@field resetFriction (fun(self: love.Contact)) Resets the contact friction to the mixture value of both fixtures.
+--- Resets the contact restitution to the mixture value of both fixtures.
+--- See: https://love2d.org/wiki/Contact:resetRestitution
+---@field resetRestitution (fun(self: love.Contact)) Resets the contact restitution to the mixture value of both fixtures.
+--- Enables or disables the contact.
+--- Parameter `enabled` (boolean): True to enable or false to disable.
+--- See: https://love2d.org/wiki/Contact:setEnabled
+---@field setEnabled (fun(self: love.Contact, enabled: boolean)) Enables or disables the contact.
+--- Sets the contact friction.
+--- Parameter `friction` (number): The contact friction.
+--- See: https://love2d.org/wiki/Contact:setFriction
+---@field setFriction (fun(self: love.Contact, friction: number)) Sets the contact friction.
+--- Sets the contact restitution.
+--- Parameter `restitution` (number): The contact restitution.
+--- See: https://love2d.org/wiki/Contact:setRestitution
+---@field setRestitution (fun(self: love.Contact, restitution: number)) Sets the contact restitution.
+
+--- Represents a hardware cursor.
+--- See: https://love2d.org/wiki/Cursor
+---@class love.Cursor : love.Object
+--- Gets the type of the Cursor.
+--- Returns `ctype` (love.CursorType): The type of the Cursor.
+--- See: https://love2d.org/wiki/Cursor:getType
+---@field getType (fun(self: love.Cursor): love.CursorType) Gets the type of the Cursor.
+
+--- The superclass of all data.
+--- See: https://love2d.org/wiki/Data
+---@class love.Data : love.Object
+--- Creates a new copy of the Data object.
+--- Returns `clone` (love.Data): The new copy.
+--- See: https://love2d.org/wiki/Data:clone
+---@field clone (fun(self: love.Data): love.Data) Creates a new copy of the Data object.
+--- Gets an FFI pointer to the Data.
+--- Returns `pointer` (any): A raw void* pointer to the Data, or nil if FFI is unavailable.
+--- See: https://love2d.org/wiki/Data:getFFIPointer
+---@field getFFIPointer (fun(self: love.Data): any) Gets an FFI pointer to the Data.
+--- Gets a pointer to the Data.
+--- Returns `pointer` (userdata): A raw pointer to the Data.
+--- See: https://love2d.org/wiki/Data:getPointer
+---@field getPointer (fun(self: love.Data): userdata) Gets a pointer to the Data.
+--- Gets the Data's size in bytes.
+--- Returns `size` (number): The size of the Data in bytes.
+--- See: https://love2d.org/wiki/Data:getSize
+---@field getSize (fun(self: love.Data): number) Gets the Data's size in bytes.
+--- Gets the full Data as a string.
+--- Returns `data` (string): The raw data.
+--- See: https://love2d.org/wiki/Data:getString
+---@field getString (fun(self: love.Data): string) Gets the full Data as a string.
+
+--- An object which can gradually decode a sound file.
+--- See: https://love2d.org/wiki/Decoder
+---@class love.Decoder : love.Object
+--- Creates a new copy of current decoder.
+--- Returns `decoder` (love.Decoder): New copy of the decoder.
+--- See: https://love2d.org/wiki/Decoder:clone
+---@field clone (fun(self: love.Decoder): love.Decoder) Creates a new copy of current decoder.
+--- Decodes the audio and returns a SoundData object containing the decoded audio data.
+--- Returns `soundData` (love.SoundData): Decoded audio data.
+--- See: https://love2d.org/wiki/Decoder:decode
+---@field decode (fun(self: love.Decoder): love.SoundData) Decodes the audio and returns a SoundData object containing the decoded audio data.
+--- Returns the number of bits per sample.
+--- Returns `bitDepth` (number): Either 8, or 16.
+--- See: https://love2d.org/wiki/Decoder:getBitDepth
+---@field getBitDepth (fun(self: love.Decoder): number) Returns the number of bits per sample.
+--- Returns the number of channels in the stream.
+--- Returns `channels` (number): 1 for mono, 2 for stereo.
+--- See: https://love2d.org/wiki/Decoder:getChannelCount
+---@field getChannelCount (fun(self: love.Decoder): number) Returns the number of channels in the stream.
+--- Gets the duration of the sound file.
+--- Returns `duration` (number): The duration of the sound file in seconds, or -1 if it cannot be determined.
+--- See: https://love2d.org/wiki/Decoder:getDuration
+---@field getDuration (fun(self: love.Decoder): number) Gets the duration of the sound file.
+--- Returns the sample rate of the Decoder.
+--- Returns `rate` (number): Number of samples per second.
+--- See: https://love2d.org/wiki/Decoder:getSampleRate
+---@field getSampleRate (fun(self: love.Decoder): number) Returns the sample rate of the Decoder.
+--- Sets the currently playing position of the Decoder.
+--- Parameter `offset` (number): The position to seek to, in seconds.
+--- See: https://love2d.org/wiki/Decoder:seek
+---@field seek (fun(self: love.Decoder, offset: number)) Sets the currently playing position of the Decoder.
+
+--- Keeps two bodies at the same distance.
+--- See: https://love2d.org/wiki/DistanceJoint
+---@class love.DistanceJoint : love.Joint
+--- Gets the damping ratio.
+--- Returns `ratio` (number): The damping ratio.
+--- See: https://love2d.org/wiki/DistanceJoint:getDampingRatio
+---@field getDampingRatio (fun(self: love.DistanceJoint): number) Gets the damping ratio.
+--- Gets the response speed.
+--- Returns `Hz` (number): The response speed.
+--- See: https://love2d.org/wiki/DistanceJoint:getFrequency
+---@field getFrequency (fun(self: love.DistanceJoint): number) Gets the response speed.
+--- Gets the equilibrium distance between the two Bodies.
+--- Returns `l` (number): The length between the two Bodies.
+--- See: https://love2d.org/wiki/DistanceJoint:getLength
+---@field getLength (fun(self: love.DistanceJoint): number) Gets the equilibrium distance between the two Bodies.
+--- Sets the damping ratio.
+--- Parameter `ratio` (number): The damping ratio.
+--- See: https://love2d.org/wiki/DistanceJoint:setDampingRatio
+---@field setDampingRatio (fun(self: love.DistanceJoint, ratio: number)) Sets the damping ratio.
+--- Sets the response speed.
+--- Parameter `Hz` (number): The response speed.
+--- See: https://love2d.org/wiki/DistanceJoint:setFrequency
+---@field setFrequency (fun(self: love.DistanceJoint, Hz: number)) Sets the response speed.
+--- Sets the equilibrium distance between the two Bodies.
+--- Parameter `l` (number): The length between the two Bodies.
+--- See: https://love2d.org/wiki/DistanceJoint:setLength
+---@field setLength (fun(self: love.DistanceJoint, l: number)) Sets the equilibrium distance between the two Bodies.
+
+--- Superclass for all things that can be drawn on screen.
+--- See: https://love2d.org/wiki/Drawable
 ---@class love.Drawable : love.Object
 
----@class love.Texture : love.Drawable
----@field getWidth fun(self: love.Texture): integer Gets the width of the Texture in pixels.
----@field getHeight fun(self: love.Texture): integer Gets the height of the Texture in pixels.
----@field getDimensions fun(self: love.Texture): integer, integer Gets width and height of the Texture.
----@field setFilter fun(self: love.Texture, min: 'linear'|'nearest', mag?: 'linear'|'nearest', anisotropy?: number): nil Sets scaling filter modes.
----@field getFilter fun(self: love.Texture): string, string, number Gets scaling filter modes.
----@field setWrap fun(self: love.Texture, horiz: 'clamp'|'repeat'|'mirroredrepeat', vert?: string): nil Sets texture wrapping mode.
----@field getWrap fun(self: love.Texture): string, string Gets texture wrapping mode.
+--- Represents a file dropped onto the window.
+--- See: https://love2d.org/wiki/DroppedFile
+---@class love.DroppedFile : love.File
 
----@class love.Image : love.Texture
+--- A EdgeShape is a line segment.
+--- See: https://love2d.org/wiki/EdgeShape
+---@class love.EdgeShape : love.Shape
+--- Gets the vertex that establishes a connection to the next shape.
+--- Returns `x` (number): The x-component of the vertex, or nil if EdgeShape:setNextVertex hasn't been called.
+--- Returns `y` (number): The y-component of the vertex, or nil if EdgeShape:setNextVertex hasn't been called.
+--- See: https://love2d.org/wiki/EdgeShape:getNextVertex
+---@field getNextVertex (fun(self: love.EdgeShape): number, number) Gets the vertex that establishes a connection to the next shape.
+--- Returns the local coordinates of the edge points.
+--- Returns `x1` (number): The x-component of the first vertex.
+--- Returns `y1` (number): The y-component of the first vertex.
+--- Returns `x2` (number): The x-component of the second vertex.
+--- Returns `y2` (number): The y-component of the second vertex.
+--- See: https://love2d.org/wiki/EdgeShape:getPoints
+---@field getPoints (fun(self: love.EdgeShape): number, number, number, number) Returns the local coordinates of the edge points.
+--- Gets the vertex that establishes a connection to the previous shape.
+--- Returns `x` (number): The x-component of the vertex, or nil if EdgeShape:setPreviousVertex hasn't been called.
+--- Returns `y` (number): The y-component of the vertex, or nil if EdgeShape:setPreviousVertex hasn't been called.
+--- See: https://love2d.org/wiki/EdgeShape:getPreviousVertex
+---@field getPreviousVertex (fun(self: love.EdgeShape): number, number) Gets the vertex that establishes a connection to the previous shape.
+--- Sets a vertex that establishes a connection to the next shape.
+--- Parameter `x` (number): The x-component of the vertex.
+--- Parameter `y` (number): The y-component of the vertex.
+--- See: https://love2d.org/wiki/EdgeShape:setNextVertex
+---@field setNextVertex (fun(self: love.EdgeShape, x: number, y: number)) Sets a vertex that establishes a connection to the next shape.
+--- Sets a vertex that establishes a connection to the previous shape.
+--- Parameter `x` (number): The x-component of the vertex.
+--- Parameter `y` (number): The y-component of the vertex.
+--- See: https://love2d.org/wiki/EdgeShape:setPreviousVertex
+---@field setPreviousVertex (fun(self: love.EdgeShape, x: number, y: number)) Sets a vertex that establishes a connection to the previous shape.
 
----@class love.Canvas : love.Texture
----@field renderTo fun(self: love.Canvas, func: fun()): nil Render to the canvas using a function callback.
----@field newImageData fun(self: love.Canvas): love.ImageData Create ImageData from the Canvas contents.
+--- Represents a file on the filesystem.
+--- See: https://love2d.org/wiki/File
+---@class love.File : love.Object
+--- Closes a File.
+--- Returns `success` (boolean): Whether closing was successful.
+--- See: https://love2d.org/wiki/File:close
+---@field close (fun(self: love.File): boolean) Closes a File.
+--- Flushes any buffered written data in the file to the disk.
+--- Returns `success` (boolean): Whether the file successfully flushed any buffered data to the disk.
+--- Returns `err` (string): The error string, if an error occurred and the file could not be flushed.
+--- See: https://love2d.org/wiki/File:flush
+---@field flush (fun(self: love.File): boolean, string) Flushes any buffered written data in the file to the disk.
+--- Gets the buffer mode of a file.
+--- Returns `mode` (love.BufferMode): The current buffer mode of the file.
+--- Returns `size` (number): The maximum size in bytes of the file's buffer.
+--- See: https://love2d.org/wiki/File:getBuffer
+---@field getBuffer (fun(self: love.File): love.BufferMode, number) Gets the buffer mode of a file.
+--- Gets the filename that the File object was created with.
+--- Returns `filename` (string): The filename of the File.
+--- See: https://love2d.org/wiki/File:getFilename
+---@field getFilename (fun(self: love.File): string) Gets the filename that the File object was created with.
+--- Gets the FileMode the file has been opened with.
+--- Returns `mode` (love.FileMode): The mode this file has been opened with.
+--- See: https://love2d.org/wiki/File:getMode
+---@field getMode (fun(self: love.File): love.FileMode) Gets the FileMode the file has been opened with.
+--- Returns the file size.
+--- Returns `size` (number): The file size in bytes.
+--- See: https://love2d.org/wiki/File:getSize
+---@field getSize (fun(self: love.File): number) Returns the file size.
+--- Gets whether end-of-file has been reached.
+--- Returns `eof` (boolean): Whether EOF has been reached.
+--- See: https://love2d.org/wiki/File:isEOF
+---@field isEOF (fun(self: love.File): boolean) Gets whether end-of-file has been reached.
+--- Gets whether the file is open.
+--- Returns `open` (boolean): True if the file is currently open, false otherwise.
+--- See: https://love2d.org/wiki/File:isOpen
+---@field isOpen (fun(self: love.File): boolean) Gets whether the file is open.
+--- Iterate over all the lines in a file.
+--- Returns `iterator` (function): The iterator (can be used in for loops).
+--- See: https://love2d.org/wiki/File:lines
+---@field lines (fun(self: love.File): function) Iterate over all the lines in a file.
+--- Open the file for write, read or append.
+--- Parameter `mode` (love.FileMode): The mode to open the file in.
+--- Returns `ok` (boolean): True on success, false otherwise.
+--- Returns `err` (string): The error string if an error occurred.
+--- See: https://love2d.org/wiki/File:open
+---@field open (fun(self: love.File, mode: love.FileMode): boolean, string) Open the file for write, read or append.
+--- Read a number of bytes from a file.
+--- Parameter `bytes` (number): The number of bytes to read. Default: `all`.
+--- Returns `contents` (string): The contents of the read bytes.
+--- Returns `size` (number): How many bytes have been read.
+--- See: https://love2d.org/wiki/File:read
+---@field read (fun(self: love.File, bytes?: number): string, number)|(fun(self: love.File, container: love.ContainerType, bytes?: number): love.FileData|string, number) Read a number of bytes from a file.
+--- Seek to a position in a file
+--- Parameter `pos` (number): The position to seek to
+--- Returns `success` (boolean): Whether the operation was successful
+--- See: https://love2d.org/wiki/File:seek
+---@field seek (fun(self: love.File, pos: number): boolean) Seek to a position in a file
+--- Sets the buffer mode for a file opened for writing or appending.
+--- Parameter `mode` (love.BufferMode): The buffer mode to use.
+--- Parameter `size` (number): The maximum size in bytes of the file's buffer. Default: `0`.
+--- Returns `success` (boolean): Whether the buffer mode was successfully set.
+--- Returns `errorstr` (string): The error string, if the buffer mode could not be set and an error occurred.
+--- See: https://love2d.org/wiki/File:setBuffer
+---@field setBuffer (fun(self: love.File, mode: love.BufferMode, size?: number): boolean, string) Sets the buffer mode for a file opened for writing or appending.
+--- Returns the position in the file.
+--- Returns `pos` (number): The current position.
+--- See: https://love2d.org/wiki/File:tell
+---@field tell (fun(self: love.File): number) Returns the position in the file.
+--- Write data to a file.
+--- Parameter `data` (string): The string data to write.
+--- Parameter `size` (number): How many bytes to write. Default: `all`.
+--- Returns `success` (boolean): Whether the operation was successful.
+--- Returns `err` (string): The error string if an error occurred.
+--- See: https://love2d.org/wiki/File:write
+---@field write (fun(self: love.File, data: string, size?: number): boolean, string)|(fun(self: love.File, data: love.Data, size?: number): boolean, string) Write data to a file.
 
----@class love.Font : love.Object
----@field getHeight fun(self: love.Font): integer Gets font height in pixels.
----@field getWidth fun(self: love.Font, text: string): integer Gets line width of formatted text.
----@field setFilter fun(self: love.Font, min: string, mag?: string): nil Sets font texture filter.
----@field getFilter fun(self: love.Font): string, string Gets font texture filter.
----@field setLineHeight fun(self: love.Font, height: number): nil Sets line height scaling factor.
----@field getLineHeight fun(self: love.Font): number Gets line height scaling factor.
----@field hasGlyphs fun(self: love.Font, ...: string|integer): boolean Checks if glyphs exist in font.
-
----@class love.Source : love.Object
----@field play fun(self: love.Source): boolean Starts audio playback.
----@field pause fun(self: love.Source): nil Pauses audio playback.
----@field stop fun(self: love.Source): nil Stops audio playback.
----@field setVolume fun(self: love.Source, volume: number): nil Sets audio volume (0.0 to 1.0).
----@field getVolume fun(self: love.Source): number Gets current audio volume.
----@field setLooping fun(self: love.Source, loop: boolean): nil Sets whether audio loops.
----@field isLooping fun(self: love.Source): boolean Returns true if audio is looping.
----@field clone fun(self: love.Source): love.Source Creates a twin copy of the Source.
----@field setPitch fun(self: love.Source, pitch: number): nil Sets playback pitch multiplier.
----@field getPitch fun(self: love.Source): number Gets playback pitch multiplier.
----@field isPlaying fun(self: love.Source): boolean Returns true if source is playing.
-
----@class love.Shader : love.Object
----@field send fun(self: love.Shader, name: string, ...: any): nil Sends uniform data to the shader.
----@field hasUniform fun(self: love.Shader, name: string): boolean Returns true if shader has uniform variable.
-
----@class love.Quad : love.Object
----@field setViewport fun(self: love.Quad, x: number, y: number, w: number, h: number, sw?: number, sh?: number): nil Sets texture coordinate rectangle.
----@field getViewport fun(self: love.Quad): number, number, number, number, number, number Gets texture coordinate rectangle.
-
----@class love.Data : love.Object
----@field getSize fun(self: love.Data): integer Size of data in bytes.
----@field getString fun(self: love.Data): string Get full data content as string.
-
+--- Data representing the contents of a file.
+--- See: https://love2d.org/wiki/FileData
 ---@class love.FileData : love.Data
----@class love.ImageData : love.Data
----@field getWidth fun(self: love.ImageData): integer Width of image data in pixels.
----@field getHeight fun(self: love.ImageData): integer Height of image data in pixels.
----@field getDimensions fun(self: love.ImageData): integer, integer Width and height of image data.
----@field getPixel fun(self: love.ImageData, x: integer, y: integer): number, number, number, number Get RGBA color of pixel.
----@field setPixel fun(self: love.ImageData, x: integer, y: integer, r: number, g: number, b: number, a: number): nil Set RGBA color of pixel.
+--- Gets the extension of the FileData.
+--- Returns `ext` (string): The extension of the file the FileData represents.
+--- See: https://love2d.org/wiki/FileData:getExtension
+---@field getExtension (fun(self: love.FileData): string) Gets the extension of the FileData.
+--- Gets the filename of the FileData.
+--- Returns `name` (string): The name of the file the FileData represents.
+--- See: https://love2d.org/wiki/FileData:getFilename
+---@field getFilename (fun(self: love.FileData): string) Gets the filename of the FileData.
 
----@class love.SoundData : love.Data
----@class love.Rasterizer : love.Object
----@class love.FontData : love.Object
----@class love.CompressedData : love.Data
----@class love.Decoder : love.Object
-
----@class love.World : love.Object
----@field update fun(self: love.World, dt: number): nil Advances physics simulation by time dt.
----@field setCallbacks fun(self: love.World, beginContact?: fun(), endContact?: fun(), preSolve?: fun(), postSolve?: fun()): nil Sets collision callbacks.
----@field getBodyCount fun(self: love.World): integer Get number of bodies in world.
-
----@class love.Body : love.Object
----@field getPosition fun(self: love.Body): number, number Get body position (x, y).
----@field setPosition fun(self: love.Body, x: number, y: number): nil Set body position (x, y).
----@field getLinearVelocity fun(self: love.Body): number, number Get linear velocity vector.
----@field setLinearVelocity fun(self: love.Body, x: number, y: number): nil Set linear velocity vector.
----@field applyForce fun(self: love.Body, fx: number, fy: number): nil Apply force vector to body.
----@field applyImpulse fun(self: love.Body, ix: number, iy: number): nil Apply impulse vector to body.
----@field destroy fun(self: love.Body): nil Destroy body and release physics resources.
-
+--- Fixtures attach shapes to bodies.
+--- See: https://love2d.org/wiki/Fixture
 ---@class love.Fixture : love.Object
----@field setSensor fun(self: love.Fixture, sensor: boolean): nil Set fixture sensor mode.
----@field isSensor fun(self: love.Fixture): boolean Returns true if fixture is sensor.
----@field setUserData fun(self: love.Fixture, data: any): nil Attach custom Lua data to fixture.
----@field getUserData fun(self: love.Fixture): any Get attached custom Lua data.
+--- Destroys the fixture.
+--- See: https://love2d.org/wiki/Fixture:destroy
+---@field destroy (fun(self: love.Fixture)) Destroys the fixture.
+--- Returns the body to which the fixture is attached.
+--- Returns `body` (love.Body): The parent body.
+--- See: https://love2d.org/wiki/Fixture:getBody
+---@field getBody (fun(self: love.Fixture): love.Body) Returns the body to which the fixture is attached.
+--- Returns the points of the fixture bounding box.
+--- Parameter `index` (number): A bounding box of the fixture. Default: `1`.
+--- Returns `topLeftX` (number): The x position of the top-left point.
+--- Returns `topLeftY` (number): The y position of the top-left point.
+--- Returns `bottomRightX` (number): The x position of the bottom-right point.
+--- Returns `bottomRightY` (number): The y position of the bottom-right point.
+--- See: https://love2d.org/wiki/Fixture:getBoundingBox
+---@field getBoundingBox (fun(self: love.Fixture, index?: number): number, number, number, number) Returns the points of the fixture bounding box.
+--- Returns the categories the fixture belongs to.
+--- Returns `...` (number): The categories.
+--- See: https://love2d.org/wiki/Fixture:getCategory
+---@field getCategory (fun(self: love.Fixture): number) Returns the categories the fixture belongs to.
+--- Returns the density of the fixture.
+--- Returns `density` (number): The fixture density in kilograms per square meter.
+--- See: https://love2d.org/wiki/Fixture:getDensity
+---@field getDensity (fun(self: love.Fixture): number) Returns the density of the fixture.
+--- Returns the filter data of the fixture.
+--- Returns `categories` (number): The categories as an integer from 0 to 65535.
+--- Returns `mask` (number): The mask as an integer from 0 to 65535.
+--- Returns `group` (number): The group as an integer from -32768 to 32767.
+--- See: https://love2d.org/wiki/Fixture:getFilterData
+---@field getFilterData (fun(self: love.Fixture): number, number, number) Returns the filter data of the fixture.
+--- Returns the friction of the fixture.
+--- Returns `friction` (number): The fixture friction.
+--- See: https://love2d.org/wiki/Fixture:getFriction
+---@field getFriction (fun(self: love.Fixture): number) Returns the friction of the fixture.
+--- Returns the group the fixture belongs to.
+--- Returns `group` (number): The group of the fixture.
+--- See: https://love2d.org/wiki/Fixture:getGroupIndex
+---@field getGroupIndex (fun(self: love.Fixture): number) Returns the group the fixture belongs to.
+--- Returns which categories this fixture should '''NOT''' collide with.
+--- Returns `...` (number): The masks.
+--- See: https://love2d.org/wiki/Fixture:getMask
+---@field getMask (fun(self: love.Fixture): number) Returns which categories this fixture should '''NOT''' collide with.
+--- Returns the mass, its center and the rotational inertia.
+--- Returns `x` (number): The x position of the center of mass.
+--- Returns `y` (number): The y position of the center of mass.
+--- Returns `mass` (number): The mass of the fixture.
+--- Returns `inertia` (number): The rotational inertia.
+--- See: https://love2d.org/wiki/Fixture:getMassData
+---@field getMassData (fun(self: love.Fixture): number, number, number, number) Returns the mass, its center and the rotational inertia.
+--- Returns the restitution of the fixture.
+--- Returns `restitution` (number): The fixture restitution.
+--- See: https://love2d.org/wiki/Fixture:getRestitution
+---@field getRestitution (fun(self: love.Fixture): number) Returns the restitution of the fixture.
+--- Returns the shape of the fixture.
+--- Returns `shape` (love.Shape): The fixture's shape.
+--- See: https://love2d.org/wiki/Fixture:getShape
+---@field getShape (fun(self: love.Fixture): love.Shape) Returns the shape of the fixture.
+--- Returns the Lua value associated with this fixture.
+--- Returns `value` (any): The Lua value associated with the fixture.
+--- See: https://love2d.org/wiki/Fixture:getUserData
+---@field getUserData (fun(self: love.Fixture): any) Returns the Lua value associated with this fixture.
+--- Gets whether the Fixture is destroyed.
+--- Returns `destroyed` (boolean): Whether the Fixture is destroyed.
+--- See: https://love2d.org/wiki/Fixture:isDestroyed
+---@field isDestroyed (fun(self: love.Fixture): boolean) Gets whether the Fixture is destroyed.
+--- Returns whether the fixture is a sensor.
+--- Returns `sensor` (boolean): If the fixture is a sensor.
+--- See: https://love2d.org/wiki/Fixture:isSensor
+---@field isSensor (fun(self: love.Fixture): boolean) Returns whether the fixture is a sensor.
+--- Casts a ray against the shape of the fixture and returns the surface normal vector and the line position where the ray hit.
+--- Parameter `x1` (number): The x position of the input line starting point.
+--- Parameter `y1` (number): The y position of the input line starting point.
+--- Parameter `x2` (number): The x position of the input line end point.
+--- Parameter `y2` (number): The y position of the input line end point.
+--- Parameter `maxFraction` (number): Ray length parameter.
+--- Parameter `childIndex` (number): The index of the child the ray gets cast against. Default: `1`.
+--- Returns `xn` (number): The x component of the normal vector of the edge where the ray hit the shape.
+--- Returns `yn` (number): The y component of the normal vector of the edge where the ray hit the shape.
+--- Returns `fraction` (number): The position on the input line where the intersection happened as a factor of the line length.
+--- See: https://love2d.org/wiki/Fixture:rayCast
+---@field rayCast (fun(self: love.Fixture, x1: number, y1: number, x2: number, y2: number, maxFraction: number, childIndex?: number): number, number, number) Casts a ray against the shape of the fixture and returns the surface normal vector and the line position where the ray hit.
+--- Sets the categories the fixture belongs to.
+--- Parameter `...` (number): The categories.
+--- See: https://love2d.org/wiki/Fixture:setCategory
+---@field setCategory (fun(self: love.Fixture, ...: number)) Sets the categories the fixture belongs to.
+--- Sets the density of the fixture.
+--- Parameter `density` (number): The fixture density in kilograms per square meter.
+--- See: https://love2d.org/wiki/Fixture:setDensity
+---@field setDensity (fun(self: love.Fixture, density: number)) Sets the density of the fixture.
+--- Sets the filter data of the fixture.
+--- Parameter `categories` (number): The categories as an integer from 0 to 65535.
+--- Parameter `mask` (number): The mask as an integer from 0 to 65535.
+--- Parameter `group` (number): The group as an integer from -32768 to 32767.
+--- See: https://love2d.org/wiki/Fixture:setFilterData
+---@field setFilterData (fun(self: love.Fixture, categories: number, mask: number, group: number)) Sets the filter data of the fixture.
+--- Sets the friction of the fixture.
+--- Parameter `friction` (number): The fixture friction.
+--- See: https://love2d.org/wiki/Fixture:setFriction
+---@field setFriction (fun(self: love.Fixture, friction: number)) Sets the friction of the fixture.
+--- Sets the group the fixture belongs to.
+--- Parameter `group` (number): The group as an integer from -32768 to 32767.
+--- See: https://love2d.org/wiki/Fixture:setGroupIndex
+---@field setGroupIndex (fun(self: love.Fixture, group: number)) Sets the group the fixture belongs to.
+--- Sets the category mask of the fixture.
+--- Parameter `...` (number): The masks.
+--- See: https://love2d.org/wiki/Fixture:setMask
+---@field setMask (fun(self: love.Fixture, ...: number)) Sets the category mask of the fixture.
+--- Sets the restitution of the fixture.
+--- Parameter `restitution` (number): The fixture restitution.
+--- See: https://love2d.org/wiki/Fixture:setRestitution
+---@field setRestitution (fun(self: love.Fixture, restitution: number)) Sets the restitution of the fixture.
+--- Sets whether the fixture should act as a sensor.
+--- Parameter `sensor` (boolean): The sensor status.
+--- See: https://love2d.org/wiki/Fixture:setSensor
+---@field setSensor (fun(self: love.Fixture, sensor: boolean)) Sets whether the fixture should act as a sensor.
+--- Associates a Lua value with the fixture.
+--- Parameter `value` (any): The Lua value to associate with the fixture.
+--- See: https://love2d.org/wiki/Fixture:setUserData
+---@field setUserData (fun(self: love.Fixture, value: any)) Associates a Lua value with the fixture.
+--- Checks if a point is inside the shape of the fixture.
+--- Parameter `x` (number): The x position of the point.
+--- Parameter `y` (number): The y position of the point.
+--- Returns `isInside` (boolean): True if the point is inside or false if it is outside.
+--- See: https://love2d.org/wiki/Fixture:testPoint
+---@field testPoint (fun(self: love.Fixture, x: number, y: number): boolean) Checks if a point is inside the shape of the fixture.
 
----@class love.Shape : love.Object
----@class love.CircleShape : love.Shape
----@class love.PolygonShape : love.Shape
+--- Defines the shape of characters that can be drawn onto the screen.
+--- See: https://love2d.org/wiki/Font
+---@class love.Font : love.Object
+--- Gets the ascent of the Font.
+--- Returns `ascent` (number): The ascent of the Font in pixels.
+--- See: https://love2d.org/wiki/Font:getAscent
+---@field getAscent (fun(self: love.Font): number) Gets the ascent of the Font.
+--- Gets the baseline of the Font.
+--- Returns `baseline` (number): The baseline of the Font in pixels.
+--- See: https://love2d.org/wiki/Font:getBaseline
+---@field getBaseline (fun(self: love.Font): number) Gets the baseline of the Font.
+--- Gets the DPI scale factor of the Font.
+--- Returns `dpiscale` (number): The DPI scale factor of the Font.
+--- See: https://love2d.org/wiki/Font:getDPIScale
+---@field getDPIScale (fun(self: love.Font): number) Gets the DPI scale factor of the Font.
+--- Gets the descent of the Font.
+--- Returns `descent` (number): The descent of the Font in pixels.
+--- See: https://love2d.org/wiki/Font:getDescent
+---@field getDescent (fun(self: love.Font): number) Gets the descent of the Font.
+--- Gets the filter mode for a font.
+--- Returns `min` (love.FilterMode): Filter mode used when minifying the font.
+--- Returns `mag` (love.FilterMode): Filter mode used when magnifying the font.
+--- Returns `anisotropy` (number): Maximum amount of anisotropic filtering used.
+--- See: https://love2d.org/wiki/Font:getFilter
+---@field getFilter (fun(self: love.Font): love.FilterMode, love.FilterMode, number) Gets the filter mode for a font.
+--- Gets the height of the Font.
+--- Returns `height` (number): The height of the Font in pixels.
+--- See: https://love2d.org/wiki/Font:getHeight
+---@field getHeight (fun(self: love.Font): number) Gets the height of the Font.
+--- Gets the kerning between two characters in the Font.
+--- Parameter `leftchar` (string): The left character.
+--- Parameter `rightchar` (string): The right character.
+--- Returns `kerning` (number): The kerning amount to add to the spacing between the two characters.
+--- See: https://love2d.org/wiki/Font:getKerning
+---@field getKerning (fun(self: love.Font, leftchar: string, rightchar: string): number)|(fun(self: love.Font, leftglyph: number, rightglyph: number): number) Gets the kerning between two characters in the Font.
+--- Gets the line height.
+--- Returns `height` (number): The current line height.
+--- See: https://love2d.org/wiki/Font:getLineHeight
+---@field getLineHeight (fun(self: love.Font): number) Gets the line height.
+--- Determines the maximum width (accounting for newlines) taken by the given string.
+--- Parameter `text` (string): A string.
+--- Returns `width` (number): The width of the text.
+--- See: https://love2d.org/wiki/Font:getWidth
+---@field getWidth (fun(self: love.Font, text: string): number) Determines the maximum width (accounting for newlines) taken by the given string.
+--- Gets formatting information for text, given a wrap limit.
+--- Parameter `text` (string): The text that will be wrapped.
+--- Parameter `wraplimit` (number): The maximum width in pixels of each line that ''text'' is allowed before wrapping.
+--- Returns `width` (number): The maximum width of the wrapped text.
+--- Returns `wrappedtext` (table): A sequence containing each line of text that was wrapped.
+--- See: https://love2d.org/wiki/Font:getWrap
+---@field getWrap (fun(self: love.Font, text: string, wraplimit: number): number, table)|(fun(self: love.Font, coloredtext: love.Font_getWrap_coloredtext, wraplimit: number): number, table) Gets formatting information for text, given a wrap limit.
+--- Gets whether the Font can render a character or string.
+--- Parameter `text` (string): A UTF-8 encoded unicode string.
+--- Returns `hasglyph` (boolean): Whether the font can render all the UTF-8 characters in the string.
+--- See: https://love2d.org/wiki/Font:hasGlyphs
+---@field hasGlyphs (fun(self: love.Font, text: string): boolean)|(fun(self: love.Font, character1: string, character2: string): boolean)|(fun(self: love.Font, codepoint1: number, codepoint2: number): boolean) Gets whether the Font can render a character or string.
+--- Sets the fallback fonts.
+--- Parameter `fallbackfont1` (love.Font): The first fallback Font to use.
+--- Parameter `...` (love.Font): Additional fallback Fonts.
+--- See: https://love2d.org/wiki/Font:setFallbacks
+---@field setFallbacks (fun(self: love.Font, fallbackfont1: love.Font, ...: love.Font)) Sets the fallback fonts.
+--- Sets the filter mode for a font.
+--- Parameter `min` (love.FilterMode): How to scale a font down.
+--- Parameter `mag` (love.FilterMode): How to scale a font up.
+--- Parameter `anisotropy` (number): Maximum amount of anisotropic filtering used. Default: `1`.
+--- See: https://love2d.org/wiki/Font:setFilter
+---@field setFilter (fun(self: love.Font, min: love.FilterMode, mag: love.FilterMode, anisotropy?: number)) Sets the filter mode for a font.
+--- Sets the line height.
+--- Parameter `height` (number): The new line height.
+--- See: https://love2d.org/wiki/Font:setLineHeight
+---@field setLineHeight (fun(self: love.Font, height: number)) Sets the line height.
 
----@class love.Thread : love.Object
----@field start fun(self: love.Thread, ...: any): nil Start thread execution.
----@field wait fun(self: love.Thread): nil Wait for thread completion.
----@field isRunning fun(self: love.Thread): boolean Check if thread is executing.
----@field getError fun(self: love.Thread): string? Get thread error message if any.
+--- A FrictionJoint applies friction to a body.
+--- See: https://love2d.org/wiki/FrictionJoint
+---@class love.FrictionJoint : love.Joint
+--- Gets the maximum friction force in Newtons.
+--- Returns `force` (number): Maximum force in Newtons.
+--- See: https://love2d.org/wiki/FrictionJoint:getMaxForce
+---@field getMaxForce (fun(self: love.FrictionJoint): number) Gets the maximum friction force in Newtons.
+--- Gets the maximum friction torque in Newton-meters.
+--- Returns `torque` (number): Maximum torque in Newton-meters.
+--- See: https://love2d.org/wiki/FrictionJoint:getMaxTorque
+---@field getMaxTorque (fun(self: love.FrictionJoint): number) Gets the maximum friction torque in Newton-meters.
+--- Sets the maximum friction force in Newtons.
+--- Parameter `maxForce` (number): Max force in Newtons.
+--- See: https://love2d.org/wiki/FrictionJoint:setMaxForce
+---@field setMaxForce (fun(self: love.FrictionJoint, maxForce: number)) Sets the maximum friction force in Newtons.
+--- Sets the maximum friction torque in Newton-meters.
+--- Parameter `torque` (number): Maximum torque in Newton-meters.
+--- See: https://love2d.org/wiki/FrictionJoint:setMaxTorque
+---@field setMaxTorque (fun(self: love.FrictionJoint, torque: number)) Sets the maximum friction torque in Newton-meters.
 
----@class love.Channel : love.Object
----@field push fun(self: love.Channel, value: any): integer Push value to channel message queue.
----@field pop fun(self: love.Channel): any Pop message from channel queue.
----@field supply fun(self: love.Channel, value: any): boolean Send value blocking until retrieved.
----@field demand fun(self: love.Channel): any Retrieve message blocking until available.
----@field peek fun(self: love.Channel): any Inspect first message without popping.
----@field getCount fun(self: love.Channel): integer Get number of pending messages.
----@field clear fun(self: love.Channel): nil Clear channel queue.
+--- Keeps bodies together in such a way that they act like gears.
+--- See: https://love2d.org/wiki/GearJoint
+---@class love.GearJoint : love.Joint
+--- Get the Joints connected by this GearJoint.
+--- Returns `joint1` (love.Joint): The first connected Joint.
+--- Returns `joint2` (love.Joint): The second connected Joint.
+--- See: https://love2d.org/wiki/GearJoint:getJoints
+---@field getJoints (fun(self: love.GearJoint): love.Joint, love.Joint) Get the Joints connected by this GearJoint.
+--- Get the ratio of a gear joint.
+--- Returns `ratio` (number): The ratio of the joint.
+--- See: https://love2d.org/wiki/GearJoint:getRatio
+---@field getRatio (fun(self: love.GearJoint): number) Get the ratio of a gear joint.
+--- Set the ratio of a gear joint.
+--- Parameter `ratio` (number): The new ratio of the joint.
+--- See: https://love2d.org/wiki/GearJoint:setRatio
+---@field setRatio (fun(self: love.GearJoint, ratio: number)) Set the ratio of a gear joint.
 
----@class love.RandomGenerator : love.Object
----@field random fun(self: love.RandomGenerator, min?: number, max?: number): number Generate random float or integer.
----@field setSeed fun(self: love.RandomGenerator, seed: integer, low?: integer): nil Set random generator seed.
+--- A GlyphData represents a drawable symbol of a font Rasterizer.
+--- See: https://love2d.org/wiki/GlyphData
+---@class love.GlyphData : love.Data
+--- Gets glyph advance.
+--- Returns `advance` (number): Glyph advance.
+--- See: https://love2d.org/wiki/GlyphData:getAdvance
+---@field getAdvance (fun(self: love.GlyphData): number) Gets glyph advance.
+--- Gets glyph bearing.
+--- Returns `bx` (number): Glyph bearing X.
+--- Returns `by` (number): Glyph bearing Y.
+--- See: https://love2d.org/wiki/GlyphData:getBearing
+---@field getBearing (fun(self: love.GlyphData): number, number) Gets glyph bearing.
+--- Gets glyph bounding box.
+--- Returns `x` (number): Glyph position x.
+--- Returns `y` (number): Glyph position y.
+--- Returns `width` (number): Glyph width.
+--- Returns `height` (number): Glyph height.
+--- See: https://love2d.org/wiki/GlyphData:getBoundingBox
+---@field getBoundingBox (fun(self: love.GlyphData): number, number, number, number) Gets glyph bounding box.
+--- Gets glyph dimensions.
+--- Returns `width` (number): Glyph width.
+--- Returns `height` (number): Glyph height.
+--- See: https://love2d.org/wiki/GlyphData:getDimensions
+---@field getDimensions (fun(self: love.GlyphData): number, number) Gets glyph dimensions.
+--- Gets glyph pixel format.
+--- Returns `format` (love.PixelFormat): Glyph pixel format.
+--- See: https://love2d.org/wiki/GlyphData:getFormat
+---@field getFormat (fun(self: love.GlyphData): love.PixelFormat) Gets glyph pixel format.
+--- Gets glyph number.
+--- Returns `glyph` (number): Glyph number.
+--- See: https://love2d.org/wiki/GlyphData:getGlyph
+---@field getGlyph (fun(self: love.GlyphData): number) Gets glyph number.
+--- Gets glyph string.
+--- Returns `glyph` (string): Glyph string.
+--- See: https://love2d.org/wiki/GlyphData:getGlyphString
+---@field getGlyphString (fun(self: love.GlyphData): string) Gets glyph string.
+--- Gets glyph height.
+--- Returns `height` (number): Glyph height.
+--- See: https://love2d.org/wiki/GlyphData:getHeight
+---@field getHeight (fun(self: love.GlyphData): number) Gets glyph height.
+--- Gets glyph width.
+--- Returns `width` (number): Glyph width.
+--- See: https://love2d.org/wiki/GlyphData:getWidth
+---@field getWidth (fun(self: love.GlyphData): number) Gets glyph width.
 
----@class love.BezierCurve : love.Object
----@field evaluate fun(self: love.BezierCurve, t: number): number, number Evaluate curve at position t (0.0 to 1.0).
----@field render fun(self: love.BezierCurve, depth?: integer): number[] Get rendered line coordinates.
+--- Drawable image type.
+--- See: https://love2d.org/wiki/Image
+---@class love.Image : love.Texture
+--- Gets whether the Image was created from CompressedData.
+--- Returns `compressed` (boolean): Whether the Image is stored as a compressed texture on the GPU.
+--- See: https://love2d.org/wiki/Image:isCompressed
+---@field isCompressed (fun(self: love.Image): boolean) Gets whether the Image was created from CompressedData.
+--- Gets whether the Image was created with the linear (non-gamma corrected) flag set to true.
+--- Returns `linear` (boolean): Whether the Image's internal pixel format is linear (not gamma corrected), when gamma-correct rendering is enabled.
+--- See: https://love2d.org/wiki/Image:isFormatLinear
+---@field isFormatLinear (fun(self: love.Image): boolean) Gets whether the Image was created with the linear (non-gamma corrected) flag set to true.
+--- Replace the contents of an Image.
+--- Parameter `data` (love.ImageData): The new ImageData to replace the contents with.
+--- Parameter `slice` (number): Which cubemap face, array index, or volume layer to replace, if applicable. Default: `1`.
+--- Parameter `mipmap` (number): The mimap level to replace, if the Image has mipmaps. Default: `1`.
+--- Parameter `x` (number): The x-offset in pixels from the top-left of the image to replace. Default: `0`.
+--- Parameter `y` (number): The y-offset in pixels from the top-left of the image to replace. Default: `0`.
+--- Parameter `reloadmipmaps` (boolean): Whether to generate new mipmaps after replacing the Image's pixels. Default: `false`.
+--- See: https://love2d.org/wiki/Image:replacePixels
+---@field replacePixels (fun(self: love.Image, data: love.ImageData, slice?: number, mipmap?: number, x?: number, y?: number, reloadmipmaps?: boolean)) Replace the contents of an Image.
 
----@class love.Cursor : love.Object
+--- Raw (decoded) image data.
+--- See: https://love2d.org/wiki/ImageData
+---@class love.ImageData : love.Data
+--- Encodes the ImageData and optionally writes it to the save directory.
+--- Parameter `format` (love.ImageFormat): The format to encode the image as.
+--- Parameter `filename` (string): The filename to write the file to. Default: `nil`.
+--- Returns `filedata` (love.FileData): The encoded image as a new FileData object.
+--- See: https://love2d.org/wiki/ImageData:encode
+---@field encode (fun(self: love.ImageData, format: love.ImageFormat, filename?: string): love.FileData)|(fun(self: love.ImageData, outFile: string))|(fun(self: love.ImageData, outFile: string, format: love.ImageFormat)) Encodes the ImageData and optionally writes it to the save directory.
+--- Gets the width and height of the ImageData in pixels.
+--- Returns `width` (number): The width of the ImageData in pixels.
+--- Returns `height` (number): The height of the ImageData in pixels.
+--- See: https://love2d.org/wiki/ImageData:getDimensions
+---@field getDimensions (fun(self: love.ImageData): number, number) Gets the width and height of the ImageData in pixels.
+--- Gets the height of the ImageData in pixels.
+--- Returns `height` (number): The height of the ImageData in pixels.
+--- See: https://love2d.org/wiki/ImageData:getHeight
+---@field getHeight (fun(self: love.ImageData): number) Gets the height of the ImageData in pixels.
+--- Gets the color of a pixel at a specific position in the image.
+--- Parameter `x` (number): The position of the pixel on the x-axis.
+--- Parameter `y` (number): The position of the pixel on the y-axis.
+--- Returns `r` (number): The red component (0-1).
+--- Returns `g` (number): The green component (0-1).
+--- Returns `b` (number): The blue component (0-1).
+--- Returns `a` (number): The alpha component (0-1).
+--- See: https://love2d.org/wiki/ImageData:getPixel
+---@field getPixel (fun(self: love.ImageData, x: number, y: number): number, number, number, number) Gets the color of a pixel at a specific position in the image.
+--- Gets the width of the ImageData in pixels.
+--- Returns `width` (number): The width of the ImageData in pixels.
+--- See: https://love2d.org/wiki/ImageData:getWidth
+---@field getWidth (fun(self: love.ImageData): number) Gets the width of the ImageData in pixels.
+--- Transform an image by applying a function to every pixel.
+--- Parameter `pixelFunction` (function): Function to apply to every pixel.
+--- Parameter `x` (number): The x-axis of the top-left corner of the area within the ImageData to apply the function to. Default: `0`.
+--- Parameter `y` (number): The y-axis of the top-left corner of the area within the ImageData to apply the function to. Default: `0`.
+--- Parameter `width` (number): The width of the area within the ImageData to apply the function to. Default: `ImageData:getWidth()`.
+--- Parameter `height` (number): The height of the area within the ImageData to apply the function to. Default: `ImageData:getHeight()`.
+--- See: https://love2d.org/wiki/ImageData:mapPixel
+---@field mapPixel (fun(self: love.ImageData, pixelFunction: function, x?: number, y?: number, width?: number, height?: number)) Transform an image by applying a function to every pixel.
+--- Paste into ImageData from another source ImageData.
+--- Parameter `source` (love.ImageData): Source ImageData from which to copy.
+--- Parameter `dx` (number): Destination top-left position on x-axis.
+--- Parameter `dy` (number): Destination top-left position on y-axis.
+--- Parameter `sx` (number): Source top-left position on x-axis.
+--- Parameter `sy` (number): Source top-left position on y-axis.
+--- Parameter `sw` (number): Source width.
+--- Parameter `sh` (number): Source height.
+--- See: https://love2d.org/wiki/ImageData:paste
+---@field paste (fun(self: love.ImageData, source: love.ImageData, dx: number, dy: number, sx: number, sy: number, sw: number, sh: number)) Paste into ImageData from another source ImageData.
+--- Sets the color of a pixel at a specific position in the image.
+--- Parameter `x` (number): The position of the pixel on the x-axis.
+--- Parameter `y` (number): The position of the pixel on the y-axis.
+--- Parameter `r` (number): The red component (0-1).
+--- Parameter `g` (number): The green component (0-1).
+--- Parameter `b` (number): The blue component (0-1).
+--- Parameter `a` (number): The alpha component (0-1).
+--- See: https://love2d.org/wiki/ImageData:setPixel
+---@field setPixel (fun(self: love.ImageData, x: number, y: number, r: number, g: number, b: number, a: number))|(fun(self: love.ImageData, x: number, y: number, color: table)) Sets the color of a pixel at a specific position in the image.
+--- Gets the pixel format of the ImageData.
+--- Returns `format` (love.PixelFormat): The pixel format the ImageData was created with.
+--- See: https://love2d.org/wiki/ImageData:getFormat
+---@field getFormat (fun(self: love.ImageData): love.PixelFormat) Gets the pixel format of the ImageData.
+
+--- Attach multiple bodies together to interact in unique ways.
+--- See: https://love2d.org/wiki/Joint
+---@class love.Joint : love.Object
+--- Explicitly destroys the Joint.
+--- See: https://love2d.org/wiki/Joint:destroy
+---@field destroy (fun(self: love.Joint)) Explicitly destroys the Joint.
+--- Get the anchor points of the joint.
+--- Returns `x1` (number): The x-component of the anchor on Body 1.
+--- Returns `y1` (number): The y-component of the anchor on Body 1.
+--- Returns `x2` (number): The x-component of the anchor on Body 2.
+--- Returns `y2` (number): The y-component of the anchor on Body 2.
+--- See: https://love2d.org/wiki/Joint:getAnchors
+---@field getAnchors (fun(self: love.Joint): number, number, number, number) Get the anchor points of the joint.
+--- Gets the bodies that the Joint is attached to.
+--- Returns `bodyA` (love.Body): The first Body.
+--- Returns `bodyB` (love.Body): The second Body.
+--- See: https://love2d.org/wiki/Joint:getBodies
+---@field getBodies (fun(self: love.Joint): love.Body, love.Body) Gets the bodies that the Joint is attached to.
+--- Gets whether the connected Bodies collide.
+--- Returns `c` (boolean): True if they collide, false otherwise.
+--- See: https://love2d.org/wiki/Joint:getCollideConnected
+---@field getCollideConnected (fun(self: love.Joint): boolean) Gets whether the connected Bodies collide.
+--- Returns the reaction force in newtons on the second body
+--- Parameter `x` (number): How long the force applies.
+--- Returns `x` (number): The x-component of the force.
+--- Returns `y` (number): The y-component of the force.
+--- See: https://love2d.org/wiki/Joint:getReactionForce
+---@field getReactionForce (fun(self: love.Joint, x: number): number, number) Returns the reaction force in newtons on the second body
+--- Returns the reaction torque on the second body.
+--- Parameter `invdt` (number): How long the force applies.
+--- Returns `torque` (number): The reaction torque on the second body.
+--- See: https://love2d.org/wiki/Joint:getReactionTorque
+---@field getReactionTorque (fun(self: love.Joint, invdt: number): number) Returns the reaction torque on the second body.
+--- Gets a string representing the type.
+--- Returns `type` (love.JointType): A string with the name of the Joint type.
+--- See: https://love2d.org/wiki/Joint:getType
+---@field getType (fun(self: love.Joint): love.JointType) Gets a string representing the type.
+--- Returns the Lua value associated with this Joint.
+--- Returns `value` (any): The Lua value associated with the Joint.
+--- See: https://love2d.org/wiki/Joint:getUserData
+---@field getUserData (fun(self: love.Joint): any) Returns the Lua value associated with this Joint.
+--- Gets whether the Joint is destroyed.
+--- Returns `destroyed` (boolean): Whether the Joint is destroyed.
+--- See: https://love2d.org/wiki/Joint:isDestroyed
+---@field isDestroyed (fun(self: love.Joint): boolean) Gets whether the Joint is destroyed.
+--- Associates a Lua value with the Joint.
+--- Parameter `value` (any): The Lua value to associate with the Joint.
+--- See: https://love2d.org/wiki/Joint:setUserData
+---@field setUserData (fun(self: love.Joint, value: any)) Associates a Lua value with the Joint.
+
+--- Represents a physical joystick.
+--- See: https://love2d.org/wiki/Joystick
 ---@class love.Joystick : love.Object
----@field getName fun(self: love.Joystick): string Get joystick name.
----@field isDown fun(self: love.Joystick, ...: integer): boolean Check if joystick buttons are held.
----@field getAxis fun(self: love.Joystick, axis: integer): number Get joystick axis value (-1.0 to 1.0).
----@field isConnected fun(self: love.Joystick): boolean Check if joystick is connected.
+--- Gets the direction of each axis.
+--- Returns `axisDir1` (number): Direction of axis1.
+--- Returns `axisDir2` (number): Direction of axis2.
+--- Returns `axisDirN` (number): Direction of axisN.
+--- See: https://love2d.org/wiki/Joystick:getAxes
+---@field getAxes (fun(self: love.Joystick): number, number, number) Gets the direction of each axis.
+--- Gets the direction of an axis.
+--- Parameter `axis` (number): The index of the axis to be checked.
+--- Returns `direction` (number): Current value of the axis.
+--- See: https://love2d.org/wiki/Joystick:getAxis
+---@field getAxis (fun(self: love.Joystick, axis: number): number) Gets the direction of an axis.
+--- Gets the number of axes on the joystick.
+--- Returns `axes` (number): The number of axes available.
+--- See: https://love2d.org/wiki/Joystick:getAxisCount
+---@field getAxisCount (fun(self: love.Joystick): number) Gets the number of axes on the joystick.
+--- Gets the number of buttons on the joystick.
+--- Returns `buttons` (number): The number of buttons available.
+--- See: https://love2d.org/wiki/Joystick:getButtonCount
+---@field getButtonCount (fun(self: love.Joystick): number) Gets the number of buttons on the joystick.
+--- Gets the USB vendor ID, product ID, and product version numbers of joystick which consistent across operating systems.
+--- Returns `vendorID` (number): The USB vendor ID of the joystick.
+--- Returns `productID` (number): The USB product ID of the joystick.
+--- Returns `productVersion` (number): The product version of the joystick.
+--- See: https://love2d.org/wiki/Joystick:getDeviceInfo
+---@field getDeviceInfo (fun(self: love.Joystick): number, number, number) Gets the USB vendor ID, product ID, and product version numbers of joystick which consistent across operating systems.
+--- Gets a stable GUID unique to the type of the physical joystick which does not change over time.
+--- Returns `guid` (string): The Joystick type's OS-dependent unique identifier.
+--- See: https://love2d.org/wiki/Joystick:getGUID
+---@field getGUID (fun(self: love.Joystick): string) Gets a stable GUID unique to the type of the physical joystick which does not change over time.
+--- Gets the direction of a virtual gamepad axis.
+--- Parameter `axis` (love.GamepadAxis): The virtual axis to be checked.
+--- Returns `direction` (number): Current value of the axis.
+--- See: https://love2d.org/wiki/Joystick:getGamepadAxis
+---@field getGamepadAxis (fun(self: love.Joystick, axis: love.GamepadAxis): number) Gets the direction of a virtual gamepad axis.
+--- Gets the button, axis or hat that a virtual gamepad input is bound to.
+--- Parameter `axis` (love.GamepadAxis): The virtual gamepad axis to get the binding for.
+--- Returns `inputtype` (love.JoystickInputType): The type of input the virtual gamepad axis is bound to.
+--- Returns `inputindex` (number): The index of the Joystick's button, axis or hat that the virtual gamepad axis is bound to.
+--- Returns `hatdirection` (love.JoystickHat): The direction of the hat, if the virtual gamepad axis is bound to a hat.
+--- See: https://love2d.org/wiki/Joystick:getGamepadMapping
+---@field getGamepadMapping (fun(self: love.Joystick, axis: love.GamepadAxis): love.JoystickInputType, number, love.JoystickHat)|(fun(self: love.Joystick, button: love.GamepadButton): love.JoystickInputType, number, love.JoystickHat) Gets the button, axis or hat that a virtual gamepad input is bound to.
+--- Gets the full gamepad mapping string of this Joystick, or nil if it's not recognized as a gamepad.
+--- Returns `mappingstring` (string): A string containing the Joystick's gamepad mappings, or nil if the Joystick is not recognized as a gamepad.
+--- See: https://love2d.org/wiki/Joystick:getGamepadMappingString
+---@field getGamepadMappingString (fun(self: love.Joystick): string) Gets the full gamepad mapping string of this Joystick, or nil if it's not recognized as a gamepad.
+--- Gets the direction of the Joystick's hat.
+--- Parameter `hat` (number): The index of the hat to be checked.
+--- Returns `direction` (love.JoystickHat): The direction the hat is pushed.
+--- See: https://love2d.org/wiki/Joystick:getHat
+---@field getHat (fun(self: love.Joystick, hat: number): love.JoystickHat) Gets the direction of the Joystick's hat.
+--- Gets the number of hats on the joystick.
+--- Returns `hats` (number): How many hats the joystick has.
+--- See: https://love2d.org/wiki/Joystick:getHatCount
+---@field getHatCount (fun(self: love.Joystick): number) Gets the number of hats on the joystick.
+--- Gets the joystick's unique identifier.
+--- Returns `id` (number): The Joystick's unique identifier.
+--- Returns `instanceid` (number): Unique instance identifier.
+--- See: https://love2d.org/wiki/Joystick:getID
+---@field getID (fun(self: love.Joystick): number, number) Gets the joystick's unique identifier.
+--- Gets the name of the joystick.
+--- Returns `name` (string): The name of the joystick.
+--- See: https://love2d.org/wiki/Joystick:getName
+---@field getName (fun(self: love.Joystick): string) Gets the name of the joystick.
+--- Gets the current vibration motor strengths on a Joystick with rumble support.
+--- Returns `left` (number): Current strength of the left vibration motor on the Joystick.
+--- Returns `right` (number): Current strength of the right vibration motor on the Joystick.
+--- See: https://love2d.org/wiki/Joystick:getVibration
+---@field getVibration (fun(self: love.Joystick): number, number) Gets the current vibration motor strengths on a Joystick with rumble support.
+--- Gets whether the Joystick is connected.
+--- Returns `connected` (boolean): True if the Joystick is currently connected, false otherwise.
+--- See: https://love2d.org/wiki/Joystick:isConnected
+---@field isConnected (fun(self: love.Joystick): boolean) Gets whether the Joystick is connected.
+--- Checks if a button on the Joystick is pressed.
+--- Parameter `buttonN` (number): The index of a button to check.
+--- Returns `anyDown` (boolean): True if any supplied button is down, false if not.
+--- See: https://love2d.org/wiki/Joystick:isDown
+---@field isDown (fun(self: love.Joystick, buttonN: number): boolean) Checks if a button on the Joystick is pressed.
+--- Gets whether the Joystick is recognized as a gamepad.
+--- Returns `isgamepad` (boolean): True if the Joystick is recognized as a gamepad, false otherwise.
+--- See: https://love2d.org/wiki/Joystick:isGamepad
+---@field isGamepad (fun(self: love.Joystick): boolean) Gets whether the Joystick is recognized as a gamepad.
+--- Checks if a virtual gamepad button on the Joystick is pressed.
+--- Parameter `buttonN` (love.GamepadButton): The gamepad button to check.
+--- Returns `anyDown` (boolean): True if any supplied button is down, false if not.
+--- See: https://love2d.org/wiki/Joystick:isGamepadDown
+---@field isGamepadDown (fun(self: love.Joystick, buttonN: love.GamepadButton): boolean) Checks if a virtual gamepad button on the Joystick is pressed.
+--- Gets whether the Joystick supports vibration.
+--- Returns `supported` (boolean): True if rumble / force feedback vibration is supported on this Joystick, false if not.
+--- See: https://love2d.org/wiki/Joystick:isVibrationSupported
+---@field isVibrationSupported (fun(self: love.Joystick): boolean) Gets whether the Joystick supports vibration.
+--- Sets the vibration motor speeds on a Joystick with rumble support.
+--- Parameter `left` (number): Strength of the left vibration motor on the Joystick.
+--- Parameter `right` (number): Strength of the right vibration motor on the Joystick.
+--- Returns `success` (boolean): True if the vibration was successfully applied, false if not.
+--- See: https://love2d.org/wiki/Joystick:setVibration
+---@field setVibration (fun(self: love.Joystick, left: number, right: number): boolean)|(fun(self: love.Joystick): boolean)|(fun(self: love.Joystick, left: number, right: number, duration?: number): boolean) Sets the vibration motor speeds on a Joystick with rumble support.
 
+--- A 2D polygon mesh used for drawing arbitrary textured shapes.
+--- See: https://love2d.org/wiki/Mesh
+---@class love.Mesh : love.Drawable
+--- Attaches a vertex attribute from a different Mesh onto this Mesh, for use when drawing.
+--- Parameter `name` (string): The name of the vertex attribute to attach.
+--- Parameter `mesh` (love.Mesh): The Mesh to get the vertex attribute from.
+--- See: https://love2d.org/wiki/Mesh:attachAttribute
+---@field attachAttribute (fun(self: love.Mesh, name: string, mesh: love.Mesh))|(fun(self: love.Mesh, name: string, mesh: love.Mesh, step?: love.VertexAttributeStep, attachname?: string)) Attaches a vertex attribute from a different Mesh onto this Mesh, for use when drawing.
+--- Removes a previously attached vertex attribute from this Mesh.
+--- Parameter `name` (string): The name of the attached vertex attribute to detach.
+--- Returns `success` (boolean): Whether the attribute was successfully detached.
+--- See: https://love2d.org/wiki/Mesh:detachAttribute
+---@field detachAttribute (fun(self: love.Mesh, name: string): boolean) Removes a previously attached vertex attribute from this Mesh.
+--- Immediately sends all modified vertex data in the Mesh to the graphics card.
+--- See: https://love2d.org/wiki/Mesh:flush
+---@field flush (fun(self: love.Mesh)) Immediately sends all modified vertex data in the Mesh to the graphics card.
+--- Gets the mode used when drawing the Mesh.
+--- Returns `mode` (love.MeshDrawMode): The mode used when drawing the Mesh.
+--- See: https://love2d.org/wiki/Mesh:getDrawMode
+---@field getDrawMode (fun(self: love.Mesh): love.MeshDrawMode) Gets the mode used when drawing the Mesh.
+--- Gets the range of vertices used when drawing the Mesh.
+--- Returns `min` (number): The index of the first vertex used when drawing, or the index of the first value in the vertex map used if one is set for this Mesh.
+--- Returns `max` (number): The index of the last vertex used when drawing, or the index of the last value in the vertex map used if one is set for this Mesh.
+--- See: https://love2d.org/wiki/Mesh:getDrawRange
+---@field getDrawRange (fun(self: love.Mesh): number, number) Gets the range of vertices used when drawing the Mesh.
+--- Gets the texture (Image or Canvas) used when drawing the Mesh.
+--- Returns `texture` (love.Texture): The Image or Canvas to texture the Mesh with when drawing, or nil if none is set.
+--- See: https://love2d.org/wiki/Mesh:getTexture
+---@field getTexture (fun(self: love.Mesh): love.Texture) Gets the texture (Image or Canvas) used when drawing the Mesh.
+--- Gets the properties of a vertex in the Mesh.
+--- Parameter `index` (number): The one-based index of the vertex you want to retrieve the information for.
+--- Returns `attributecomponent` (number): The first component of the first vertex attribute in the specified vertex.
+--- Returns `...` (number): Additional components of all vertex attributes in the specified vertex.
+--- See: https://love2d.org/wiki/Mesh:getVertex
+---@field getVertex (fun(self: love.Mesh, index: number): number, number)|(fun(self: love.Mesh, index: number): number, number, number, number, number, number, number, number) Gets the properties of a vertex in the Mesh.
+--- Gets the properties of a specific attribute within a vertex in the Mesh.
+--- Parameter `vertexindex` (number): The index of the the vertex you want to retrieve the attribute for (one-based).
+--- Parameter `attributeindex` (number): The index of the attribute within the vertex to be retrieved (one-based).
+--- Returns `value1` (number): The value of the first component of the attribute.
+--- Returns `value2` (number): The value of the second component of the attribute.
+--- Returns `...` (number): Any additional vertex attribute components.
+--- See: https://love2d.org/wiki/Mesh:getVertexAttribute
+---@field getVertexAttribute (fun(self: love.Mesh, vertexindex: number, attributeindex: number): number, number, number) Gets the properties of a specific attribute within a vertex in the Mesh.
+--- Gets the total number of vertices in the Mesh.
+--- Returns `count` (number): The total number of vertices in the mesh.
+--- See: https://love2d.org/wiki/Mesh:getVertexCount
+---@field getVertexCount (fun(self: love.Mesh): number) Gets the total number of vertices in the Mesh.
+--- Gets the vertex format that the Mesh was created with.
+--- Returns `format` (love.Mesh_getVertexFormat_formatResult): The vertex format of the Mesh, which is a table containing tables for each vertex attribute the Mesh was created with, in the form of {attribute, ...}.
+--- See: https://love2d.org/wiki/Mesh:getVertexFormat
+---@field getVertexFormat (fun(self: love.Mesh): love.Mesh_getVertexFormat_formatResult) Gets the vertex format that the Mesh was created with.
+--- Gets the vertex map for the Mesh.
+--- Returns `map` (table): A table containing the list of vertex indices used when drawing.
+--- See: https://love2d.org/wiki/Mesh:getVertexMap
+---@field getVertexMap (fun(self: love.Mesh): table) Gets the vertex map for the Mesh.
+--- Gets whether a specific vertex attribute in the Mesh is enabled.
+--- Parameter `name` (string): The name of the vertex attribute to be checked.
+--- Returns `enabled` (boolean): Whether the vertex attribute is used when drawing this Mesh.
+--- See: https://love2d.org/wiki/Mesh:isAttributeEnabled
+---@field isAttributeEnabled (fun(self: love.Mesh, name: string): boolean) Gets whether a specific vertex attribute in the Mesh is enabled.
+--- Enables or disables a specific vertex attribute in the Mesh.
+--- Parameter `name` (string): The name of the vertex attribute to enable or disable.
+--- Parameter `enable` (boolean): Whether the vertex attribute is used when drawing this Mesh.
+--- See: https://love2d.org/wiki/Mesh:setAttributeEnabled
+---@field setAttributeEnabled (fun(self: love.Mesh, name: string, enable: boolean)) Enables or disables a specific vertex attribute in the Mesh.
+--- Sets the mode used when drawing the Mesh.
+--- Parameter `mode` (love.MeshDrawMode): The mode to use when drawing the Mesh.
+--- See: https://love2d.org/wiki/Mesh:setDrawMode
+---@field setDrawMode (fun(self: love.Mesh, mode: love.MeshDrawMode)) Sets the mode used when drawing the Mesh.
+--- Restricts the drawn vertices of the Mesh to a subset of the total.
+--- Parameter `start` (number): The index of the first vertex to use when drawing, or the index of the first value in the vertex map to use if one is set for this Mesh.
+--- Parameter `count` (number): The number of vertices to use when drawing, or number of values in the vertex map to use if one is set for this Mesh.
+--- See: https://love2d.org/wiki/Mesh:setDrawRange
+---@field setDrawRange (fun(self: love.Mesh, start: number, count: number))|(fun(self: love.Mesh)) Restricts the drawn vertices of the Mesh to a subset of the total.
+--- Sets the texture (Image or Canvas) used when drawing the Mesh.
+--- Parameter `texture` (love.Texture): The Image or Canvas to texture the Mesh with when drawing.
+--- See: https://love2d.org/wiki/Mesh:setTexture
+---@field setTexture (fun(self: love.Mesh, texture: love.Texture))|(fun(self: love.Mesh)) Sets the texture (Image or Canvas) used when drawing the Mesh.
+--- Sets the properties of a vertex in the Mesh.
+--- Parameter `index` (number): The index of the the vertex you want to modify (one-based).
+--- Parameter `attributecomponent` (number): The first component of the first vertex attribute in the specified vertex.
+--- Parameter `...` (number): Additional components of all vertex attributes in the specified vertex.
+--- See: https://love2d.org/wiki/Mesh:setVertex
+---@field setVertex (fun(self: love.Mesh, index: number, attributecomponent: number, ...: number))|(fun(self: love.Mesh, index: number, vertex: love.Mesh_setVertex_vertex))|(fun(self: love.Mesh, index: number, x: number, y: number, u: number, v: number, r?: number, g?: number, b?: number, a?: number))|(fun(self: love.Mesh, index: number, vertex: love.Mesh_setVertex_vertex2)) Sets the properties of a vertex in the Mesh.
+--- Sets the properties of a specific attribute within a vertex in the Mesh.
+--- Parameter `vertexindex` (number): The index of the the vertex to be modified (one-based).
+--- Parameter `attributeindex` (number): The index of the attribute within the vertex to be modified (one-based).
+--- Parameter `value1` (number): The new value for the first component of the attribute.
+--- Parameter `value2` (number): The new value for the second component of the attribute.
+--- Parameter `...` (number): Any additional vertex attribute components.
+--- See: https://love2d.org/wiki/Mesh:setVertexAttribute
+---@field setVertexAttribute (fun(self: love.Mesh, vertexindex: number, attributeindex: number, value1: number, value2: number, ...: number)) Sets the properties of a specific attribute within a vertex in the Mesh.
+--- Sets the vertex map for the Mesh.
+--- Parameter `map` (table): A table containing a list of vertex indices to use when drawing.
+--- See: https://love2d.org/wiki/Mesh:setVertexMap
+---@field setVertexMap (fun(self: love.Mesh, map: table))|(fun(self: love.Mesh, vi1: number, vi2: number, vi3: number))|(fun(self: love.Mesh, data: love.Data, datatype: love.IndexDataType)) Sets the vertex map for the Mesh.
+--- Replaces a range of vertices in the Mesh with new ones.
+--- Parameter `vertices` (love.Mesh_setVertices_vertices): The table filled with vertex information tables for each vertex, in the form of {vertex, ...} where each vertex is a table in the form of {attributecomponent, ...}.
+--- Parameter `startvertex` (number): The index of the first vertex to replace. Default: `1`.
+--- Parameter `count` (number): Amount of vertices to replace. Default: `all`.
+--- See: https://love2d.org/wiki/Mesh:setVertices
+---@field setVertices (fun(self: love.Mesh, vertices: love.Mesh_setVertices_vertices, startvertex?: number, count?: number))|(fun(self: love.Mesh, data: love.Data, startvertex?: number))|(fun(self: love.Mesh, vertices: love.Mesh_setVertices_vertices2)) Replaces a range of vertices in the Mesh with new ones.
+
+--- Controls the relative motion between two Bodies.
+--- See: https://love2d.org/wiki/MotorJoint
+---@class love.MotorJoint : love.Joint
+--- Gets the target angular offset between the two Bodies the Joint is attached to.
+--- Returns `angleoffset` (number): The target angular offset in radians: the second body's angle minus the first body's angle.
+--- See: https://love2d.org/wiki/MotorJoint:getAngularOffset
+---@field getAngularOffset (fun(self: love.MotorJoint): number) Gets the target angular offset between the two Bodies the Joint is attached to.
+--- Gets the target linear offset between the two Bodies the Joint is attached to.
+--- Returns `x` (number): The x component of the target linear offset, relative to the first Body.
+--- Returns `y` (number): The y component of the target linear offset, relative to the first Body.
+--- See: https://love2d.org/wiki/MotorJoint:getLinearOffset
+---@field getLinearOffset (fun(self: love.MotorJoint): number, number) Gets the target linear offset between the two Bodies the Joint is attached to.
+--- Sets the target angluar offset between the two Bodies the Joint is attached to.
+--- Parameter `angleoffset` (number): The target angular offset in radians: the second body's angle minus the first body's angle.
+--- See: https://love2d.org/wiki/MotorJoint:setAngularOffset
+---@field setAngularOffset (fun(self: love.MotorJoint, angleoffset: number)) Sets the target angluar offset between the two Bodies the Joint is attached to.
+--- Sets the target linear offset between the two Bodies the Joint is attached to.
+--- Parameter `x` (number): The x component of the target linear offset, relative to the first Body.
+--- Parameter `y` (number): The y component of the target linear offset, relative to the first Body.
+--- See: https://love2d.org/wiki/MotorJoint:setLinearOffset
+---@field setLinearOffset (fun(self: love.MotorJoint, x: number, y: number)) Sets the target linear offset between the two Bodies the Joint is attached to.
+
+--- For controlling objects with the mouse.
+--- See: https://love2d.org/wiki/MouseJoint
+---@class love.MouseJoint : love.Joint
+--- Returns the damping ratio.
+--- Returns `ratio` (number): The new damping ratio.
+--- See: https://love2d.org/wiki/MouseJoint:getDampingRatio
+---@field getDampingRatio (fun(self: love.MouseJoint): number) Returns the damping ratio.
+--- Returns the frequency.
+--- Returns `freq` (number): The frequency in hertz.
+--- See: https://love2d.org/wiki/MouseJoint:getFrequency
+---@field getFrequency (fun(self: love.MouseJoint): number) Returns the frequency.
+--- Gets the highest allowed force.
+--- Returns `f` (number): The max allowed force.
+--- See: https://love2d.org/wiki/MouseJoint:getMaxForce
+---@field getMaxForce (fun(self: love.MouseJoint): number) Gets the highest allowed force.
+--- Gets the target point.
+--- Returns `x` (number): The x-component of the target.
+--- Returns `y` (number): The x-component of the target.
+--- See: https://love2d.org/wiki/MouseJoint:getTarget
+---@field getTarget (fun(self: love.MouseJoint): number, number) Gets the target point.
+--- Sets a new damping ratio.
+--- Parameter `ratio` (number): The new damping ratio.
+--- See: https://love2d.org/wiki/MouseJoint:setDampingRatio
+---@field setDampingRatio (fun(self: love.MouseJoint, ratio: number)) Sets a new damping ratio.
+--- Sets a new frequency.
+--- Parameter `freq` (number): The new frequency in hertz.
+--- See: https://love2d.org/wiki/MouseJoint:setFrequency
+---@field setFrequency (fun(self: love.MouseJoint, freq: number)) Sets a new frequency.
+--- Sets the highest allowed force.
+--- Parameter `f` (number): The max allowed force.
+--- See: https://love2d.org/wiki/MouseJoint:setMaxForce
+---@field setMaxForce (fun(self: love.MouseJoint, f: number)) Sets the highest allowed force.
+--- Sets the target point.
+--- Parameter `x` (number): The x-component of the target.
+--- Parameter `y` (number): The y-component of the target.
+--- See: https://love2d.org/wiki/MouseJoint:setTarget
+---@field setTarget (fun(self: love.MouseJoint, x: number, y: number)) Sets the target point.
+
+--- The superclass of all LÖVE types.
+--- See: https://love2d.org/wiki/Object
+---@class love.Object
+--- Destroys the object's Lua reference.
+--- Returns `success` (boolean): True if the object was released by this call, false if it had been previously released.
+--- See: https://love2d.org/wiki/Object:release
+---@field release (fun(self: love.Object): boolean) Destroys the object's Lua reference.
+--- Gets the type of the object as a string.
+--- Returns `type` (string): The type as a string.
+--- See: https://love2d.org/wiki/Object:type
+---@field type (fun(self: love.Object): string) Gets the type of the object as a string.
+--- Checks whether an object is of a certain type.
+--- Parameter `name` (string): The name of the type to check for.
+--- Returns `b` (boolean): True if the object is of the specified type, false otherwise.
+--- See: https://love2d.org/wiki/Object:typeOf
+---@field typeOf (fun(self: love.Object, name: string): boolean) Checks whether an object is of a certain type.
+
+--- A ParticleSystem can be used to create particle effects like fire or smoke.
+--- See: https://love2d.org/wiki/ParticleSystem
+---@class love.ParticleSystem : love.Drawable
+--- Creates an identical copy of the ParticleSystem in the stopped state.
+--- Returns `particlesystem` (love.ParticleSystem): The new identical copy of this ParticleSystem.
+--- See: https://love2d.org/wiki/ParticleSystem:clone
+---@field clone (fun(self: love.ParticleSystem): love.ParticleSystem) Creates an identical copy of the ParticleSystem in the stopped state.
+--- Emits a burst of particles from the particle emitter.
+--- Parameter `numparticles` (number): The amount of particles to emit.
+--- See: https://love2d.org/wiki/ParticleSystem:emit
+---@field emit (fun(self: love.ParticleSystem, numparticles: number)) Emits a burst of particles from the particle emitter.
+--- Gets the maximum number of particles the ParticleSystem can have at once.
+--- Returns `size` (number): The maximum number of particles.
+--- See: https://love2d.org/wiki/ParticleSystem:getBufferSize
+---@field getBufferSize (fun(self: love.ParticleSystem): number) Gets the maximum number of particles the ParticleSystem can have at once.
+--- Gets the series of colors applied to the particle sprite.
+--- Returns `r1` (number): First color, red component (0-1).
+--- Returns `g1` (number): First color, green component (0-1).
+--- Returns `b1` (number): First color, blue component (0-1).
+--- Returns `a1` (number): First color, alpha component (0-1).
+--- Returns `r2` (number): Second color, red component (0-1).
+--- Returns `g2` (number): Second color, green component (0-1).
+--- Returns `b2` (number): Second color, blue component (0-1).
+--- Returns `a2` (number): Second color, alpha component (0-1).
+--- Returns `r8` (number): Eighth color, red component (0-1).
+--- Returns `g8` (number): Eighth color, green component (0-1).
+--- Returns `b8` (number): Eighth color, blue component (0-1).
+--- Returns `a8` (number): Eighth color, alpha component (0-1).
+--- See: https://love2d.org/wiki/ParticleSystem:getColors
+---@field getColors (fun(self: love.ParticleSystem): number, number, number, number, number, number, number, number, number, number, number, number) Gets the series of colors applied to the particle sprite.
+--- Gets the number of particles that are currently in the system.
+--- Returns `count` (number): The current number of live particles.
+--- See: https://love2d.org/wiki/ParticleSystem:getCount
+---@field getCount (fun(self: love.ParticleSystem): number) Gets the number of particles that are currently in the system.
+--- Gets the direction of the particle emitter (in radians).
+--- Returns `direction` (number): The direction of the emitter (radians).
+--- See: https://love2d.org/wiki/ParticleSystem:getDirection
+---@field getDirection (fun(self: love.ParticleSystem): number) Gets the direction of the particle emitter (in radians).
+--- Gets the area-based spawn parameters for the particles.
+--- Returns `distribution` (love.AreaSpreadDistribution): The type of distribution for new particles.
+--- Returns `dx` (number): The maximum spawn distance from the emitter along the x-axis for uniform distribution, or the standard deviation along the x-axis for normal distribution.
+--- Returns `dy` (number): The maximum spawn distance from the emitter along the y-axis for uniform distribution, or the standard deviation along the y-axis for normal distribution.
+--- Returns `angle` (number): The angle in radians of the emission area.
+--- Returns `directionRelativeToCenter` (boolean): True if newly spawned particles will be oriented relative to the center of the emission area, false otherwise.
+--- See: https://love2d.org/wiki/ParticleSystem:getEmissionArea
+---@field getEmissionArea (fun(self: love.ParticleSystem): love.AreaSpreadDistribution, number, number, number, boolean) Gets the area-based spawn parameters for the particles.
+--- Gets the amount of particles emitted per second.
+--- Returns `rate` (number): The amount of particles per second.
+--- See: https://love2d.org/wiki/ParticleSystem:getEmissionRate
+---@field getEmissionRate (fun(self: love.ParticleSystem): number) Gets the amount of particles emitted per second.
+--- Gets how long the particle system will emit particles (if -1 then it emits particles forever).
+--- Returns `life` (number): The lifetime of the emitter (in seconds).
+--- See: https://love2d.org/wiki/ParticleSystem:getEmitterLifetime
+---@field getEmitterLifetime (fun(self: love.ParticleSystem): number) Gets how long the particle system will emit particles (if -1 then it emits particles forever).
+--- Gets the mode used when the ParticleSystem adds new particles.
+--- Returns `mode` (love.ParticleInsertMode): The mode used when the ParticleSystem adds new particles.
+--- See: https://love2d.org/wiki/ParticleSystem:getInsertMode
+---@field getInsertMode (fun(self: love.ParticleSystem): love.ParticleInsertMode) Gets the mode used when the ParticleSystem adds new particles.
+--- Gets the linear acceleration (acceleration along the x and y axes) for particles.
+--- Returns `xmin` (number): The minimum acceleration along the x axis.
+--- Returns `ymin` (number): The minimum acceleration along the y axis.
+--- Returns `xmax` (number): The maximum acceleration along the x axis.
+--- Returns `ymax` (number): The maximum acceleration along the y axis.
+--- See: https://love2d.org/wiki/ParticleSystem:getLinearAcceleration
+---@field getLinearAcceleration (fun(self: love.ParticleSystem): number, number, number, number) Gets the linear acceleration (acceleration along the x and y axes) for particles.
+--- Gets the amount of linear damping (constant deceleration) for particles.
+--- Returns `min` (number): The minimum amount of linear damping applied to particles.
+--- Returns `max` (number): The maximum amount of linear damping applied to particles.
+--- See: https://love2d.org/wiki/ParticleSystem:getLinearDamping
+---@field getLinearDamping (fun(self: love.ParticleSystem): number, number) Gets the amount of linear damping (constant deceleration) for particles.
+--- Gets the particle image's draw offset.
+--- Returns `ox` (number): The x coordinate of the particle image's draw offset.
+--- Returns `oy` (number): The y coordinate of the particle image's draw offset.
+--- See: https://love2d.org/wiki/ParticleSystem:getOffset
+---@field getOffset (fun(self: love.ParticleSystem): number, number) Gets the particle image's draw offset.
+--- Gets the lifetime of the particles.
+--- Returns `min` (number): The minimum life of the particles (in seconds).
+--- Returns `max` (number): The maximum life of the particles (in seconds).
+--- See: https://love2d.org/wiki/ParticleSystem:getParticleLifetime
+---@field getParticleLifetime (fun(self: love.ParticleSystem): number, number) Gets the lifetime of the particles.
+--- Gets the position of the emitter.
+--- Returns `x` (number): Position along x-axis.
+--- Returns `y` (number): Position along y-axis.
+--- See: https://love2d.org/wiki/ParticleSystem:getPosition
+---@field getPosition (fun(self: love.ParticleSystem): number, number) Gets the position of the emitter.
+--- Gets the series of Quads used for the particle sprites.
+--- Returns `quads` (table): A table containing the Quads used.
+--- See: https://love2d.org/wiki/ParticleSystem:getQuads
+---@field getQuads (fun(self: love.ParticleSystem): table) Gets the series of Quads used for the particle sprites.
+--- Gets the radial acceleration (away from the emitter).
+--- Returns `min` (number): The minimum acceleration.
+--- Returns `max` (number): The maximum acceleration.
+--- See: https://love2d.org/wiki/ParticleSystem:getRadialAcceleration
+---@field getRadialAcceleration (fun(self: love.ParticleSystem): number, number) Gets the radial acceleration (away from the emitter).
+--- Gets the rotation of the image upon particle creation (in radians).
+--- Returns `min` (number): The minimum initial angle (radians).
+--- Returns `max` (number): The maximum initial angle (radians).
+--- See: https://love2d.org/wiki/ParticleSystem:getRotation
+---@field getRotation (fun(self: love.ParticleSystem): number, number) Gets the rotation of the image upon particle creation (in radians).
+--- Gets the amount of size variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- Returns `variation` (number): The amount of variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- See: https://love2d.org/wiki/ParticleSystem:getSizeVariation
+---@field getSizeVariation (fun(self: love.ParticleSystem): number) Gets the amount of size variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- Gets the series of sizes by which the sprite is scaled.
+--- Returns `size1` (number): The first size.
+--- Returns `size2` (number): The second size.
+--- Returns `size8` (number): The eighth size.
+--- See: https://love2d.org/wiki/ParticleSystem:getSizes
+---@field getSizes (fun(self: love.ParticleSystem): number, number, number) Gets the series of sizes by which the sprite is scaled.
+--- Gets the speed of the particles.
+--- Returns `min` (number): The minimum linear speed of the particles.
+--- Returns `max` (number): The maximum linear speed of the particles.
+--- See: https://love2d.org/wiki/ParticleSystem:getSpeed
+---@field getSpeed (fun(self: love.ParticleSystem): number, number) Gets the speed of the particles.
+--- Gets the spin of the sprite.
+--- Returns `min` (number): The minimum spin (radians per second).
+--- Returns `max` (number): The maximum spin (radians per second).
+--- Returns `variation` (number): The degree of variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- See: https://love2d.org/wiki/ParticleSystem:getSpin
+---@field getSpin (fun(self: love.ParticleSystem): number, number, number) Gets the spin of the sprite.
+--- Gets the amount of spin variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- Returns `variation` (number): The amount of variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- See: https://love2d.org/wiki/ParticleSystem:getSpinVariation
+---@field getSpinVariation (fun(self: love.ParticleSystem): number) Gets the amount of spin variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- Gets the amount of directional spread of the particle emitter (in radians).
+--- Returns `spread` (number): The spread of the emitter (radians).
+--- See: https://love2d.org/wiki/ParticleSystem:getSpread
+---@field getSpread (fun(self: love.ParticleSystem): number) Gets the amount of directional spread of the particle emitter (in radians).
+--- Gets the tangential acceleration (acceleration perpendicular to the particle's direction).
+--- Returns `min` (number): The minimum acceleration.
+--- Returns `max` (number): The maximum acceleration.
+--- See: https://love2d.org/wiki/ParticleSystem:getTangentialAcceleration
+---@field getTangentialAcceleration (fun(self: love.ParticleSystem): number, number) Gets the tangential acceleration (acceleration perpendicular to the particle's direction).
+--- Gets the texture (Image or Canvas) used for the particles.
+--- Returns `texture` (love.Texture): The Image or Canvas used for the particles.
+--- See: https://love2d.org/wiki/ParticleSystem:getTexture
+---@field getTexture (fun(self: love.ParticleSystem): love.Texture) Gets the texture (Image or Canvas) used for the particles.
+--- Gets whether particle angles and rotations are relative to their velocities.
+--- Returns `enable` (boolean): True if relative particle rotation is enabled, false if it's disabled.
+--- See: https://love2d.org/wiki/ParticleSystem:hasRelativeRotation
+---@field hasRelativeRotation (fun(self: love.ParticleSystem): boolean) Gets whether particle angles and rotations are relative to their velocities.
+--- Checks whether the particle system is actively emitting particles.
+--- Returns `active` (boolean): True if system is active, false otherwise.
+--- See: https://love2d.org/wiki/ParticleSystem:isActive
+---@field isActive (fun(self: love.ParticleSystem): boolean) Checks whether the particle system is actively emitting particles.
+--- Checks whether the particle system is paused.
+--- Returns `paused` (boolean): True if system is paused, false otherwise.
+--- See: https://love2d.org/wiki/ParticleSystem:isPaused
+---@field isPaused (fun(self: love.ParticleSystem): boolean) Checks whether the particle system is paused.
+--- Checks whether the particle system is stopped.
+--- Returns `stopped` (boolean): True if system is stopped, false otherwise.
+--- See: https://love2d.org/wiki/ParticleSystem:isStopped
+---@field isStopped (fun(self: love.ParticleSystem): boolean) Checks whether the particle system is stopped.
+--- Moves the position of the emitter.
+--- Parameter `x` (number): Position along x-axis.
+--- Parameter `y` (number): Position along y-axis.
+--- See: https://love2d.org/wiki/ParticleSystem:moveTo
+---@field moveTo (fun(self: love.ParticleSystem, x: number, y: number)) Moves the position of the emitter.
+--- Pauses the particle emitter.
+--- See: https://love2d.org/wiki/ParticleSystem:pause
+---@field pause (fun(self: love.ParticleSystem)) Pauses the particle emitter.
+--- Resets the particle emitter, removing any existing particles and resetting the lifetime counter.
+--- See: https://love2d.org/wiki/ParticleSystem:reset
+---@field reset (fun(self: love.ParticleSystem)) Resets the particle emitter, removing any existing particles and resetting the lifetime counter.
+--- Sets the size of the buffer (the max allowed amount of particles in the system).
+--- Parameter `size` (number): The buffer size.
+--- See: https://love2d.org/wiki/ParticleSystem:setBufferSize
+---@field setBufferSize (fun(self: love.ParticleSystem, size: number)) Sets the size of the buffer (the max allowed amount of particles in the system).
+--- Sets a series of colors to apply to the particle sprite.
+--- Parameter `r1` (number): First color, red component (0-1).
+--- Parameter `g1` (number): First color, green component (0-1).
+--- Parameter `b1` (number): First color, blue component (0-1).
+--- Parameter `a1` (number): First color, alpha component (0-1). Default: `1`.
+--- Parameter `...` (number): Additional colors.
+--- See: https://love2d.org/wiki/ParticleSystem:setColors
+---@field setColors (fun(self: love.ParticleSystem, r1: number, g1: number, b1: number, a1?: number, ...: number))|(fun(self: love.ParticleSystem, rgba1: table, ...: table)) Sets a series of colors to apply to the particle sprite.
+--- Sets the direction the particles will be emitted in.
+--- Parameter `direction` (number): The direction of the particles (in radians).
+--- See: https://love2d.org/wiki/ParticleSystem:setDirection
+---@field setDirection (fun(self: love.ParticleSystem, direction: number)) Sets the direction the particles will be emitted in.
+--- Sets area-based spawn parameters for the particles.
+--- Parameter `distribution` (love.AreaSpreadDistribution): The type of distribution for new particles.
+--- Parameter `dx` (number): The maximum spawn distance from the emitter along the x-axis for uniform distribution, or the standard deviation along the x-axis for normal distribution.
+--- Parameter `dy` (number): The maximum spawn distance from the emitter along the y-axis for uniform distribution, or the standard deviation along the y-axis for normal distribution.
+--- Parameter `angle` (number): The angle in radians of the emission area. Default: `0`.
+--- Parameter `directionRelativeToCenter` (boolean): True if newly spawned particles will be oriented relative to the center of the emission area, false otherwise. Default: `false`.
+--- See: https://love2d.org/wiki/ParticleSystem:setEmissionArea
+---@field setEmissionArea (fun(self: love.ParticleSystem, distribution: love.AreaSpreadDistribution, dx: number, dy: number, angle?: number, directionRelativeToCenter?: boolean)) Sets area-based spawn parameters for the particles.
+--- Sets the amount of particles emitted per second.
+--- Parameter `rate` (number): The amount of particles per second.
+--- See: https://love2d.org/wiki/ParticleSystem:setEmissionRate
+---@field setEmissionRate (fun(self: love.ParticleSystem, rate: number)) Sets the amount of particles emitted per second.
+--- Sets how long the particle system should emit particles (if -1 then it emits particles forever).
+--- Parameter `life` (number): The lifetime of the emitter (in seconds).
+--- See: https://love2d.org/wiki/ParticleSystem:setEmitterLifetime
+---@field setEmitterLifetime (fun(self: love.ParticleSystem, life: number)) Sets how long the particle system should emit particles (if -1 then it emits particles forever).
+--- Sets the mode to use when the ParticleSystem adds new particles.
+--- Parameter `mode` (love.ParticleInsertMode): The mode to use when the ParticleSystem adds new particles.
+--- See: https://love2d.org/wiki/ParticleSystem:setInsertMode
+---@field setInsertMode (fun(self: love.ParticleSystem, mode: love.ParticleInsertMode)) Sets the mode to use when the ParticleSystem adds new particles.
+--- Sets the linear acceleration (acceleration along the x and y axes) for particles.
+--- Parameter `xmin` (number): The minimum acceleration along the x axis.
+--- Parameter `ymin` (number): The minimum acceleration along the y axis.
+--- Parameter `xmax` (number): The maximum acceleration along the x axis. Default: `xmin`.
+--- Parameter `ymax` (number): The maximum acceleration along the y axis. Default: `ymin`.
+--- See: https://love2d.org/wiki/ParticleSystem:setLinearAcceleration
+---@field setLinearAcceleration (fun(self: love.ParticleSystem, xmin: number, ymin: number, xmax?: number, ymax?: number)) Sets the linear acceleration (acceleration along the x and y axes) for particles.
+--- Sets the amount of linear damping (constant deceleration) for particles.
+--- Parameter `min` (number): The minimum amount of linear damping applied to particles.
+--- Parameter `max` (number): The maximum amount of linear damping applied to particles. Default: `min`.
+--- See: https://love2d.org/wiki/ParticleSystem:setLinearDamping
+---@field setLinearDamping (fun(self: love.ParticleSystem, min: number, max?: number)) Sets the amount of linear damping (constant deceleration) for particles.
+--- Set the offset position which the particle sprite is rotated around.
+--- Parameter `x` (number): The x coordinate of the rotation offset.
+--- Parameter `y` (number): The y coordinate of the rotation offset.
+--- See: https://love2d.org/wiki/ParticleSystem:setOffset
+---@field setOffset (fun(self: love.ParticleSystem, x: number, y: number)) Set the offset position which the particle sprite is rotated around.
+--- Sets the lifetime of the particles.
+--- Parameter `min` (number): The minimum life of the particles (in seconds).
+--- Parameter `max` (number): The maximum life of the particles (in seconds). Default: `min`.
+--- See: https://love2d.org/wiki/ParticleSystem:setParticleLifetime
+---@field setParticleLifetime (fun(self: love.ParticleSystem, min: number, max?: number)) Sets the lifetime of the particles.
+--- Sets the position of the emitter.
+--- Parameter `x` (number): Position along x-axis.
+--- Parameter `y` (number): Position along y-axis.
+--- See: https://love2d.org/wiki/ParticleSystem:setPosition
+---@field setPosition (fun(self: love.ParticleSystem, x: number, y: number)) Sets the position of the emitter.
+--- Sets a series of Quads to use for the particle sprites.
+--- Parameter `quad1` (love.Quad): The first Quad to use.
+--- Parameter `...` (love.Quad): Additional Quads to use.
+--- See: https://love2d.org/wiki/ParticleSystem:setQuads
+---@field setQuads (fun(self: love.ParticleSystem, quad1: love.Quad, ...: love.Quad))|(fun(self: love.ParticleSystem, quads: table)) Sets a series of Quads to use for the particle sprites.
+--- Set the radial acceleration (away from the emitter).
+--- Parameter `min` (number): The minimum acceleration.
+--- Parameter `max` (number): The maximum acceleration. Default: `min`.
+--- See: https://love2d.org/wiki/ParticleSystem:setRadialAcceleration
+---@field setRadialAcceleration (fun(self: love.ParticleSystem, min: number, max?: number)) Set the radial acceleration (away from the emitter).
+--- Sets whether particle angles and rotations are relative to their velocities.
+--- Parameter `enable` (boolean): True to enable relative particle rotation, false to disable it.
+--- See: https://love2d.org/wiki/ParticleSystem:setRelativeRotation
+---@field setRelativeRotation (fun(self: love.ParticleSystem, enable: boolean)) Sets whether particle angles and rotations are relative to their velocities.
+--- Sets the rotation of the image upon particle creation (in radians).
+--- Parameter `min` (number): The minimum initial angle (radians).
+--- Parameter `max` (number): The maximum initial angle (radians). Default: `min`.
+--- See: https://love2d.org/wiki/ParticleSystem:setRotation
+---@field setRotation (fun(self: love.ParticleSystem, min: number, max?: number)) Sets the rotation of the image upon particle creation (in radians).
+--- Sets the amount of size variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- Parameter `variation` (number): The amount of variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- See: https://love2d.org/wiki/ParticleSystem:setSizeVariation
+---@field setSizeVariation (fun(self: love.ParticleSystem, variation: number)) Sets the amount of size variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- Sets a series of sizes by which to scale a particle sprite.
+--- Parameter `size1` (number): The first size.
+--- Parameter `size2` (number): The second size. Default: `nil`.
+--- Parameter `size8` (number): The eighth size. Default: `nil`.
+--- See: https://love2d.org/wiki/ParticleSystem:setSizes
+---@field setSizes (fun(self: love.ParticleSystem, size1: number, size2?: number, size8?: number)) Sets a series of sizes by which to scale a particle sprite.
+--- Sets the speed of the particles.
+--- Parameter `min` (number): The minimum linear speed of the particles.
+--- Parameter `max` (number): The maximum linear speed of the particles. Default: `min`.
+--- See: https://love2d.org/wiki/ParticleSystem:setSpeed
+---@field setSpeed (fun(self: love.ParticleSystem, min: number, max?: number)) Sets the speed of the particles.
+--- Sets the spin of the sprite.
+--- Parameter `min` (number): The minimum spin (radians per second).
+--- Parameter `max` (number): The maximum spin (radians per second). Default: `min`.
+--- See: https://love2d.org/wiki/ParticleSystem:setSpin
+---@field setSpin (fun(self: love.ParticleSystem, min: number, max?: number)) Sets the spin of the sprite.
+--- Sets the amount of spin variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- Parameter `variation` (number): The amount of variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- See: https://love2d.org/wiki/ParticleSystem:setSpinVariation
+---@field setSpinVariation (fun(self: love.ParticleSystem, variation: number)) Sets the amount of spin variation (0 meaning no variation and 1 meaning full variation between start and end).
+--- Sets the amount of spread for the system.
+--- Parameter `spread` (number): The amount of spread (radians).
+--- See: https://love2d.org/wiki/ParticleSystem:setSpread
+---@field setSpread (fun(self: love.ParticleSystem, spread: number)) Sets the amount of spread for the system.
+--- Sets the tangential acceleration (acceleration perpendicular to the particle's direction).
+--- Parameter `min` (number): The minimum acceleration.
+--- Parameter `max` (number): The maximum acceleration. Default: `min`.
+--- See: https://love2d.org/wiki/ParticleSystem:setTangentialAcceleration
+---@field setTangentialAcceleration (fun(self: love.ParticleSystem, min: number, max?: number)) Sets the tangential acceleration (acceleration perpendicular to the particle's direction).
+--- Sets the texture (Image or Canvas) to be used for the particles.
+--- Parameter `texture` (love.Texture): An Image or Canvas to use for the particles.
+--- See: https://love2d.org/wiki/ParticleSystem:setTexture
+---@field setTexture (fun(self: love.ParticleSystem, texture: love.Texture)) Sets the texture (Image or Canvas) to be used for the particles.
+--- Starts the particle emitter.
+--- See: https://love2d.org/wiki/ParticleSystem:start
+---@field start (fun(self: love.ParticleSystem)) Starts the particle emitter.
+--- Stops the particle emitter, resetting the lifetime counter.
+--- See: https://love2d.org/wiki/ParticleSystem:stop
+---@field stop (fun(self: love.ParticleSystem)) Stops the particle emitter, resetting the lifetime counter.
+--- Updates the particle system; moving, creating and killing particles.
+--- Parameter `dt` (number): The time (seconds) since last frame.
+--- See: https://love2d.org/wiki/ParticleSystem:update
+---@field update (fun(self: love.ParticleSystem, dt: number)) Updates the particle system; moving, creating and killing particles.
+
+--- A PolygonShape is a convex polygon with up to 8 vertices.
+--- See: https://love2d.org/wiki/PolygonShape
+---@class love.PolygonShape : love.Shape
+--- Get the local coordinates of the polygon's vertices.
+--- Returns `x1` (number): The x-component of the first vertex.
+--- Returns `y1` (number): The y-component of the first vertex.
+--- Returns `x2` (number): The x-component of the second vertex.
+--- Returns `y2` (number): The y-component of the second vertex.
+--- See: https://love2d.org/wiki/PolygonShape:getPoints
+---@field getPoints (fun(self: love.PolygonShape): number, number, number, number) Get the local coordinates of the polygon's vertices.
+
+--- Restricts relative motion between Bodies to one shared axis.
+--- See: https://love2d.org/wiki/PrismaticJoint
+---@class love.PrismaticJoint : love.Joint
+--- Checks whether the limits are enabled.
+--- Returns `enabled` (boolean): True if enabled, false otherwise.
+--- See: https://love2d.org/wiki/PrismaticJoint:areLimitsEnabled
+---@field areLimitsEnabled (fun(self: love.PrismaticJoint): boolean) Checks whether the limits are enabled.
+--- Gets the world-space axis vector of the Prismatic Joint.
+--- Returns `x` (number): The x-axis coordinate of the world-space axis vector.
+--- Returns `y` (number): The y-axis coordinate of the world-space axis vector.
+--- See: https://love2d.org/wiki/PrismaticJoint:getAxis
+---@field getAxis (fun(self: love.PrismaticJoint): number, number) Gets the world-space axis vector of the Prismatic Joint.
+--- Get the current joint angle speed.
+--- Returns `s` (number): Joint angle speed in meters/second.
+--- See: https://love2d.org/wiki/PrismaticJoint:getJointSpeed
+---@field getJointSpeed (fun(self: love.PrismaticJoint): number) Get the current joint angle speed.
+--- Get the current joint translation.
+--- Returns `t` (number): Joint translation, usually in meters..
+--- See: https://love2d.org/wiki/PrismaticJoint:getJointTranslation
+---@field getJointTranslation (fun(self: love.PrismaticJoint): number) Get the current joint translation.
+--- Gets the joint limits.
+--- Returns `lower` (number): The lower limit, usually in meters.
+--- Returns `upper` (number): The upper limit, usually in meters.
+--- See: https://love2d.org/wiki/PrismaticJoint:getLimits
+---@field getLimits (fun(self: love.PrismaticJoint): number, number) Gets the joint limits.
+--- Gets the lower limit.
+--- Returns `lower` (number): The lower limit, usually in meters.
+--- See: https://love2d.org/wiki/PrismaticJoint:getLowerLimit
+---@field getLowerLimit (fun(self: love.PrismaticJoint): number) Gets the lower limit.
+--- Gets the maximum motor force.
+--- Returns `f` (number): The maximum motor force, usually in N.
+--- See: https://love2d.org/wiki/PrismaticJoint:getMaxMotorForce
+---@field getMaxMotorForce (fun(self: love.PrismaticJoint): number) Gets the maximum motor force.
+--- Returns the current motor force.
+--- Parameter `invdt` (number): How long the force applies.
+--- Returns `force` (number): The force on the motor in newtons.
+--- See: https://love2d.org/wiki/PrismaticJoint:getMotorForce
+---@field getMotorForce (fun(self: love.PrismaticJoint, invdt: number): number) Returns the current motor force.
+--- Gets the motor speed.
+--- Returns `s` (number): The motor speed, usually in meters per second.
+--- See: https://love2d.org/wiki/PrismaticJoint:getMotorSpeed
+---@field getMotorSpeed (fun(self: love.PrismaticJoint): number) Gets the motor speed.
+--- Gets the reference angle.
+--- Returns `angle` (number): The reference angle in radians.
+--- See: https://love2d.org/wiki/PrismaticJoint:getReferenceAngle
+---@field getReferenceAngle (fun(self: love.PrismaticJoint): number) Gets the reference angle.
+--- Gets the upper limit.
+--- Returns `upper` (number): The upper limit, usually in meters.
+--- See: https://love2d.org/wiki/PrismaticJoint:getUpperLimit
+---@field getUpperLimit (fun(self: love.PrismaticJoint): number) Gets the upper limit.
+--- Checks whether the motor is enabled.
+--- Returns `enabled` (boolean): True if enabled, false if disabled.
+--- See: https://love2d.org/wiki/PrismaticJoint:isMotorEnabled
+---@field isMotorEnabled (fun(self: love.PrismaticJoint): boolean) Checks whether the motor is enabled.
+--- Sets the limits.
+--- Parameter `lower` (number): The lower limit, usually in meters.
+--- Parameter `upper` (number): The upper limit, usually in meters.
+--- See: https://love2d.org/wiki/PrismaticJoint:setLimits
+---@field setLimits (fun(self: love.PrismaticJoint, lower: number, upper: number)) Sets the limits.
+--- Enables/disables the joint limit.
+--- Returns `enable` (boolean): True if enabled, false if disabled.
+--- See: https://love2d.org/wiki/PrismaticJoint:setLimitsEnabled
+---@field setLimitsEnabled (fun(self: love.PrismaticJoint): boolean) Enables/disables the joint limit.
+--- Sets the lower limit.
+--- Parameter `lower` (number): The lower limit, usually in meters.
+--- See: https://love2d.org/wiki/PrismaticJoint:setLowerLimit
+---@field setLowerLimit (fun(self: love.PrismaticJoint, lower: number)) Sets the lower limit.
+--- Set the maximum motor force.
+--- Parameter `f` (number): The maximum motor force, usually in N.
+--- See: https://love2d.org/wiki/PrismaticJoint:setMaxMotorForce
+---@field setMaxMotorForce (fun(self: love.PrismaticJoint, f: number)) Set the maximum motor force.
+--- Enables/disables the joint motor.
+--- Parameter `enable` (boolean): True to enable, false to disable.
+--- See: https://love2d.org/wiki/PrismaticJoint:setMotorEnabled
+---@field setMotorEnabled (fun(self: love.PrismaticJoint, enable: boolean)) Enables/disables the joint motor.
+--- Sets the motor speed.
+--- Parameter `s` (number): The motor speed, usually in meters per second.
+--- See: https://love2d.org/wiki/PrismaticJoint:setMotorSpeed
+---@field setMotorSpeed (fun(self: love.PrismaticJoint, s: number)) Sets the motor speed.
+--- Sets the upper limit.
+--- Parameter `upper` (number): The upper limit, usually in meters.
+--- See: https://love2d.org/wiki/PrismaticJoint:setUpperLimit
+---@field setUpperLimit (fun(self: love.PrismaticJoint, upper: number)) Sets the upper limit.
+
+--- Allows you to simulate bodies connected through pulleys.
+--- See: https://love2d.org/wiki/PulleyJoint
+---@class love.PulleyJoint : love.Joint
+--- Get the total length of the rope.
+--- Returns `length` (number): The length of the rope in the joint.
+--- See: https://love2d.org/wiki/PulleyJoint:getConstant
+---@field getConstant (fun(self: love.PulleyJoint): number) Get the total length of the rope.
+--- Get the ground anchor positions in world coordinates.
+--- Returns `a1x` (number): The x coordinate of the first anchor.
+--- Returns `a1y` (number): The y coordinate of the first anchor.
+--- Returns `a2x` (number): The x coordinate of the second anchor.
+--- Returns `a2y` (number): The y coordinate of the second anchor.
+--- See: https://love2d.org/wiki/PulleyJoint:getGroundAnchors
+---@field getGroundAnchors (fun(self: love.PulleyJoint): number, number, number, number) Get the ground anchor positions in world coordinates.
+--- Get the current length of the rope segment attached to the first body.
+--- Returns `length` (number): The length of the rope segment.
+--- See: https://love2d.org/wiki/PulleyJoint:getLengthA
+---@field getLengthA (fun(self: love.PulleyJoint): number) Get the current length of the rope segment attached to the first body.
+--- Get the current length of the rope segment attached to the second body.
+--- Returns `length` (number): The length of the rope segment.
+--- See: https://love2d.org/wiki/PulleyJoint:getLengthB
+---@field getLengthB (fun(self: love.PulleyJoint): number) Get the current length of the rope segment attached to the second body.
+--- Get the maximum lengths of the rope segments.
+--- Returns `len1` (number): The maximum length of the first rope segment.
+--- Returns `len2` (number): The maximum length of the second rope segment.
+--- See: https://love2d.org/wiki/PulleyJoint:getMaxLengths
+---@field getMaxLengths (fun(self: love.PulleyJoint): number, number) Get the maximum lengths of the rope segments.
+--- Get the pulley ratio.
+--- Returns `ratio` (number): The pulley ratio of the joint.
+--- See: https://love2d.org/wiki/PulleyJoint:getRatio
+---@field getRatio (fun(self: love.PulleyJoint): number) Get the pulley ratio.
+--- Set the total length of the rope.
+--- Parameter `length` (number): The new length of the rope in the joint.
+--- See: https://love2d.org/wiki/PulleyJoint:setConstant
+---@field setConstant (fun(self: love.PulleyJoint, length: number)) Set the total length of the rope.
+--- Set the maximum lengths of the rope segments.
+--- Parameter `max1` (number): The new maximum length of the first segment.
+--- Parameter `max2` (number): The new maximum length of the second segment.
+--- See: https://love2d.org/wiki/PulleyJoint:setMaxLengths
+---@field setMaxLengths (fun(self: love.PulleyJoint, max1: number, max2: number)) Set the maximum lengths of the rope segments.
+--- Set the pulley ratio.
+--- Parameter `ratio` (number): The new pulley ratio of the joint.
+--- See: https://love2d.org/wiki/PulleyJoint:setRatio
+---@field setRatio (fun(self: love.PulleyJoint, ratio: number)) Set the pulley ratio.
+
+--- A quadrilateral (a polygon with four sides and four corners) with texture coordinate information.
+--- See: https://love2d.org/wiki/Quad
+---@class love.Quad : love.Object
+--- Gets reference texture dimensions initially specified in love.graphics.newQuad.
+--- Returns `sw` (number): The Texture width used by the Quad.
+--- Returns `sh` (number): The Texture height used by the Quad.
+--- See: https://love2d.org/wiki/Quad:getTextureDimensions
+---@field getTextureDimensions (fun(self: love.Quad): number, number) Gets reference texture dimensions initially specified in love.graphics.newQuad.
+--- Gets the current viewport of this Quad.
+--- Returns `x` (number): The top-left corner along the x-axis.
+--- Returns `y` (number): The top-left corner along the y-axis.
+--- Returns `w` (number): The width of the viewport.
+--- Returns `h` (number): The height of the viewport.
+--- See: https://love2d.org/wiki/Quad:getViewport
+---@field getViewport (fun(self: love.Quad): number, number, number, number) Gets the current viewport of this Quad.
+--- Sets the texture coordinates according to a viewport.
+--- Parameter `x` (number): The top-left corner along the x-axis.
+--- Parameter `y` (number): The top-left corner along the y-axis.
+--- Parameter `w` (number): The width of the viewport.
+--- Parameter `h` (number): The height of the viewport.
+--- Parameter `sw` (number): Optional new reference width, the width of the Texture. Default: `nil`.
+--- Parameter `sh` (number): Optional new reference height, the height of the Texture. Default: `nil`.
+--- See: https://love2d.org/wiki/Quad:setViewport
+---@field setViewport (fun(self: love.Quad, x: number, y: number, w: number, h: number, sw?: number, sh?: number)) Sets the texture coordinates according to a viewport.
+
+--- A random number generation object which has its own random state.
+--- See: https://love2d.org/wiki/RandomGenerator
+---@class love.RandomGenerator : love.Object
+--- Gets the seed of the random number generator object.
+--- Returns `low` (number): Integer number representing the lower 32 bits of the RandomGenerator's 64 bit seed value.
+--- Returns `high` (number): Integer number representing the higher 32 bits of the RandomGenerator's 64 bit seed value.
+--- See: https://love2d.org/wiki/RandomGenerator:getSeed
+---@field getSeed (fun(self: love.RandomGenerator): number, number) Gets the seed of the random number generator object.
+--- Gets the current state of the random number generator.
+--- Returns `state` (string): The current state of the RandomGenerator object, represented as a string.
+--- See: https://love2d.org/wiki/RandomGenerator:getState
+---@field getState (fun(self: love.RandomGenerator): string) Gets the current state of the random number generator.
+--- Generates a pseudo-random number in a platform independent manner.
+--- Returns `number` (number): The pseudo-random number.
+--- See: https://love2d.org/wiki/RandomGenerator:random
+---@field random (fun(self: love.RandomGenerator): number)|(fun(self: love.RandomGenerator, max: number): number)|(fun(self: love.RandomGenerator, min: number, max: number): number) Generates a pseudo-random number in a platform independent manner.
+--- Get a normally distributed pseudo random number.
+--- Parameter `stddev` (number): Standard deviation of the distribution. Default: `1`.
+--- Parameter `mean` (number): The mean of the distribution. Default: `0`.
+--- Returns `number` (number): Normally distributed random number with variance (stddev)² and the specified mean.
+--- See: https://love2d.org/wiki/RandomGenerator:randomNormal
+---@field randomNormal (fun(self: love.RandomGenerator, stddev?: number, mean?: number): number) Get a normally distributed pseudo random number.
+--- Sets the seed of the random number generator using the specified integer number.
+--- Parameter `seed` (number): The integer number with which you want to seed the randomization.
+--- See: https://love2d.org/wiki/RandomGenerator:setSeed
+---@field setSeed (fun(self: love.RandomGenerator, seed: number))|(fun(self: love.RandomGenerator, low: number, high: number)) Sets the seed of the random number generator using the specified integer number.
+--- Sets the current state of the random number generator.
+--- Parameter `state` (string): The new state of the RandomGenerator object, represented as a string.
+--- See: https://love2d.org/wiki/RandomGenerator:setState
+---@field setState (fun(self: love.RandomGenerator, state: string)) Sets the current state of the random number generator.
+
+--- A Rasterizer handles font rendering, containing the font data (image or TrueType font) and drawable glyphs.
+--- See: https://love2d.org/wiki/Rasterizer
+---@class love.Rasterizer : love.Object
+--- Gets font advance.
+--- Returns `advance` (number): Font advance.
+--- See: https://love2d.org/wiki/Rasterizer:getAdvance
+---@field getAdvance (fun(self: love.Rasterizer): number) Gets font advance.
+--- Gets ascent height.
+--- Returns `height` (number): Ascent height.
+--- See: https://love2d.org/wiki/Rasterizer:getAscent
+---@field getAscent (fun(self: love.Rasterizer): number) Gets ascent height.
+--- Gets descent height.
+--- Returns `height` (number): Descent height.
+--- See: https://love2d.org/wiki/Rasterizer:getDescent
+---@field getDescent (fun(self: love.Rasterizer): number) Gets descent height.
+--- Gets number of glyphs in font.
+--- Returns `count` (number): Glyphs count.
+--- See: https://love2d.org/wiki/Rasterizer:getGlyphCount
+---@field getGlyphCount (fun(self: love.Rasterizer): number) Gets number of glyphs in font.
+--- Gets glyph data of a specified glyph.
+--- Parameter `glyph` (string): Glyph
+--- Returns `glyphData` (love.GlyphData): Glyph data
+--- See: https://love2d.org/wiki/Rasterizer:getGlyphData
+---@field getGlyphData (fun(self: love.Rasterizer, glyph: string): love.GlyphData)|(fun(self: love.Rasterizer, glyphNumber: number): love.GlyphData) Gets glyph data of a specified glyph.
+--- Gets font height.
+--- Returns `height` (number): Font height
+--- See: https://love2d.org/wiki/Rasterizer:getHeight
+---@field getHeight (fun(self: love.Rasterizer): number) Gets font height.
+--- Gets line height of a font.
+--- Returns `height` (number): Line height of a font.
+--- See: https://love2d.org/wiki/Rasterizer:getLineHeight
+---@field getLineHeight (fun(self: love.Rasterizer): number) Gets line height of a font.
+--- Checks if font contains specified glyphs.
+--- Parameter `glyph1` (string|number): Glyph
+--- Parameter `...` (string|number): Additional glyphs
+--- Returns `hasGlyphs` (boolean): Whatever font contains specified glyphs.
+--- See: https://love2d.org/wiki/Rasterizer:hasGlyphs
+---@field hasGlyphs (fun(self: love.Rasterizer, glyph1: string|number, ...: string|number): boolean) Checks if font contains specified glyphs.
+
+--- Represents an audio input device capable of recording sounds.
+--- See: https://love2d.org/wiki/RecordingDevice
+---@class love.RecordingDevice : love.Object
+--- Gets the number of bits per sample in the data currently being recorded.
+--- Returns `bits` (number): The number of bits per sample in the data that's currently being recorded.
+--- See: https://love2d.org/wiki/RecordingDevice:getBitDepth
+---@field getBitDepth (fun(self: love.RecordingDevice): number) Gets the number of bits per sample in the data currently being recorded.
+--- Gets the number of channels currently being recorded (mono or stereo).
+--- Returns `channels` (number): The number of channels being recorded (1 for mono, 2 for stereo).
+--- See: https://love2d.org/wiki/RecordingDevice:getChannelCount
+---@field getChannelCount (fun(self: love.RecordingDevice): number) Gets the number of channels currently being recorded (mono or stereo).
+--- Gets all recorded audio SoundData stored in the device's internal ring buffer.
+--- Returns `data` (love.SoundData): The recorded audio data, or nil if the device isn't recording.
+--- See: https://love2d.org/wiki/RecordingDevice:getData
+---@field getData (fun(self: love.RecordingDevice): love.SoundData) Gets all recorded audio SoundData stored in the device's internal ring buffer.
+--- Gets the name of the recording device.
+--- Returns `name` (string): The name of the device.
+--- See: https://love2d.org/wiki/RecordingDevice:getName
+---@field getName (fun(self: love.RecordingDevice): string) Gets the name of the recording device.
+--- Gets the number of currently recorded samples.
+--- Returns `samples` (number): The number of samples that have been recorded so far.
+--- See: https://love2d.org/wiki/RecordingDevice:getSampleCount
+---@field getSampleCount (fun(self: love.RecordingDevice): number) Gets the number of currently recorded samples.
+--- Gets the number of samples per second currently being recorded.
+--- Returns `rate` (number): The number of samples being recorded per second (sample rate).
+--- See: https://love2d.org/wiki/RecordingDevice:getSampleRate
+---@field getSampleRate (fun(self: love.RecordingDevice): number) Gets the number of samples per second currently being recorded.
+--- Gets whether the device is currently recording.
+--- Returns `recording` (boolean): True if the recording, false otherwise.
+--- See: https://love2d.org/wiki/RecordingDevice:isRecording
+---@field isRecording (fun(self: love.RecordingDevice): boolean) Gets whether the device is currently recording.
+--- Begins recording audio using this device.
+--- Parameter `samplecount` (number): The maximum number of samples to store in an internal ring buffer when recording.
+--- Parameter `samplerate` (number): The number of samples per second to store when recording. Default: `8000`.
+--- Parameter `bitdepth` (number): The number of bits per sample. Default: `16`.
+--- Parameter `channels` (number): Whether to record in mono or stereo. Default: `1`.
+--- Returns `success` (boolean): True if the device successfully began recording using the specified parameters, false if not.
+--- See: https://love2d.org/wiki/RecordingDevice:start
+---@field start (fun(self: love.RecordingDevice, samplecount: number, samplerate?: number, bitdepth?: number, channels?: number): boolean) Begins recording audio using this device.
+--- Stops recording audio from this device.
+--- Returns `data` (love.SoundData): The sound data currently in the device's buffer, or nil if the device wasn't recording.
+--- See: https://love2d.org/wiki/RecordingDevice:stop
+---@field stop (fun(self: love.RecordingDevice): love.SoundData) Stops recording audio from this device.
+
+--- Allow two Bodies to revolve around a shared point.
+--- See: https://love2d.org/wiki/RevoluteJoint
+---@class love.RevoluteJoint : love.Joint
+--- Checks whether limits are enabled.
+--- Returns `enabled` (boolean): True if enabled, false otherwise.
+--- See: https://love2d.org/wiki/RevoluteJoint:areLimitsEnabled
+---@field areLimitsEnabled (fun(self: love.RevoluteJoint): boolean) Checks whether limits are enabled.
+--- Get the current joint angle.
+--- Returns `angle` (number): The joint angle in radians.
+--- See: https://love2d.org/wiki/RevoluteJoint:getJointAngle
+---@field getJointAngle (fun(self: love.RevoluteJoint): number) Get the current joint angle.
+--- Get the current joint angle speed.
+--- Returns `s` (number): Joint angle speed in radians/second.
+--- See: https://love2d.org/wiki/RevoluteJoint:getJointSpeed
+---@field getJointSpeed (fun(self: love.RevoluteJoint): number) Get the current joint angle speed.
+--- Gets the joint limits.
+--- Returns `lower` (number): The lower limit, in radians.
+--- Returns `upper` (number): The upper limit, in radians.
+--- See: https://love2d.org/wiki/RevoluteJoint:getLimits
+---@field getLimits (fun(self: love.RevoluteJoint): number, number) Gets the joint limits.
+--- Gets the lower limit.
+--- Returns `lower` (number): The lower limit, in radians.
+--- See: https://love2d.org/wiki/RevoluteJoint:getLowerLimit
+---@field getLowerLimit (fun(self: love.RevoluteJoint): number) Gets the lower limit.
+--- Gets the maximum motor force.
+--- Returns `f` (number): The maximum motor force, in Nm.
+--- See: https://love2d.org/wiki/RevoluteJoint:getMaxMotorTorque
+---@field getMaxMotorTorque (fun(self: love.RevoluteJoint): number) Gets the maximum motor force.
+--- Gets the motor speed.
+--- Returns `s` (number): The motor speed, radians per second.
+--- See: https://love2d.org/wiki/RevoluteJoint:getMotorSpeed
+---@field getMotorSpeed (fun(self: love.RevoluteJoint): number) Gets the motor speed.
+--- Get the current motor force.
+--- Returns `f` (number): The current motor force, in Nm.
+--- See: https://love2d.org/wiki/RevoluteJoint:getMotorTorque
+---@field getMotorTorque (fun(self: love.RevoluteJoint): number) Get the current motor force.
+--- Gets the reference angle.
+--- Returns `angle` (number): The reference angle in radians.
+--- See: https://love2d.org/wiki/RevoluteJoint:getReferenceAngle
+---@field getReferenceAngle (fun(self: love.RevoluteJoint): number) Gets the reference angle.
+--- Gets the upper limit.
+--- Returns `upper` (number): The upper limit, in radians.
+--- See: https://love2d.org/wiki/RevoluteJoint:getUpperLimit
+---@field getUpperLimit (fun(self: love.RevoluteJoint): number) Gets the upper limit.
+--- Checks whether limits are enabled.
+--- Returns `enabled` (boolean): True if enabled, false otherwise.
+--- See: https://love2d.org/wiki/RevoluteJoint:hasLimitsEnabled
+---@field hasLimitsEnabled (fun(self: love.RevoluteJoint): boolean) Checks whether limits are enabled.
+--- Checks whether the motor is enabled.
+--- Returns `enabled` (boolean): True if enabled, false if disabled.
+--- See: https://love2d.org/wiki/RevoluteJoint:isMotorEnabled
+---@field isMotorEnabled (fun(self: love.RevoluteJoint): boolean) Checks whether the motor is enabled.
+--- Sets the limits.
+--- Parameter `lower` (number): The lower limit, in radians.
+--- Parameter `upper` (number): The upper limit, in radians.
+--- See: https://love2d.org/wiki/RevoluteJoint:setLimits
+---@field setLimits (fun(self: love.RevoluteJoint, lower: number, upper: number)) Sets the limits.
+--- Enables/disables the joint limit.
+--- Parameter `enable` (boolean): True to enable, false to disable.
+--- See: https://love2d.org/wiki/RevoluteJoint:setLimitsEnabled
+---@field setLimitsEnabled (fun(self: love.RevoluteJoint, enable: boolean)) Enables/disables the joint limit.
+--- Sets the lower limit.
+--- Parameter `lower` (number): The lower limit, in radians.
+--- See: https://love2d.org/wiki/RevoluteJoint:setLowerLimit
+---@field setLowerLimit (fun(self: love.RevoluteJoint, lower: number)) Sets the lower limit.
+--- Set the maximum motor force.
+--- Parameter `f` (number): The maximum motor force, in Nm.
+--- See: https://love2d.org/wiki/RevoluteJoint:setMaxMotorTorque
+---@field setMaxMotorTorque (fun(self: love.RevoluteJoint, f: number)) Set the maximum motor force.
+--- Enables/disables the joint motor.
+--- Parameter `enable` (boolean): True to enable, false to disable.
+--- See: https://love2d.org/wiki/RevoluteJoint:setMotorEnabled
+---@field setMotorEnabled (fun(self: love.RevoluteJoint, enable: boolean)) Enables/disables the joint motor.
+--- Sets the motor speed.
+--- Parameter `s` (number): The motor speed, radians per second.
+--- See: https://love2d.org/wiki/RevoluteJoint:setMotorSpeed
+---@field setMotorSpeed (fun(self: love.RevoluteJoint, s: number)) Sets the motor speed.
+--- Sets the upper limit.
+--- Parameter `upper` (number): The upper limit, in radians.
+--- See: https://love2d.org/wiki/RevoluteJoint:setUpperLimit
+---@field setUpperLimit (fun(self: love.RevoluteJoint, upper: number)) Sets the upper limit.
+
+--- The RopeJoint enforces a maximum distance between two points on two bodies.
+--- See: https://love2d.org/wiki/RopeJoint
+---@class love.RopeJoint : love.Joint
+--- Gets the maximum length of a RopeJoint.
+--- Returns `maxLength` (number): The maximum length of the RopeJoint.
+--- See: https://love2d.org/wiki/RopeJoint:getMaxLength
+---@field getMaxLength (fun(self: love.RopeJoint): number) Gets the maximum length of a RopeJoint.
+--- Sets the maximum length of a RopeJoint.
+--- Parameter `maxLength` (number): The new maximum length of the RopeJoint.
+--- See: https://love2d.org/wiki/RopeJoint:setMaxLength
+---@field setMaxLength (fun(self: love.RopeJoint, maxLength: number)) Sets the maximum length of a RopeJoint.
+
+--- A Shader is used for advanced hardware-accelerated pixel or vertex manipulation.
+--- See: https://love2d.org/wiki/Shader
+---@class love.Shader : love.Object
+--- Returns any warning and error messages from compiling the shader code.
+--- Returns `warnings` (string): Warning and error messages (if any).
+--- See: https://love2d.org/wiki/Shader:getWarnings
+---@field getWarnings (fun(self: love.Shader): string) Returns any warning and error messages from compiling the shader code.
+--- Gets whether a uniform / extern variable exists in the Shader.
+--- Parameter `name` (string): The name of the uniform variable.
+--- Returns `hasuniform` (boolean): Whether the uniform exists in the shader and affects its final output.
+--- See: https://love2d.org/wiki/Shader:hasUniform
+---@field hasUniform (fun(self: love.Shader, name: string): boolean) Gets whether a uniform / extern variable exists in the Shader.
+--- Sends one or more values to a special (''uniform'') variable inside the shader.
+--- Parameter `name` (string): Name of the number to send to the shader.
+--- Parameter `number` (number): Number to send to store in the uniform variable.
+--- Parameter `...` (number): Additional numbers to send if the uniform variable is an array.
+--- See: https://love2d.org/wiki/Shader:send
+---@field send (fun(self: love.Shader, name: string, number: number, ...: number))|(fun(self: love.Shader, name: string, vector: table, ...: table))|(fun(self: love.Shader, name: string, matrix: table, ...: table))|(fun(self: love.Shader, name: string, texture: love.Texture))|(fun(self: love.Shader, name: string, boolean: boolean, ...: boolean))|(fun(self: love.Shader, name: string, matrixlayout: love.MatrixLayout, matrix: table, ...: table))|(fun(self: love.Shader, name: string, data: love.Data, offset?: number, size?: number))|(fun(self: love.Shader, name: string, data: love.Data, matrixlayout: love.MatrixLayout, offset?: number, size?: number))|(fun(self: love.Shader, name: string, matrixlayout: love.MatrixLayout, data: love.Data, offset?: number, size?: number)) Sends one or more values to a special (''uniform'') variable inside the shader.
+--- Sends one or more colors to a special (''extern'' / ''uniform'') vec3 or vec4 variable inside the shader.
+--- Parameter `name` (string): The name of the color extern variable to send to in the shader.
+--- Parameter `color` (table): A table with red, green, blue, and optional alpha color components in the range of 1 to send to the extern as a vector.
+--- Parameter `...` (table): Additional colors to send in case the extern is an array.
+--- See: https://love2d.org/wiki/Shader:sendColor
+---@field sendColor (fun(self: love.Shader, name: string, color: table, ...: table)) Sends one or more colors to a special (''extern'' / ''uniform'') vec3 or vec4 variable inside the shader.
+
+--- Shapes are solid 2d geometrical objects which handle the mass and collision of a Body in love.physics.
+--- See: https://love2d.org/wiki/Shape
+---@class love.Shape : love.Object
+--- Returns the points of the bounding box for the transformed shape.
+--- Parameter `tx` (number): The translation of the shape on the x-axis.
+--- Parameter `ty` (number): The translation of the shape on the y-axis.
+--- Parameter `tr` (number): The shape rotation.
+--- Parameter `childIndex` (number): The index of the child to compute the bounding box of. Default: `1`.
+--- Returns `topLeftX` (number): The x position of the top-left point.
+--- Returns `topLeftY` (number): The y position of the top-left point.
+--- Returns `bottomRightX` (number): The x position of the bottom-right point.
+--- Returns `bottomRightY` (number): The y position of the bottom-right point.
+--- See: https://love2d.org/wiki/Shape:computeAABB
+---@field computeAABB (fun(self: love.Shape, tx: number, ty: number, tr: number, childIndex?: number): number, number, number, number) Returns the points of the bounding box for the transformed shape.
+--- Computes the mass properties for the shape with the specified density.
+--- Parameter `density` (number): The shape density.
+--- Returns `x` (number): The x postition of the center of mass.
+--- Returns `y` (number): The y postition of the center of mass.
+--- Returns `mass` (number): The mass of the shape.
+--- Returns `inertia` (number): The rotational inertia.
+--- See: https://love2d.org/wiki/Shape:computeMass
+---@field computeMass (fun(self: love.Shape, density: number): number, number, number, number) Computes the mass properties for the shape with the specified density.
+--- Returns the number of children the shape has.
+--- Returns `count` (number): The number of children.
+--- See: https://love2d.org/wiki/Shape:getChildCount
+---@field getChildCount (fun(self: love.Shape): number) Returns the number of children the shape has.
+--- Gets the radius of the shape.
+--- Returns `radius` (number): The radius of the shape.
+--- See: https://love2d.org/wiki/Shape:getRadius
+---@field getRadius (fun(self: love.Shape): number) Gets the radius of the shape.
+--- Gets a string representing the Shape.
+--- Returns `type` (love.ShapeType): The type of the Shape.
+--- See: https://love2d.org/wiki/Shape:getType
+---@field getType (fun(self: love.Shape): love.ShapeType) Gets a string representing the Shape.
+--- Casts a ray against the shape and returns the surface normal vector and the line position where the ray hit.
+--- Parameter `x1` (number): The x position of the input line starting point.
+--- Parameter `y1` (number): The y position of the input line starting point.
+--- Parameter `x2` (number): The x position of the input line end point.
+--- Parameter `y2` (number): The y position of the input line end point.
+--- Parameter `maxFraction` (number): Ray length parameter.
+--- Parameter `tx` (number): The translation of the shape on the x-axis.
+--- Parameter `ty` (number): The translation of the shape on the y-axis.
+--- Parameter `tr` (number): The shape rotation.
+--- Parameter `childIndex` (number): The index of the child the ray gets cast against. Default: `1`.
+--- Returns `xn` (number): The x component of the normal vector of the edge where the ray hit the shape.
+--- Returns `yn` (number): The y component of the normal vector of the edge where the ray hit the shape.
+--- Returns `fraction` (number): The position on the input line where the intersection happened as a factor of the line length.
+--- See: https://love2d.org/wiki/Shape:rayCast
+---@field rayCast (fun(self: love.Shape, x1: number, y1: number, x2: number, y2: number, maxFraction: number, tx: number, ty: number, tr: number, childIndex?: number): number, number, number) Casts a ray against the shape and returns the surface normal vector and the line position where the ray hit.
+--- This is particularly useful for mouse interaction with the shapes.
+--- Parameter `tx` (number): Translates the shape along the x-axis.
+--- Parameter `ty` (number): Translates the shape along the y-axis.
+--- Parameter `tr` (number): Rotates the shape.
+--- Parameter `x` (number): The x-component of the point.
+--- Parameter `y` (number): The y-component of the point.
+--- Returns `hit` (boolean): True if inside, false if outside
+--- See: https://love2d.org/wiki/Shape:testPoint
+---@field testPoint (fun(self: love.Shape, tx: number, ty: number, tr: number, x: number, y: number): boolean) This is particularly useful for mouse interaction with the shapes.
+
+--- Contains raw audio samples.
+--- See: https://love2d.org/wiki/SoundData
+---@class love.SoundData : love.Data
+--- Returns the number of bits per sample.
+--- Returns `bitdepth` (number): Either 8, or 16.
+--- See: https://love2d.org/wiki/SoundData:getBitDepth
+---@field getBitDepth (fun(self: love.SoundData): number) Returns the number of bits per sample.
+--- Returns the number of channels in the SoundData.
+--- Returns `channels` (number): 1 for mono, 2 for stereo.
+--- See: https://love2d.org/wiki/SoundData:getChannelCount
+---@field getChannelCount (fun(self: love.SoundData): number) Returns the number of channels in the SoundData.
+--- Gets the duration of the sound data.
+--- Returns `duration` (number): The duration of the sound data in seconds.
+--- See: https://love2d.org/wiki/SoundData:getDuration
+---@field getDuration (fun(self: love.SoundData): number) Gets the duration of the sound data.
+--- Gets the value of the sample-point at the specified position.
+--- Parameter `i` (number): An integer value specifying the position of the sample (starting at 0).
+--- Returns `sample` (number): The normalized samplepoint (range -1.0 to 1.0).
+--- See: https://love2d.org/wiki/SoundData:getSample
+---@field getSample (fun(self: love.SoundData, i: number): number)|(fun(self: love.SoundData, i: number, channel: number): number) Gets the value of the sample-point at the specified position.
+--- Returns the number of samples per channel of the SoundData.
+--- Returns `count` (number): Total number of samples.
+--- See: https://love2d.org/wiki/SoundData:getSampleCount
+---@field getSampleCount (fun(self: love.SoundData): number) Returns the number of samples per channel of the SoundData.
+--- Returns the sample rate of the SoundData.
+--- Returns `rate` (number): Number of samples per second.
+--- See: https://love2d.org/wiki/SoundData:getSampleRate
+---@field getSampleRate (fun(self: love.SoundData): number) Returns the sample rate of the SoundData.
+--- Sets the value of the sample-point at the specified position.
+--- Parameter `i` (number): An integer value specifying the position of the sample (starting at 0).
+--- Parameter `sample` (number): The normalized samplepoint (range -1.0 to 1.0).
+--- See: https://love2d.org/wiki/SoundData:setSample
+---@field setSample (fun(self: love.SoundData, i: number, sample: number))|(fun(self: love.SoundData, i: number, channel: number, sample: number)) Sets the value of the sample-point at the specified position.
+
+--- A Source represents audio you can play back.
+--- See: https://love2d.org/wiki/Source
+---@class love.Source : love.Object
+--- Creates an identical copy of the Source in the stopped state.
+--- Returns `source` (love.Source): The new identical copy of this Source.
+--- See: https://love2d.org/wiki/Source:clone
+---@field clone (fun(self: love.Source): love.Source) Creates an identical copy of the Source in the stopped state.
+--- Gets a list of the Source's active effect names.
+--- Returns `effects` (table): A list of the source's active effect names.
+--- See: https://love2d.org/wiki/Source:getActiveEffects
+---@field getActiveEffects (fun(self: love.Source): table) Gets a list of the Source's active effect names.
+--- Gets the amount of air absorption applied to the Source.
+--- Returns `amount` (number): The amount of air absorption applied to the Source.
+--- See: https://love2d.org/wiki/Source:getAirAbsorption
+---@field getAirAbsorption (fun(self: love.Source): number) Gets the amount of air absorption applied to the Source.
+--- Gets the reference and maximum attenuation distances of the Source.
+--- Returns `ref` (number): The current reference attenuation distance.
+--- Returns `max` (number): The current maximum attenuation distance.
+--- See: https://love2d.org/wiki/Source:getAttenuationDistances
+---@field getAttenuationDistances (fun(self: love.Source): number, number) Gets the reference and maximum attenuation distances of the Source.
+--- Gets the number of channels in the Source.
+--- Returns `channels` (number): 1 for mono, 2 for stereo.
+--- See: https://love2d.org/wiki/Source:getChannelCount
+---@field getChannelCount (fun(self: love.Source): number) Gets the number of channels in the Source.
+--- Gets the Source's directional volume cones.
+--- Returns `innerAngle` (number): The inner angle from the Source's direction, in radians.
+--- Returns `outerAngle` (number): The outer angle from the Source's direction, in radians.
+--- Returns `outerVolume` (number): The Source's volume when the listener is outside both the inner and outer cone angles.
+--- See: https://love2d.org/wiki/Source:getCone
+---@field getCone (fun(self: love.Source): number, number, number) Gets the Source's directional volume cones.
+--- Gets the direction of the Source.
+--- Returns `x` (number): The X part of the direction vector.
+--- Returns `y` (number): The Y part of the direction vector.
+--- Returns `z` (number): The Z part of the direction vector.
+--- See: https://love2d.org/wiki/Source:getDirection
+---@field getDirection (fun(self: love.Source): number, number, number) Gets the direction of the Source.
+--- Gets the duration of the Source.
+--- Parameter `unit` (love.TimeUnit): The time unit for the return value. Default: `'seconds'`.
+--- Returns `duration` (number): The duration of the Source, or -1 if it cannot be determined.
+--- See: https://love2d.org/wiki/Source:getDuration
+---@field getDuration (fun(self: love.Source, unit?: love.TimeUnit): number) Gets the duration of the Source.
+--- Gets the filter settings associated to a specific effect.
+--- Parameter `name` (string): The name of the effect.
+--- Parameter `filtersettings` (table): An optional empty table that will be filled with the filter settings. Default: `{}`.
+--- Returns `filtersettings` (love.Source_getEffect_filtersettingsResult): The settings for the filter associated to this effect, or nil if the effect is not present in this Source or has no filter associated.
+--- See: https://love2d.org/wiki/Source:getEffect
+---@field getEffect (fun(self: love.Source, name: string, filtersettings?: table): love.Source_getEffect_filtersettingsResult) Gets the filter settings associated to a specific effect.
+--- Gets the filter settings currently applied to the Source.
+--- Returns `settings` (love.Source_getFilter_settingsResult): The filter settings to use for this Source, or nil if the Source has no active filter.
+--- See: https://love2d.org/wiki/Source:getFilter
+---@field getFilter (fun(self: love.Source): love.Source_getFilter_settingsResult) Gets the filter settings currently applied to the Source.
+--- Gets the number of free buffer slots in a queueable Source.
+--- Returns `buffers` (number): How many more SoundData objects can be queued up.
+--- See: https://love2d.org/wiki/Source:getFreeBufferCount
+---@field getFreeBufferCount (fun(self: love.Source): number) Gets the number of free buffer slots in a queueable Source.
+--- Gets the current pitch of the Source.
+--- Returns `pitch` (number): The pitch, where 1.0 is normal.
+--- See: https://love2d.org/wiki/Source:getPitch
+---@field getPitch (fun(self: love.Source): number) Gets the current pitch of the Source.
+--- Gets the position of the Source.
+--- Returns `x` (number): The X position of the Source.
+--- Returns `y` (number): The Y position of the Source.
+--- Returns `z` (number): The Z position of the Source.
+--- See: https://love2d.org/wiki/Source:getPosition
+---@field getPosition (fun(self: love.Source): number, number, number) Gets the position of the Source.
+--- Returns the rolloff factor of the source.
+--- Returns `rolloff` (number): The rolloff factor.
+--- See: https://love2d.org/wiki/Source:getRolloff
+---@field getRolloff (fun(self: love.Source): number) Returns the rolloff factor of the source.
+--- Gets the type of the Source.
+--- Returns `sourcetype` (love.SourceType): The type of the source.
+--- See: https://love2d.org/wiki/Source:getType
+---@field getType (fun(self: love.Source): love.SourceType) Gets the type of the Source.
+--- Gets the velocity of the Source.
+--- Returns `x` (number): The X part of the velocity vector.
+--- Returns `y` (number): The Y part of the velocity vector.
+--- Returns `z` (number): The Z part of the velocity vector.
+--- See: https://love2d.org/wiki/Source:getVelocity
+---@field getVelocity (fun(self: love.Source): number, number, number) Gets the velocity of the Source.
+--- Gets the current volume of the Source.
+--- Returns `volume` (number): The volume of the Source, where 1.0 is normal volume.
+--- See: https://love2d.org/wiki/Source:getVolume
+---@field getVolume (fun(self: love.Source): number) Gets the current volume of the Source.
+--- Returns the volume limits of the source.
+--- Returns `min` (number): The minimum volume.
+--- Returns `max` (number): The maximum volume.
+--- See: https://love2d.org/wiki/Source:getVolumeLimits
+---@field getVolumeLimits (fun(self: love.Source): number, number) Returns the volume limits of the source.
+--- Returns whether the Source will loop.
+--- Returns `loop` (boolean): True if the Source will loop, false otherwise.
+--- See: https://love2d.org/wiki/Source:isLooping
+---@field isLooping (fun(self: love.Source): boolean) Returns whether the Source will loop.
+--- Returns whether the Source is playing.
+--- Returns `playing` (boolean): True if the Source is playing, false otherwise.
+--- See: https://love2d.org/wiki/Source:isPlaying
+---@field isPlaying (fun(self: love.Source): boolean) Returns whether the Source is playing.
+--- Gets whether the Source's position, velocity, direction, and cone angles are relative to the listener.
+--- Returns `relative` (boolean): True if the position, velocity, direction and cone angles are relative to the listener, false if they're absolute.
+--- See: https://love2d.org/wiki/Source:isRelative
+---@field isRelative (fun(self: love.Source): boolean) Gets whether the Source's position, velocity, direction, and cone angles are relative to the listener.
+--- Pauses the Source.
+--- See: https://love2d.org/wiki/Source:pause
+---@field pause (fun(self: love.Source)) Pauses the Source.
+--- Starts playing the Source.
+--- Returns `success` (boolean): Whether the Source was able to successfully start playing.
+--- See: https://love2d.org/wiki/Source:play
+---@field play (fun(self: love.Source): boolean) Starts playing the Source.
+--- Queues SoundData for playback in a queueable Source.
+--- Parameter `sounddata` (love.SoundData): The data to queue.
+--- Returns `success` (boolean): True if the data was successfully queued for playback, false if there were no available buffers to use for queueing.
+--- See: https://love2d.org/wiki/Source:queue
+---@field queue (fun(self: love.Source, sounddata: love.SoundData): boolean) Queues SoundData for playback in a queueable Source.
+--- Sets the currently playing position of the Source.
+--- Parameter `offset` (number): The position to seek to.
+--- Parameter `unit` (love.TimeUnit): The unit of the position value. Default: `'seconds'`.
+--- See: https://love2d.org/wiki/Source:seek
+---@field seek (fun(self: love.Source, offset: number, unit?: love.TimeUnit)) Sets the currently playing position of the Source.
+--- Sets the amount of air absorption applied to the Source.
+--- Parameter `amount` (number): The amount of air absorption applied to the Source.
+--- See: https://love2d.org/wiki/Source:setAirAbsorption
+---@field setAirAbsorption (fun(self: love.Source, amount: number)) Sets the amount of air absorption applied to the Source.
+--- Sets the reference and maximum attenuation distances of the Source.
+--- Parameter `ref` (number): The new reference attenuation distance.
+--- Parameter `max` (number): The new maximum attenuation distance.
+--- See: https://love2d.org/wiki/Source:setAttenuationDistances
+---@field setAttenuationDistances (fun(self: love.Source, ref: number, max: number)) Sets the reference and maximum attenuation distances of the Source.
+--- Sets the Source's directional volume cones.
+--- Parameter `innerAngle` (number): The inner angle from the Source's direction, in radians.
+--- Parameter `outerAngle` (number): The outer angle from the Source's direction, in radians.
+--- Parameter `outerVolume` (number): The Source's volume when the listener is outside both the inner and outer cone angles. Default: `0`.
+--- See: https://love2d.org/wiki/Source:setCone
+---@field setCone (fun(self: love.Source, innerAngle: number, outerAngle: number, outerVolume?: number)) Sets the Source's directional volume cones.
+--- Sets the direction vector of the Source.
+--- Parameter `x` (number): The X part of the direction vector.
+--- Parameter `y` (number): The Y part of the direction vector.
+--- Parameter `z` (number): The Z part of the direction vector.
+--- See: https://love2d.org/wiki/Source:setDirection
+---@field setDirection (fun(self: love.Source, x: number, y: number, z: number)) Sets the direction vector of the Source.
+--- Applies an audio effect to the Source.
+--- Parameter `name` (string): The name of the effect previously set up with love.audio.setEffect.
+--- Parameter `enable` (boolean): If false and the given effect name was previously enabled on this Source, disables the effect. Default: `true`.
+--- Returns `success` (boolean): Whether the effect was successfully applied to this Source.
+--- See: https://love2d.org/wiki/Source:setEffect
+---@field setEffect (fun(self: love.Source, name: string, enable?: boolean): boolean)|(fun(self: love.Source, name: string, filtersettings: love.Source_setEffect_filtersettings): boolean) Applies an audio effect to the Source.
+--- Sets a low-pass, high-pass, or band-pass filter to apply when playing the Source.
+--- Parameter `settings` (love.Source_setFilter_settings): The filter settings to use for this Source, with the following fields:
+--- Returns `success` (boolean): Whether the filter was successfully applied to the Source.
+--- See: https://love2d.org/wiki/Source:setFilter
+---@field setFilter (fun(self: love.Source, settings: love.Source_setFilter_settings): boolean)|(fun(self: love.Source)) Sets a low-pass, high-pass, or band-pass filter to apply when playing the Source.
+--- Sets whether the Source should loop.
+--- Parameter `loop` (boolean): True if the source should loop, false otherwise.
+--- See: https://love2d.org/wiki/Source:setLooping
+---@field setLooping (fun(self: love.Source, loop: boolean)) Sets whether the Source should loop.
+--- Sets the pitch of the Source.
+--- Parameter `pitch` (number): Calculated with regard to 1 being the base pitch.
+--- See: https://love2d.org/wiki/Source:setPitch
+---@field setPitch (fun(self: love.Source, pitch: number)) Sets the pitch of the Source.
+--- Sets the position of the Source.
+--- Parameter `x` (number): The X position of the Source.
+--- Parameter `y` (number): The Y position of the Source.
+--- Parameter `z` (number): The Z position of the Source.
+--- See: https://love2d.org/wiki/Source:setPosition
+---@field setPosition (fun(self: love.Source, x: number, y: number, z: number)) Sets the position of the Source.
+--- Sets whether the Source's position, velocity, direction, and cone angles are relative to the listener, or absolute.
+--- Parameter `enable` (boolean): True to make the position, velocity, direction and cone angles relative to the listener, false to make them absolute. Default: `false`.
+--- See: https://love2d.org/wiki/Source:setRelative
+---@field setRelative (fun(self: love.Source, enable?: boolean)) Sets whether the Source's position, velocity, direction, and cone angles are relative to the listener, or absolute.
+--- Sets the rolloff factor which affects the strength of the used distance attenuation.
+--- Parameter `rolloff` (number): The new rolloff factor.
+--- See: https://love2d.org/wiki/Source:setRolloff
+---@field setRolloff (fun(self: love.Source, rolloff: number)) Sets the rolloff factor which affects the strength of the used distance attenuation.
+--- Sets the velocity of the Source.
+--- Parameter `x` (number): The X part of the velocity vector.
+--- Parameter `y` (number): The Y part of the velocity vector.
+--- Parameter `z` (number): The Z part of the velocity vector.
+--- See: https://love2d.org/wiki/Source:setVelocity
+---@field setVelocity (fun(self: love.Source, x: number, y: number, z: number)) Sets the velocity of the Source.
+--- Sets the current volume of the Source.
+--- Parameter `volume` (number): The volume for a Source, where 1.0 is normal volume.
+--- See: https://love2d.org/wiki/Source:setVolume
+---@field setVolume (fun(self: love.Source, volume: number)) Sets the current volume of the Source.
+--- Sets the volume limits of the source.
+--- Parameter `min` (number): The minimum volume.
+--- Parameter `max` (number): The maximum volume.
+--- See: https://love2d.org/wiki/Source:setVolumeLimits
+---@field setVolumeLimits (fun(self: love.Source, min: number, max: number)) Sets the volume limits of the source.
+--- Stops a Source.
+--- See: https://love2d.org/wiki/Source:stop
+---@field stop (fun(self: love.Source)) Stops a Source.
+--- Gets the currently playing position of the Source.
+--- Parameter `unit` (love.TimeUnit): The type of unit for the return value. Default: `'seconds'`.
+--- Returns `position` (number): The currently playing position of the Source.
+--- See: https://love2d.org/wiki/Source:tell
+---@field tell (fun(self: love.Source, unit?: love.TimeUnit): number) Gets the currently playing position of the Source.
+
+--- Using a single image, draw any number of identical copies of the image using a single call to love.graphics.draw().
+--- See: https://love2d.org/wiki/SpriteBatch
+---@class love.SpriteBatch : love.Drawable
+--- Adds a sprite to the batch.
+--- Parameter `x` (number): The position to draw the object (x-axis).
+--- Parameter `y` (number): The position to draw the object (y-axis).
+--- Parameter `r` (number): Orientation (radians). Default: `0`.
+--- Parameter `sx` (number): Scale factor (x-axis). Default: `1`.
+--- Parameter `sy` (number): Scale factor (y-axis). Default: `sx`.
+--- Parameter `ox` (number): Origin offset (x-axis). Default: `0`.
+--- Parameter `oy` (number): Origin offset (y-axis). Default: `0`.
+--- Parameter `kx` (number): Shear factor (x-axis). Default: `0`.
+--- Parameter `ky` (number): Shear factor (y-axis). Default: `0`.
+--- Returns `id` (number): An identifier for the added sprite.
+--- See: https://love2d.org/wiki/SpriteBatch:add
+---@field add (fun(self: love.SpriteBatch, x: number, y: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): number)|(fun(self: love.SpriteBatch, quad: love.Quad, x: number, y: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): number) Adds a sprite to the batch.
+--- Adds a sprite to a batch created with an Array Texture.
+--- Parameter `layerindex` (number): The index of the layer to use for this sprite.
+--- Parameter `x` (number): The position to draw the sprite (x-axis). Default: `0`.
+--- Parameter `y` (number): The position to draw the sprite (y-axis). Default: `0`.
+--- Parameter `r` (number): Orientation (radians). Default: `0`.
+--- Parameter `sx` (number): Scale factor (x-axis). Default: `1`.
+--- Parameter `sy` (number): Scale factor (y-axis). Default: `sx`.
+--- Parameter `ox` (number): Origin offset (x-axis). Default: `0`.
+--- Parameter `oy` (number): Origin offset (y-axis). Default: `0`.
+--- Parameter `kx` (number): Shearing factor (x-axis). Default: `0`.
+--- Parameter `ky` (number): Shearing factor (y-axis). Default: `0`.
+--- Returns `spriteindex` (number): The index of the added sprite, for use with SpriteBatch:set or SpriteBatch:setLayer.
+--- See: https://love2d.org/wiki/SpriteBatch:addLayer
+---@field addLayer (fun(self: love.SpriteBatch, layerindex: number, x?: number, y?: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): number)|(fun(self: love.SpriteBatch, layerindex: number, quad: love.Quad, x?: number, y?: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): number)|(fun(self: love.SpriteBatch, layerindex: number, transform: love.Transform): number)|(fun(self: love.SpriteBatch, layerindex: number, quad: love.Quad, transform: love.Transform): number) Adds a sprite to a batch created with an Array Texture.
+--- Attaches a per-vertex attribute from a Mesh onto this SpriteBatch, for use when drawing.
+--- Parameter `name` (string): The name of the vertex attribute to attach.
+--- Parameter `mesh` (love.Mesh): The Mesh to get the vertex attribute from.
+--- See: https://love2d.org/wiki/SpriteBatch:attachAttribute
+---@field attachAttribute (fun(self: love.SpriteBatch, name: string, mesh: love.Mesh)) Attaches a per-vertex attribute from a Mesh onto this SpriteBatch, for use when drawing.
+--- Removes all sprites from the buffer.
+--- See: https://love2d.org/wiki/SpriteBatch:clear
+---@field clear (fun(self: love.SpriteBatch)) Removes all sprites from the buffer.
+--- Immediately sends all new and modified sprite data in the batch to the graphics card.
+--- See: https://love2d.org/wiki/SpriteBatch:flush
+---@field flush (fun(self: love.SpriteBatch)) Immediately sends all new and modified sprite data in the batch to the graphics card.
+--- Gets the maximum number of sprites the SpriteBatch can hold.
+--- Returns `size` (number): The maximum number of sprites the batch can hold.
+--- See: https://love2d.org/wiki/SpriteBatch:getBufferSize
+---@field getBufferSize (fun(self: love.SpriteBatch): number) Gets the maximum number of sprites the SpriteBatch can hold.
+--- Gets the color that will be used for the next add and set operations.
+--- Returns `r` (number): The red component (0-1).
+--- Returns `g` (number): The green component (0-1).
+--- Returns `b` (number): The blue component (0-1).
+--- Returns `a` (number): The alpha component (0-1).
+--- See: https://love2d.org/wiki/SpriteBatch:getColor
+---@field getColor (fun(self: love.SpriteBatch): number, number, number, number) Gets the color that will be used for the next add and set operations.
+--- Gets the number of sprites currently in the SpriteBatch.
+--- Returns `count` (number): The number of sprites currently in the batch.
+--- See: https://love2d.org/wiki/SpriteBatch:getCount
+---@field getCount (fun(self: love.SpriteBatch): number) Gets the number of sprites currently in the SpriteBatch.
+--- Gets the texture (Image or Canvas) used by the SpriteBatch.
+--- Returns `texture` (love.Texture): The Image or Canvas used by the SpriteBatch.
+--- See: https://love2d.org/wiki/SpriteBatch:getTexture
+---@field getTexture (fun(self: love.SpriteBatch): love.Texture) Gets the texture (Image or Canvas) used by the SpriteBatch.
+--- Changes a sprite in the batch.
+--- Parameter `spriteindex` (number): The index of the sprite that will be changed.
+--- Parameter `x` (number): The position to draw the object (x-axis).
+--- Parameter `y` (number): The position to draw the object (y-axis).
+--- Parameter `r` (number): Orientation (radians). Default: `0`.
+--- Parameter `sx` (number): Scale factor (x-axis). Default: `1`.
+--- Parameter `sy` (number): Scale factor (y-axis). Default: `sx`.
+--- Parameter `ox` (number): Origin offset (x-axis). Default: `0`.
+--- Parameter `oy` (number): Origin offset (y-axis). Default: `0`.
+--- Parameter `kx` (number): Shear factor (x-axis). Default: `0`.
+--- Parameter `ky` (number): Shear factor (y-axis). Default: `0`.
+--- See: https://love2d.org/wiki/SpriteBatch:set
+---@field set (fun(self: love.SpriteBatch, spriteindex: number, x: number, y: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(self: love.SpriteBatch, spriteindex: number, quad: love.Quad, x: number, y: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number)) Changes a sprite in the batch.
+--- Sets the color that will be used for the next add and set operations.
+--- Parameter `r` (number): The amount of red.
+--- Parameter `g` (number): The amount of green.
+--- Parameter `b` (number): The amount of blue.
+--- Parameter `a` (number): The amount of alpha. Default: `1`.
+--- See: https://love2d.org/wiki/SpriteBatch:setColor
+---@field setColor (fun(self: love.SpriteBatch, r: number, g: number, b: number, a?: number))|(fun(self: love.SpriteBatch)) Sets the color that will be used for the next add and set operations.
+--- Restricts the drawn sprites in the SpriteBatch to a subset of the total.
+--- Parameter `start` (number): The index of the first sprite to draw.
+--- Parameter `count` (number): The number of sprites to draw.
+--- See: https://love2d.org/wiki/SpriteBatch:setDrawRange
+---@field setDrawRange (fun(self: love.SpriteBatch, start: number, count: number))|(fun(self: love.SpriteBatch)) Restricts the drawn sprites in the SpriteBatch to a subset of the total.
+--- Changes a sprite previously added with add or addLayer, in a batch created with an Array Texture.
+--- Parameter `spriteindex` (number): The index of the existing sprite to replace.
+--- Parameter `layerindex` (number): The index of the layer in the Array Texture to use for this sprite.
+--- Parameter `x` (number): The position to draw the sprite (x-axis). Default: `0`.
+--- Parameter `y` (number): The position to draw the sprite (y-axis). Default: `0`.
+--- Parameter `r` (number): Orientation (radians). Default: `0`.
+--- Parameter `sx` (number): Scale factor (x-axis). Default: `1`.
+--- Parameter `sy` (number): Scale factor (y-axis). Default: `sx`.
+--- Parameter `ox` (number): Origin offset (x-axis). Default: `0`.
+--- Parameter `oy` (number): Origin offset (y-axis). Default: `0`.
+--- Parameter `kx` (number): Shearing factor (x-axis). Default: `0`.
+--- Parameter `ky` (number): Shearing factor (y-axis). Default: `0`.
+--- See: https://love2d.org/wiki/SpriteBatch:setLayer
+---@field setLayer (fun(self: love.SpriteBatch, spriteindex: number, layerindex: number, x?: number, y?: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(self: love.SpriteBatch, spriteindex: number, layerindex: number, quad: love.Quad, x?: number, y?: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(self: love.SpriteBatch, spriteindex: number, layerindex: number, transform: love.Transform))|(fun(self: love.SpriteBatch, spriteindex: number, layerindex: number, quad: love.Quad, transform: love.Transform)) Changes a sprite previously added with add or addLayer, in a batch created with an Array Texture.
+--- Sets the texture (Image or Canvas) used for the sprites in the batch, when drawing.
+--- Parameter `texture` (love.Texture): The new Image or Canvas to use for the sprites in the batch.
+--- See: https://love2d.org/wiki/SpriteBatch:setTexture
+---@field setTexture (fun(self: love.SpriteBatch, texture: love.Texture)) Sets the texture (Image or Canvas) used for the sprites in the batch, when drawing.
+
+--- Drawable text.
+--- See: https://love2d.org/wiki/Text
+---@class love.Text : love.Drawable
+--- Adds additional colored text to the Text object at the specified position.
+--- Parameter `textstring` (string): The text to add to the object.
+--- Parameter `x` (number): The position of the new text on the x-axis. Default: `0`.
+--- Parameter `y` (number): The position of the new text on the y-axis. Default: `0`.
+--- Parameter `angle` (number): The orientation of the new text in radians. Default: `0`.
+--- Parameter `sx` (number): Scale factor on the x-axis. Default: `1`.
+--- Parameter `sy` (number): Scale factor on the y-axis. Default: `sx`.
+--- Parameter `ox` (number): Origin offset on the x-axis. Default: `0`.
+--- Parameter `oy` (number): Origin offset on the y-axis. Default: `0`.
+--- Parameter `kx` (number): Shearing / skew factor on the x-axis. Default: `0`.
+--- Parameter `ky` (number): Shearing / skew factor on the y-axis. Default: `0`.
+--- Returns `index` (number): An index number that can be used with Text:getWidth or Text:getHeight.
+--- See: https://love2d.org/wiki/Text:add
+---@field add (fun(self: love.Text, textstring: string, x?: number, y?: number, angle?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): number)|(fun(self: love.Text, coloredtext: love.Text_add_coloredtext, x?: number, y?: number, angle?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): number) Adds additional colored text to the Text object at the specified position.
+--- Adds additional formatted / colored text to the Text object at the specified position.
+--- Parameter `textstring` (string): The text to add to the object.
+--- Parameter `wraplimit` (number): The maximum width in pixels of the text before it gets automatically wrapped to a new line.
+--- Parameter `align` (love.AlignMode): The alignment of the text.
+--- Parameter `x` (number): The position of the new text (x-axis).
+--- Parameter `y` (number): The position of the new text (y-axis).
+--- Parameter `angle` (number): Orientation (radians). Default: `0`.
+--- Parameter `sx` (number): Scale factor (x-axis). Default: `1`.
+--- Parameter `sy` (number): Scale factor (y-axis). Default: `sx`.
+--- Parameter `ox` (number): Origin offset (x-axis). Default: `0`.
+--- Parameter `oy` (number): Origin offset (y-axis). Default: `0`.
+--- Parameter `kx` (number): Shearing / skew factor (x-axis). Default: `0`.
+--- Parameter `ky` (number): Shearing / skew factor (y-axis). Default: `0`.
+--- Returns `index` (number): An index number that can be used with Text:getWidth or Text:getHeight.
+--- See: https://love2d.org/wiki/Text:addf
+---@field addf (fun(self: love.Text, textstring: string, wraplimit: number, align: love.AlignMode, x: number, y: number, angle?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): number)|(fun(self: love.Text, coloredtext: love.Text_addf_coloredtext, wraplimit: number, align: love.AlignMode, x: number, y: number, angle?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): number) Adds additional formatted / colored text to the Text object at the specified position.
+--- Clears the contents of the Text object.
+--- See: https://love2d.org/wiki/Text:clear
+---@field clear (fun(self: love.Text)) Clears the contents of the Text object.
+--- Gets the width and height of the text in pixels.
+--- Returns `width` (number): The width of the text.
+--- Returns `height` (number): The height of the text.
+--- See: https://love2d.org/wiki/Text:getDimensions
+---@field getDimensions (fun(self: love.Text): number, number)|(fun(self: love.Text, index: number): number, number) Gets the width and height of the text in pixels.
+--- Gets the Font used with the Text object.
+--- Returns `font` (love.Font): The font used with this Text object.
+--- See: https://love2d.org/wiki/Text:getFont
+---@field getFont (fun(self: love.Text): love.Font) Gets the Font used with the Text object.
+--- Gets the height of the text in pixels.
+--- Returns `height` (number): The height of the text.
+--- See: https://love2d.org/wiki/Text:getHeight
+---@field getHeight (fun(self: love.Text): number)|(fun(self: love.Text, index: number): number) Gets the height of the text in pixels.
+--- Gets the width of the text in pixels.
+--- Returns `width` (number): The width of the text.
+--- See: https://love2d.org/wiki/Text:getWidth
+---@field getWidth (fun(self: love.Text): number)|(fun(self: love.Text, index: number): number) Gets the width of the text in pixels.
+--- Replaces the contents of the Text object with a new unformatted string.
+--- Parameter `textstring` (string): The new string of text to use.
+--- See: https://love2d.org/wiki/Text:set
+---@field set (fun(self: love.Text, textstring: string))|(fun(self: love.Text, coloredtext: love.Text_set_coloredtext)) Replaces the contents of the Text object with a new unformatted string.
+--- Replaces the Font used with the text.
+--- Parameter `font` (love.Font): The new font to use with this Text object.
+--- See: https://love2d.org/wiki/Text:setFont
+---@field setFont (fun(self: love.Text, font: love.Font)) Replaces the Font used with the text.
+--- Replaces the contents of the Text object with a new formatted string.
+--- Parameter `textstring` (string): The new string of text to use.
+--- Parameter `wraplimit` (number): The maximum width in pixels of the text before it gets automatically wrapped to a new line.
+--- Parameter `align` (love.AlignMode): The alignment of the text.
+--- See: https://love2d.org/wiki/Text:setf
+---@field setf (fun(self: love.Text, textstring: string, wraplimit: number, align: love.AlignMode))|(fun(self: love.Text, coloredtext: love.Text_setf_coloredtext, wraplimit: number, align: love.AlignMode)) Replaces the contents of the Text object with a new formatted string.
+
+--- Superclass for drawable objects which represent a texture.
+--- See: https://love2d.org/wiki/Texture
+---@class love.Texture : love.Drawable
+--- Gets the DPI scale factor of the Texture.
+--- Returns `dpiscale` (number): The DPI scale factor of the Texture.
+--- See: https://love2d.org/wiki/Texture:getDPIScale
+---@field getDPIScale (fun(self: love.Texture): number) Gets the DPI scale factor of the Texture.
+--- Gets the depth of a Volume Texture.
+--- Returns `depth` (number): The depth of the volume Texture.
+--- See: https://love2d.org/wiki/Texture:getDepth
+---@field getDepth (fun(self: love.Texture): number) Gets the depth of a Volume Texture.
+--- Gets the comparison mode used when sampling from a depth texture in a shader.
+--- Returns `compare` (love.CompareMode): The comparison mode used when sampling from this texture in a shader, or nil if setDepthSampleMode has not been called on this Texture.
+--- See: https://love2d.org/wiki/Texture:getDepthSampleMode
+---@field getDepthSampleMode (fun(self: love.Texture): love.CompareMode) Gets the comparison mode used when sampling from a depth texture in a shader.
+--- Gets the width and height of the Texture.
+--- Returns `width` (number): The width of the Texture.
+--- Returns `height` (number): The height of the Texture.
+--- See: https://love2d.org/wiki/Texture:getDimensions
+---@field getDimensions (fun(self: love.Texture): number, number) Gets the width and height of the Texture.
+--- Gets the filter mode of the Texture.
+--- Returns `min` (love.FilterMode): Filter mode to use when minifying the texture (rendering it at a smaller size on-screen than its size in pixels).
+--- Returns `mag` (love.FilterMode): Filter mode to use when magnifying the texture (rendering it at a smaller size on-screen than its size in pixels).
+--- Returns `anisotropy` (number): Maximum amount of anisotropic filtering used.
+--- See: https://love2d.org/wiki/Texture:getFilter
+---@field getFilter (fun(self: love.Texture): love.FilterMode, love.FilterMode, number) Gets the filter mode of the Texture.
+--- Gets the pixel format of the Texture.
+--- Returns `format` (love.PixelFormat): The pixel format the Texture was created with.
+--- See: https://love2d.org/wiki/Texture:getFormat
+---@field getFormat (fun(self: love.Texture): love.PixelFormat) Gets the pixel format of the Texture.
+--- Gets the height of the Texture.
+--- Returns `height` (number): The height of the Texture.
+--- See: https://love2d.org/wiki/Texture:getHeight
+---@field getHeight (fun(self: love.Texture): number) Gets the height of the Texture.
+--- Gets the number of layers / slices in an Array Texture.
+--- Returns `layers` (number): The number of layers in the Array Texture.
+--- See: https://love2d.org/wiki/Texture:getLayerCount
+---@field getLayerCount (fun(self: love.Texture): number) Gets the number of layers / slices in an Array Texture.
+--- Gets the number of mipmaps contained in the Texture.
+--- Returns `mipmaps` (number): The number of mipmaps in the Texture.
+--- See: https://love2d.org/wiki/Texture:getMipmapCount
+---@field getMipmapCount (fun(self: love.Texture): number) Gets the number of mipmaps contained in the Texture.
+--- Gets the mipmap filter mode for a Texture.
+--- Returns `mode` (love.FilterMode): The filter mode used in between mipmap levels.
+--- Returns `sharpness` (number): Value used to determine whether the image should use more or less detailed mipmap levels than normal when drawing.
+--- See: https://love2d.org/wiki/Texture:getMipmapFilter
+---@field getMipmapFilter (fun(self: love.Texture): love.FilterMode, number) Gets the mipmap filter mode for a Texture.
+--- Gets the width and height in pixels of the Texture.
+--- Returns `pixelwidth` (number): The width of the Texture, in pixels.
+--- Returns `pixelheight` (number): The height of the Texture, in pixels.
+--- See: https://love2d.org/wiki/Texture:getPixelDimensions
+---@field getPixelDimensions (fun(self: love.Texture): number, number) Gets the width and height in pixels of the Texture.
+--- Gets the height in pixels of the Texture.
+--- Returns `pixelheight` (number): The height of the Texture, in pixels.
+--- See: https://love2d.org/wiki/Texture:getPixelHeight
+---@field getPixelHeight (fun(self: love.Texture): number) Gets the height in pixels of the Texture.
+--- Gets the width in pixels of the Texture.
+--- Returns `pixelwidth` (number): The width of the Texture, in pixels.
+--- See: https://love2d.org/wiki/Texture:getPixelWidth
+---@field getPixelWidth (fun(self: love.Texture): number) Gets the width in pixels of the Texture.
+--- Gets the type of the Texture.
+--- Returns `texturetype` (love.TextureType): The type of the Texture.
+--- See: https://love2d.org/wiki/Texture:getTextureType
+---@field getTextureType (fun(self: love.Texture): love.TextureType) Gets the type of the Texture.
+--- Gets the width of the Texture.
+--- Returns `width` (number): The width of the Texture.
+--- See: https://love2d.org/wiki/Texture:getWidth
+---@field getWidth (fun(self: love.Texture): number) Gets the width of the Texture.
+--- Gets the wrapping properties of a Texture.
+--- Returns `horiz` (love.WrapMode): Horizontal wrapping mode of the texture.
+--- Returns `vert` (love.WrapMode): Vertical wrapping mode of the texture.
+--- Returns `depth` (love.WrapMode): Wrapping mode for the z-axis of a Volume texture.
+--- See: https://love2d.org/wiki/Texture:getWrap
+---@field getWrap (fun(self: love.Texture): love.WrapMode, love.WrapMode, love.WrapMode) Gets the wrapping properties of a Texture.
+--- Gets whether the Texture can be drawn and sent to a Shader.
+--- Returns `readable` (boolean): Whether the Texture is readable.
+--- See: https://love2d.org/wiki/Texture:isReadable
+---@field isReadable (fun(self: love.Texture): boolean) Gets whether the Texture can be drawn and sent to a Shader.
+--- Sets the comparison mode used when sampling from a depth texture in a shader.
+--- Parameter `compare` (love.CompareMode): The comparison mode used when sampling from this texture in a shader.
+--- See: https://love2d.org/wiki/Texture:setDepthSampleMode
+---@field setDepthSampleMode (fun(self: love.Texture, compare: love.CompareMode)) Sets the comparison mode used when sampling from a depth texture in a shader.
+--- Sets the filter mode of the Texture.
+--- Parameter `min` (love.FilterMode): Filter mode to use when minifying the texture (rendering it at a smaller size on-screen than its size in pixels).
+--- Parameter `mag` (love.FilterMode): Filter mode to use when magnifying the texture (rendering it at a larger size on-screen than its size in pixels). Default: `min`.
+--- Parameter `anisotropy` (number): Maximum amount of anisotropic filtering to use. Default: `1`.
+--- See: https://love2d.org/wiki/Texture:setFilter
+---@field setFilter (fun(self: love.Texture, min: love.FilterMode, mag?: love.FilterMode, anisotropy?: number)) Sets the filter mode of the Texture.
+--- Sets the mipmap filter mode for a Texture.
+--- Parameter `filtermode` (love.FilterMode): The filter mode to use in between mipmap levels.
+--- Parameter `sharpness` (number): A positive sharpness value makes the texture use a more detailed mipmap level when drawing, at the expense of performance. Default: `0`.
+--- See: https://love2d.org/wiki/Texture:setMipmapFilter
+---@field setMipmapFilter (fun(self: love.Texture, filtermode: love.FilterMode, sharpness?: number))|(fun(self: love.Texture)) Sets the mipmap filter mode for a Texture.
+--- Sets the wrapping properties of a Texture.
+--- Parameter `horiz` (love.WrapMode): Horizontal wrapping mode of the texture.
+--- Parameter `vert` (love.WrapMode): Vertical wrapping mode of the texture. Default: `horiz`.
+--- Parameter `depth` (love.WrapMode): Wrapping mode for the z-axis of a Volume texture. Default: `horiz`.
+--- See: https://love2d.org/wiki/Texture:setWrap
+---@field setWrap (fun(self: love.Texture, horiz: love.WrapMode, vert?: love.WrapMode, depth?: love.WrapMode)) Sets the wrapping properties of a Texture.
+
+--- A Thread is a chunk of code that can run in parallel with other threads.
+--- See: https://love2d.org/wiki/Thread
+---@class love.Thread : love.Object
+--- Retrieves the error string from the thread if it produced an error.
+--- Returns `err` (string): The error message, or nil if the Thread has not caused an error.
+--- See: https://love2d.org/wiki/Thread:getError
+---@field getError (fun(self: love.Thread): string) Retrieves the error string from the thread if it produced an error.
+--- Returns whether the thread is currently running.
+--- Returns `value` (boolean): True if the thread is running, false otherwise.
+--- See: https://love2d.org/wiki/Thread:isRunning
+---@field isRunning (fun(self: love.Thread): boolean) Returns whether the thread is currently running.
+--- Starts the thread.
+--- See: https://love2d.org/wiki/Thread:start
+---@field start (fun(self: love.Thread))|(fun(self: love.Thread, ...: string|number|boolean|love.Object|table)) Starts the thread.
+--- Wait for a thread to finish.
+--- See: https://love2d.org/wiki/Thread:wait
+---@field wait (fun(self: love.Thread)) Wait for a thread to finish.
+
+--- Object containing a coordinate system transformation.
+--- See: https://love2d.org/wiki/Transform
+---@class love.Transform : love.Object
+--- Applies the given other Transform object to this one.
+--- Parameter `other` (love.Transform): The other Transform object to apply to this Transform.
+--- Returns `transform` (love.Transform): The Transform object the method was called on.
+--- See: https://love2d.org/wiki/Transform:apply
+---@field apply (fun(self: love.Transform, other: love.Transform): love.Transform) Applies the given other Transform object to this one.
+--- Creates a new copy of this Transform.
+--- Returns `clone` (love.Transform): The copy of this Transform.
+--- See: https://love2d.org/wiki/Transform:clone
+---@field clone (fun(self: love.Transform): love.Transform) Creates a new copy of this Transform.
+--- Gets the internal 4x4 transformation matrix stored by this Transform.
+--- Returns `e1_1` (number): The first column of the first row of the matrix.
+--- Returns `e1_2` (number): The second column of the first row of the matrix.
+--- Returns `e1_3` (number): The third column of the first row of the matrix.
+--- Returns `e1_4` (number): The fourth column of the first row of the matrix.
+--- Returns `e2_1` (number): The first column of the second row of the matrix.
+--- Returns `e2_2` (number): The second column of the second row of the matrix.
+--- Returns `e2_3` (number): The third column of the second row of the matrix.
+--- Returns `e2_4` (number): The fourth column of the second row of the matrix.
+--- Returns `e3_1` (number): The first column of the third row of the matrix.
+--- Returns `e3_2` (number): The second column of the third row of the matrix.
+--- Returns `e3_3` (number): The third column of the third row of the matrix.
+--- Returns `e3_4` (number): The fourth column of the third row of the matrix.
+--- Returns `e4_1` (number): The first column of the fourth row of the matrix.
+--- Returns `e4_2` (number): The second column of the fourth row of the matrix.
+--- Returns `e4_3` (number): The third column of the fourth row of the matrix.
+--- Returns `e4_4` (number): The fourth column of the fourth row of the matrix.
+--- See: https://love2d.org/wiki/Transform:getMatrix
+---@field getMatrix (fun(self: love.Transform): number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number) Gets the internal 4x4 transformation matrix stored by this Transform.
+--- Creates a new Transform containing the inverse of this Transform.
+--- Returns `inverse` (love.Transform): A new Transform object representing the inverse of this Transform's matrix.
+--- See: https://love2d.org/wiki/Transform:inverse
+---@field inverse (fun(self: love.Transform): love.Transform) Creates a new Transform containing the inverse of this Transform.
+--- Applies the reverse of the Transform object's transformation to the given 2D position.
+--- Parameter `localX` (number): The x component of the position with the transform applied.
+--- Parameter `localY` (number): The y component of the position with the transform applied.
+--- Returns `globalX` (number): The x component of the position in global coordinates.
+--- Returns `globalY` (number): The y component of the position in global coordinates.
+--- See: https://love2d.org/wiki/Transform:inverseTransformPoint
+---@field inverseTransformPoint (fun(self: love.Transform, localX: number, localY: number): number, number) Applies the reverse of the Transform object's transformation to the given 2D position.
+--- Checks whether the Transform is an affine transformation.
+--- Returns `affine` (boolean): true if the transform object is an affine transformation, false otherwise.
+--- See: https://love2d.org/wiki/Transform:isAffine2DTransform
+---@field isAffine2DTransform (fun(self: love.Transform): boolean) Checks whether the Transform is an affine transformation.
+--- Resets the Transform to an identity state.
+--- Returns `transform` (love.Transform): The Transform object the method was called on.
+--- See: https://love2d.org/wiki/Transform:reset
+---@field reset (fun(self: love.Transform): love.Transform) Resets the Transform to an identity state.
+--- Applies a rotation to the Transform's coordinate system.
+--- Parameter `angle` (number): The relative angle in radians to rotate this Transform by.
+--- Returns `transform` (love.Transform): The Transform object the method was called on.
+--- See: https://love2d.org/wiki/Transform:rotate
+---@field rotate (fun(self: love.Transform, angle: number): love.Transform) Applies a rotation to the Transform's coordinate system.
+--- Scales the Transform's coordinate system.
+--- Parameter `sx` (number): The relative scale factor along the x-axis.
+--- Parameter `sy` (number): The relative scale factor along the y-axis. Default: `sx`.
+--- Returns `transform` (love.Transform): The Transform object the method was called on.
+--- See: https://love2d.org/wiki/Transform:scale
+---@field scale (fun(self: love.Transform, sx: number, sy?: number): love.Transform) Scales the Transform's coordinate system.
+--- Directly sets the Transform's internal 4x4 transformation matrix.
+--- Parameter `e1_1` (number): The first column of the first row of the matrix.
+--- Parameter `e1_2` (number): The second column of the first row of the matrix.
+--- Parameter `e1_3` (number): The third column of the first row of the matrix.
+--- Parameter `e1_4` (number): The fourth column of the first row of the matrix.
+--- Parameter `e2_1` (number): The first column of the second row of the matrix.
+--- Parameter `e2_2` (number): The second column of the second row of the matrix.
+--- Parameter `e2_3` (number): The third column of the second row of the matrix.
+--- Parameter `e2_4` (number): The fourth column of the second row of the matrix.
+--- Parameter `e3_1` (number): The first column of the third row of the matrix.
+--- Parameter `e3_2` (number): The second column of the third row of the matrix.
+--- Parameter `e3_3` (number): The third column of the third row of the matrix.
+--- Parameter `e3_4` (number): The fourth column of the third row of the matrix.
+--- Parameter `e4_1` (number): The first column of the fourth row of the matrix.
+--- Parameter `e4_2` (number): The second column of the fourth row of the matrix.
+--- Parameter `e4_3` (number): The third column of the fourth row of the matrix.
+--- Parameter `e4_4` (number): The fourth column of the fourth row of the matrix.
+--- Returns `transform` (love.Transform): The Transform object the method was called on.
+--- See: https://love2d.org/wiki/Transform:setMatrix
+---@field setMatrix (fun(self: love.Transform, e1_1: number, e1_2: number, e1_3: number, e1_4: number, e2_1: number, e2_2: number, e2_3: number, e2_4: number, e3_1: number, e3_2: number, e3_3: number, e3_4: number, e4_1: number, e4_2: number, e4_3: number, e4_4: number): love.Transform)|(fun(self: love.Transform, layout: love.MatrixLayout, e1_1: number, e1_2: number, e1_3: number, e1_4: number, e2_1: number, e2_2: number, e2_3: number, e2_4: number, e3_1: number, e3_2: number, e3_3: number, e3_4: number, e4_1: number, e4_2: number, e4_3: number, e4_4: number): love.Transform)|(fun(self: love.Transform, layout: love.MatrixLayout, matrix: table): love.Transform)|(fun(self: love.Transform, layout: love.MatrixLayout, matrix: table): love.Transform) Directly sets the Transform's internal 4x4 transformation matrix.
+--- Resets the Transform to the specified transformation parameters.
+--- Parameter `x` (number): The position of the Transform on the x-axis.
+--- Parameter `y` (number): The position of the Transform on the y-axis.
+--- Parameter `angle` (number): The orientation of the Transform in radians. Default: `0`.
+--- Parameter `sx` (number): Scale factor on the x-axis. Default: `1`.
+--- Parameter `sy` (number): Scale factor on the y-axis. Default: `sx`.
+--- Parameter `ox` (number): Origin offset on the x-axis. Default: `0`.
+--- Parameter `oy` (number): Origin offset on the y-axis. Default: `0`.
+--- Parameter `kx` (number): Shearing / skew factor on the x-axis. Default: `0`.
+--- Parameter `ky` (number): Shearing / skew factor on the y-axis. Default: `0`.
+--- Returns `transform` (love.Transform): The Transform object the method was called on.
+--- See: https://love2d.org/wiki/Transform:setTransformation
+---@field setTransformation (fun(self: love.Transform, x: number, y: number, angle?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): love.Transform) Resets the Transform to the specified transformation parameters.
+--- Applies a shear factor (skew) to the Transform's coordinate system.
+--- Parameter `kx` (number): The shear factor along the x-axis.
+--- Parameter `ky` (number): The shear factor along the y-axis.
+--- Returns `transform` (love.Transform): The Transform object the method was called on.
+--- See: https://love2d.org/wiki/Transform:shear
+---@field shear (fun(self: love.Transform, kx: number, ky: number): love.Transform) Applies a shear factor (skew) to the Transform's coordinate system.
+--- Applies the Transform object's transformation to the given 2D position.
+--- Parameter `globalX` (number): The x component of the position in global coordinates.
+--- Parameter `globalY` (number): The y component of the position in global coordinates.
+--- Returns `localX` (number): The x component of the position with the transform applied.
+--- Returns `localY` (number): The y component of the position with the transform applied.
+--- See: https://love2d.org/wiki/Transform:transformPoint
+---@field transformPoint (fun(self: love.Transform, globalX: number, globalY: number): number, number) Applies the Transform object's transformation to the given 2D position.
+--- Applies a translation to the Transform's coordinate system.
+--- Parameter `dx` (number): The relative translation along the x-axis.
+--- Parameter `dy` (number): The relative translation along the y-axis.
+--- Returns `transform` (love.Transform): The Transform object the method was called on.
+--- See: https://love2d.org/wiki/Transform:translate
+---@field translate (fun(self: love.Transform, dx: number, dy: number): love.Transform) Applies a translation to the Transform's coordinate system.
+
+--- A drawable video.
+--- See: https://love2d.org/wiki/Video
 ---@class love.Video : love.Drawable
----@field play fun(self: love.Video): nil Play video stream.
----@field pause fun(self: love.Video): nil Pause video stream.
----@field rewind fun(self: love.Video): nil Rewind video to start.
----@field isPlaying fun(self: love.Video): boolean Check if video is playing.
+--- Gets the width and height of the Video in pixels.
+--- Returns `width` (number): The width of the Video.
+--- Returns `height` (number): The height of the Video.
+--- See: https://love2d.org/wiki/Video:getDimensions
+---@field getDimensions (fun(self: love.Video): number, number) Gets the width and height of the Video in pixels.
+--- Gets the scaling filters used when drawing the Video.
+--- Returns `min` (love.FilterMode): The filter mode used when scaling the Video down.
+--- Returns `mag` (love.FilterMode): The filter mode used when scaling the Video up.
+--- Returns `anisotropy` (number): Maximum amount of anisotropic filtering used.
+--- See: https://love2d.org/wiki/Video:getFilter
+---@field getFilter (fun(self: love.Video): love.FilterMode, love.FilterMode, number) Gets the scaling filters used when drawing the Video.
+--- Gets the height of the Video in pixels.
+--- Returns `height` (number): The height of the Video.
+--- See: https://love2d.org/wiki/Video:getHeight
+---@field getHeight (fun(self: love.Video): number) Gets the height of the Video in pixels.
+--- Gets the audio Source used for playing back the video's audio.
+--- Returns `source` (love.Source): The audio Source used for audio playback, or nil if the video has no audio.
+--- See: https://love2d.org/wiki/Video:getSource
+---@field getSource (fun(self: love.Video): love.Source) Gets the audio Source used for playing back the video's audio.
+--- Gets the VideoStream object used for decoding and controlling the video.
+--- Returns `stream` (love.VideoStream): The VideoStream used for decoding and controlling the video.
+--- See: https://love2d.org/wiki/Video:getStream
+---@field getStream (fun(self: love.Video): love.VideoStream) Gets the VideoStream object used for decoding and controlling the video.
+--- Gets the width of the Video in pixels.
+--- Returns `width` (number): The width of the Video.
+--- See: https://love2d.org/wiki/Video:getWidth
+---@field getWidth (fun(self: love.Video): number) Gets the width of the Video in pixels.
+--- Gets whether the Video is currently playing.
+--- Returns `playing` (boolean): Whether the video is playing.
+--- See: https://love2d.org/wiki/Video:isPlaying
+---@field isPlaying (fun(self: love.Video): boolean) Gets whether the Video is currently playing.
+--- Pauses the Video.
+--- See: https://love2d.org/wiki/Video:pause
+---@field pause (fun(self: love.Video)) Pauses the Video.
+--- Starts playing the Video.
+--- See: https://love2d.org/wiki/Video:play
+---@field play (fun(self: love.Video)) Starts playing the Video.
+--- Rewinds the Video to the beginning.
+--- See: https://love2d.org/wiki/Video:rewind
+---@field rewind (fun(self: love.Video)) Rewinds the Video to the beginning.
+--- Sets the current playback position of the Video.
+--- Parameter `offset` (number): The time in seconds since the beginning of the Video.
+--- See: https://love2d.org/wiki/Video:seek
+---@field seek (fun(self: love.Video, offset: number)) Sets the current playback position of the Video.
+--- Sets the scaling filters used when drawing the Video.
+--- Parameter `min` (love.FilterMode): The filter mode used when scaling the Video down.
+--- Parameter `mag` (love.FilterMode): The filter mode used when scaling the Video up.
+--- Parameter `anisotropy` (number): Maximum amount of anisotropic filtering used. Default: `1`.
+--- See: https://love2d.org/wiki/Video:setFilter
+---@field setFilter (fun(self: love.Video, min: love.FilterMode, mag: love.FilterMode, anisotropy?: number)) Sets the scaling filters used when drawing the Video.
+--- Sets the audio Source used for playing back the video's audio.
+--- Parameter `source` (love.Source): The audio Source used for audio playback, or nil to disable audio synchronization. Default: `nil`.
+--- See: https://love2d.org/wiki/Video:setSource
+---@field setSource (fun(self: love.Video, source?: love.Source)) Sets the audio Source used for playing back the video's audio.
+--- Gets the current playback position of the Video.
+--- Returns `seconds` (number): The time in seconds since the beginning of the Video.
+--- See: https://love2d.org/wiki/Video:tell
+---@field tell (fun(self: love.Video): number) Gets the current playback position of the Video.
 
----@class love.WindowFlags
----@field fullscreen? boolean
----@field fullscreentype? 'desktop'|'exclusive'
----@field vsync? integer
----@field msaa? integer
----@field resizable? boolean
----@field borderless? boolean
----@field centered? boolean
----@field display? integer
----@field minwidth? integer
----@field minheight? integer
----@field highdpi? boolean
----@field x? integer
----@field y? integer
+--- An object which decodes, streams, and controls Videos.
+--- See: https://love2d.org/wiki/VideoStream
+---@class love.VideoStream : love.Object
+--- Gets the filename of the VideoStream.
+--- Returns `filename` (string): The filename of the VideoStream
+--- See: https://love2d.org/wiki/VideoStream:getFilename
+---@field getFilename (fun(self: love.VideoStream): string) Gets the filename of the VideoStream.
+--- Gets whether the VideoStream is playing.
+--- Returns `playing` (boolean): Whether the VideoStream is playing.
+--- See: https://love2d.org/wiki/VideoStream:isPlaying
+---@field isPlaying (fun(self: love.VideoStream): boolean) Gets whether the VideoStream is playing.
+--- Pauses the VideoStream.
+--- See: https://love2d.org/wiki/VideoStream:pause
+---@field pause (fun(self: love.VideoStream)) Pauses the VideoStream.
+--- Plays the VideoStream.
+--- See: https://love2d.org/wiki/VideoStream:play
+---@field play (fun(self: love.VideoStream)) Plays the VideoStream.
+--- Rewinds the VideoStream.
+--- See: https://love2d.org/wiki/VideoStream:rewind
+---@field rewind (fun(self: love.VideoStream)) Rewinds the VideoStream.
+--- Sets the current playback position of the VideoStream.
+--- Parameter `offset` (number): The time in seconds since the beginning of the VideoStream.
+--- See: https://love2d.org/wiki/VideoStream:seek
+---@field seek (fun(self: love.VideoStream, offset: number)) Sets the current playback position of the VideoStream.
+--- Gets the current playback position of the VideoStream.
+--- Returns `seconds` (number): The number of seconds sionce the beginning of the VideoStream.
+--- See: https://love2d.org/wiki/VideoStream:tell
+---@field tell (fun(self: love.VideoStream): number) Gets the current playback position of the VideoStream.
 
----@class love.FileDataInfo
----@field size integer File size in bytes.
----@field modtime integer Modification timestamp in seconds.
----@field type 'file'|'directory'|'symlink'|'other' Path entry type.
+--- A WeldJoint essentially glues two bodies together.
+--- See: https://love2d.org/wiki/WeldJoint
+---@class love.WeldJoint : love.Joint
+--- Returns the damping ratio of the joint.
+--- Returns `ratio` (number): The damping ratio.
+--- See: https://love2d.org/wiki/WeldJoint:getDampingRatio
+---@field getDampingRatio (fun(self: love.WeldJoint): number) Returns the damping ratio of the joint.
+--- Returns the frequency.
+--- Returns `freq` (number): The frequency in hertz.
+--- See: https://love2d.org/wiki/WeldJoint:getFrequency
+---@field getFrequency (fun(self: love.WeldJoint): number) Returns the frequency.
+--- Gets the reference angle.
+--- Returns `angle` (number): The reference angle in radians.
+--- See: https://love2d.org/wiki/WeldJoint:getReferenceAngle
+---@field getReferenceAngle (fun(self: love.WeldJoint): number) Gets the reference angle.
+--- Sets a new damping ratio.
+--- Parameter `ratio` (number): The new damping ratio.
+--- See: https://love2d.org/wiki/WeldJoint:setDampingRatio
+---@field setDampingRatio (fun(self: love.WeldJoint, ratio: number)) Sets a new damping ratio.
+--- Sets a new frequency.
+--- Parameter `freq` (number): The new frequency in hertz.
+--- See: https://love2d.org/wiki/WeldJoint:setFrequency
+---@field setFrequency (fun(self: love.WeldJoint, freq: number)) Sets a new frequency.
 
----@class love.graphics
----@field draw fun(drawable: love.Drawable, x?: number, y?: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): nil
----@field draw fun(texture: love.Texture, quad: love.Quad, x?: number, y?: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): nil
----@field print fun(text: string|table, x?: number, y?: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): nil
----@field printf fun(text: string|table, x: number, y: number, limit: number, align?: 'left'|'center'|'right'|'justify', r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): nil
----@field rectangle fun(mode: 'fill'|'line', x: number, y: number, width: number, height: number, rx?: number, ry?: number): nil
----@field circle fun(mode: 'fill'|'line', x: number, y: number, radius: number, segments?: integer): nil
----@field line fun(...: number): nil
----@field polygon fun(mode: 'fill'|'line', ...: number): nil
----@field ellipse fun(mode: 'fill'|'line', x: number, y: number, rx: number, ry: number): nil
----@field arc fun(mode: 'fill'|'line', arctype: 'pie'|'open'|'closed', x: number, y: number, radius: number, angle1: number, angle2: number, segments?: integer): nil
----@field points fun(...: number): nil
----@field setColor fun(red: number, green: number, blue: number, alpha?: number): nil
----@field getColor fun(): number, number, number, number
----@field setBackgroundColor fun(red: number, green: number, blue: number, alpha?: number): nil
----@field getBackgroundColor fun(): number, number, number, number
----@field clear fun(r?: number, g?: number, b?: number, a?: number): nil
----@field present fun(): nil
----@field newImage fun(filename: string|love.FileData|love.ImageData): love.Image
----@field newFont fun(filename: string, size?: integer): love.Font
----@field newFont fun(size?: integer): love.Font
----@field newCanvas fun(width?: integer, height?: integer): love.Canvas
----@field newShader fun(code: string): love.Shader
----@field newQuad fun(x: number, y: number, width: number, height: number, sw: number, sh: number): love.Quad
----@field setCanvas fun(canvas?: love.Canvas|love.Canvas[]): nil
----@field getCanvas fun(): love.Canvas?
----@field setShader fun(shader?: love.Shader): nil
----@field getShader fun(): love.Shader?
----@field setFont fun(font: love.Font): nil
----@field getFont fun(): love.Font
----@field push fun(stack?: 'transform'|'all'): nil
----@field pop fun(): nil
----@field rotate fun(angle: number): nil
----@field scale fun(sx: number, sy?: number): nil
----@field translate fun(dx: number, dy: number): nil
----@field shear fun(kx: number, ky: number): nil
----@field origin fun(): nil
----@field getWidth fun(): integer
----@field getHeight fun(): integer
----@field getDimensions fun(): integer, integer
----@field setScissor fun(x?: number, y?: number, width?: number, height?: number): nil
----@field getScissor fun(): number, number, number, number
----@field setBlendMode fun(mode: 'alpha'|'add'|'subtract'|'multiply'|'replace'|'screen', alphamode?: 'alphamultiplied'|'premultiplied'): nil
----@field getBlendMode fun(): string, string
----@field setLineWidth fun(width: number): nil
----@field getLineWidth fun(): number
----@field setLineStyle fun(style: 'rough'|'smooth'): nil
+--- Restricts a point on the second body to a line on the first body.
+--- See: https://love2d.org/wiki/WheelJoint
+---@class love.WheelJoint : love.Joint
+--- Gets the world-space axis vector of the Wheel Joint.
+--- Returns `x` (number): The x-axis coordinate of the world-space axis vector.
+--- Returns `y` (number): The y-axis coordinate of the world-space axis vector.
+--- See: https://love2d.org/wiki/WheelJoint:getAxis
+---@field getAxis (fun(self: love.WheelJoint): number, number) Gets the world-space axis vector of the Wheel Joint.
+--- Returns the current joint translation speed.
+--- Returns `speed` (number): The translation speed of the joint in meters per second.
+--- See: https://love2d.org/wiki/WheelJoint:getJointSpeed
+---@field getJointSpeed (fun(self: love.WheelJoint): number) Returns the current joint translation speed.
+--- Returns the current joint translation.
+--- Returns `position` (number): The translation of the joint in meters.
+--- See: https://love2d.org/wiki/WheelJoint:getJointTranslation
+---@field getJointTranslation (fun(self: love.WheelJoint): number) Returns the current joint translation.
+--- Returns the maximum motor torque.
+--- Returns `maxTorque` (number): The maximum torque of the joint motor in newton meters.
+--- See: https://love2d.org/wiki/WheelJoint:getMaxMotorTorque
+---@field getMaxMotorTorque (fun(self: love.WheelJoint): number) Returns the maximum motor torque.
+--- Returns the speed of the motor.
+--- Returns `speed` (number): The speed of the joint motor in radians per second.
+--- See: https://love2d.org/wiki/WheelJoint:getMotorSpeed
+---@field getMotorSpeed (fun(self: love.WheelJoint): number) Returns the speed of the motor.
+--- Returns the current torque on the motor.
+--- Parameter `invdt` (number): How long the force applies.
+--- Returns `torque` (number): The torque on the motor in newton meters.
+--- See: https://love2d.org/wiki/WheelJoint:getMotorTorque
+---@field getMotorTorque (fun(self: love.WheelJoint, invdt: number): number) Returns the current torque on the motor.
+--- Returns the damping ratio.
+--- Returns `ratio` (number): The damping ratio.
+--- See: https://love2d.org/wiki/WheelJoint:getSpringDampingRatio
+---@field getSpringDampingRatio (fun(self: love.WheelJoint): number) Returns the damping ratio.
+--- Returns the spring frequency.
+--- Returns `freq` (number): The frequency in hertz.
+--- See: https://love2d.org/wiki/WheelJoint:getSpringFrequency
+---@field getSpringFrequency (fun(self: love.WheelJoint): number) Returns the spring frequency.
+--- Checks if the joint motor is running.
+--- Returns `on` (boolean): The status of the joint motor.
+--- See: https://love2d.org/wiki/WheelJoint:isMotorEnabled
+---@field isMotorEnabled (fun(self: love.WheelJoint): boolean) Checks if the joint motor is running.
+--- Sets a new maximum motor torque.
+--- Parameter `maxTorque` (number): The new maximum torque for the joint motor in newton meters.
+--- See: https://love2d.org/wiki/WheelJoint:setMaxMotorTorque
+---@field setMaxMotorTorque (fun(self: love.WheelJoint, maxTorque: number)) Sets a new maximum motor torque.
+--- Starts and stops the joint motor.
+--- Parameter `enable` (boolean): True turns the motor on and false turns it off.
+--- See: https://love2d.org/wiki/WheelJoint:setMotorEnabled
+---@field setMotorEnabled (fun(self: love.WheelJoint, enable: boolean)) Starts and stops the joint motor.
+--- Sets a new speed for the motor.
+--- Parameter `speed` (number): The new speed for the joint motor in radians per second.
+--- See: https://love2d.org/wiki/WheelJoint:setMotorSpeed
+---@field setMotorSpeed (fun(self: love.WheelJoint, speed: number)) Sets a new speed for the motor.
+--- Sets a new damping ratio.
+--- Parameter `ratio` (number): The new damping ratio.
+--- See: https://love2d.org/wiki/WheelJoint:setSpringDampingRatio
+---@field setSpringDampingRatio (fun(self: love.WheelJoint, ratio: number)) Sets a new damping ratio.
+--- Sets a new spring frequency.
+--- Parameter `freq` (number): The new frequency in hertz.
+--- See: https://love2d.org/wiki/WheelJoint:setSpringFrequency
+---@field setSpringFrequency (fun(self: love.WheelJoint, freq: number)) Sets a new spring frequency.
 
+--- A world is an object that contains all bodies and joints.
+--- See: https://love2d.org/wiki/World
+---@class love.World : love.Object
+--- Destroys the world, taking all bodies, joints, fixtures and their shapes with it.
+--- See: https://love2d.org/wiki/World:destroy
+---@field destroy (fun(self: love.World)) Destroys the world, taking all bodies, joints, fixtures and their shapes with it.
+--- Returns a table with all bodies.
+--- Returns `bodies` (table): A sequence with all bodies.
+--- See: https://love2d.org/wiki/World:getBodies
+---@field getBodies (fun(self: love.World): table) Returns a table with all bodies.
+--- Returns the number of bodies in the world.
+--- Returns `n` (number): The number of bodies in the world.
+--- See: https://love2d.org/wiki/World:getBodyCount
+---@field getBodyCount (fun(self: love.World): number) Returns the number of bodies in the world.
+--- Returns functions for the callbacks during the world update.
+--- Returns `beginContact` (function): Gets called when two fixtures begin to overlap.
+--- Returns `endContact` (function): Gets called when two fixtures cease to overlap.
+--- Returns `preSolve` (function): Gets called before a collision gets resolved.
+--- Returns `postSolve` (function): Gets called after the collision has been resolved.
+--- See: https://love2d.org/wiki/World:getCallbacks
+---@field getCallbacks (fun(self: love.World): function, function, function, function) Returns functions for the callbacks during the world update.
+--- Returns the number of contacts in the world.
+--- Returns `n` (number): The number of contacts in the world.
+--- See: https://love2d.org/wiki/World:getContactCount
+---@field getContactCount (fun(self: love.World): number) Returns the number of contacts in the world.
+--- Returns the function for collision filtering.
+--- Returns `contactFilter` (function): The function that handles the contact filtering.
+--- See: https://love2d.org/wiki/World:getContactFilter
+---@field getContactFilter (fun(self: love.World): function) Returns the function for collision filtering.
+--- Returns a table with all Contacts.
+--- Returns `contacts` (table): A sequence with all Contacts.
+--- See: https://love2d.org/wiki/World:getContacts
+---@field getContacts (fun(self: love.World): table) Returns a table with all Contacts.
+--- Get the gravity of the world.
+--- Returns `x` (number): The x component of gravity.
+--- Returns `y` (number): The y component of gravity.
+--- See: https://love2d.org/wiki/World:getGravity
+---@field getGravity (fun(self: love.World): number, number) Get the gravity of the world.
+--- Returns the number of joints in the world.
+--- Returns `n` (number): The number of joints in the world.
+--- See: https://love2d.org/wiki/World:getJointCount
+---@field getJointCount (fun(self: love.World): number) Returns the number of joints in the world.
+--- Returns a table with all joints.
+--- Returns `joints` (table): A sequence with all joints.
+--- See: https://love2d.org/wiki/World:getJoints
+---@field getJoints (fun(self: love.World): table) Returns a table with all joints.
+--- Gets whether the World is destroyed.
+--- Returns `destroyed` (boolean): Whether the World is destroyed.
+--- See: https://love2d.org/wiki/World:isDestroyed
+---@field isDestroyed (fun(self: love.World): boolean) Gets whether the World is destroyed.
+--- Returns if the world is updating its state.
+--- Returns `locked` (boolean): Will be true if the world is in the process of updating its state.
+--- See: https://love2d.org/wiki/World:isLocked
+---@field isLocked (fun(self: love.World): boolean) Returns if the world is updating its state.
+--- Gets the sleep behaviour of the world.
+--- Returns `allow` (boolean): True if bodies in the world are allowed to sleep, or false if not.
+--- See: https://love2d.org/wiki/World:isSleepingAllowed
+---@field isSleepingAllowed (fun(self: love.World): boolean) Gets the sleep behaviour of the world.
+--- Calls a function for each fixture inside the specified area by searching for any overlapping bounding box (Fixture:getBoundingBox).
+--- Parameter `topLeftX` (number): The x position of the top-left point.
+--- Parameter `topLeftY` (number): The y position of the top-left point.
+--- Parameter `bottomRightX` (number): The x position of the bottom-right point.
+--- Parameter `bottomRightY` (number): The y position of the bottom-right point.
+--- Parameter `callback` (function): This function gets passed one argument, the fixture, and should return a boolean.
+--- See: https://love2d.org/wiki/World:queryBoundingBox
+---@field queryBoundingBox (fun(self: love.World, topLeftX: number, topLeftY: number, bottomRightX: number, bottomRightY: number, callback: function)) Calls a function for each fixture inside the specified area by searching for any overlapping bounding box (Fixture:getBoundingBox).
+--- Casts a ray and calls a function for each fixtures it intersects.
+--- Parameter `x1` (number): The x position of the starting point of the ray.
+--- Parameter `y1` (number): The x position of the starting point of the ray.
+--- Parameter `x2` (number): The x position of the end point of the ray.
+--- Parameter `y2` (number): The x value of the surface normal vector of the shape edge.
+--- Parameter `callback` (function): A function called for each fixture intersected by the ray.
+--- See: https://love2d.org/wiki/World:rayCast
+---@field rayCast (fun(self: love.World, x1: number, y1: number, x2: number, y2: number, callback: function)) Casts a ray and calls a function for each fixtures it intersects.
+--- Sets functions for the collision callbacks during the world update.
+--- Parameter `beginContact` (function): Gets called when two fixtures begin to overlap.
+--- Parameter `endContact` (function): Gets called when two fixtures cease to overlap.
+--- Parameter `preSolve` (function): Gets called before a collision gets resolved. Default: `nil`.
+--- Parameter `postSolve` (function): Gets called after the collision has been resolved. Default: `nil`.
+--- See: https://love2d.org/wiki/World:setCallbacks
+---@field setCallbacks (fun(self: love.World, beginContact: function, endContact: function, preSolve?: function, postSolve?: function)) Sets functions for the collision callbacks during the world update.
+--- Sets a function for collision filtering.
+--- Parameter `filter` (function): The function handling the contact filtering.
+--- See: https://love2d.org/wiki/World:setContactFilter
+---@field setContactFilter (fun(self: love.World, filter: function)) Sets a function for collision filtering.
+--- Set the gravity of the world.
+--- Parameter `x` (number): The x component of gravity.
+--- Parameter `y` (number): The y component of gravity.
+--- See: https://love2d.org/wiki/World:setGravity
+---@field setGravity (fun(self: love.World, x: number, y: number)) Set the gravity of the world.
+--- Sets the sleep behaviour of the world.
+--- Parameter `allow` (boolean): True if bodies in the world are allowed to sleep, or false if not.
+--- See: https://love2d.org/wiki/World:setSleepingAllowed
+---@field setSleepingAllowed (fun(self: love.World, allow: boolean)) Sets the sleep behaviour of the world.
+--- Translates the World's origin.
+--- Parameter `x` (number): The x component of the new origin with respect to the old origin.
+--- Parameter `y` (number): The y component of the new origin with respect to the old origin.
+--- See: https://love2d.org/wiki/World:translateOrigin
+---@field translateOrigin (fun(self: love.World, x: number, y: number)) Translates the World's origin.
+--- Update the state of the world.
+--- Parameter `dt` (number): The time (in seconds) to advance the physics simulation.
+--- Parameter `velocityiterations` (number): The maximum number of steps used to determine the new velocities when resolving a collision. Default: `8`.
+--- Parameter `positioniterations` (number): The maximum number of steps used to determine the new positions when resolving a collision. Default: `3`.
+--- See: https://love2d.org/wiki/World:update
+---@field update (fun(self: love.World, dt: number, velocityiterations?: number, positioniterations?: number)) Update the state of the world.
+
+--- Provides an interface to create noise with the user's speakers.
+--- See: https://love2d.org/wiki/love.audio
 ---@class love.audio
----@field play fun(source: love.Source): nil
----@field pause fun(source?: love.Source): nil
----@field stop fun(source?: love.Source): nil
----@field setVolume fun(volume: number): nil
----@field getVolume fun(): number
----@field newSource fun(filename: string|love.FileData|love.SoundData, type: 'static'|'stream'): love.Source
----@field setPosition fun(x: number, y: number, z: number): nil
----@field getPosition fun(): number, number, number
----@field setVelocity fun(x: number, y: number, z: number): nil
----@field getVelocity fun(): number, number, number
----@field setOrientation fun(fx: number, fy: number, fz: number, ux: number, uy: number, uz: number): nil
----@field getActiveSourceCount fun(): integer
+--- Gets a list of the names of the currently enabled effects.
+--- Returns `effects` (table): The list of the names of the currently enabled effects.
+--- See: https://love2d.org/wiki/love.audio.getActiveEffects
+---@field getActiveEffects (fun(): table) Gets a list of the names of the currently enabled effects.
+--- Gets the current number of simultaneously playing sources.
+--- Returns `count` (number): The current number of simultaneously playing sources.
+--- See: https://love2d.org/wiki/love.audio.getActiveSourceCount
+---@field getActiveSourceCount (fun(): number) Gets the current number of simultaneously playing sources.
+--- Returns the distance attenuation model.
+--- Returns `model` (love.DistanceModel): The current distance model.
+--- See: https://love2d.org/wiki/love.audio.getDistanceModel
+---@field getDistanceModel (fun(): love.DistanceModel) Returns the distance attenuation model.
+--- Gets the current global scale factor for velocity-based doppler effects.
+--- Returns `scale` (number): The current doppler scale factor.
+--- See: https://love2d.org/wiki/love.audio.getDopplerScale
+---@field getDopplerScale (fun(): number) Gets the current global scale factor for velocity-based doppler effects.
+--- Gets the settings associated with an effect.
+--- Parameter `name` (string): The name of the effect.
+--- Returns `settings` (table): The settings associated with the effect.
+--- See: https://love2d.org/wiki/love.audio.getEffect
+---@field getEffect (fun(name: string): table) Gets the settings associated with an effect.
+--- Gets the maximum number of active effects supported by the system.
+--- Returns `maximum` (number): The maximum number of active effects.
+--- See: https://love2d.org/wiki/love.audio.getMaxSceneEffects
+---@field getMaxSceneEffects (fun(): number) Gets the maximum number of active effects supported by the system.
+--- Gets the maximum number of active Effects in a single Source object, that the system can support.
+--- Returns `maximum` (number): The maximum number of active Effects per Source.
+--- See: https://love2d.org/wiki/love.audio.getMaxSourceEffects
+---@field getMaxSourceEffects (fun(): number) Gets the maximum number of active Effects in a single Source object, that the system can support.
+--- Returns the orientation of the listener.
+--- Returns `fx` (number): Forward x of the listener orientation.
+--- Returns `fy` (number): Forward y of the listener orientation.
+--- Returns `fz` (number): Forward z of the listener orientation.
+--- Returns `ux` (number): Up x of the listener orientation.
+--- Returns `uy` (number): Up y of the listener orientation.
+--- Returns `uz` (number): Up z of the listener orientation.
+--- See: https://love2d.org/wiki/love.audio.getOrientation
+---@field getOrientation (fun(): number, number, number, number, number, number) Returns the orientation of the listener.
+--- Returns the position of the listener.
+--- Returns `x` (number): The X position of the listener.
+--- Returns `y` (number): The Y position of the listener.
+--- Returns `z` (number): The Z position of the listener.
+--- See: https://love2d.org/wiki/love.audio.getPosition
+---@field getPosition (fun(): number, number, number) Returns the position of the listener.
+--- Gets a list of RecordingDevices on the system.
+--- Returns `devices` (table): The list of connected recording devices.
+--- See: https://love2d.org/wiki/love.audio.getRecordingDevices
+---@field getRecordingDevices (fun(): table) Gets a list of RecordingDevices on the system.
+--- Returns the velocity of the listener.
+--- Returns `x` (number): The X velocity of the listener.
+--- Returns `y` (number): The Y velocity of the listener.
+--- Returns `z` (number): The Z velocity of the listener.
+--- See: https://love2d.org/wiki/love.audio.getVelocity
+---@field getVelocity (fun(): number, number, number) Returns the velocity of the listener.
+--- Returns the master volume.
+--- Returns `volume` (number): The current master volume
+--- See: https://love2d.org/wiki/love.audio.getVolume
+---@field getVolume (fun(): number) Returns the master volume.
+--- Gets whether audio effects are supported in the system.
+--- Returns `supported` (boolean): True if effects are supported, false otherwise.
+--- See: https://love2d.org/wiki/love.audio.isEffectsSupported
+---@field isEffectsSupported (fun(): boolean) Gets whether audio effects are supported in the system.
+--- Creates a new Source usable for real-time generated sound playback with Source:queue.
+--- Parameter `samplerate` (number): Number of samples per second when playing.
+--- Parameter `bitdepth` (number): Bits per sample (8 or 16).
+--- Parameter `channels` (number): 1 for mono or 2 for stereo.
+--- Parameter `buffercount` (number): The number of buffers that can be queued up at any given time with Source:queue. Default: `0`.
+--- Returns `source` (love.Source): The new Source usable with Source:queue.
+--- See: https://love2d.org/wiki/love.audio.newQueueableSource
+---@field newQueueableSource (fun(samplerate: number, bitdepth: number, channels: number, buffercount?: number): love.Source) Creates a new Source usable for real-time generated sound playback with Source:queue.
+--- Creates a new Source from a filepath, File, Decoder or SoundData.
+--- Parameter `filename` (string): The filepath to the audio file.
+--- Parameter `type` (love.SourceType): Streaming or static source.
+--- Returns `source` (love.Source): A new Source that can play the specified audio.
+--- Example: `local music = love.audio.newSource("music.ogg", "stream")`
+--- Tip: Use 'stream' for long music and 'static' for short effects.
+--- See: https://love2d.org/wiki/love.audio.newSource
+---@field newSource (fun(filename: string, type: love.SourceType): love.Source)|(fun(file: love.File, type: love.SourceType): love.Source)|(fun(decoder: love.Decoder, type: love.SourceType): love.Source)|(fun(data: love.FileData, type: love.SourceType): love.Source)|(fun(data: love.SoundData): love.Source) Creates a new Source from a filepath, File, Decoder or SoundData.
+--- Pauses specific or all currently played Sources.
+--- Returns `Sources` (table): A table containing a list of Sources that were paused by this call.
+--- See: https://love2d.org/wiki/love.audio.pause
+---@field pause (fun(): table)|(fun(source: love.Source, ...: love.Source))|(fun(sources: table)) Pauses specific or all currently played Sources.
+--- Plays the specified Source.
+--- Parameter `source` (love.Source): The Source to play.
+--- See: https://love2d.org/wiki/love.audio.play
+---@field play (fun(source: love.Source))|(fun(sources: table))|(fun(source1: love.Source, source2: love.Source, ...: love.Source)) Plays the specified Source.
+--- Sets the distance attenuation model.
+--- Parameter `model` (love.DistanceModel): The new distance model.
+--- See: https://love2d.org/wiki/love.audio.setDistanceModel
+---@field setDistanceModel (fun(model: love.DistanceModel)) Sets the distance attenuation model.
+--- Sets a global scale factor for velocity-based doppler effects.
+--- Parameter `scale` (number): The new doppler scale factor.
+--- See: https://love2d.org/wiki/love.audio.setDopplerScale
+---@field setDopplerScale (fun(scale: number)) Sets a global scale factor for velocity-based doppler effects.
+--- Defines an effect that can be applied to a Source.
+--- Parameter `name` (string): The name of the effect.
+--- Parameter `settings` (love.audio_setEffect_settings): The settings to use for this effect, with the following fields:
+--- Returns `success` (boolean): Whether the effect was successfully created.
+--- See: https://love2d.org/wiki/love.audio.setEffect
+---@field setEffect (fun(name: string, settings: love.audio_setEffect_settings): boolean)|(fun(name: string, enabled?: boolean): boolean) Defines an effect that can be applied to a Source.
+--- Sets whether the system should mix the audio with the system's audio.
+--- Parameter `mix` (boolean): True to enable mixing, false to disable it.
+--- Returns `success` (boolean): True if the change succeeded, false otherwise.
+--- See: https://love2d.org/wiki/love.audio.setMixWithSystem
+---@field setMixWithSystem (fun(mix: boolean): boolean) Sets whether the system should mix the audio with the system's audio.
+--- Sets the orientation of the listener.
+--- Parameter `fx__fy__fz` (number): Forward vector of the listener orientation.
+--- Parameter `ux__uy__uz` (number): Up vector of the listener orientation.
+--- See: https://love2d.org/wiki/love.audio.setOrientation
+---@field setOrientation (fun(fx__fy__fz: number, ux__uy__uz: number)) Sets the orientation of the listener.
+--- Sets the position of the listener, which determines how sounds play.
+--- Parameter `x` (number): The x position of the listener.
+--- Parameter `y` (number): The y position of the listener.
+--- Parameter `z` (number): The z position of the listener.
+--- See: https://love2d.org/wiki/love.audio.setPosition
+---@field setPosition (fun(x: number, y: number, z: number)) Sets the position of the listener, which determines how sounds play.
+--- Sets the velocity of the listener.
+--- Parameter `x` (number): The X velocity of the listener.
+--- Parameter `y` (number): The Y velocity of the listener.
+--- Parameter `z` (number): The Z velocity of the listener.
+--- See: https://love2d.org/wiki/love.audio.setVelocity
+---@field setVelocity (fun(x: number, y: number, z: number)) Sets the velocity of the listener.
+--- Sets the master volume.
+--- Parameter `volume` (number): 1.0 is max and 0.0 is off.
+--- See: https://love2d.org/wiki/love.audio.setVolume
+---@field setVolume (fun(volume: number)) Sets the master volume.
+--- Stops currently played sources.
+--- See: https://love2d.org/wiki/love.audio.stop
+---@field stop (fun())|(fun(source: love.Source))|(fun(source1: love.Source, source2: love.Source, ...: love.Source))|(fun(sources: table)) Stops currently played sources.
 
----@class love.event
----@field quit fun(exitstatus?: integer|'restart'): nil
----@field pump fun(): nil
----@field push fun(n: string, a?: any, b?: any, c?: any, d?: any, e?: any, f?: any): nil
----@field poll fun(): fun(): string, any, any, any, any, any, any
----@field wait fun(): string, any, any, any, any, any, any
----@field clear fun(): nil
-
----@class love.filesystem
----@field read fun(name: string, bytes?: integer): string?, integer?
----@field write fun(name: string, data: string|love.Data, size?: integer): boolean, string?
----@field append fun(name: string, data: string|love.Data, size?: integer): boolean, string?
----@field getInfo fun(path: string, filtertype?: string): love.FileDataInfo?
----@field getDirectoryItems fun(dir: string): string[]
----@field createDirectory fun(name: string): boolean
----@field remove fun(name: string): boolean
----@field lines fun(name: string): fun(): string
----@field load fun(name: string): fun(...: any): any, string?
----@field setIdentity fun(name: string): nil
----@field getIdentity fun(): string
----@field getSaveDirectory fun(): string
----@field getWorkingDirectory fun(): string
----@field getUserDirectory fun(): string
----@field newFileData fun(contents: string, name: string): love.FileData
-
----@class love.font
----@field newFontData fun(rasterizer: any): love.FontData
----@field newRasterizer fun(filename: string): love.Rasterizer
-
----@class love.image
----@field newImageData fun(width: integer, height: integer): love.ImageData
----@field newImageData fun(filename: string): love.ImageData
----@field newCompressedData fun(filename: string): love.CompressedData
----@field isCompressed fun(filename: string): boolean
-
----@class love.keyboard
----@field isDown fun(...: string): boolean
----@field setKeyRepeat fun(enable: boolean): nil
----@field hasKeyRepeat fun(): boolean
----@field hasTextInput fun(): boolean
----@field setTextInput fun(enable: boolean, x?: number, y?: number, w?: number, h?: number): nil
----@field getScancodeFromKey fun(key: string): string
----@field getKeyFromScancode fun(scancode: string): string
-
----@class love.math
----@field random fun(min?: number, max?: number): number
----@field setRandomSeed fun(seed: integer, low?: integer): nil
----@field getRandomSeed fun(): integer, integer
----@field noise fun(x: number, y?: number, z?: number, w?: number): number
----@field gammaToLinear fun(r: number, g: number, b: number): number, number, number
----@field linearToGamma fun(r: number, g: number, b: number): number, number, number
----@field newRandomGenerator fun(seed?: integer): love.RandomGenerator
----@field newBezierCurve fun(...: number): love.BezierCurve
----@field triangulate fun(polygon: number[]): number[][]
-
----@class love.mouse
----@field getPosition fun(): number, number
----@field getX fun(): number
----@field getY fun(): number
----@field setPosition fun(x: number, y: number): nil
----@field isDown fun(...: integer): boolean
----@field setVisible fun(visible: boolean): nil
----@field isVisible fun(): boolean
----@field setCursor fun(cursor?: love.Cursor): nil
----@field getCursor fun(): love.Cursor?
----@field newCursor fun(imageData: love.ImageData, hotx?: integer, hoty?: integer): love.Cursor
----@field setRelativeMode fun(enable: boolean): nil
----@field getRelativeMode fun(): boolean
-
----@class love.physics
----@field newWorld fun(gx?: number, gy?: number, sleep?: boolean): love.World
----@field newBody fun(world: love.World, x?: number, y?: number, type?: 'static'|'dynamic'|'kinematic'): love.Body
----@field newFixture fun(body: love.Body, shape: love.Shape, density?: number): love.Fixture
----@field newRectangleShape fun(width: number, height: number): love.PolygonShape
----@field newCircleShape fun(radius: number): love.CircleShape
----@field newPolygonShape fun(...: number): love.PolygonShape
----@field setMeter fun(scale: number): nil
----@field getMeter fun(): number
-
----@class love.sound
----@field newSoundData fun(filename: string): love.SoundData
----@field newDecoder fun(filename: string): love.Decoder
-
----@class love.system
----@field getOS fun(): 'OS X'|'Windows'|'Linux'|'Android'|'iOS'|string
----@field getProcessorCount fun(): integer
----@field getPowerInfo fun(): 'unknown'|'battery'|'nobattery'|'charging'|'charged', integer?, integer?
----@field getClipboardText fun(): string
----@field setClipboardText fun(text: string): nil
----@field openURL fun(url: string): boolean
-
----@class love.thread
----@field newThread fun(filename: string|love.FileData): love.Thread
----@field newChannel fun(): love.Channel
----@field getChannel fun(name: string): love.Channel
-
----@class love.timer
----@field step fun(): number
----@field getDelta fun(): number
----@field getFPS fun(): integer
----@field getTime fun(): number
----@field sleep fun(s: number): nil
-
----@class love.touch
----@field getTouches fun(): table[]
----@field getPosition fun(id: any): number, number
----@field getPressure fun(id: any): number
-
----@class love.video
----@field newVideo fun(filename: string): love.Video
-
----@class love.window
----@field setMode fun(width: integer, height: integer, flags?: love.WindowFlags): boolean
----@field getMode fun(): integer, integer, love.WindowFlags
----@field setTitle fun(title: string): nil
----@field getTitle fun(): string
----@field setIcon fun(imageData: love.ImageData): boolean
----@field setFullscreen fun(fullscreen: boolean, fstype?: 'desktop'|'exclusive'): boolean
----@field getFullscreen fun(): boolean, string
----@field isOpen fun(): boolean
----@field close fun(): nil
----@field getDesktopDimensions fun(display?: integer): integer, integer
----@field setVSync fun(vsync: integer): nil
----@field getVSync fun(): integer
-
----@class love.joystick
----@field getJoysticks fun(): love.Joystick[]
----@field getJoystickCount fun(): integer
-
+--- Provides functionality for creating and transforming data.
+--- See: https://love2d.org/wiki/love.data
 ---@class love.data
----@field compress fun(container: 'string'|'data', format: 'lz4'|'zlib'|'gzip', data: string|love.Data, level?: integer): any
----@field decompress fun(container: 'string'|'data', format: 'lz4'|'zlib'|'gzip', compressedData: string|love.Data): any
----@field encode fun(container: 'string'|'data', format: 'base64'|'hex', sourceString: string, linelength?: integer): any
----@field decode fun(container: 'string'|'data', format: 'base64'|'hex', sourceString: string): any
----@field hash fun(functionality: 'md5'|'sha1'|'sha256'|'sha512', data: string|love.Data): string
+--- Compresses a string or data using a specific compression algorithm.
+--- Parameter `container` (love.ContainerType): What type to return the compressed data as.
+--- Parameter `format` (love.CompressedDataFormat): The format to use when compressing the string.
+--- Parameter `rawstring` (string): The raw (un-compressed) string to compress.
+--- Parameter `level` (number): The level of compression to use, between 0 and 9. Default: `-1`.
+--- Returns `compressedData` (love.CompressedData|string): CompressedData/string which contains the compressed version of rawstring.
+--- See: https://love2d.org/wiki/love.data.compress
+---@field compress (fun(container: love.ContainerType, format: love.CompressedDataFormat, rawstring: string, level?: number): love.CompressedData|string)|(fun(container: love.ContainerType, format: love.CompressedDataFormat, data: love.Data, level?: number): love.CompressedData|string) Compresses a string or data using a specific compression algorithm.
+--- Decode Data or a string from any of the EncodeFormats to Data or string.
+--- Parameter `container` (love.ContainerType): What type to return the decoded data as.
+--- Parameter `format` (love.EncodeFormat): The format of the input data.
+--- Parameter `sourceString` (string): The raw (encoded) data to decode.
+--- Returns `decoded` (love.ByteData|string): ByteData/string which contains the decoded version of source.
+--- See: https://love2d.org/wiki/love.data.decode
+---@field decode (fun(container: love.ContainerType, format: love.EncodeFormat, sourceString: string): love.ByteData|string)|(fun(container: love.ContainerType, format: love.EncodeFormat, sourceData: love.Data): love.ByteData|string) Decode Data or a string from any of the EncodeFormats to Data or string.
+--- Decompresses a CompressedData or previously compressed string or Data object.
+--- Parameter `container` (love.ContainerType): What type to return the decompressed data as.
+--- Parameter `compressedData` (love.CompressedData): The compressed data to decompress.
+--- Returns `decompressedData` (love.Data|string): Data/string containing the raw decompressed data.
+--- See: https://love2d.org/wiki/love.data.decompress
+---@field decompress (fun(container: love.ContainerType, compressedData: love.CompressedData): love.Data|string)|(fun(container: love.ContainerType, format: love.CompressedDataFormat, compressedString: string): love.Data|string)|(fun(container: love.ContainerType, format: love.CompressedDataFormat, data: love.Data): love.Data|string) Decompresses a CompressedData or previously compressed string or Data object.
+--- Encode Data or a string to a Data or string in one of the EncodeFormats.
+--- Parameter `container` (love.ContainerType): What type to return the encoded data as.
+--- Parameter `format` (love.EncodeFormat): The format of the output data.
+--- Parameter `sourceString` (string): The raw data to encode.
+--- Parameter `linelength` (number): The maximum line length of the output. Default: `0`.
+--- Returns `encoded` (love.ByteData|string): ByteData/string which contains the encoded version of source.
+--- See: https://love2d.org/wiki/love.data.encode
+---@field encode (fun(container: love.ContainerType, format: love.EncodeFormat, sourceString: string, linelength?: number): love.ByteData|string)|(fun(container: love.ContainerType, format: love.EncodeFormat, sourceData: love.Data, linelength?: number): love.ByteData|string) Encode Data or a string to a Data or string in one of the EncodeFormats.
+--- Gets the size in bytes that a given format used with love.data.pack will use.
+--- Parameter `format` (string): A string determining how the values are packed.
+--- Returns `size` (number): The size in bytes that the packed data will use.
+--- See: https://love2d.org/wiki/love.data.getPackedSize
+---@field getPackedSize (fun(format: string): number) Gets the size in bytes that a given format used with love.data.pack will use.
+--- Compute the message digest of a string using a specified hash algorithm.
+--- Parameter `hashFunction` (love.HashFunction): Hash algorithm to use.
+--- Parameter `string` (string): String to hash.
+--- Returns `rawdigest` (string): Raw message digest string.
+--- See: https://love2d.org/wiki/love.data.hash
+---@field hash (fun(hashFunction: love.HashFunction, string: string): string)|(fun(hashFunction: love.HashFunction, data: love.Data): string) Compute the message digest of a string using a specified hash algorithm.
+--- Creates a new Data object containing arbitrary bytes.
+--- Parameter `datastring` (string): The byte string to copy.
+--- Returns `bytedata` (love.ByteData): The new Data object.
+--- See: https://love2d.org/wiki/love.data.newByteData
+---@field newByteData (fun(datastring: string): love.ByteData)|(fun(Data: love.Data, offset?: number, size?: number): love.ByteData)|(fun(size: number): love.ByteData) Creates a new Data object containing arbitrary bytes.
+--- Creates a new Data referencing a subsection of an existing Data object.
+--- Parameter `data` (love.Data): The Data object to reference.
+--- Parameter `offset` (number): The offset of the subsection to reference, in bytes.
+--- Parameter `size` (number): The size in bytes of the subsection to reference.
+--- Returns `view` (love.Data): The new Data view.
+--- See: https://love2d.org/wiki/love.data.newDataView
+---@field newDataView (fun(data: love.Data, offset: number, size: number): love.Data) Creates a new Data referencing a subsection of an existing Data object.
+--- Packs (serializes) simple Lua values.
+--- Parameter `container` (love.ContainerType): What type to return the encoded data as.
+--- Parameter `format` (string): A string determining how the values are packed.
+--- Parameter `v1` (number|boolean|string): The first value (number, boolean, or string) to serialize.
+--- Parameter `...` (number|boolean|string): Additional values to serialize.
+--- Returns `data` (love.Data|string): Data/string which contains the serialized data.
+--- See: https://love2d.org/wiki/love.data.pack
+---@field pack (fun(container: love.ContainerType, format: string, v1: number|boolean|string, ...: number|boolean|string): love.Data|string) Packs (serializes) simple Lua values.
+--- Unpacks (deserializes) a byte-string or Data into simple Lua values.
+--- Parameter `format` (string): A string determining how the values were packed.
+--- Parameter `datastring` (string): A string containing the packed (serialized) data.
+--- Parameter `pos` (number): Where to start reading in the string. Default: `1`.
+--- Returns `v1` (number|boolean|string): The first value (number, boolean, or string) that was unpacked.
+--- Returns `...` (number|boolean|string): Additional unpacked values.
+--- Returns `index` (number): The index of the first unread byte in the data string.
+--- See: https://love2d.org/wiki/love.data.unpack
+---@field unpack (fun(format: string, datastring: string, pos?: number): number|boolean|string, number|boolean|string, number)|(fun(format: string, data: love.Data, pos?: number): number|boolean|string, number|boolean|string, number) Unpacks (deserializes) a byte-string or Data into simple Lua values.
 
+--- Manages events, like keypresses.
+--- See: https://love2d.org/wiki/love.event
+---@class love.event
+--- Clears the event queue.
+--- See: https://love2d.org/wiki/love.event.clear
+---@field clear (fun()) Clears the event queue.
+--- Returns an iterator for messages in the event queue.
+--- Returns `i` (function): Iterator function usable in a for loop.
+--- See: https://love2d.org/wiki/love.event.poll
+---@field poll (fun(): function) Returns an iterator for messages in the event queue.
+--- Pump events into the event queue.
+--- See: https://love2d.org/wiki/love.event.pump
+---@field pump (fun()) Pump events into the event queue.
+--- Adds an event to the event queue.
+--- Parameter `n` (love.Event): The name of the event.
+--- Parameter `a` (string|number|boolean|love.Object|table): First event argument. Default: `nil`.
+--- Parameter `b` (string|number|boolean|love.Object|table): Second event argument. Default: `nil`.
+--- Parameter `c` (string|number|boolean|love.Object|table): Third event argument. Default: `nil`.
+--- Parameter `d` (string|number|boolean|love.Object|table): Fourth event argument. Default: `nil`.
+--- Parameter `e` (string|number|boolean|love.Object|table): Fifth event argument. Default: `nil`.
+--- Parameter `f` (string|number|boolean|love.Object|table): Sixth event argument. Default: `nil`.
+--- Parameter `...` (string|number|boolean|love.Object|table): Further event arguments may follow. Default: `nil`.
+--- See: https://love2d.org/wiki/love.event.push
+---@field push (fun(n: love.Event, a?: string|number|boolean|love.Object|table, b?: string|number|boolean|love.Object|table, c?: string|number|boolean|love.Object|table, d?: string|number|boolean|love.Object|table, e?: string|number|boolean|love.Object|table, f?: string|number|boolean|love.Object|table, ...: string|number|boolean|love.Object|table)) Adds an event to the event queue.
+--- Adds the quit event to the queue.
+--- Parameter `exitstatus` (number): The program exit status to use when closing the application. Default: `0`.
+--- See: https://love2d.org/wiki/love.event.quit
+---@field quit (fun(exitstatus?: number))|(fun(_restart_: string)) Adds the quit event to the queue.
+--- Like love.event.poll(), but blocks until there is an event in the queue.
+--- Returns `n` (love.Event): The name of event.
+--- Returns `a` (string|number|boolean|love.Object|table): First event argument.
+--- Returns `b` (string|number|boolean|love.Object|table): Second event argument.
+--- Returns `c` (string|number|boolean|love.Object|table): Third event argument.
+--- Returns `d` (string|number|boolean|love.Object|table): Fourth event argument.
+--- Returns `e` (string|number|boolean|love.Object|table): Fifth event argument.
+--- Returns `f` (string|number|boolean|love.Object|table): Sixth event argument.
+--- Returns `...` (string|number|boolean|love.Object|table): Further event arguments may follow.
+--- See: https://love2d.org/wiki/love.event.wait
+---@field wait (fun(): love.Event, string|number|boolean|love.Object|table, string|number|boolean|love.Object|table, string|number|boolean|love.Object|table, string|number|boolean|love.Object|table, string|number|boolean|love.Object|table, string|number|boolean|love.Object|table, string|number|boolean|love.Object|table) Like love.event.poll(), but blocks until there is an event in the queue.
+
+--- Provides an interface to the user's filesystem.
+--- See: https://love2d.org/wiki/love.filesystem
+---@class love.filesystem
+--- Append data to an existing file.
+--- Parameter `name` (string): The name (and path) of the file.
+--- Parameter `data` (string): The string data to append to the file.
+--- Parameter `size` (number): How many bytes to write. Default: `all`.
+--- Returns `success` (boolean): True if the operation was successful, or nil if there was an error.
+--- Returns `errormsg` (string): The error message on failure.
+--- See: https://love2d.org/wiki/love.filesystem.append
+---@field append (fun(name: string, data: string, size?: number): boolean, string)|(fun(name: string, data: love.Data, size?: number): boolean, string) Append data to an existing file.
+--- Gets whether love.filesystem follows symbolic links.
+--- Returns `enable` (boolean): Whether love.filesystem follows symbolic links.
+--- See: https://love2d.org/wiki/love.filesystem.areSymlinksEnabled
+---@field areSymlinksEnabled (fun(): boolean) Gets whether love.filesystem follows symbolic links.
+--- Recursively creates a directory.
+--- Parameter `name` (string): The directory to create.
+--- Returns `success` (boolean): True if the directory was created, false if not.
+--- See: https://love2d.org/wiki/love.filesystem.createDirectory
+---@field createDirectory (fun(name: string): boolean) Recursively creates a directory.
+--- Returns the application data directory (could be the same as getUserDirectory)
+--- Returns `path` (string): The path of the application data directory
+--- See: https://love2d.org/wiki/love.filesystem.getAppdataDirectory
+---@field getAppdataDirectory (fun(): string) Returns the application data directory (could be the same as getUserDirectory)
+--- Gets the filesystem paths that will be searched for c libraries when require is called.
+--- Returns `paths` (string): The paths that the ''require'' function will check for c libraries in love's filesystem.
+--- See: https://love2d.org/wiki/love.filesystem.getCRequirePath
+---@field getCRequirePath (fun(): string) Gets the filesystem paths that will be searched for c libraries when require is called.
+--- Returns a table with the names of files and subdirectories in the specified path.
+--- Parameter `dir` (string): The directory.
+--- Returns `files` (table): A sequence with the names of all files and subdirectories as strings.
+--- See: https://love2d.org/wiki/love.filesystem.getDirectoryItems
+---@field getDirectoryItems (fun(dir: string): table)|(fun(dir: string, callback: function): table) Returns a table with the names of files and subdirectories in the specified path.
+--- Gets the write directory name for your game.
+--- Returns `name` (string): The identity that is used as write directory.
+--- See: https://love2d.org/wiki/love.filesystem.getIdentity
+---@field getIdentity (fun(): string) Gets the write directory name for your game.
+--- Gets information about the specified file or directory.
+--- Parameter `path` (string): The file or directory path to check.
+--- Parameter `filtertype` (love.FileType): If supplied, this parameter causes getInfo to only return the info table if the item at the given path matches the specified file type. Default: `nil`.
+--- Returns `info` (love.filesystem_getInfo_infoResult): A table containing information about the specified path, or nil if nothing exists at the path.
+--- See: https://love2d.org/wiki/love.filesystem.getInfo
+---@field getInfo (fun(path: string, filtertype?: love.FileType): love.filesystem_getInfo_infoResult)|(fun(path: string, info: table): love.filesystem_getInfo_infoResult2)|(fun(path: string, filtertype: love.FileType, info: table): love.filesystem_getInfo_infoResult3) Gets information about the specified file or directory.
+--- Gets the platform-specific absolute path of the directory containing a filepath.
+--- Parameter `filepath` (string): The filepath to get the directory of.
+--- Returns `realdir` (string): The platform-specific full path of the directory containing the filepath.
+--- See: https://love2d.org/wiki/love.filesystem.getRealDirectory
+---@field getRealDirectory (fun(filepath: string): string) Gets the platform-specific absolute path of the directory containing a filepath.
+--- Gets the filesystem paths that will be searched when require is called.
+--- Returns `paths` (string): The paths that the ''require'' function will check in love's filesystem.
+--- See: https://love2d.org/wiki/love.filesystem.getRequirePath
+---@field getRequirePath (fun(): string) Gets the filesystem paths that will be searched when require is called.
+--- Gets the full path to the designated save directory.
+--- Returns `dir` (string): The absolute path to the save directory.
+--- See: https://love2d.org/wiki/love.filesystem.getSaveDirectory
+---@field getSaveDirectory (fun(): string) Gets the full path to the designated save directory.
+--- Returns the full path to the the .love file or directory.
+--- Returns `path` (string): The full platform-dependent path of the .love file or directory.
+--- See: https://love2d.org/wiki/love.filesystem.getSource
+---@field getSource (fun(): string) Returns the full path to the the .love file or directory.
+--- Returns the full path to the directory containing the .love file.
+--- Returns `path` (string): The full platform-dependent path of the directory containing the .love file.
+--- See: https://love2d.org/wiki/love.filesystem.getSourceBaseDirectory
+---@field getSourceBaseDirectory (fun(): string) Returns the full path to the directory containing the .love file.
+--- Returns the path of the user's directory
+--- Returns `path` (string): The path of the user's directory
+--- See: https://love2d.org/wiki/love.filesystem.getUserDirectory
+---@field getUserDirectory (fun(): string) Returns the path of the user's directory
+--- Gets the current working directory.
+--- Returns `cwd` (string): The current working directory.
+--- See: https://love2d.org/wiki/love.filesystem.getWorkingDirectory
+---@field getWorkingDirectory (fun(): string) Gets the current working directory.
+--- Initializes love.filesystem, will be called internally, so should not be used explicitly.
+--- Parameter `appname` (string): The name of the application binary, typically love.
+--- See: https://love2d.org/wiki/love.filesystem.init
+---@field init (fun(appname: string)) Initializes love.filesystem, will be called internally, so should not be used explicitly.
+--- Gets whether the game is in fused mode or not.
+--- Returns `fused` (boolean): True if the game is in fused mode, false otherwise.
+--- See: https://love2d.org/wiki/love.filesystem.isFused
+---@field isFused (fun(): boolean) Gets whether the game is in fused mode or not.
+--- Iterate over the lines in a file.
+--- Parameter `name` (string): The name (and path) of the file
+--- Returns `iterator` (function): A function that iterates over all the lines in the file
+--- See: https://love2d.org/wiki/love.filesystem.lines
+---@field lines (fun(name: string): function) Iterate over the lines in a file.
+--- Loads a Lua file (but does not run it).
+--- Parameter `name` (string): The name (and path) of the file.
+--- Returns `chunk` (function): The loaded chunk.
+--- Returns `errormsg` (string): The error message if file could not be opened.
+--- See: https://love2d.org/wiki/love.filesystem.load
+---@field load (fun(name: string): function, string) Loads a Lua file (but does not run it).
+--- Mounts a zip file or folder in the game's save directory for reading.
+--- Parameter `archive` (string): The folder or zip file in the game's save directory to mount.
+--- Parameter `mountpoint` (string): The new path the archive will be mounted to.
+--- Parameter `appendToPath` (boolean): Whether the archive will be searched when reading a filepath before or after already-mounted archives. Default: `false`.
+--- Returns `success` (boolean): True if the archive was successfully mounted, false otherwise.
+--- See: https://love2d.org/wiki/love.filesystem.mount
+---@field mount (fun(archive: string, mountpoint: string, appendToPath?: boolean): boolean)|(fun(filedata: love.FileData, mountpoint: string, appendToPath?: boolean): boolean)|(fun(data: love.Data, archivename: string, mountpoint: string, appendToPath?: boolean): boolean) Mounts a zip file or folder in the game's save directory for reading.
+--- Creates a new File object.
+--- Parameter `filename` (string): The filename of the file.
+--- Returns `file` (love.File): The new File object.
+--- See: https://love2d.org/wiki/love.filesystem.newFile
+---@field newFile (fun(filename: string): love.File)|(fun(filename: string, mode: love.FileMode): love.File, string) Creates a new File object.
+--- Creates a new FileData object from a file on disk, or from a string in memory.
+--- Parameter `contents` (string): The contents of the file in memory represented as a string.
+--- Parameter `name` (string): The name of the file.
+--- Returns `data` (love.FileData): The new FileData.
+--- See: https://love2d.org/wiki/love.filesystem.newFileData
+---@field newFileData (fun(contents: string, name: string): love.FileData)|(fun(originaldata: love.Data, name: string): love.FileData)|(fun(filepath: string): love.FileData, string) Creates a new FileData object from a file on disk, or from a string in memory.
+--- Read the contents of a file.
+--- Parameter `name` (string): The name (and path) of the file.
+--- Parameter `size` (number): How many bytes to read. Default: `all`.
+--- Returns `contents` (string): The file contents.
+--- Returns `size` (number): How many bytes have been read.
+--- Returns `contents` (nil): returns nil as content.
+--- Returns `error` (string): returns an error message.
+--- Example: `local contents, size = love.filesystem.read("save.txt")`
+--- See: https://love2d.org/wiki/love.filesystem.read
+---@field read (fun(name: string, size?: number): string, number, nil, string)|(fun(container: love.ContainerType, name: string, size?: number): love.FileData|string, number, nil, string) Read the contents of a file.
+--- Removes a file or empty directory.
+--- Parameter `name` (string): The file or directory to remove.
+--- Returns `success` (boolean): True if the file/directory was removed, false otherwise.
+--- See: https://love2d.org/wiki/love.filesystem.remove
+---@field remove (fun(name: string): boolean) Removes a file or empty directory.
+--- Sets the filesystem paths that will be searched for c libraries when require is called.
+--- Parameter `paths` (string): The paths that the ''require'' function will check in love's filesystem.
+--- See: https://love2d.org/wiki/love.filesystem.setCRequirePath
+---@field setCRequirePath (fun(paths: string)) Sets the filesystem paths that will be searched for c libraries when require is called.
+--- Sets the write directory for your game.
+--- Parameter `name` (string): The new identity that will be used as write directory.
+--- See: https://love2d.org/wiki/love.filesystem.setIdentity
+---@field setIdentity (fun(name: string))|(fun(name: string)) Sets the write directory for your game.
+--- Sets the filesystem paths that will be searched when require is called.
+--- Parameter `paths` (string): The paths that the ''require'' function will check in love's filesystem.
+--- See: https://love2d.org/wiki/love.filesystem.setRequirePath
+---@field setRequirePath (fun(paths: string)) Sets the filesystem paths that will be searched when require is called.
+--- Sets the source of the game, where the code is present.
+--- Parameter `path` (string): Absolute path to the game's source folder.
+--- See: https://love2d.org/wiki/love.filesystem.setSource
+---@field setSource (fun(path: string)) Sets the source of the game, where the code is present.
+--- Sets whether love.filesystem follows symbolic links.
+--- Parameter `enable` (boolean): Whether love.filesystem should follow symbolic links.
+--- See: https://love2d.org/wiki/love.filesystem.setSymlinksEnabled
+---@field setSymlinksEnabled (fun(enable: boolean)) Sets whether love.filesystem follows symbolic links.
+--- Unmounts a zip file or folder previously mounted for reading with love.filesystem.mount.
+--- Parameter `archive` (string): The folder or zip file in the game's save directory which is currently mounted.
+--- Returns `success` (boolean): True if the archive was successfully unmounted, false otherwise.
+--- See: https://love2d.org/wiki/love.filesystem.unmount
+---@field unmount (fun(archive: string): boolean) Unmounts a zip file or folder previously mounted for reading with love.filesystem.mount.
+--- Write data to a file in the save directory.
+--- Parameter `name` (string): The name (and path) of the file.
+--- Parameter `data` (string): The string data to write to the file.
+--- Parameter `size` (number): How many bytes to write. Default: `all`.
+--- Returns `success` (boolean): If the operation was successful.
+--- Returns `message` (string): Error message if operation was unsuccessful.
+--- Example: `local ok, err = love.filesystem.write("save.txt", "level=2")`
+--- Tip: Paths are relative to LÖVE's save directory; check the return value.
+--- See: https://love2d.org/wiki/love.filesystem.write
+---@field write (fun(name: string, data: string, size?: number): boolean, string)|(fun(name: string, data: love.Data, size?: number): boolean, string) Write data to a file in the save directory.
+
+--- Allows you to work with fonts.
+--- See: https://love2d.org/wiki/love.font
+---@class love.font
+--- Creates a new BMFont Rasterizer.
+--- Parameter `imageData` (love.ImageData): The image data containing the drawable pictures of font glyphs.
+--- Parameter `glyphs` (string): The sequence of glyphs in the ImageData.
+--- Parameter `dpiscale` (number): DPI scale. Default: `1`.
+--- Returns `rasterizer` (love.Rasterizer): The rasterizer.
+--- See: https://love2d.org/wiki/love.font.newBMFontRasterizer
+---@field newBMFontRasterizer (fun(imageData: love.ImageData, glyphs: string, dpiscale?: number): love.Rasterizer)|(fun(fileName: string, glyphs: string, dpiscale?: number): love.Rasterizer) Creates a new BMFont Rasterizer.
+--- Creates a new GlyphData.
+--- Parameter `rasterizer` (love.Rasterizer): The Rasterizer containing the font.
+--- Parameter `glyph` (number): The character code of the glyph.
+--- See: https://love2d.org/wiki/love.font.newGlyphData
+---@field newGlyphData (fun(rasterizer: love.Rasterizer, glyph: number)) Creates a new GlyphData.
+--- Creates a new Image Rasterizer.
+--- Parameter `imageData` (love.ImageData): Font image data.
+--- Parameter `glyphs` (string): String containing font glyphs.
+--- Parameter `extraSpacing` (number): Font extra spacing. Default: `0`.
+--- Parameter `dpiscale` (number): Font DPI scale. Default: `1`.
+--- Returns `rasterizer` (love.Rasterizer): The rasterizer.
+--- See: https://love2d.org/wiki/love.font.newImageRasterizer
+---@field newImageRasterizer (fun(imageData: love.ImageData, glyphs: string, extraSpacing?: number, dpiscale?: number): love.Rasterizer) Creates a new Image Rasterizer.
+--- Creates a new Rasterizer.
+--- Parameter `filename` (string): The font file.
+--- Returns `rasterizer` (love.Rasterizer): The rasterizer.
+--- See: https://love2d.org/wiki/love.font.newRasterizer
+---@field newRasterizer (fun(filename: string): love.Rasterizer)|(fun(data: love.FileData): love.Rasterizer)|(fun(size?: number, hinting?: love.HintingMode, dpiscale?: number): love.Rasterizer)|(fun(fileName: string, size?: number, hinting?: love.HintingMode, dpiscale?: number): love.Rasterizer)|(fun(fileData: love.FileData, size?: number, hinting?: love.HintingMode, dpiscale?: number): love.Rasterizer)|(fun(imageData: love.ImageData, glyphs: string, dpiscale?: number): love.Rasterizer)|(fun(fileName: string, glyphs: string, dpiscale?: number): love.Rasterizer) Creates a new Rasterizer.
+--- Creates a new TrueType Rasterizer.
+--- Parameter `size` (number): The font size. Default: `12`.
+--- Parameter `hinting` (love.HintingMode): True Type hinting mode. Default: `'normal'`.
+--- Parameter `dpiscale` (number): The font DPI scale. Default: `love.window.getDPIScale()`.
+--- Returns `rasterizer` (love.Rasterizer): The rasterizer.
+--- See: https://love2d.org/wiki/love.font.newTrueTypeRasterizer
+---@field newTrueTypeRasterizer (fun(size?: number, hinting?: love.HintingMode, dpiscale?: number): love.Rasterizer)|(fun(fileName: string, size?: number, hinting?: love.HintingMode, dpiscale?: number): love.Rasterizer)|(fun(fileData: love.FileData, size?: number, hinting?: love.HintingMode, dpiscale?: number): love.Rasterizer) Creates a new TrueType Rasterizer.
+
+--- The primary responsibility for the love.graphics module is the drawing of lines, shapes, text, Images and other Drawable objects onto the screen.
+--- See: https://love2d.org/wiki/love.graphics
+---@class love.graphics
+--- Applies the given Transform object to the current coordinate transformation.
+--- Parameter `transform` (love.Transform): The Transform object to apply to the current graphics coordinate transform.
+--- See: https://love2d.org/wiki/love.graphics.applyTransform
+---@field applyTransform (fun(transform: love.Transform)) Applies the given Transform object to the current coordinate transformation.
+--- Draws a filled or unfilled arc at position (x, y).
+--- Parameter `drawmode` (love.DrawMode): How to draw the arc.
+--- Parameter `x` (number): The position of the center along x-axis.
+--- Parameter `y` (number): The position of the center along y-axis.
+--- Parameter `radius` (number): Radius of the arc.
+--- Parameter `angle1` (number): The angle at which the arc begins.
+--- Parameter `angle2` (number): The angle at which the arc terminates.
+--- Parameter `segments` (number): The number of segments used for drawing the arc. Default: `10`.
+--- See: https://love2d.org/wiki/love.graphics.arc
+---@field arc (fun(drawmode: love.DrawMode, x: number, y: number, radius: number, angle1: number, angle2: number, segments?: number))|(fun(drawmode: love.DrawMode, arctype: love.ArcType, x: number, y: number, radius: number, angle1: number, angle2: number, segments?: number)) Draws a filled or unfilled arc at position (x, y).
+--- Creates a screenshot once the current frame is done (after love.draw has finished).
+--- Parameter `filename` (string): The filename to save the screenshot to.
+--- See: https://love2d.org/wiki/love.graphics.captureScreenshot
+---@field captureScreenshot (fun(filename: string))|(fun(callback: function))|(fun(channel: love.Channel)) Creates a screenshot once the current frame is done (after love.draw has finished).
+--- Draws a circle.
+--- Parameter `mode` (love.DrawMode): How to draw the circle.
+--- Parameter `x` (number): The position of the center along x-axis.
+--- Parameter `y` (number): The position of the center along y-axis.
+--- Parameter `radius` (number): The radius of the circle.
+--- See: https://love2d.org/wiki/love.graphics.circle
+---@field circle (fun(mode: love.DrawMode, x: number, y: number, radius: number))|(fun(mode: love.DrawMode, x: number, y: number, radius: number, segments: number)) Draws a circle.
+--- Clears the screen or active Canvas to the specified color.
+--- See: https://love2d.org/wiki/love.graphics.clear
+---@field clear (fun())|(fun(r: number, g: number, b: number, a?: number, clearstencil?: boolean, cleardepth?: boolean))|(fun(color: table, ...: table, clearstencil?: boolean, cleardepth?: boolean))|(fun(clearcolor: boolean, clearstencil: boolean, cleardepth: boolean)) Clears the screen or active Canvas to the specified color.
+--- Discards (trashes) the contents of the screen or active Canvas.
+--- Parameter `discardcolor` (boolean): Whether to discard the texture(s) of the active Canvas(es) (the contents of the screen if no Canvas is active.) Default: `true`.
+--- Parameter `discardstencil` (boolean): Whether to discard the contents of the stencil buffer of the screen / active Canvas. Default: `true`.
+--- See: https://love2d.org/wiki/love.graphics.discard
+---@field discard (fun(discardcolor?: boolean, discardstencil?: boolean))|(fun(discardcolors: table, discardstencil?: boolean)) Discards (trashes) the contents of the screen or active Canvas.
+--- Draws a Drawable object (an Image, Canvas, SpriteBatch, ParticleSystem, Mesh, Text object, or Video) on the screen with optional rotation, scaling and shearing.
+--- Parameter `drawable` (love.Drawable): A drawable object.
+--- Parameter `x` (number): The position to draw the object (x-axis). Default: `0`.
+--- Parameter `y` (number): The position to draw the object (y-axis). Default: `0`.
+--- Parameter `r` (number): Orientation (radians). Default: `0`.
+--- Parameter `sx` (number): Scale factor (x-axis). Default: `1`.
+--- Parameter `sy` (number): Scale factor (y-axis). Default: `sx`.
+--- Parameter `ox` (number): Origin offset (x-axis). Default: `0`.
+--- Parameter `oy` (number): Origin offset (y-axis). Default: `0`.
+--- Parameter `kx` (number): Shearing factor (x-axis). Default: `0`.
+--- Parameter `ky` (number): Shearing factor (y-axis). Default: `0`.
+--- Example: `love.graphics.draw(image, 100, 80, math.pi / 4)`
+--- See: https://love2d.org/wiki/love.graphics.draw
+---@field draw (fun(drawable: love.Drawable, x?: number, y?: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(texture: love.Texture, quad: love.Quad, x: number, y: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(drawable: love.Drawable, transform: love.Transform))|(fun(texture: love.Texture, quad: love.Quad, transform: love.Transform)) Draws a Drawable object (an Image, Canvas, SpriteBatch, ParticleSystem, Mesh, Text object, or Video) on the screen with optional rotation, scaling and shearing.
+--- Draws many instances of a Mesh with a single draw call, using hardware geometry instancing.
+--- Parameter `mesh` (love.Mesh): The mesh to render.
+--- Parameter `instancecount` (number): The number of instances to render.
+--- Parameter `x` (number): The position to draw the instances (x-axis). Default: `0`.
+--- Parameter `y` (number): The position to draw the instances (y-axis). Default: `0`.
+--- Parameter `r` (number): Orientation (radians). Default: `0`.
+--- Parameter `sx` (number): Scale factor (x-axis). Default: `1`.
+--- Parameter `sy` (number): Scale factor (y-axis). Default: `sx`.
+--- Parameter `ox` (number): Origin offset (x-axis). Default: `0`.
+--- Parameter `oy` (number): Origin offset (y-axis). Default: `0`.
+--- Parameter `kx` (number): Shearing factor (x-axis). Default: `0`.
+--- Parameter `ky` (number): Shearing factor (y-axis). Default: `0`.
+--- See: https://love2d.org/wiki/love.graphics.drawInstanced
+---@field drawInstanced (fun(mesh: love.Mesh, instancecount: number, x?: number, y?: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(mesh: love.Mesh, instancecount: number, transform: love.Transform)) Draws many instances of a Mesh with a single draw call, using hardware geometry instancing.
+--- Draws a layer of an Array Texture.
+--- Parameter `texture` (love.Texture): The Array Texture to draw.
+--- Parameter `layerindex` (number): The index of the layer to use when drawing.
+--- Parameter `x` (number): The position to draw the texture (x-axis). Default: `0`.
+--- Parameter `y` (number): The position to draw the texture (y-axis). Default: `0`.
+--- Parameter `r` (number): Orientation (radians). Default: `0`.
+--- Parameter `sx` (number): Scale factor (x-axis). Default: `1`.
+--- Parameter `sy` (number): Scale factor (y-axis). Default: `sx`.
+--- Parameter `ox` (number): Origin offset (x-axis). Default: `0`.
+--- Parameter `oy` (number): Origin offset (y-axis). Default: `0`.
+--- Parameter `kx` (number): Shearing factor (x-axis). Default: `0`.
+--- Parameter `ky` (number): Shearing factor (y-axis). Default: `0`.
+--- See: https://love2d.org/wiki/love.graphics.drawLayer
+---@field drawLayer (fun(texture: love.Texture, layerindex: number, x?: number, y?: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(texture: love.Texture, layerindex: number, quad: love.Quad, x?: number, y?: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(texture: love.Texture, layerindex: number, transform: love.Transform))|(fun(texture: love.Texture, layerindex: number, quad: love.Quad, transform: love.Transform)) Draws a layer of an Array Texture.
+--- Draws an ellipse.
+--- Parameter `mode` (love.DrawMode): How to draw the ellipse.
+--- Parameter `x` (number): The position of the center along x-axis.
+--- Parameter `y` (number): The position of the center along y-axis.
+--- Parameter `radiusx` (number): The radius of the ellipse along the x-axis (half the ellipse's width).
+--- Parameter `radiusy` (number): The radius of the ellipse along the y-axis (half the ellipse's height).
+--- See: https://love2d.org/wiki/love.graphics.ellipse
+---@field ellipse (fun(mode: love.DrawMode, x: number, y: number, radiusx: number, radiusy: number))|(fun(mode: love.DrawMode, x: number, y: number, radiusx: number, radiusy: number, segments: number)) Draws an ellipse.
+--- Immediately renders any pending automatically batched draws.
+--- See: https://love2d.org/wiki/love.graphics.flushBatch
+---@field flushBatch (fun()) Immediately renders any pending automatically batched draws.
+--- Gets the current background color.
+--- Returns `r` (number): The red component (0-1).
+--- Returns `g` (number): The green component (0-1).
+--- Returns `b` (number): The blue component (0-1).
+--- Returns `a` (number): The alpha component (0-1).
+--- See: https://love2d.org/wiki/love.graphics.getBackgroundColor
+---@field getBackgroundColor (fun(): number, number, number, number) Gets the current background color.
+--- Gets the blending mode.
+--- Returns `mode` (love.BlendMode): The current blend mode.
+--- Returns `alphamode` (love.BlendAlphaMode): The current blend alpha mode – it determines how the alpha of drawn objects affects blending.
+--- See: https://love2d.org/wiki/love.graphics.getBlendMode
+---@field getBlendMode (fun(): love.BlendMode, love.BlendAlphaMode) Gets the blending mode.
+--- Gets the current target Canvas.
+--- Returns `canvas` (love.Canvas): The Canvas set by setCanvas.
+--- See: https://love2d.org/wiki/love.graphics.getCanvas
+---@field getCanvas (fun(): love.Canvas) Gets the current target Canvas.
+--- Gets the available Canvas formats, and whether each is supported.
+--- Returns `formats` (table): A table containing CanvasFormats as keys, and a boolean indicating whether the format is supported as values.
+--- See: https://love2d.org/wiki/love.graphics.getCanvasFormats
+---@field getCanvasFormats (fun(): table)|(fun(readable: boolean): table) Gets the available Canvas formats, and whether each is supported.
+--- Gets the current color.
+--- Returns `r` (number): The red component (0-1).
+--- Returns `g` (number): The green component (0-1).
+--- Returns `b` (number): The blue component (0-1).
+--- Returns `a` (number): The alpha component (0-1).
+--- See: https://love2d.org/wiki/love.graphics.getColor
+---@field getColor (fun(): number, number, number, number) Gets the current color.
+--- Gets the active color components used when drawing.
+--- Returns `r` (boolean): Whether the red color component is active when rendering.
+--- Returns `g` (boolean): Whether the green color component is active when rendering.
+--- Returns `b` (boolean): Whether the blue color component is active when rendering.
+--- Returns `a` (boolean): Whether the alpha color component is active when rendering.
+--- See: https://love2d.org/wiki/love.graphics.getColorMask
+---@field getColorMask (fun(): boolean, boolean, boolean, boolean) Gets the active color components used when drawing.
+--- Gets the DPI scale factor of the window.
+--- Returns `scale` (number): The pixel scale factor associated with the window.
+--- See: https://love2d.org/wiki/love.graphics.getDPIScale
+---@field getDPIScale (fun(): number) Gets the DPI scale factor of the window.
+--- Returns the default scaling filters used with Images, Canvases, and Fonts.
+--- Returns `min` (love.FilterMode): Filter mode used when scaling the image down.
+--- Returns `mag` (love.FilterMode): Filter mode used when scaling the image up.
+--- Returns `anisotropy` (number): Maximum amount of Anisotropic Filtering used.
+--- See: https://love2d.org/wiki/love.graphics.getDefaultFilter
+---@field getDefaultFilter (fun(): love.FilterMode, love.FilterMode, number) Returns the default scaling filters used with Images, Canvases, and Fonts.
+--- Gets the current depth test mode and whether writing to the depth buffer is enabled.
+--- Returns `comparemode` (love.CompareMode): Depth comparison mode used for depth testing.
+--- Returns `write` (boolean): Whether to write update / write values to the depth buffer when rendering.
+--- See: https://love2d.org/wiki/love.graphics.getDepthMode
+---@field getDepthMode (fun(): love.CompareMode, boolean) Gets the current depth test mode and whether writing to the depth buffer is enabled.
+--- Gets the width and height in pixels of the window.
+--- Returns `width` (number): The width of the window.
+--- Returns `height` (number): The height of the window.
+--- See: https://love2d.org/wiki/love.graphics.getDimensions
+---@field getDimensions (fun(): number, number) Gets the width and height in pixels of the window.
+--- Gets the current Font object.
+--- Returns `font` (love.Font): The current Font.
+--- See: https://love2d.org/wiki/love.graphics.getFont
+---@field getFont (fun(): love.Font) Gets the current Font object.
+--- Gets whether triangles with clockwise- or counterclockwise-ordered vertices are considered front-facing.
+--- Returns `winding` (love.VertexWinding): The winding mode being used.
+--- See: https://love2d.org/wiki/love.graphics.getFrontFaceWinding
+---@field getFrontFaceWinding (fun(): love.VertexWinding) Gets whether triangles with clockwise- or counterclockwise-ordered vertices are considered front-facing.
+--- Gets the height in pixels of the window.
+--- Returns `height` (number): The height of the window.
+--- See: https://love2d.org/wiki/love.graphics.getHeight
+---@field getHeight (fun(): number) Gets the height in pixels of the window.
+--- Gets the raw and compressed pixel formats usable for Images, and whether each is supported.
+--- Returns `formats` (table): A table containing PixelFormats as keys, and a boolean indicating whether the format is supported as values.
+--- See: https://love2d.org/wiki/love.graphics.getImageFormats
+---@field getImageFormats (fun(): table) Gets the raw and compressed pixel formats usable for Images, and whether each is supported.
+--- Gets the line join style.
+--- Returns `join` (love.LineJoin): The LineJoin style.
+--- See: https://love2d.org/wiki/love.graphics.getLineJoin
+---@field getLineJoin (fun(): love.LineJoin) Gets the line join style.
+--- Gets the line style.
+--- Returns `style` (love.LineStyle): The current line style.
+--- See: https://love2d.org/wiki/love.graphics.getLineStyle
+---@field getLineStyle (fun(): love.LineStyle) Gets the line style.
+--- Gets the current line width.
+--- Returns `width` (number): The current line width.
+--- See: https://love2d.org/wiki/love.graphics.getLineWidth
+---@field getLineWidth (fun(): number) Gets the current line width.
+--- Gets whether back-facing triangles in a Mesh are culled.
+--- Returns `mode` (love.CullMode): The Mesh face culling mode in use (whether to render everything, cull back-facing triangles, or cull front-facing triangles).
+--- See: https://love2d.org/wiki/love.graphics.getMeshCullMode
+---@field getMeshCullMode (fun(): love.CullMode) Gets whether back-facing triangles in a Mesh are culled.
+--- Gets the width and height in pixels of the window.
+--- Returns `pixelwidth` (number): The width of the window in pixels.
+--- Returns `pixelheight` (number): The height of the window in pixels.
+--- See: https://love2d.org/wiki/love.graphics.getPixelDimensions
+---@field getPixelDimensions (fun(): number, number) Gets the width and height in pixels of the window.
+--- Gets the height in pixels of the window.
+--- Returns `pixelheight` (number): The height of the window in pixels.
+--- See: https://love2d.org/wiki/love.graphics.getPixelHeight
+---@field getPixelHeight (fun(): number) Gets the height in pixels of the window.
+--- Gets the width in pixels of the window.
+--- Returns `pixelwidth` (number): The width of the window in pixels.
+--- See: https://love2d.org/wiki/love.graphics.getPixelWidth
+---@field getPixelWidth (fun(): number) Gets the width in pixels of the window.
+--- Gets the point size.
+--- Returns `size` (number): The current point size.
+--- See: https://love2d.org/wiki/love.graphics.getPointSize
+---@field getPointSize (fun(): number) Gets the point size.
+--- Gets information about the system's video card and drivers.
+--- Returns `name` (string): The name of the renderer, e.g.
+--- Returns `version` (string): The version of the renderer with some extra driver-dependent version info, e.g.
+--- Returns `vendor` (string): The name of the graphics card vendor, e.g.
+--- Returns `device` (string): The name of the graphics card, e.g.
+--- See: https://love2d.org/wiki/love.graphics.getRendererInfo
+---@field getRendererInfo (fun(): string, string, string, string) Gets information about the system's video card and drivers.
+--- Gets the current scissor box.
+--- Returns `x` (number): The x-component of the top-left point of the box.
+--- Returns `y` (number): The y-component of the top-left point of the box.
+--- Returns `width` (number): The width of the box.
+--- Returns `height` (number): The height of the box.
+--- See: https://love2d.org/wiki/love.graphics.getScissor
+---@field getScissor (fun(): number, number, number, number) Gets the current scissor box.
+--- Gets the current Shader.
+--- Returns `shader` (love.Shader): The currently active Shader, or nil if none is set.
+--- See: https://love2d.org/wiki/love.graphics.getShader
+---@field getShader (fun(): love.Shader) Gets the current Shader.
+--- Gets the current depth of the transform / state stack (the number of pushes without corresponding pops).
+--- Returns `depth` (number): The current depth of the transform and state love.graphics stack.
+--- See: https://love2d.org/wiki/love.graphics.getStackDepth
+---@field getStackDepth (fun(): number) Gets the current depth of the transform / state stack (the number of pushes without corresponding pops).
+--- Gets performance-related rendering statistics.
+--- Returns `stats` (love.graphics_getStats_statsResult): A table with the following fields:
+--- See: https://love2d.org/wiki/love.graphics.getStats
+---@field getStats (fun(): love.graphics_getStats_statsResult)|(fun(stats: table): love.graphics_getStats_statsResult2) Gets performance-related rendering statistics.
+--- Gets the current stencil test configuration.
+--- Returns `comparemode` (love.CompareMode): The type of comparison that is made for each pixel.
+--- Returns `comparevalue` (number): The value used when comparing with the stencil value of each pixel.
+--- See: https://love2d.org/wiki/love.graphics.getStencilTest
+---@field getStencilTest (fun(): love.CompareMode, number) Gets the current stencil test configuration.
+--- Gets the optional graphics features and whether they're supported on the system.
+--- Returns `features` (table): A table containing GraphicsFeature keys, and boolean values indicating whether each feature is supported.
+--- See: https://love2d.org/wiki/love.graphics.getSupported
+---@field getSupported (fun(): table) Gets the optional graphics features and whether they're supported on the system.
+--- Gets the system-dependent maximum values for love.graphics features.
+--- Returns `limits` (table): A table containing GraphicsLimit keys, and number values.
+--- See: https://love2d.org/wiki/love.graphics.getSystemLimits
+---@field getSystemLimits (fun(): table) Gets the system-dependent maximum values for love.graphics features.
+--- Gets the available texture types, and whether each is supported.
+--- Returns `texturetypes` (table): A table containing TextureTypes as keys, and a boolean indicating whether the type is supported as values.
+--- See: https://love2d.org/wiki/love.graphics.getTextureTypes
+---@field getTextureTypes (fun(): table) Gets the available texture types, and whether each is supported.
+--- Gets the width in pixels of the window.
+--- Returns `width` (number): The width of the window.
+--- See: https://love2d.org/wiki/love.graphics.getWidth
+---@field getWidth (fun(): number) Gets the width in pixels of the window.
+--- Sets the scissor to the rectangle created by the intersection of the specified rectangle with the existing scissor.
+--- Parameter `x` (number): The x-coordinate of the upper left corner of the rectangle to intersect with the existing scissor rectangle.
+--- Parameter `y` (number): The y-coordinate of the upper left corner of the rectangle to intersect with the existing scissor rectangle.
+--- Parameter `width` (number): The width of the rectangle to intersect with the existing scissor rectangle.
+--- Parameter `height` (number): The height of the rectangle to intersect with the existing scissor rectangle.
+--- See: https://love2d.org/wiki/love.graphics.intersectScissor
+---@field intersectScissor (fun(x: number, y: number, width: number, height: number)) Sets the scissor to the rectangle created by the intersection of the specified rectangle with the existing scissor.
+--- Converts the given 2D position from screen-space into global coordinates.
+--- Parameter `screenX` (number): The x component of the screen-space position.
+--- Parameter `screenY` (number): The y component of the screen-space position.
+--- Returns `globalX` (number): The x component of the position in global coordinates.
+--- Returns `globalY` (number): The y component of the position in global coordinates.
+--- See: https://love2d.org/wiki/love.graphics.inverseTransformPoint
+---@field inverseTransformPoint (fun(screenX: number, screenY: number): number, number) Converts the given 2D position from screen-space into global coordinates.
+--- Gets whether the graphics module is able to be used.
+--- Returns `active` (boolean): Whether the graphics module is active and able to be used.
+--- See: https://love2d.org/wiki/love.graphics.isActive
+---@field isActive (fun(): boolean) Gets whether the graphics module is able to be used.
+--- Gets whether gamma-correct rendering is supported and enabled.
+--- Returns `gammacorrect` (boolean): True if gamma-correct rendering is supported and was enabled in love.conf, false otherwise.
+--- See: https://love2d.org/wiki/love.graphics.isGammaCorrect
+---@field isGammaCorrect (fun(): boolean) Gets whether gamma-correct rendering is supported and enabled.
+--- Gets whether wireframe mode is used when drawing.
+--- Returns `wireframe` (boolean): True if wireframe lines are used when drawing, false if it's not.
+--- See: https://love2d.org/wiki/love.graphics.isWireframe
+---@field isWireframe (fun(): boolean) Gets whether wireframe mode is used when drawing.
+--- Draws lines between points.
+--- Parameter `x1` (number): The position of first point on the x-axis.
+--- Parameter `y1` (number): The position of first point on the y-axis.
+--- Parameter `x2` (number): The position of second point on the x-axis.
+--- Parameter `y2` (number): The position of second point on the y-axis.
+--- Parameter `...` (number): You can continue passing point positions to draw a polyline.
+--- See: https://love2d.org/wiki/love.graphics.line
+---@field line (fun(x1: number, y1: number, x2: number, y2: number, ...: number))|(fun(points: table)) Draws lines between points.
+--- Creates a new array Image.
+--- Parameter `slices` (table): A table containing filepaths to images (or File, FileData, ImageData, or CompressedImageData objects), in an array.
+--- Parameter `settings` (love.graphics_newArrayImage_settings): Optional table of settings to configure the array image, containing the following fields: Default: `nil`.
+--- Returns `image` (love.Image): An Array Image object.
+--- See: https://love2d.org/wiki/love.graphics.newArrayImage
+---@field newArrayImage (fun(slices: table, settings?: love.graphics_newArrayImage_settings): love.Image) Creates a new array Image.
+--- Creates a new Canvas object for offscreen rendering.
+--- Returns `canvas` (love.Canvas): A new Canvas with dimensions equal to the window's size in pixels.
+--- Example: `local canvas = love.graphics.newCanvas(320, 180)`
+--- See: https://love2d.org/wiki/love.graphics.newCanvas
+---@field newCanvas (fun(): love.Canvas)|(fun(width: number, height: number): love.Canvas)|(fun(width: number, height: number, settings?: love.graphics_newCanvas_settings): love.Canvas)|(fun(width: number, height: number, layers: number, settings?: love.graphics_newCanvas_settings2): love.Canvas) Creates a new Canvas object for offscreen rendering.
+--- Creates a new cubemap Image.
+--- Parameter `filename` (string): The filepath to a cubemap image file (or a File, FileData, or ImageData).
+--- Parameter `settings` (love.graphics_newCubeImage_settings): Optional table of settings to configure the cubemap image, containing the following fields: Default: `nil`.
+--- Returns `image` (love.Image): An cubemap Image object.
+--- See: https://love2d.org/wiki/love.graphics.newCubeImage
+---@field newCubeImage (fun(filename: string, settings?: love.graphics_newCubeImage_settings): love.Image)|(fun(faces: table, settings?: love.graphics_newCubeImage_settings2): love.Image) Creates a new cubemap Image.
+--- Creates a new Font from a TrueType Font or BMFont file.
+--- Parameter `filename` (string): The filepath to the BMFont or TrueType font file.
+--- Returns `font` (love.Font): A Font object which can be used to draw text on screen.
+--- See: https://love2d.org/wiki/love.graphics.newFont
+---@field newFont (fun(filename: string): love.Font)|(fun(filename: string, size: number, hinting?: love.HintingMode, dpiscale?: number): love.Font)|(fun(filename: string, imagefilename: string): love.Font)|(fun(size?: number, hinting?: love.HintingMode, dpiscale?: number): love.Font) Creates a new Font from a TrueType Font or BMFont file.
+--- Creates a new Image from a filepath, FileData, an ImageData, or a CompressedImageData, and optionally generates or specifies mipmaps for the image.
+--- Parameter `filename` (string): The filepath to the image file.
+--- Parameter `settings` (love.graphics_newImage_settings): A table containing the following fields: Default: `nil`.
+--- Returns `image` (love.Image): A new Image object which can be drawn on screen.
+--- Example: `local image = love.graphics.newImage("player.png")`
+--- See: https://love2d.org/wiki/love.graphics.newImage
+---@field newImage (fun(filename: string, settings?: love.graphics_newImage_settings): love.Image)|(fun(fileData: love.FileData, settings?: love.graphics_newImage_settings2): love.Image)|(fun(imageData: love.ImageData, settings?: love.graphics_newImage_settings3): love.Image)|(fun(compressedImageData: love.CompressedImageData, settings?: love.graphics_newImage_settings4): love.Image) Creates a new Image from a filepath, FileData, an ImageData, or a CompressedImageData, and optionally generates or specifies mipmaps for the image.
+--- Creates a new specifically formatted image.
+--- Parameter `filename` (string): The filepath to the image file.
+--- Parameter `glyphs` (string): A string of the characters in the image in order from left to right.
+--- Parameter `extraspacing` (number): Additional spacing (positive or negative) to apply to each glyph in the Font. Default: `0`.
+--- Returns `font` (love.Font): A Font object which can be used to draw text on screen.
+--- See: https://love2d.org/wiki/love.graphics.newImageFont
+---@field newImageFont (fun(filename: string, glyphs: string, extraspacing?: number): love.Font)|(fun(imageData: love.ImageData, glyphs: string, extraspacing?: number): love.Font) Creates a new specifically formatted image.
+--- Creates a new Mesh.
+--- Parameter `vertices` (love.graphics_newMesh_vertices): The table filled with vertex information tables for each vertex as follows:
+--- Parameter `mode` (love.MeshDrawMode): How the vertices are used when drawing. Default: `'fan'`.
+--- Parameter `usage` (love.SpriteBatchUsage): The expected usage of the Mesh. Default: `'dynamic'`.
+--- Returns `mesh` (love.Mesh): The new mesh.
+--- See: https://love2d.org/wiki/love.graphics.newMesh
+---@field newMesh (fun(vertices: love.graphics_newMesh_vertices, mode?: love.MeshDrawMode, usage?: love.SpriteBatchUsage): love.Mesh)|(fun(vertexcount: number, mode?: love.MeshDrawMode, usage?: love.SpriteBatchUsage): love.Mesh)|(fun(vertexformat: love.graphics_newMesh_vertexformat, vertices: love.graphics_newMesh_vertices2, mode?: love.MeshDrawMode, usage?: love.SpriteBatchUsage): love.Mesh)|(fun(vertexformat: love.graphics_newMesh_vertexformat2, vertexcount: number, mode?: love.MeshDrawMode, usage?: love.SpriteBatchUsage): love.Mesh)|(fun(vertexcount: number, texture?: love.Texture, mode?: love.MeshDrawMode): love.Mesh) Creates a new Mesh.
+--- Creates a new ParticleSystem.
+--- Parameter `image` (love.Image): The image to use.
+--- Parameter `buffer` (number): The max number of particles at the same time. Default: `1000`.
+--- Returns `system` (love.ParticleSystem): A new ParticleSystem.
+--- See: https://love2d.org/wiki/love.graphics.newParticleSystem
+---@field newParticleSystem (fun(image: love.Image, buffer?: number): love.ParticleSystem)|(fun(texture: love.Texture, buffer?: number): love.ParticleSystem) Creates a new ParticleSystem.
+--- Creates a new Quad.
+--- Parameter `x` (number): The top-left position in the Image along the x-axis.
+--- Parameter `y` (number): The top-left position in the Image along the y-axis.
+--- Parameter `width` (number): The width of the Quad in the Image.
+--- Parameter `height` (number): The height of the Quad in the Image.
+--- Parameter `sw` (number): The reference width, the width of the Image.
+--- Parameter `sh` (number): The reference height, the height of the Image.
+--- Returns `quad` (love.Quad): The new Quad.
+--- See: https://love2d.org/wiki/love.graphics.newQuad
+---@field newQuad (fun(x: number, y: number, width: number, height: number, sw: number, sh: number): love.Quad)|(fun(x: number, y: number, width: number, height: number, texture: love.Texture): love.Quad) Creates a new Quad.
+--- Creates a new Shader object for hardware-accelerated vertex and pixel effects.
+--- Parameter `code` (string): The pixel shader or vertex shader code, or a filename pointing to a file with the code.
+--- Returns `shader` (love.Shader): A Shader object for use in drawing operations.
+--- See: https://love2d.org/wiki/love.graphics.newShader
+---@field newShader (fun(code: string): love.Shader)|(fun(pixelcode: string, vertexcode: string): love.Shader) Creates a new Shader object for hardware-accelerated vertex and pixel effects.
+--- Creates a new SpriteBatch object.
+--- Parameter `image` (love.Image): The Image to use for the sprites.
+--- Parameter `maxsprites` (number): The maximum number of sprites that the SpriteBatch can contain at any given time. Default: `1000`.
+--- Returns `spriteBatch` (love.SpriteBatch): The new SpriteBatch.
+--- See: https://love2d.org/wiki/love.graphics.newSpriteBatch
+---@field newSpriteBatch (fun(image: love.Image, maxsprites?: number): love.SpriteBatch)|(fun(image: love.Image, maxsprites?: number, usage?: love.SpriteBatchUsage): love.SpriteBatch)|(fun(texture: love.Texture, maxsprites?: number, usage?: love.SpriteBatchUsage): love.SpriteBatch) Creates a new SpriteBatch object.
+--- Creates a new drawable Text object.
+--- Parameter `font` (love.Font): The font to use for the text.
+--- Parameter `textstring` (string): The initial string of text that the new Text object will contain. Default: `nil`.
+--- Returns `text` (love.Text): The new drawable Text object.
+--- See: https://love2d.org/wiki/love.graphics.newText
+---@field newText (fun(font: love.Font, textstring?: string): love.Text)|(fun(font: love.Font, coloredtext: love.graphics_newText_coloredtext): love.Text) Creates a new drawable Text object.
+--- Creates a new drawable Video.
+--- Parameter `filename` (string): The file path to the Ogg Theora video file.
+--- Returns `video` (love.Video): A new Video.
+--- See: https://love2d.org/wiki/love.graphics.newVideo
+---@field newVideo (fun(filename: string): love.Video)|(fun(videostream: love.VideoStream): love.Video)|(fun(filename: string, settings?: love.graphics_newVideo_settings): love.Video)|(fun(filename: string, loadaudio?: boolean): love.Video)|(fun(videostream: love.VideoStream, loadaudio?: boolean): love.Video) Creates a new drawable Video.
+--- Creates a new volume (3D) Image.
+--- Parameter `layers` (table): A table containing filepaths to images (or File, FileData, ImageData, or CompressedImageData objects), in an array.
+--- Parameter `settings` (love.graphics_newVolumeImage_settings): Optional table of settings to configure the volume image, containing the following fields: Default: `nil`.
+--- Returns `image` (love.Image): A volume Image object.
+--- See: https://love2d.org/wiki/love.graphics.newVolumeImage
+---@field newVolumeImage (fun(layers: table, settings?: love.graphics_newVolumeImage_settings): love.Image) Creates a new volume (3D) Image.
+--- Resets the current coordinate transformation.
+--- See: https://love2d.org/wiki/love.graphics.origin
+---@field origin (fun()) Resets the current coordinate transformation.
+--- Draws one or more points.
+--- Parameter `x` (number): The position of the first point on the x-axis.
+--- Parameter `y` (number): The position of the first point on the y-axis.
+--- Parameter `...` (number): The x and y coordinates of additional points.
+--- See: https://love2d.org/wiki/love.graphics.points
+---@field points (fun(x: number, y: number, ...: number))|(fun(points: table))|(fun(points: love.graphics_points_points)) Draws one or more points.
+--- Draw a polygon.
+--- Parameter `mode` (love.DrawMode): How to draw the polygon.
+--- Parameter `...` (number): The vertices of the polygon.
+--- See: https://love2d.org/wiki/love.graphics.polygon
+---@field polygon (fun(mode: love.DrawMode, ...: number))|(fun(mode: love.DrawMode, vertices: table)) Draw a polygon.
+--- Pops the current coordinate transformation from the transformation stack.
+--- See: https://love2d.org/wiki/love.graphics.pop
+---@field pop (fun()) Pops the current coordinate transformation from the transformation stack.
+--- Displays the results of drawing operations on the screen.
+--- See: https://love2d.org/wiki/love.graphics.present
+---@field present (fun()) Displays the results of drawing operations on the screen.
+--- Draws text on screen.
+--- Parameter `text` (string): The text to draw.
+--- Parameter `x` (number): The position to draw the object (x-axis). Default: `0`.
+--- Parameter `y` (number): The position to draw the object (y-axis). Default: `0`.
+--- Parameter `r` (number): Orientation (radians). Default: `0`.
+--- Parameter `sx` (number): Scale factor (x-axis). Default: `1`.
+--- Parameter `sy` (number): Scale factor (y-axis). Default: `sx`.
+--- Parameter `ox` (number): Origin offset (x-axis). Default: `0`.
+--- Parameter `oy` (number): Origin offset (y-axis). Default: `0`.
+--- Parameter `kx` (number): Shearing factor (x-axis). Default: `0`.
+--- Parameter `ky` (number): Shearing factor (y-axis). Default: `0`.
+--- Example: `love.graphics.print("Hello, LÖVE!", 20, 20)`
+--- See: https://love2d.org/wiki/love.graphics.print
+---@field print (fun(text: string, x?: number, y?: number, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(coloredtext: love.graphics_print_coloredtext, x?: number, y?: number, angle?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(text: string, transform: love.Transform))|(fun(coloredtext: love.graphics_print_coloredtext2, transform: love.Transform))|(fun(text: string, font: love.Font, transform: love.Transform))|(fun(coloredtext: love.graphics_print_coloredtext3, font: love.Font, transform: love.Transform)) Draws text on screen.
+--- Draws formatted text, with word wrap and alignment.
+--- Parameter `text` (string): A text string.
+--- Parameter `x` (number): The position on the x-axis.
+--- Parameter `y` (number): The position on the y-axis.
+--- Parameter `limit` (number): Wrap the line after this many horizontal pixels.
+--- Parameter `align` (love.AlignMode): The alignment. Default: `'left'`.
+--- Parameter `r` (number): Orientation (radians). Default: `0`.
+--- Parameter `sx` (number): Scale factor (x-axis). Default: `1`.
+--- Parameter `sy` (number): Scale factor (y-axis). Default: `sx`.
+--- Parameter `ox` (number): Origin offset (x-axis). Default: `0`.
+--- Parameter `oy` (number): Origin offset (y-axis). Default: `0`.
+--- Parameter `kx` (number): Shearing factor (x-axis). Default: `0`.
+--- Parameter `ky` (number): Shearing factor (y-axis). Default: `0`.
+--- See: https://love2d.org/wiki/love.graphics.printf
+---@field printf (fun(text: string, x: number, y: number, limit: number, align?: love.AlignMode, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(text: string, font: love.Font, x: number, y: number, limit: number, align?: love.AlignMode, r?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(text: string, transform: love.Transform, limit: number, align?: love.AlignMode))|(fun(text: string, font: love.Font, transform: love.Transform, limit: number, align?: love.AlignMode))|(fun(coloredtext: love.graphics_printf_coloredtext, x: number, y: number, limit: number, align: love.AlignMode, angle?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(coloredtext: love.graphics_printf_coloredtext2, font: love.Font, x: number, y: number, limit: number, align?: love.AlignMode, angle?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number))|(fun(coloredtext: love.graphics_printf_coloredtext3, transform: love.Transform, limit: number, align?: love.AlignMode))|(fun(coloredtext: love.graphics_printf_coloredtext4, font: love.Font, transform: love.Transform, limit: number, align?: love.AlignMode)) Draws formatted text, with word wrap and alignment.
+--- Copies and pushes the current coordinate transformation to the transformation stack.
+--- Example: `love.graphics.push(); love.graphics.translate(20, 30); love.graphics.pop()`
+--- Tip: Pair each push with pop to restore the previous graphics state.
+--- See: https://love2d.org/wiki/love.graphics.push
+---@field push (fun())|(fun(stack: love.StackType)) Copies and pushes the current coordinate transformation to the transformation stack.
+--- Draws a rectangle.
+--- Parameter `mode` (love.DrawMode): How to draw the rectangle.
+--- Parameter `x` (number): The position of top-left corner along the x-axis.
+--- Parameter `y` (number): The position of top-left corner along the y-axis.
+--- Parameter `width` (number): Width of the rectangle.
+--- Parameter `height` (number): Height of the rectangle.
+--- See: https://love2d.org/wiki/love.graphics.rectangle
+---@field rectangle (fun(mode: love.DrawMode, x: number, y: number, width: number, height: number))|(fun(mode: love.DrawMode, x: number, y: number, width: number, height: number, rx: number, ry?: number, segments?: number)) Draws a rectangle.
+--- Replaces the current coordinate transformation with the given Transform object.
+--- Parameter `transform` (love.Transform): The Transform object to replace the current graphics coordinate transform with.
+--- See: https://love2d.org/wiki/love.graphics.replaceTransform
+---@field replaceTransform (fun(transform: love.Transform)) Replaces the current coordinate transformation with the given Transform object.
+--- Resets the current graphics settings.
+--- See: https://love2d.org/wiki/love.graphics.reset
+---@field reset (fun()) Resets the current graphics settings.
+--- Rotates the coordinate system in two dimensions.
+--- Parameter `angle` (number): The amount to rotate the coordinate system in radians.
+--- See: https://love2d.org/wiki/love.graphics.rotate
+---@field rotate (fun(angle: number)) Rotates the coordinate system in two dimensions.
+--- Scales the coordinate system in two dimensions.
+--- Parameter `sx` (number): The scaling in the direction of the x-axis.
+--- Parameter `sy` (number): The scaling in the direction of the y-axis. Default: `sx`.
+--- See: https://love2d.org/wiki/love.graphics.scale
+---@field scale (fun(sx: number, sy?: number)) Scales the coordinate system in two dimensions.
+--- Sets the background color.
+--- Parameter `red` (number): The red component (0-1).
+--- Parameter `green` (number): The green component (0-1).
+--- Parameter `blue` (number): The blue component (0-1).
+--- Parameter `alpha` (number): The alpha component (0-1). Default: `1`.
+--- See: https://love2d.org/wiki/love.graphics.setBackgroundColor
+---@field setBackgroundColor (fun(red: number, green: number, blue: number, alpha?: number))|(fun(rgba: table)) Sets the background color.
+--- Sets the blending mode.
+--- Parameter `mode` (love.BlendMode): The blend mode to use.
+--- See: https://love2d.org/wiki/love.graphics.setBlendMode
+---@field setBlendMode (fun(mode: love.BlendMode))|(fun(mode: love.BlendMode, alphamode?: love.BlendAlphaMode)) Sets the blending mode.
+--- Captures drawing operations to a Canvas.
+--- Parameter `canvas` (love.Canvas): The new target.
+--- Parameter `mipmap` (number): The mipmap level to render to, for Canvases with mipmaps. Default: `1`.
+--- Example: `love.graphics.setCanvas(canvas); love.graphics.clear(); love.graphics.setCanvas()`
+--- Tip: Call with no canvas afterward to resume drawing to the screen.
+--- See: https://love2d.org/wiki/love.graphics.setCanvas
+---@field setCanvas (fun(canvas: love.Canvas, mipmap?: number))|(fun())|(fun(canvas1: love.Canvas, canvas2: love.Canvas, ...: love.Canvas))|(fun(canvas: love.Canvas, slice: number, mipmap?: number))|(fun(setup: love.graphics_setCanvas_setup)) Captures drawing operations to a Canvas.
+--- Sets the color used for drawing.
+--- Parameter `red` (number): The amount of red.
+--- Parameter `green` (number): The amount of green.
+--- Parameter `blue` (number): The amount of blue.
+--- Parameter `alpha` (number): The amount of alpha. Default: `1`.
+--- Example: `love.graphics.setColor(1, 0.4, 0.2, 1)`
+--- Tip: Color channels use 0–1 values in LÖVE 11.x.
+--- See: https://love2d.org/wiki/love.graphics.setColor
+---@field setColor (fun(red: number, green: number, blue: number, alpha?: number))|(fun(rgba: table)) Sets the color used for drawing.
+--- Sets the color mask.
+--- Parameter `red` (boolean): Render red component.
+--- Parameter `green` (boolean): Render green component.
+--- Parameter `blue` (boolean): Render blue component.
+--- Parameter `alpha` (boolean): Render alpha component.
+--- See: https://love2d.org/wiki/love.graphics.setColorMask
+---@field setColorMask (fun(red: boolean, green: boolean, blue: boolean, alpha: boolean))|(fun()) Sets the color mask.
+--- Sets the default scaling filters used with Images, Canvases, and Fonts.
+--- Parameter `min` (love.FilterMode): Filter mode used when scaling the image down.
+--- Parameter `mag` (love.FilterMode): Filter mode used when scaling the image up. Default: `min`.
+--- Parameter `anisotropy` (number): Maximum amount of Anisotropic Filtering used. Default: `1`.
+--- See: https://love2d.org/wiki/love.graphics.setDefaultFilter
+---@field setDefaultFilter (fun(min: love.FilterMode, mag?: love.FilterMode, anisotropy?: number)) Sets the default scaling filters used with Images, Canvases, and Fonts.
+--- Configures depth testing and writing to the depth buffer.
+--- Parameter `comparemode` (love.CompareMode): Depth comparison mode used for depth testing.
+--- Parameter `write` (boolean): Whether to write update / write values to the depth buffer when rendering.
+--- See: https://love2d.org/wiki/love.graphics.setDepthMode
+---@field setDepthMode (fun(comparemode: love.CompareMode, write: boolean))|(fun()) Configures depth testing and writing to the depth buffer.
+--- Set an already-loaded Font as the current font or create and load a new one from the file and size.
+--- Parameter `font` (love.Font): The Font object to use.
+--- See: https://love2d.org/wiki/love.graphics.setFont
+---@field setFont (fun(font: love.Font)) Set an already-loaded Font as the current font or create and load a new one from the file and size.
+--- Sets whether triangles with clockwise- or counterclockwise-ordered vertices are considered front-facing.
+--- Parameter `winding` (love.VertexWinding): The winding mode to use.
+--- See: https://love2d.org/wiki/love.graphics.setFrontFaceWinding
+---@field setFrontFaceWinding (fun(winding: love.VertexWinding)) Sets whether triangles with clockwise- or counterclockwise-ordered vertices are considered front-facing.
+--- Sets the line join style.
+--- Parameter `join` (love.LineJoin): The LineJoin to use.
+--- See: https://love2d.org/wiki/love.graphics.setLineJoin
+---@field setLineJoin (fun(join: love.LineJoin)) Sets the line join style.
+--- Sets the line style.
+--- Parameter `style` (love.LineStyle): The LineStyle to use.
+--- See: https://love2d.org/wiki/love.graphics.setLineStyle
+---@field setLineStyle (fun(style: love.LineStyle)) Sets the line style.
+--- Sets the line width.
+--- Parameter `width` (number): The width of the line.
+--- See: https://love2d.org/wiki/love.graphics.setLineWidth
+---@field setLineWidth (fun(width: number)) Sets the line width.
+--- Sets whether back-facing triangles in a Mesh are culled.
+--- Parameter `mode` (love.CullMode): The Mesh face culling mode to use (whether to render everything, cull back-facing triangles, or cull front-facing triangles).
+--- See: https://love2d.org/wiki/love.graphics.setMeshCullMode
+---@field setMeshCullMode (fun(mode: love.CullMode)) Sets whether back-facing triangles in a Mesh are culled.
+--- Creates and sets a new Font.
+--- Parameter `size` (number): The size of the font. Default: `12`.
+--- Returns `font` (love.Font): The new font.
+--- See: https://love2d.org/wiki/love.graphics.setNewFont
+---@field setNewFont (fun(size?: number): love.Font)|(fun(filename: string, size?: number): love.Font)|(fun(file: love.File, size?: number): love.Font)|(fun(data: love.Data, size?: number): love.Font)|(fun(rasterizer: love.Rasterizer): love.Font) Creates and sets a new Font.
+--- Sets the point size.
+--- Parameter `size` (number): The new point size.
+--- See: https://love2d.org/wiki/love.graphics.setPointSize
+---@field setPointSize (fun(size: number)) Sets the point size.
+--- Sets or disables scissor.
+--- Parameter `x` (number): x coordinate of upper left corner.
+--- Parameter `y` (number): y coordinate of upper left corner.
+--- Parameter `width` (number): width of clipping rectangle.
+--- Parameter `height` (number): height of clipping rectangle.
+--- See: https://love2d.org/wiki/love.graphics.setScissor
+---@field setScissor (fun(x: number, y: number, width: number, height: number))|(fun()) Sets or disables scissor.
+--- Sets or resets a Shader as the current pixel effect or vertex shaders.
+--- Parameter `shader` (love.Shader): The new shader.
+--- See: https://love2d.org/wiki/love.graphics.setShader
+---@field setShader (fun(shader: love.Shader))|(fun()) Sets or resets a Shader as the current pixel effect or vertex shaders.
+--- Configures or disables stencil testing.
+--- Parameter `comparemode` (love.CompareMode): The type of comparison to make for each pixel.
+--- Parameter `comparevalue` (number): The value to use when comparing with the stencil value of each pixel.
+--- See: https://love2d.org/wiki/love.graphics.setStencilTest
+---@field setStencilTest (fun(comparemode: love.CompareMode, comparevalue: number))|(fun()) Configures or disables stencil testing.
+--- Sets whether wireframe lines will be used when drawing.
+--- Parameter `enable` (boolean): True to enable wireframe mode when drawing, false to disable it.
+--- See: https://love2d.org/wiki/love.graphics.setWireframe
+---@field setWireframe (fun(enable: boolean)) Sets whether wireframe lines will be used when drawing.
+--- Shears the coordinate system.
+--- Parameter `kx` (number): The shear factor on the x-axis.
+--- Parameter `ky` (number): The shear factor on the y-axis.
+--- See: https://love2d.org/wiki/love.graphics.shear
+---@field shear (fun(kx: number, ky: number)) Shears the coordinate system.
+--- Draws geometry as a stencil.
+--- Parameter `stencilfunction` (function): Function which draws geometry.
+--- Parameter `action` (love.StencilAction): How to modify any stencil values of pixels that are touched by what's drawn in the stencil function. Default: `'replace'`.
+--- Parameter `value` (number): The new stencil value to use for pixels if the 'replace' stencil action is used. Default: `1`.
+--- Parameter `keepvalues` (boolean): True to preserve old stencil values of pixels, false to re-set every pixel's stencil value to 0 before executing the stencil function. Default: `false`.
+--- See: https://love2d.org/wiki/love.graphics.stencil
+---@field stencil (fun(stencilfunction: function, action?: love.StencilAction, value?: number, keepvalues?: boolean)) Draws geometry as a stencil.
+--- Converts the given 2D position from global coordinates into screen-space.
+--- Parameter `globalX` (number): The x component of the position in global coordinates.
+--- Parameter `globalY` (number): The y component of the position in global coordinates.
+--- Returns `screenX` (number): The x component of the position with graphics transformations applied.
+--- Returns `screenY` (number): The y component of the position with graphics transformations applied.
+--- See: https://love2d.org/wiki/love.graphics.transformPoint
+---@field transformPoint (fun(globalX: number, globalY: number): number, number) Converts the given 2D position from global coordinates into screen-space.
+--- Translates the coordinate system in two dimensions.
+--- Parameter `dx` (number): The translation relative to the x-axis.
+--- Parameter `dy` (number): The translation relative to the y-axis.
+--- See: https://love2d.org/wiki/love.graphics.translate
+---@field translate (fun(dx: number, dy: number)) Translates the coordinate system in two dimensions.
+--- Validates shader code.
+--- Parameter `gles` (boolean): Validate code as GLSL ES shader.
+--- Parameter `code` (string): The pixel shader or vertex shader code, or a filename pointing to a file with the code.
+--- Returns `status` (boolean): true if specified shader code doesn't contain any errors.
+--- Returns `message` (string): Reason why shader code validation failed (or nil if validation succeded).
+--- See: https://love2d.org/wiki/love.graphics.validateShader
+---@field validateShader (fun(gles: boolean, code: string): boolean, string)|(fun(gles: boolean, pixelcode: string, vertexcode: string): boolean, string) Validates shader code.
+
+--- Provides an interface to decode encoded image data.
+--- See: https://love2d.org/wiki/love.image
+---@class love.image
+--- Determines whether a file can be loaded as CompressedImageData.
+--- Parameter `filename` (string): The filename of the potentially compressed image file.
+--- Returns `compressed` (boolean): Whether the file can be loaded as CompressedImageData or not.
+--- See: https://love2d.org/wiki/love.image.isCompressed
+---@field isCompressed (fun(filename: string): boolean)|(fun(fileData: love.FileData): boolean) Determines whether a file can be loaded as CompressedImageData.
+--- Create a new CompressedImageData object from a compressed image file.
+--- Parameter `filename` (string): The filename of the compressed image file.
+--- Returns `compressedImageData` (love.CompressedImageData): The new CompressedImageData object.
+--- See: https://love2d.org/wiki/love.image.newCompressedData
+---@field newCompressedData (fun(filename: string): love.CompressedImageData)|(fun(fileData: love.FileData): love.CompressedImageData) Create a new CompressedImageData object from a compressed image file.
+--- Creates a new ImageData object.
+--- Parameter `width` (number): The width of the ImageData.
+--- Parameter `height` (number): The height of the ImageData.
+--- Returns `imageData` (love.ImageData): The new blank ImageData object.
+--- See: https://love2d.org/wiki/love.image.newImageData
+---@field newImageData (fun(width: number, height: number): love.ImageData)|(fun(width: number, height: number, format?: love.PixelFormat, data?: string): love.ImageData)|(fun(width: number, height: number, data: string): love.ImageData)|(fun(filename: string): love.ImageData)|(fun(filedata: love.FileData): love.ImageData) Creates a new ImageData object.
+
+--- Provides an interface to the user's joystick.
+--- See: https://love2d.org/wiki/love.joystick
+---@class love.joystick
+--- Gets the full gamepad mapping string of the Joysticks which have the given GUID, or nil if the GUID isn't recognized as a gamepad.
+--- Parameter `guid` (string): The GUID value to get the mapping string for.
+--- Returns `mappingstring` (string): A string containing the Joystick's gamepad mappings, or nil if the GUID is not recognized as a gamepad.
+--- See: https://love2d.org/wiki/love.joystick.getGamepadMappingString
+---@field getGamepadMappingString (fun(guid: string): string) Gets the full gamepad mapping string of the Joysticks which have the given GUID, or nil if the GUID isn't recognized as a gamepad.
+--- Gets the number of connected joysticks.
+--- Returns `joystickcount` (number): The number of connected joysticks.
+--- See: https://love2d.org/wiki/love.joystick.getJoystickCount
+---@field getJoystickCount (fun(): number) Gets the number of connected joysticks.
+--- Gets a list of connected Joysticks.
+--- Returns `joysticks` (table): The list of currently connected Joysticks.
+--- See: https://love2d.org/wiki/love.joystick.getJoysticks
+---@field getJoysticks (fun(): table) Gets a list of connected Joysticks.
+--- Loads a gamepad mappings string or file created with love.joystick.saveGamepadMappings.
+--- Parameter `filename` (string): The filename to load the mappings string from.
+--- See: https://love2d.org/wiki/love.joystick.loadGamepadMappings
+---@field loadGamepadMappings (fun(filename: string))|(fun(mappings: string)) Loads a gamepad mappings string or file created with love.joystick.saveGamepadMappings.
+--- Saves the virtual gamepad mappings of all recognized as gamepads and have either been recently used or their gamepad bindings have been modified.
+--- Parameter `filename` (string): The filename to save the mappings string to.
+--- Returns `mappings` (string): The mappings string that was written to the file.
+--- See: https://love2d.org/wiki/love.joystick.saveGamepadMappings
+---@field saveGamepadMappings (fun(filename: string): string)|(fun(): string) Saves the virtual gamepad mappings of all recognized as gamepads and have either been recently used or their gamepad bindings have been modified.
+--- Binds a virtual gamepad input to a button, axis or hat for all Joysticks of a certain type.
+--- Parameter `guid` (string): The OS-dependent GUID for the type of Joystick the binding will affect.
+--- Parameter `button` (love.GamepadButton): The virtual gamepad button to bind.
+--- Parameter `inputtype` (love.JoystickInputType): The type of input to bind the virtual gamepad button to.
+--- Parameter `inputindex` (number): The index of the axis, button, or hat to bind the virtual gamepad button to.
+--- Parameter `hatdir` (love.JoystickHat): The direction of the hat, if the virtual gamepad button will be bound to a hat. Default: `nil`.
+--- Returns `success` (boolean): Whether the virtual gamepad button was successfully bound.
+--- See: https://love2d.org/wiki/love.joystick.setGamepadMapping
+---@field setGamepadMapping (fun(guid: string, button: love.GamepadButton, inputtype: love.JoystickInputType, inputindex: number, hatdir?: love.JoystickHat): boolean)|(fun(guid: string, axis: love.GamepadAxis, inputtype: love.JoystickInputType, inputindex: number, hatdir?: love.JoystickHat): boolean) Binds a virtual gamepad input to a button, axis or hat for all Joysticks of a certain type.
+
+--- Provides an interface to the user's keyboard.
+--- See: https://love2d.org/wiki/love.keyboard
+---@class love.keyboard
+--- Gets the key corresponding to the given hardware scancode.
+--- Parameter `scancode` (love.Scancode): The scancode to get the key from.
+--- Returns `key` (love.KeyConstant): The key corresponding to the given scancode, or 'unknown' if the scancode doesn't map to a KeyConstant on the current system.
+--- See: https://love2d.org/wiki/love.keyboard.getKeyFromScancode
+---@field getKeyFromScancode (fun(scancode: love.Scancode): love.KeyConstant) Gets the key corresponding to the given hardware scancode.
+--- Gets the hardware scancode corresponding to the given key.
+--- Parameter `key` (love.KeyConstant): The key to get the scancode from.
+--- Returns `scancode` (love.Scancode): The scancode corresponding to the given key, or 'unknown' if the given key has no known physical representation on the current system.
+--- See: https://love2d.org/wiki/love.keyboard.getScancodeFromKey
+---@field getScancodeFromKey (fun(key: love.KeyConstant): love.Scancode) Gets the hardware scancode corresponding to the given key.
+--- Gets whether key repeat is enabled.
+--- Returns `enabled` (boolean): Whether key repeat is enabled.
+--- See: https://love2d.org/wiki/love.keyboard.hasKeyRepeat
+---@field hasKeyRepeat (fun(): boolean) Gets whether key repeat is enabled.
+--- Gets whether screen keyboard is supported.
+--- Returns `supported` (boolean): Whether screen keyboard is supported.
+--- See: https://love2d.org/wiki/love.keyboard.hasScreenKeyboard
+---@field hasScreenKeyboard (fun(): boolean) Gets whether screen keyboard is supported.
+--- Gets whether text input events are enabled.
+--- Returns `enabled` (boolean): Whether text input events are enabled.
+--- See: https://love2d.org/wiki/love.keyboard.hasTextInput
+---@field hasTextInput (fun(): boolean) Gets whether text input events are enabled.
+--- Checks whether a certain key is down.
+--- Parameter `key` (love.KeyConstant): The key to check.
+--- Returns `down` (boolean): True if the key is down, false if not.
+--- Example: `if love.keyboard.isDown("space") then jump() end`
+--- See: https://love2d.org/wiki/love.keyboard.isDown
+---@field isDown (fun(key: love.KeyConstant): boolean)|(fun(key: love.KeyConstant, ...: love.KeyConstant): boolean)|(fun(keys: table): boolean) Checks whether a certain key is down.
+--- Checks whether the specified Scancodes are pressed.
+--- Parameter `scancode` (love.Scancode): A Scancode to check.
+--- Parameter `...` (love.Scancode): Additional Scancodes to check.
+--- Returns `down` (boolean): True if any supplied Scancode is down, false if not.
+--- See: https://love2d.org/wiki/love.keyboard.isScancodeDown
+---@field isScancodeDown (fun(scancode: love.Scancode, ...: love.Scancode): boolean) Checks whether the specified Scancodes are pressed.
+--- Enables or disables key repeat for love.keypressed.
+--- Parameter `enable` (boolean): Whether repeat keypress events should be enabled when a key is held down.
+--- See: https://love2d.org/wiki/love.keyboard.setKeyRepeat
+---@field setKeyRepeat (fun(enable: boolean)) Enables or disables key repeat for love.keypressed.
+--- Enables or disables text input events.
+--- Parameter `enable` (boolean): Whether text input events should be enabled.
+--- See: https://love2d.org/wiki/love.keyboard.setTextInput
+---@field setTextInput (fun(enable: boolean))|(fun(enable: boolean, x: number, y: number, w: number, h: number)) Enables or disables text input events.
+
+--- Provides system-independent mathematical functions.
+--- See: https://love2d.org/wiki/love.math
+---@class love.math
+--- Converts a color from 0..255 to 0..1 range.
+--- Parameter `rb` (number): Red color component in 0..255 range.
+--- Parameter `gb` (number): Green color component in 0..255 range.
+--- Parameter `bb` (number): Blue color component in 0..255 range.
+--- Parameter `ab` (number): Alpha color component in 0..255 range. Default: `nil`.
+--- Returns `r` (number): Red color component in 0..1 range.
+--- Returns `g` (number): Green color component in 0..1 range.
+--- Returns `b` (number): Blue color component in 0..1 range.
+--- Returns `a` (number): Alpha color component in 0..1 range or nil if alpha is not specified.
+--- See: https://love2d.org/wiki/love.math.colorFromBytes
+---@field colorFromBytes (fun(rb: number, gb: number, bb: number, ab?: number): number, number, number, number) Converts a color from 0..255 to 0..1 range.
+--- Converts a color from 0..1 to 0..255 range.
+--- Parameter `r` (number): Red color component.
+--- Parameter `g` (number): Green color component.
+--- Parameter `b` (number): Blue color component.
+--- Parameter `a` (number): Alpha color component. Default: `nil`.
+--- Returns `rb` (number): Red color component in 0..255 range.
+--- Returns `gb` (number): Green color component in 0..255 range.
+--- Returns `bb` (number): Blue color component in 0..255 range.
+--- Returns `ab` (number): Alpha color component in 0..255 range or nil if alpha is not specified.
+--- See: https://love2d.org/wiki/love.math.colorToBytes
+---@field colorToBytes (fun(r: number, g: number, b: number, a?: number): number, number, number, number) Converts a color from 0..1 to 0..255 range.
+--- Converts a color from gamma-space (sRGB) to linear-space (RGB).
+--- Parameter `r` (number): The red channel of the sRGB color to convert.
+--- Parameter `g` (number): The green channel of the sRGB color to convert.
+--- Parameter `b` (number): The blue channel of the sRGB color to convert.
+--- Returns `lr` (number): The red channel of the converted color in linear RGB space.
+--- Returns `lg` (number): The green channel of the converted color in linear RGB space.
+--- Returns `lb` (number): The blue channel of the converted color in linear RGB space.
+--- See: https://love2d.org/wiki/love.math.gammaToLinear
+---@field gammaToLinear (fun(r: number, g: number, b: number): number, number, number)|(fun(color: table): number, number, number)|(fun(c: number): number) Converts a color from gamma-space (sRGB) to linear-space (RGB).
+--- Gets the seed of the random number generator.
+--- Returns `low` (number): Integer number representing the lower 32 bits of the random number generator's 64 bit seed value.
+--- Returns `high` (number): Integer number representing the higher 32 bits of the random number generator's 64 bit seed value.
+--- See: https://love2d.org/wiki/love.math.getRandomSeed
+---@field getRandomSeed (fun(): number, number) Gets the seed of the random number generator.
+--- Gets the current state of the random number generator.
+--- Returns `state` (string): The current state of the random number generator, represented as a string.
+--- See: https://love2d.org/wiki/love.math.getRandomState
+---@field getRandomState (fun(): string) Gets the current state of the random number generator.
+--- Checks whether a polygon is convex.
+--- Parameter `vertices` (table): The vertices of the polygon as a table in the form of {x1, y1, x2, y2, x3, y3, ...}.
+--- Returns `convex` (boolean): Whether the given polygon is convex.
+--- See: https://love2d.org/wiki/love.math.isConvex
+---@field isConvex (fun(vertices: table): boolean)|(fun(x1: number, y1: number, x2: number, y2: number, ...: number): boolean) Checks whether a polygon is convex.
+--- Converts a color from linear-space (RGB) to gamma-space (sRGB).
+--- Parameter `lr` (number): The red channel of the linear RGB color to convert.
+--- Parameter `lg` (number): The green channel of the linear RGB color to convert.
+--- Parameter `lb` (number): The blue channel of the linear RGB color to convert.
+--- Returns `cr` (number): The red channel of the converted color in gamma sRGB space.
+--- Returns `cg` (number): The green channel of the converted color in gamma sRGB space.
+--- Returns `cb` (number): The blue channel of the converted color in gamma sRGB space.
+--- See: https://love2d.org/wiki/love.math.linearToGamma
+---@field linearToGamma (fun(lr: number, lg: number, lb: number): number, number, number)|(fun(color: table): number, number, number)|(fun(lc: number): number) Converts a color from linear-space (RGB) to gamma-space (sRGB).
+--- Creates a new BezierCurve object.
+--- Parameter `vertices` (table): The vertices of the control polygon as a table in the form of {x1, y1, x2, y2, x3, y3, ...}.
+--- Returns `curve` (love.BezierCurve): A Bézier curve object.
+--- See: https://love2d.org/wiki/love.math.newBezierCurve
+---@field newBezierCurve (fun(vertices: table): love.BezierCurve)|(fun(x1: number, y1: number, x2: number, y2: number, ...: number): love.BezierCurve) Creates a new BezierCurve object.
+--- Creates a new RandomGenerator object which is completely independent of other RandomGenerator objects and random functions.
+--- Returns `rng` (love.RandomGenerator): The new Random Number Generator object.
+--- See: https://love2d.org/wiki/love.math.newRandomGenerator
+---@field newRandomGenerator (fun(): love.RandomGenerator)|(fun(seed: number): love.RandomGenerator)|(fun(low: number, high: number): love.RandomGenerator) Creates a new RandomGenerator object which is completely independent of other RandomGenerator objects and random functions.
+--- Creates a new Transform object.
+--- Returns `transform` (love.Transform): The new Transform object.
+--- See: https://love2d.org/wiki/love.math.newTransform
+---@field newTransform (fun(): love.Transform)|(fun(x: number, y: number, angle?: number, sx?: number, sy?: number, ox?: number, oy?: number, kx?: number, ky?: number): love.Transform) Creates a new Transform object.
+--- Generates a Simplex or Perlin noise value in 1-4 dimensions.
+--- Parameter `x` (number): The number used to generate the noise value.
+--- Returns `value` (number): The noise value in the range of 1.
+--- See: https://love2d.org/wiki/love.math.noise
+---@field noise (fun(x: number): number)|(fun(x: number, y: number): number)|(fun(x: number, y: number, z: number): number)|(fun(x: number, y: number, z: number, w: number): number) Generates a Simplex or Perlin noise value in 1-4 dimensions.
+--- Generates a pseudo-random number in a platform independent manner.
+--- Returns `number` (number): The pseudo-random number.
+--- See: https://love2d.org/wiki/love.math.random
+---@field random (fun(): number)|(fun(max: number): number)|(fun(min: number, max: number): number) Generates a pseudo-random number in a platform independent manner.
+--- Get a normally distributed pseudo random number.
+--- Parameter `stddev` (number): Standard deviation of the distribution. Default: `1`.
+--- Parameter `mean` (number): The mean of the distribution. Default: `0`.
+--- Returns `number` (number): Normally distributed random number with variance (stddev)² and the specified mean.
+--- See: https://love2d.org/wiki/love.math.randomNormal
+---@field randomNormal (fun(stddev?: number, mean?: number): number) Get a normally distributed pseudo random number.
+--- Sets the seed of the random number generator using the specified integer number.
+--- Parameter `seed` (number): The integer number with which you want to seed the randomization.
+--- See: https://love2d.org/wiki/love.math.setRandomSeed
+---@field setRandomSeed (fun(seed: number))|(fun(low: number, high: number)) Sets the seed of the random number generator using the specified integer number.
+--- Sets the current state of the random number generator.
+--- Parameter `state` (string): The new state of the random number generator, represented as a string.
+--- See: https://love2d.org/wiki/love.math.setRandomState
+---@field setRandomState (fun(state: string)) Sets the current state of the random number generator.
+--- Decomposes a simple convex or concave polygon into triangles.
+--- Parameter `polygon` (table): Polygon to triangulate.
+--- Returns `triangles` (table): List of triangles the polygon is composed of, in the form of {{x1, y1, x2, y2, x3, y3}, {x1, y1, x2, y2, x3, y3}, ...}.
+--- See: https://love2d.org/wiki/love.math.triangulate
+---@field triangulate (fun(polygon: table): table)|(fun(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): table) Decomposes a simple convex or concave polygon into triangles.
+
+--- Provides an interface to the user's mouse.
+--- See: https://love2d.org/wiki/love.mouse
+---@class love.mouse
+--- Gets the current Cursor.
+--- Returns `cursor` (love.Cursor): The current cursor, or nil if no cursor is set.
+--- See: https://love2d.org/wiki/love.mouse.getCursor
+---@field getCursor (fun(): love.Cursor) Gets the current Cursor.
+--- Returns the current position of the mouse.
+--- Returns `x` (number): The position of the mouse along the x-axis.
+--- Returns `y` (number): The position of the mouse along the y-axis.
+--- Example: `local x, y = love.mouse.getPosition()`
+--- See: https://love2d.org/wiki/love.mouse.getPosition
+---@field getPosition (fun(): number, number) Returns the current position of the mouse.
+--- Gets whether relative mode is enabled for the mouse.
+--- Returns `enabled` (boolean): True if relative mode is enabled, false if it's disabled.
+--- See: https://love2d.org/wiki/love.mouse.getRelativeMode
+---@field getRelativeMode (fun(): boolean) Gets whether relative mode is enabled for the mouse.
+--- Gets a Cursor object representing a system-native hardware cursor.
+--- Parameter `ctype` (love.CursorType): The type of system cursor to get.
+--- Returns `cursor` (love.Cursor): The Cursor object representing the system cursor type.
+--- See: https://love2d.org/wiki/love.mouse.getSystemCursor
+---@field getSystemCursor (fun(ctype: love.CursorType): love.Cursor) Gets a Cursor object representing a system-native hardware cursor.
+--- Returns the current x-position of the mouse.
+--- Returns `x` (number): The position of the mouse along the x-axis.
+--- See: https://love2d.org/wiki/love.mouse.getX
+---@field getX (fun(): number) Returns the current x-position of the mouse.
+--- Returns the current y-position of the mouse.
+--- Returns `y` (number): The position of the mouse along the y-axis.
+--- See: https://love2d.org/wiki/love.mouse.getY
+---@field getY (fun(): number) Returns the current y-position of the mouse.
+--- Gets whether cursor functionality is supported.
+--- Returns `supported` (boolean): Whether the system has cursor functionality.
+--- See: https://love2d.org/wiki/love.mouse.isCursorSupported
+---@field isCursorSupported (fun(): boolean) Gets whether cursor functionality is supported.
+--- Checks whether a certain mouse button is down.
+--- Parameter `button` (number): The index of a button to check.
+--- Parameter `...` (number): Additional button numbers to check.
+--- Returns `down` (boolean): True if any specified button is down.
+--- See: https://love2d.org/wiki/love.mouse.isDown
+---@field isDown (fun(button: number, ...: number): boolean) Checks whether a certain mouse button is down.
+--- Checks if the mouse is grabbed.
+--- Returns `grabbed` (boolean): True if the cursor is grabbed, false if it is not.
+--- See: https://love2d.org/wiki/love.mouse.isGrabbed
+---@field isGrabbed (fun(): boolean) Checks if the mouse is grabbed.
+--- Checks if the cursor is visible.
+--- Returns `visible` (boolean): True if the cursor to visible, false if the cursor is hidden.
+--- See: https://love2d.org/wiki/love.mouse.isVisible
+---@field isVisible (fun(): boolean) Checks if the cursor is visible.
+--- Creates a new hardware Cursor object from an image file or ImageData.
+--- Parameter `imageData` (love.ImageData): The ImageData to use for the new Cursor.
+--- Parameter `hotx` (number): The x-coordinate in the ImageData of the cursor's hot spot. Default: `0`.
+--- Parameter `hoty` (number): The y-coordinate in the ImageData of the cursor's hot spot. Default: `0`.
+--- Returns `cursor` (love.Cursor): The new Cursor object.
+--- See: https://love2d.org/wiki/love.mouse.newCursor
+---@field newCursor (fun(imageData: love.ImageData, hotx?: number, hoty?: number): love.Cursor)|(fun(filename: string, hotx?: number, hoty?: number): love.Cursor)|(fun(fileData: love.FileData, hotx?: number, hoty?: number): love.Cursor) Creates a new hardware Cursor object from an image file or ImageData.
+--- Sets the current mouse cursor.
+--- Parameter `cursor` (love.Cursor): The Cursor object to use as the current mouse cursor.
+--- See: https://love2d.org/wiki/love.mouse.setCursor
+---@field setCursor (fun(cursor: love.Cursor))|(fun()) Sets the current mouse cursor.
+--- Grabs the mouse and confines it to the window.
+--- Parameter `grab` (boolean): True to confine the mouse, false to let it leave the window.
+--- See: https://love2d.org/wiki/love.mouse.setGrabbed
+---@field setGrabbed (fun(grab: boolean)) Grabs the mouse and confines it to the window.
+--- Sets the current position of the mouse.
+--- Parameter `x` (number): The new position of the mouse along the x-axis.
+--- Parameter `y` (number): The new position of the mouse along the y-axis.
+--- See: https://love2d.org/wiki/love.mouse.setPosition
+---@field setPosition (fun(x: number, y: number)) Sets the current position of the mouse.
+--- Sets whether relative mode is enabled for the mouse.
+--- Parameter `enable` (boolean): True to enable relative mode, false to disable it.
+--- See: https://love2d.org/wiki/love.mouse.setRelativeMode
+---@field setRelativeMode (fun(enable: boolean)) Sets whether relative mode is enabled for the mouse.
+--- Sets the current visibility of the cursor.
+--- Parameter `visible` (boolean): True to set the cursor to visible, false to hide the cursor.
+--- See: https://love2d.org/wiki/love.mouse.setVisible
+---@field setVisible (fun(visible: boolean)) Sets the current visibility of the cursor.
+--- Sets the current X position of the mouse.
+--- Parameter `x` (number): The new position of the mouse along the x-axis.
+--- See: https://love2d.org/wiki/love.mouse.setX
+---@field setX (fun(x: number)) Sets the current X position of the mouse.
+--- Sets the current Y position of the mouse.
+--- Parameter `y` (number): The new position of the mouse along the y-axis.
+--- See: https://love2d.org/wiki/love.mouse.setY
+---@field setY (fun(y: number)) Sets the current Y position of the mouse.
+
+--- Can simulate 2D rigid body physics in a realistic manner.
+--- See: https://love2d.org/wiki/love.physics
+---@class love.physics
+--- Returns the two closest points between two fixtures and their distance.
+--- Parameter `fixture1` (love.Fixture): The first fixture.
+--- Parameter `fixture2` (love.Fixture): The second fixture.
+--- Returns `distance` (number): The distance of the two points.
+--- Returns `x1` (number): The x-coordinate of the first point.
+--- Returns `y1` (number): The y-coordinate of the first point.
+--- Returns `x2` (number): The x-coordinate of the second point.
+--- Returns `y2` (number): The y-coordinate of the second point.
+--- See: https://love2d.org/wiki/love.physics.getDistance
+---@field getDistance (fun(fixture1: love.Fixture, fixture2: love.Fixture): number, number, number, number, number) Returns the two closest points between two fixtures and their distance.
+--- Returns the meter scale factor.
+--- Returns `scale` (number): The scale factor as an integer.
+--- See: https://love2d.org/wiki/love.physics.getMeter
+---@field getMeter (fun(): number) Returns the meter scale factor.
+--- Creates a new body.
+--- Parameter `world` (love.World): The world to create the body in.
+--- Parameter `x` (number): The x position of the body. Default: `0`.
+--- Parameter `y` (number): The y position of the body. Default: `0`.
+--- Parameter `type` (love.BodyType): The type of the body. Default: `'static'`.
+--- Returns `body` (love.Body): A new body.
+--- See: https://love2d.org/wiki/love.physics.newBody
+---@field newBody (fun(world: love.World, x?: number, y?: number, type?: love.BodyType): love.Body) Creates a new body.
+--- Creates a new ChainShape.
+--- Parameter `loop` (boolean): If the chain should loop back to the first point.
+--- Parameter `x1` (number): The x position of the first point.
+--- Parameter `y1` (number): The y position of the first point.
+--- Parameter `x2` (number): The x position of the second point.
+--- Parameter `y2` (number): The y position of the second point.
+--- Parameter `...` (number): Additional point positions.
+--- Returns `shape` (love.ChainShape): The new shape.
+--- See: https://love2d.org/wiki/love.physics.newChainShape
+---@field newChainShape (fun(loop: boolean, x1: number, y1: number, x2: number, y2: number, ...: number): love.ChainShape)|(fun(loop: boolean, points: table): love.ChainShape) Creates a new ChainShape.
+--- Creates a new CircleShape.
+--- Parameter `radius` (number): The radius of the circle.
+--- Returns `shape` (love.CircleShape): The new shape.
+--- See: https://love2d.org/wiki/love.physics.newCircleShape
+---@field newCircleShape (fun(radius: number): love.CircleShape)|(fun(x: number, y: number, radius: number): love.CircleShape) Creates a new CircleShape.
+--- Creates a DistanceJoint between two bodies.
+--- Parameter `body1` (love.Body): The first body to attach to the joint.
+--- Parameter `body2` (love.Body): The second body to attach to the joint.
+--- Parameter `x1` (number): The x position of the first anchor point (world space).
+--- Parameter `y1` (number): The y position of the first anchor point (world space).
+--- Parameter `x2` (number): The x position of the second anchor point (world space).
+--- Parameter `y2` (number): The y position of the second anchor point (world space).
+--- Parameter `collideConnected` (boolean): Specifies whether the two bodies should collide with each other. Default: `false`.
+--- Returns `joint` (love.DistanceJoint): The new distance joint.
+--- See: https://love2d.org/wiki/love.physics.newDistanceJoint
+---@field newDistanceJoint (fun(body1: love.Body, body2: love.Body, x1: number, y1: number, x2: number, y2: number, collideConnected?: boolean): love.DistanceJoint) Creates a DistanceJoint between two bodies.
+--- Creates a new EdgeShape.
+--- Parameter `x1` (number): The x position of the first point.
+--- Parameter `y1` (number): The y position of the first point.
+--- Parameter `x2` (number): The x position of the second point.
+--- Parameter `y2` (number): The y position of the second point.
+--- Returns `shape` (love.EdgeShape): The new shape.
+--- See: https://love2d.org/wiki/love.physics.newEdgeShape
+---@field newEdgeShape (fun(x1: number, y1: number, x2: number, y2: number): love.EdgeShape) Creates a new EdgeShape.
+--- Creates and attaches a Fixture to a body.
+--- Parameter `body` (love.Body): The body which gets the fixture attached.
+--- Parameter `shape` (love.Shape): The shape to be copied to the fixture.
+--- Parameter `density` (number): The density of the fixture. Default: `1`.
+--- Returns `fixture` (love.Fixture): The new fixture.
+--- See: https://love2d.org/wiki/love.physics.newFixture
+---@field newFixture (fun(body: love.Body, shape: love.Shape, density?: number): love.Fixture) Creates and attaches a Fixture to a body.
+--- Create a friction joint between two bodies.
+--- Parameter `body1` (love.Body): The first body to attach to the joint.
+--- Parameter `body2` (love.Body): The second body to attach to the joint.
+--- Parameter `x` (number): The x position of the anchor point.
+--- Parameter `y` (number): The y position of the anchor point.
+--- Parameter `collideConnected` (boolean): Specifies whether the two bodies should collide with each other. Default: `false`.
+--- Returns `joint` (love.FrictionJoint): The new FrictionJoint.
+--- See: https://love2d.org/wiki/love.physics.newFrictionJoint
+---@field newFrictionJoint (fun(body1: love.Body, body2: love.Body, x: number, y: number, collideConnected?: boolean): love.FrictionJoint)|(fun(body1: love.Body, body2: love.Body, x1: number, y1: number, x2: number, y2: number, collideConnected?: boolean): love.FrictionJoint) Create a friction joint between two bodies.
+--- Create a GearJoint connecting two Joints.
+--- Parameter `joint1` (love.Joint): The first joint to connect with a gear joint.
+--- Parameter `joint2` (love.Joint): The second joint to connect with a gear joint.
+--- Parameter `ratio` (number): The gear ratio. Default: `1`.
+--- Parameter `collideConnected` (boolean): Specifies whether the two bodies should collide with each other. Default: `false`.
+--- Returns `joint` (love.GearJoint): The new gear joint.
+--- See: https://love2d.org/wiki/love.physics.newGearJoint
+---@field newGearJoint (fun(joint1: love.Joint, joint2: love.Joint, ratio?: number, collideConnected?: boolean): love.GearJoint) Create a GearJoint connecting two Joints.
+--- Creates a joint between two bodies which controls the relative motion between them.
+--- Parameter `body1` (love.Body): The first body to attach to the joint.
+--- Parameter `body2` (love.Body): The second body to attach to the joint.
+--- Parameter `correctionFactor` (number): The joint's initial position correction factor, in the range of 1. Default: `0.3`.
+--- Returns `joint` (love.MotorJoint): The new MotorJoint.
+--- See: https://love2d.org/wiki/love.physics.newMotorJoint
+---@field newMotorJoint (fun(body1: love.Body, body2: love.Body, correctionFactor?: number): love.MotorJoint)|(fun(body1: love.Body, body2: love.Body, correctionFactor?: number, collideConnected?: boolean): love.MotorJoint) Creates a joint between two bodies which controls the relative motion between them.
+--- Create a joint between a body and the mouse.
+--- Parameter `body` (love.Body): The body to attach to the mouse.
+--- Parameter `x` (number): The x position of the connecting point.
+--- Parameter `y` (number): The y position of the connecting point.
+--- Returns `joint` (love.MouseJoint): The new mouse joint.
+--- See: https://love2d.org/wiki/love.physics.newMouseJoint
+---@field newMouseJoint (fun(body: love.Body, x: number, y: number): love.MouseJoint) Create a joint between a body and the mouse.
+--- Creates a new PolygonShape.
+--- Parameter `x1` (number): The x position of the first point.
+--- Parameter `y1` (number): The y position of the first point.
+--- Parameter `x2` (number): The x position of the second point.
+--- Parameter `y2` (number): The y position of the second point.
+--- Parameter `x3` (number): The x position of the third point.
+--- Parameter `y3` (number): The y position of the third point.
+--- Parameter `...` (number): You can continue passing more point positions to create the PolygonShape.
+--- Returns `shape` (love.PolygonShape): A new PolygonShape.
+--- See: https://love2d.org/wiki/love.physics.newPolygonShape
+---@field newPolygonShape (fun(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, ...: number): love.PolygonShape)|(fun(vertices: table): love.PolygonShape) Creates a new PolygonShape.
+--- Creates a PrismaticJoint between two bodies.
+--- Parameter `body1` (love.Body): The first body to connect with a prismatic joint.
+--- Parameter `body2` (love.Body): The second body to connect with a prismatic joint.
+--- Parameter `x` (number): The x coordinate of the anchor point.
+--- Parameter `y` (number): The y coordinate of the anchor point.
+--- Parameter `ax` (number): The x coordinate of the axis vector.
+--- Parameter `ay` (number): The y coordinate of the axis vector.
+--- Parameter `collideConnected` (boolean): Specifies whether the two bodies should collide with each other. Default: `false`.
+--- Returns `joint` (love.PrismaticJoint): The new prismatic joint.
+--- See: https://love2d.org/wiki/love.physics.newPrismaticJoint
+---@field newPrismaticJoint (fun(body1: love.Body, body2: love.Body, x: number, y: number, ax: number, ay: number, collideConnected?: boolean): love.PrismaticJoint)|(fun(body1: love.Body, body2: love.Body, x1: number, y1: number, x2: number, y2: number, ax: number, ay: number, collideConnected?: boolean): love.PrismaticJoint)|(fun(body1: love.Body, body2: love.Body, x1: number, y1: number, x2: number, y2: number, ax: number, ay: number, collideConnected?: boolean, referenceAngle?: number): love.PrismaticJoint) Creates a PrismaticJoint between two bodies.
+--- Creates a PulleyJoint to join two bodies to each other and the ground.
+--- Parameter `body1` (love.Body): The first body to connect with a pulley joint.
+--- Parameter `body2` (love.Body): The second body to connect with a pulley joint.
+--- Parameter `gx1` (number): The x coordinate of the first body's ground anchor.
+--- Parameter `gy1` (number): The y coordinate of the first body's ground anchor.
+--- Parameter `gx2` (number): The x coordinate of the second body's ground anchor.
+--- Parameter `gy2` (number): The y coordinate of the second body's ground anchor.
+--- Parameter `x1` (number): The x coordinate of the pulley joint anchor in the first body.
+--- Parameter `y1` (number): The y coordinate of the pulley joint anchor in the first body.
+--- Parameter `x2` (number): The x coordinate of the pulley joint anchor in the second body.
+--- Parameter `y2` (number): The y coordinate of the pulley joint anchor in the second body.
+--- Parameter `ratio` (number): The joint ratio. Default: `1`.
+--- Parameter `collideConnected` (boolean): Specifies whether the two bodies should collide with each other. Default: `true`.
+--- Returns `joint` (love.PulleyJoint): The new pulley joint.
+--- See: https://love2d.org/wiki/love.physics.newPulleyJoint
+---@field newPulleyJoint (fun(body1: love.Body, body2: love.Body, gx1: number, gy1: number, gx2: number, gy2: number, x1: number, y1: number, x2: number, y2: number, ratio?: number, collideConnected?: boolean): love.PulleyJoint) Creates a PulleyJoint to join two bodies to each other and the ground.
+--- Shorthand for creating rectangular PolygonShapes.
+--- Parameter `width` (number): The width of the rectangle.
+--- Parameter `height` (number): The height of the rectangle.
+--- Returns `shape` (love.PolygonShape): A new PolygonShape.
+--- See: https://love2d.org/wiki/love.physics.newRectangleShape
+---@field newRectangleShape (fun(width: number, height: number): love.PolygonShape)|(fun(x: number, y: number, width: number, height: number, angle?: number): love.PolygonShape) Shorthand for creating rectangular PolygonShapes.
+--- Creates a pivot joint between two bodies.
+--- Parameter `body1` (love.Body): The first body.
+--- Parameter `body2` (love.Body): The second body.
+--- Parameter `x` (number): The x position of the connecting point.
+--- Parameter `y` (number): The y position of the connecting point.
+--- Parameter `collideConnected` (boolean): Specifies whether the two bodies should collide with each other. Default: `false`.
+--- Returns `joint` (love.RevoluteJoint): The new revolute joint.
+--- See: https://love2d.org/wiki/love.physics.newRevoluteJoint
+---@field newRevoluteJoint (fun(body1: love.Body, body2: love.Body, x: number, y: number, collideConnected?: boolean): love.RevoluteJoint)|(fun(body1: love.Body, body2: love.Body, x1: number, y1: number, x2: number, y2: number, collideConnected?: boolean, referenceAngle?: number): love.RevoluteJoint) Creates a pivot joint between two bodies.
+--- Creates a joint between two bodies.
+--- Parameter `body1` (love.Body): The first body to attach to the joint.
+--- Parameter `body2` (love.Body): The second body to attach to the joint.
+--- Parameter `x1` (number): The x position of the first anchor point.
+--- Parameter `y1` (number): The y position of the first anchor point.
+--- Parameter `x2` (number): The x position of the second anchor point.
+--- Parameter `y2` (number): The y position of the second anchor point.
+--- Parameter `maxLength` (number): The maximum distance for the bodies.
+--- Parameter `collideConnected` (boolean): Specifies whether the two bodies should collide with each other. Default: `false`.
+--- Returns `joint` (love.RopeJoint): The new RopeJoint.
+--- See: https://love2d.org/wiki/love.physics.newRopeJoint
+---@field newRopeJoint (fun(body1: love.Body, body2: love.Body, x1: number, y1: number, x2: number, y2: number, maxLength: number, collideConnected?: boolean): love.RopeJoint) Creates a joint between two bodies.
+--- Creates a constraint joint between two bodies.
+--- Parameter `body1` (love.Body): The first body to attach to the joint.
+--- Parameter `body2` (love.Body): The second body to attach to the joint.
+--- Parameter `x` (number): The x position of the anchor point (world space).
+--- Parameter `y` (number): The y position of the anchor point (world space).
+--- Parameter `collideConnected` (boolean): Specifies whether the two bodies should collide with each other. Default: `false`.
+--- Returns `joint` (love.WeldJoint): The new WeldJoint.
+--- See: https://love2d.org/wiki/love.physics.newWeldJoint
+---@field newWeldJoint (fun(body1: love.Body, body2: love.Body, x: number, y: number, collideConnected?: boolean): love.WeldJoint)|(fun(body1: love.Body, body2: love.Body, x1: number, y1: number, x2: number, y2: number, collideConnected?: boolean): love.WeldJoint)|(fun(body1: love.Body, body2: love.Body, x1: number, y1: number, x2: number, y2: number, collideConnected?: boolean, referenceAngle?: number): love.WeldJoint) Creates a constraint joint between two bodies.
+--- Creates a wheel joint.
+--- Parameter `body1` (love.Body): The first body.
+--- Parameter `body2` (love.Body): The second body.
+--- Parameter `x` (number): The x position of the anchor point.
+--- Parameter `y` (number): The y position of the anchor point.
+--- Parameter `ax` (number): The x position of the axis unit vector.
+--- Parameter `ay` (number): The y position of the axis unit vector.
+--- Parameter `collideConnected` (boolean): Specifies whether the two bodies should collide with each other. Default: `false`.
+--- Returns `joint` (love.WheelJoint): The new WheelJoint.
+--- See: https://love2d.org/wiki/love.physics.newWheelJoint
+---@field newWheelJoint (fun(body1: love.Body, body2: love.Body, x: number, y: number, ax: number, ay: number, collideConnected?: boolean): love.WheelJoint)|(fun(body1: love.Body, body2: love.Body, x1: number, y1: number, x2: number, y2: number, ax: number, ay: number, collideConnected?: boolean): love.WheelJoint) Creates a wheel joint.
+--- Creates a new World.
+--- Parameter `xg` (number): The x component of gravity. Default: `0`.
+--- Parameter `yg` (number): The y component of gravity. Default: `0`.
+--- Parameter `sleep` (boolean): Whether the bodies in this world are allowed to sleep. Default: `true`.
+--- Returns `world` (love.World): A brave new World.
+--- Example: `local world = love.physics.newWorld(0, 9.81 * 64, true)`
+--- Tip: Step the world from love.update with world:update(dt).
+--- See: https://love2d.org/wiki/love.physics.newWorld
+---@field newWorld (fun(xg?: number, yg?: number, sleep?: boolean): love.World) Creates a new World.
+--- Sets the pixels to meter scale factor.
+--- Parameter `scale` (number): The scale factor as an integer.
+--- See: https://love2d.org/wiki/love.physics.setMeter
+---@field setMeter (fun(scale: number)) Sets the pixels to meter scale factor.
+
+--- This module is responsible for decoding sound files.
+--- See: https://love2d.org/wiki/love.sound
+---@class love.sound
+--- Attempts to find a decoder for the encoded sound data in the specified file.
+--- Parameter `file` (love.File): The file with encoded sound data.
+--- Parameter `buffer` (number): The size of each decoded chunk, in bytes. Default: `2048`.
+--- Returns `decoder` (love.Decoder): A new Decoder object.
+--- See: https://love2d.org/wiki/love.sound.newDecoder
+---@field newDecoder (fun(file: love.File, buffer?: number): love.Decoder)|(fun(filename: string, buffer?: number): love.Decoder) Attempts to find a decoder for the encoded sound data in the specified file.
+--- Creates new SoundData from a filepath, File, or Decoder.
+--- Parameter `filename` (string): The file name of the file to load.
+--- Returns `soundData` (love.SoundData): A new SoundData object.
+--- See: https://love2d.org/wiki/love.sound.newSoundData
+---@field newSoundData (fun(filename: string): love.SoundData)|(fun(file: love.File): love.SoundData)|(fun(decoder: love.Decoder): love.SoundData)|(fun(samples: number, rate?: number, bits?: number, channels?: number): love.SoundData) Creates new SoundData from a filepath, File, or Decoder.
+
+--- Provides access to information about the user's system.
+--- See: https://love2d.org/wiki/love.system
+---@class love.system
+--- Gets text from the clipboard.
+--- Returns `text` (string): The text currently held in the system's clipboard.
+--- See: https://love2d.org/wiki/love.system.getClipboardText
+---@field getClipboardText (fun(): string) Gets text from the clipboard.
+--- Gets the current operating system.
+--- Returns `osString` (string): The current operating system.
+--- See: https://love2d.org/wiki/love.system.getOS
+---@field getOS (fun(): string) Gets the current operating system.
+--- Gets information about the system's power supply.
+--- Returns `state` (love.PowerState): The basic state of the power supply.
+--- Returns `percent` (number): Percentage of battery life left, between 0 and 100.
+--- Returns `seconds` (number): Seconds of battery life left.
+--- See: https://love2d.org/wiki/love.system.getPowerInfo
+---@field getPowerInfo (fun(): love.PowerState, number, number) Gets information about the system's power supply.
+--- Gets the amount of logical processor in the system.
+--- Returns `processorCount` (number): Amount of logical processors.
+--- See: https://love2d.org/wiki/love.system.getProcessorCount
+---@field getProcessorCount (fun(): number) Gets the amount of logical processor in the system.
+--- Gets whether another application on the system is playing music in the background.
+--- Returns `backgroundmusic` (boolean): True if the user is playing music in the background via another app, false otherwise.
+--- See: https://love2d.org/wiki/love.system.hasBackgroundMusic
+---@field hasBackgroundMusic (fun(): boolean) Gets whether another application on the system is playing music in the background.
+--- Opens a URL with the user's web or file browser.
+--- Parameter `url` (string): The URL to open.
+--- Returns `success` (boolean): Whether the URL was opened successfully.
+--- See: https://love2d.org/wiki/love.system.openURL
+---@field openURL (fun(url: string): boolean) Opens a URL with the user's web or file browser.
+--- Puts text in the clipboard.
+--- Parameter `text` (string): The new text to hold in the system's clipboard.
+--- See: https://love2d.org/wiki/love.system.setClipboardText
+---@field setClipboardText (fun(text: string)) Puts text in the clipboard.
+--- Causes the device to vibrate, if possible.
+--- Parameter `seconds` (number): The duration to vibrate for. Default: `0.5`.
+--- See: https://love2d.org/wiki/love.system.vibrate
+---@field vibrate (fun(seconds?: number)) Causes the device to vibrate, if possible.
+
+--- Allows you to work with threads.
+--- See: https://love2d.org/wiki/love.thread
+---@class love.thread
+--- Creates or retrieves a named thread channel.
+--- Parameter `name` (string): The name of the channel you want to create or retrieve.
+--- Returns `channel` (love.Channel): The Channel object associated with the name.
+--- See: https://love2d.org/wiki/love.thread.getChannel
+---@field getChannel (fun(name: string): love.Channel) Creates or retrieves a named thread channel.
+--- Create a new unnamed thread channel.
+--- Returns `channel` (love.Channel): The new Channel object.
+--- See: https://love2d.org/wiki/love.thread.newChannel
+---@field newChannel (fun(): love.Channel) Create a new unnamed thread channel.
+--- Creates a new Thread from a filename, string or FileData object containing Lua code.
+--- Parameter `filename` (string): The name of the Lua file to use as the source.
+--- Returns `thread` (love.Thread): A new Thread that has yet to be started.
+--- See: https://love2d.org/wiki/love.thread.newThread
+---@field newThread (fun(filename: string): love.Thread)|(fun(fileData: love.FileData): love.Thread)|(fun(codestring: string): love.Thread) Creates a new Thread from a filename, string or FileData object containing Lua code.
+
+--- Provides an interface to the user's clock.
+--- See: https://love2d.org/wiki/love.timer
+---@class love.timer
+--- Returns the average delta time (seconds per frame) over the last second.
+--- Returns `delta` (number): The average delta time over the last second.
+--- See: https://love2d.org/wiki/love.timer.getAverageDelta
+---@field getAverageDelta (fun(): number) Returns the average delta time (seconds per frame) over the last second.
+--- Returns the time between the last two frames.
+--- Returns `dt` (number): The time passed (in seconds).
+--- Example: `local dt = love.timer.getDelta()`
+--- See: https://love2d.org/wiki/love.timer.getDelta
+---@field getDelta (fun(): number) Returns the time between the last two frames.
+--- Returns the current frames per second.
+--- Returns `fps` (number): The current FPS.
+--- See: https://love2d.org/wiki/love.timer.getFPS
+---@field getFPS (fun(): number) Returns the current frames per second.
+--- Returns the value of a timer with an unspecified starting time.
+--- Returns `time` (number): The time in seconds.
+--- See: https://love2d.org/wiki/love.timer.getTime
+---@field getTime (fun(): number) Returns the value of a timer with an unspecified starting time.
+--- Pauses the current thread for the specified amount of time.
+--- Parameter `s` (number): Seconds to sleep for.
+--- See: https://love2d.org/wiki/love.timer.sleep
+---@field sleep (fun(s: number)) Pauses the current thread for the specified amount of time.
+--- Measures the time between two frames.
+--- Returns `dt` (number): The time passed (in seconds).
+--- See: https://love2d.org/wiki/love.timer.step
+---@field step (fun(): number) Measures the time between two frames.
+
+--- Provides an interface to touch-screen presses.
+--- See: https://love2d.org/wiki/love.touch
+---@class love.touch
+--- Gets the current position of the specified touch-press, in pixels.
+--- Parameter `id` (userdata): The identifier of the touch-press.
+--- Returns `x` (number): The position along the x-axis of the touch-press inside the window, in pixels.
+--- Returns `y` (number): The position along the y-axis of the touch-press inside the window, in pixels.
+--- See: https://love2d.org/wiki/love.touch.getPosition
+---@field getPosition (fun(id: userdata): number, number) Gets the current position of the specified touch-press, in pixels.
+--- Gets the current pressure of the specified touch-press.
+--- Parameter `id` (userdata): The identifier of the touch-press.
+--- Returns `pressure` (number): The pressure of the touch-press.
+--- See: https://love2d.org/wiki/love.touch.getPressure
+---@field getPressure (fun(id: userdata): number) Gets the current pressure of the specified touch-press.
+--- Gets a list of all active touch-presses.
+--- Returns `touches` (table): A list of active touch-press id values, which can be used with love.touch.getPosition.
+--- See: https://love2d.org/wiki/love.touch.getTouches
+---@field getTouches (fun(): table) Gets a list of all active touch-presses.
+
+--- This module is responsible for decoding, controlling, and streaming video files.
+--- See: https://love2d.org/wiki/love.video
+---@class love.video
+--- Creates a new VideoStream.
+--- Parameter `filename` (string): The file path to the Ogg Theora video file.
+--- Returns `videostream` (love.VideoStream): A new VideoStream.
+--- See: https://love2d.org/wiki/love.video.newVideoStream
+---@field newVideoStream (fun(filename: string): love.VideoStream)|(fun(file: love.File): love.VideoStream) Creates a new VideoStream.
+
+--- Provides an interface for modifying and retrieving information about the program's window.
+--- See: https://love2d.org/wiki/love.window
+---@class love.window
+--- Closes the window.
+--- See: https://love2d.org/wiki/love.window.close
+---@field close (fun()) Closes the window.
+--- Converts a number from pixels to density-independent units.
+--- Parameter `pixelvalue` (number): A number in pixels to convert to density-independent units.
+--- Returns `value` (number): The converted number, in density-independent units.
+--- See: https://love2d.org/wiki/love.window.fromPixels
+---@field fromPixels (fun(pixelvalue: number): number)|(fun(px: number, py: number): number, number) Converts a number from pixels to density-independent units.
+--- Gets the DPI scale factor associated with the window.
+--- Returns `scale` (number): The pixel scale factor associated with the window.
+--- See: https://love2d.org/wiki/love.window.getDPIScale
+---@field getDPIScale (fun(): number) Gets the DPI scale factor associated with the window.
+--- Gets the width and height of the desktop.
+--- Parameter `displayindex` (number): The index of the display, if multiple monitors are available. Default: `1`.
+--- Returns `width` (number): The width of the desktop.
+--- Returns `height` (number): The height of the desktop.
+--- See: https://love2d.org/wiki/love.window.getDesktopDimensions
+---@field getDesktopDimensions (fun(displayindex?: number): number, number) Gets the width and height of the desktop.
+--- Gets the number of connected monitors.
+--- Returns `count` (number): The number of currently connected displays.
+--- See: https://love2d.org/wiki/love.window.getDisplayCount
+---@field getDisplayCount (fun(): number) Gets the number of connected monitors.
+--- Gets the name of a display.
+--- Parameter `displayindex` (number): The index of the display to get the name of. Default: `1`.
+--- Returns `name` (string): The name of the specified display.
+--- See: https://love2d.org/wiki/love.window.getDisplayName
+---@field getDisplayName (fun(displayindex?: number): string) Gets the name of a display.
+--- Gets current device display orientation.
+--- Parameter `displayindex` (number): Display index to get its display orientation, or nil for default display index. Default: `nil`.
+--- Returns `orientation` (love.DisplayOrientation): Current device display orientation.
+--- See: https://love2d.org/wiki/love.window.getDisplayOrientation
+---@field getDisplayOrientation (fun(displayindex?: number): love.DisplayOrientation) Gets current device display orientation.
+--- Gets whether the window is fullscreen.
+--- Returns `fullscreen` (boolean): True if the window is fullscreen, false otherwise.
+--- Returns `fstype` (love.FullscreenType): The type of fullscreen mode used.
+--- See: https://love2d.org/wiki/love.window.getFullscreen
+---@field getFullscreen (fun(): boolean, love.FullscreenType) Gets whether the window is fullscreen.
+--- Gets a list of supported fullscreen modes.
+--- Parameter `displayindex` (number): The index of the display, if multiple monitors are available. Default: `1`.
+--- Returns `modes` (love.window_getFullscreenModes_modesResult): A table of width/height pairs.
+--- See: https://love2d.org/wiki/love.window.getFullscreenModes
+---@field getFullscreenModes (fun(displayindex?: number): love.window_getFullscreenModes_modesResult) Gets a list of supported fullscreen modes.
+--- Gets the window icon.
+--- Returns `imagedata` (love.ImageData): The window icon imagedata, or nil if no icon has been set with love.window.setIcon.
+--- See: https://love2d.org/wiki/love.window.getIcon
+---@field getIcon (fun(): love.ImageData) Gets the window icon.
+--- Gets the display mode and properties of the window.
+--- Returns `width` (number): Window width.
+--- Returns `height` (number): Window height.
+--- Returns `flags` (love.window_getMode_flagsResult): Table with the window properties:
+--- See: https://love2d.org/wiki/love.window.getMode
+---@field getMode (fun(): number, number, love.window_getMode_flagsResult) Gets the display mode and properties of the window.
+--- Gets the position of the window on the screen.
+--- Returns `x` (number): The x-coordinate of the window's position.
+--- Returns `y` (number): The y-coordinate of the window's position.
+--- Returns `displayindex` (number): The index of the display that the window is in.
+--- See: https://love2d.org/wiki/love.window.getPosition
+---@field getPosition (fun(): number, number, number) Gets the position of the window on the screen.
+--- Gets area inside the window which is known to be unobstructed by a system title bar, the iPhone X notch, etc.
+--- Returns `x` (number): Starting position of safe area (x-axis).
+--- Returns `y` (number): Starting position of safe area (y-axis).
+--- Returns `w` (number): Width of safe area.
+--- Returns `h` (number): Height of safe area.
+--- See: https://love2d.org/wiki/love.window.getSafeArea
+---@field getSafeArea (fun(): number, number, number, number) Gets area inside the window which is known to be unobstructed by a system title bar, the iPhone X notch, etc.
+--- Gets the window title.
+--- Returns `title` (string): The current window title.
+--- See: https://love2d.org/wiki/love.window.getTitle
+---@field getTitle (fun(): string) Gets the window title.
+--- Gets current vertical synchronization (vsync).
+--- Returns `vsync` (number): Current vsync status.
+--- See: https://love2d.org/wiki/love.window.getVSync
+---@field getVSync (fun(): number) Gets current vertical synchronization (vsync).
+--- Checks if the game window has keyboard focus.
+--- Returns `focus` (boolean): True if the window has the focus or false if not.
+--- See: https://love2d.org/wiki/love.window.hasFocus
+---@field hasFocus (fun(): boolean) Checks if the game window has keyboard focus.
+--- Checks if the game window has mouse focus.
+--- Returns `focus` (boolean): True if the window has mouse focus or false if not.
+--- See: https://love2d.org/wiki/love.window.hasMouseFocus
+---@field hasMouseFocus (fun(): boolean) Checks if the game window has mouse focus.
+--- Gets whether the display is allowed to sleep while the program is running.
+--- Returns `enabled` (boolean): True if system display sleep is enabled / allowed, false otherwise.
+--- See: https://love2d.org/wiki/love.window.isDisplaySleepEnabled
+---@field isDisplaySleepEnabled (fun(): boolean) Gets whether the display is allowed to sleep while the program is running.
+--- Gets whether the Window is currently maximized.
+--- Returns `maximized` (boolean): True if the window is currently maximized in windowed mode, false otherwise.
+--- See: https://love2d.org/wiki/love.window.isMaximized
+---@field isMaximized (fun(): boolean) Gets whether the Window is currently maximized.
+--- Gets whether the Window is currently minimized.
+--- Returns `minimized` (boolean): True if the window is currently minimized, false otherwise.
+--- See: https://love2d.org/wiki/love.window.isMinimized
+---@field isMinimized (fun(): boolean) Gets whether the Window is currently minimized.
+--- Checks if the window is open.
+--- Returns `open` (boolean): True if the window is open, false otherwise.
+--- See: https://love2d.org/wiki/love.window.isOpen
+---@field isOpen (fun(): boolean) Checks if the window is open.
+--- Checks if the game window is visible.
+--- Returns `visible` (boolean): True if the window is visible or false if not.
+--- See: https://love2d.org/wiki/love.window.isVisible
+---@field isVisible (fun(): boolean) Checks if the game window is visible.
+--- Makes the window as large as possible.
+--- See: https://love2d.org/wiki/love.window.maximize
+---@field maximize (fun()) Makes the window as large as possible.
+--- Minimizes the window to the system's task bar / dock.
+--- See: https://love2d.org/wiki/love.window.minimize
+---@field minimize (fun()) Minimizes the window to the system's task bar / dock.
+--- Causes the window to request the attention of the user if it is not in the foreground.
+--- Parameter `continuous` (boolean): Whether to continuously request attention until the window becomes active, or to do it only once. Default: `false`.
+--- See: https://love2d.org/wiki/love.window.requestAttention
+---@field requestAttention (fun(continuous?: boolean)) Causes the window to request the attention of the user if it is not in the foreground.
+--- Restores the size and position of the window if it was minimized or maximized.
+--- See: https://love2d.org/wiki/love.window.restore
+---@field restore (fun()) Restores the size and position of the window if it was minimized or maximized.
+--- Sets whether the display is allowed to sleep while the program is running.
+--- Parameter `enable` (boolean): True to enable system display sleep, false to disable it.
+--- See: https://love2d.org/wiki/love.window.setDisplaySleepEnabled
+---@field setDisplaySleepEnabled (fun(enable: boolean)) Sets whether the display is allowed to sleep while the program is running.
+--- Enters or exits fullscreen.
+--- Parameter `fullscreen` (boolean): Whether to enter or exit fullscreen mode.
+--- Returns `success` (boolean): True if an attempt to enter fullscreen was successful, false otherwise.
+--- See: https://love2d.org/wiki/love.window.setFullscreen
+---@field setFullscreen (fun(fullscreen: boolean): boolean)|(fun(fullscreen: boolean, fstype: love.FullscreenType): boolean) Enters or exits fullscreen.
+--- Sets the window icon until the game is quit.
+--- Parameter `imagedata` (love.ImageData): The window icon image.
+--- Returns `success` (boolean): Whether the icon has been set successfully.
+--- See: https://love2d.org/wiki/love.window.setIcon
+---@field setIcon (fun(imagedata: love.ImageData): boolean) Sets the window icon until the game is quit.
+--- Sets the display mode and properties of the window.
+--- Parameter `width` (number): Display width.
+--- Parameter `height` (number): Display height.
+--- Parameter `flags` (love.window_setMode_flags): The flags table with the options: Default: `nil`.
+--- Returns `success` (boolean): True if successful, false otherwise.
+--- Example: `love.window.setMode(800, 600, { resizable = true })`
+--- See: https://love2d.org/wiki/love.window.setMode
+---@field setMode (fun(width: number, height: number, flags?: love.window_setMode_flags): boolean) Sets the display mode and properties of the window.
+--- Sets the position of the window on the screen.
+--- Parameter `x` (number): The x-coordinate of the window's position.
+--- Parameter `y` (number): The y-coordinate of the window's position.
+--- Parameter `displayindex` (number): The index of the display that the new window position is relative to. Default: `1`.
+--- See: https://love2d.org/wiki/love.window.setPosition
+---@field setPosition (fun(x: number, y: number, displayindex?: number)) Sets the position of the window on the screen.
+--- Sets the window title.
+--- Parameter `title` (string): The new window title.
+--- See: https://love2d.org/wiki/love.window.setTitle
+---@field setTitle (fun(title: string)) Sets the window title.
+--- Sets vertical synchronization mode.
+--- Parameter `vsync` (number): VSync number: 1 to enable, 0 to disable, and -1 for adaptive vsync.
+--- See: https://love2d.org/wiki/love.window.setVSync
+---@field setVSync (fun(vsync: number)) Sets vertical synchronization mode.
+--- Displays a message box dialog above the love window.
+--- Parameter `title` (string): The title of the message box.
+--- Parameter `message` (string): The text inside the message box.
+--- Parameter `type` (love.MessageBoxType): The type of the message box. Default: `'info'`.
+--- Parameter `attachtowindow` (boolean): Whether the message box should be attached to the love window or free-floating. Default: `true`.
+--- Returns `success` (boolean): Whether the message box was successfully displayed.
+--- See: https://love2d.org/wiki/love.window.showMessageBox
+---@field showMessageBox (fun(title: string, message: string, type?: love.MessageBoxType, attachtowindow?: boolean): boolean)|(fun(title: string, message: string, buttonlist: table, type?: love.MessageBoxType, attachtowindow?: boolean): number) Displays a message box dialog above the love window.
+--- Converts a number from density-independent units to pixels.
+--- Parameter `value` (number): A number in density-independent units to convert to pixels.
+--- Returns `pixelvalue` (number): The converted number, in pixels.
+--- See: https://love2d.org/wiki/love.window.toPixels
+---@field toPixels (fun(value: number): number)|(fun(x: number, y: number): number, number) Converts a number from density-independent units to pixels.
+--- Sets the display mode and properties of the window, without modifying unspecified properties.
+--- Parameter `width` (number): Window width.
+--- Parameter `height` (number): Window height.
+--- Parameter `settings` (love.window_updateMode_settings): The settings table with the following optional fields.
+--- Returns `success` (boolean): True if successful, false otherwise.
+--- See: https://love2d.org/wiki/love.window.updateMode
+---@field updateMode (fun(width: number, height: number, settings: love.window_updateMode_settings): boolean) Sets the display mode and properties of the window, without modifying unspecified properties.
+
+--- Main LÖVE namespace. Callbacks are assigned by the game.
+--- See: https://love2d.org/wiki/love
 ---@class love
----@field graphics love.graphics Graphics rendering module
----@field audio love.audio Audio playing and recording module
----@field event love.event Application event handling
----@field filesystem love.filesystem File system I/O module
----@field font love.font Font loading and rasterization module
----@field image love.image Image decoding and manipulation module
----@field keyboard love.keyboard Keyboard input module
----@field math love.math Math, random number and geometry helpers
----@field mouse love.mouse Mouse hardware input module
----@field physics love.physics 2D rigid body physics engine (Box2D)
----@field sound love.sound Sound decoding and raw audio buffer module
----@field system love.system System info and clipboard interaction
----@field thread love.thread Multi-threading module
----@field timer love.timer Delta time and FPS tracking module
----@field touch love.touch Touch screen gesture input module
----@field video love.video Video playback stream module
----@field window love.window Window management and OS display settings
----@field joystick love.joystick Gamepad and joystick input module
----@field data love.data Data hashing, encoding, compression module
----@field load? fun(arg: string[], unfilteredArg: string[]) Game initialization callback
----@field update? fun(dt: number) Game update step callback
----@field draw? fun() Render frame callback
----@field keypressed? fun(key: string, scancode: string, isrepeat: boolean) Key press callback
----@field keyreleased? fun(key: string, scancode: string) Key release callback
----@field mousepressed? fun(x: number, y: number, button: number, isTouch: boolean, presses: number) Mouse press callback
----@field mousereleased? fun(x: number, y: number, button: number, isTouch: boolean, presses: number) Mouse release callback
----@field mousemoved? fun(x: number, y: number, dx: number, dy: number, istouch: boolean) Mouse motion callback
----@field wheelmoved? fun(x: number, y: number) Mouse wheel scroll callback
----@field textinput? fun(text: string) Text input callback
----@field resize? fun(w: number, h: number) Window resize callback
----@field quit? fun(): boolean? Quit event callback
----@field run? fun(): function Main game loop constructor
----@field errorhandler? fun(msg: string): function? Error handler handler callback
+---@field audio love.audio Provides an interface to create noise with the user's speakers.
+---@field data love.data Provides functionality for creating and transforming data.
+---@field event love.event Manages events, like keypresses.
+---@field filesystem love.filesystem Provides an interface to the user's filesystem.
+---@field font love.font Allows you to work with fonts.
+---@field graphics love.graphics The primary responsibility for the love.graphics module is the drawing of lines, shapes, text, Images and other Drawable objects onto the screen.
+---@field image love.image Provides an interface to decode encoded image data.
+---@field joystick love.joystick Provides an interface to the user's joystick.
+---@field keyboard love.keyboard Provides an interface to the user's keyboard.
+---@field math love.math Provides system-independent mathematical functions.
+---@field mouse love.mouse Provides an interface to the user's mouse.
+---@field physics love.physics Can simulate 2D rigid body physics in a realistic manner.
+---@field sound love.sound This module is responsible for decoding sound files.
+---@field system love.system Provides access to information about the user's system.
+---@field thread love.thread Allows you to work with threads.
+---@field timer love.timer Provides an interface to the user's clock.
+---@field touch love.touch Provides an interface to touch-screen presses.
+---@field video love.video This module is responsible for decoding, controlling, and streaming video files.
+---@field window love.window Provides an interface for modifying and retrieving information about the program's window.
+--- Gets the current running version of LÖVE.
+--- Returns `major` (number): The major version of LÖVE, i.e.
+--- Returns `minor` (number): The minor version of LÖVE, i.e.
+--- Returns `revision` (number): The revision version of LÖVE, i.e.
+--- Returns `codename` (string): The codename of the current version, i.e.
+--- See: https://love2d.org/wiki/love.getVersion
+---@field getVersion (fun(): number, number, number, string) Gets the current running version of LÖVE.
+--- Gets whether LÖVE displays warnings when using deprecated functionality.
+--- Returns `enabled` (boolean): Whether deprecation output is enabled.
+--- See: https://love2d.org/wiki/love.hasDeprecationOutput
+---@field hasDeprecationOutput (fun(): boolean) Gets whether LÖVE displays warnings when using deprecated functionality.
+--- Gets whether the given version is compatible with the current running version of LÖVE.
+--- Parameter `version` (string): The version to check (for example '11.3' or '0.10.2').
+--- Returns `compatible` (boolean): Whether the given version is compatible with the current running version of LÖVE.
+--- See: https://love2d.org/wiki/love.isVersionCompatible
+---@field isVersionCompatible (fun(version: string): boolean)|(fun(major: number, minor: number, revision: number): boolean) Gets whether the given version is compatible with the current running version of LÖVE.
+--- Sets whether LÖVE displays warnings when using deprecated functionality.
+--- Parameter `enable` (boolean): Whether to enable or disable deprecation output.
+--- See: https://love2d.org/wiki/love.setDeprecationOutput
+---@field setDeprecationOutput (fun(enable: boolean)) Sets whether LÖVE displays warnings when using deprecated functionality.
+--- If a file called conf.lua is present in your game folder (or .love file), it is run before the LÖVE modules are loaded.
+--- Parameter `t` (love.conf_t): The love.conf function takes one argument: a table filled with all the default values which you can overwrite to your liking.
+--- See: https://love2d.org/wiki/love.conf
+---@field conf? (fun(t: love.conf_t)) If a file called conf.lua is present in your game folder (or .love file), it is run before the LÖVE modules are loaded.
+--- Callback function triggered when a directory is dragged and dropped onto the window.
+--- Parameter `path` (string): The full platform-dependent path to the directory.
+--- See: https://love2d.org/wiki/love.directorydropped
+---@field directorydropped? (fun(path: string)) Callback function triggered when a directory is dragged and dropped onto the window.
+--- Called when the device display orientation changed, for example, user rotated their phone 180 degrees.
+--- Parameter `index` (number): The index of the display that changed orientation.
+--- Parameter `orientation` (love.DisplayOrientation): The new orientation.
+--- See: https://love2d.org/wiki/love.displayrotated
+---@field displayrotated? (fun(index: number, orientation: love.DisplayOrientation)) Called when the device display orientation changed, for example, user rotated their phone 180 degrees.
+--- Callback function used to draw on the screen every frame.
+--- Example: `function love.draw() love.graphics.draw(image, x, y) end`
+--- Tip: Draw each frame here; load images and fonts once in love.load.
+--- See: https://love2d.org/wiki/love.draw
+---@field draw? (fun()) Callback function used to draw on the screen every frame.
+--- The error handler, used to display error messages.
+--- Parameter `msg` (string): The error message.
+--- Returns `mainLoop` (function): Function which handles one frame, including events and rendering, when called.
+--- See: https://love2d.org/wiki/love.errorhandler
+---@field errorhandler? (fun(msg: string): function) The error handler, used to display error messages.
+--- Callback function triggered when a file is dragged and dropped onto the window.
+--- Parameter `file` (love.DroppedFile): The unopened File object representing the file that was dropped.
+--- See: https://love2d.org/wiki/love.filedropped
+---@field filedropped? (fun(file: love.DroppedFile)) Callback function triggered when a file is dragged and dropped onto the window.
+--- Callback function triggered when window receives or loses focus.
+--- Parameter `focus` (boolean): True if the window gains focus, false if it loses focus.
+--- See: https://love2d.org/wiki/love.focus
+---@field focus? (fun(focus: boolean)) Callback function triggered when window receives or loses focus.
+--- Called when a Joystick's virtual gamepad axis is moved.
+--- Parameter `joystick` (love.Joystick): The joystick object.
+--- Parameter `axis` (love.GamepadAxis): The virtual gamepad axis.
+--- Parameter `value` (number): The new axis value.
+--- See: https://love2d.org/wiki/love.gamepadaxis
+---@field gamepadaxis? (fun(joystick: love.Joystick, axis: love.GamepadAxis, value: number)) Called when a Joystick's virtual gamepad axis is moved.
+--- Called when a Joystick's virtual gamepad button is pressed.
+--- Parameter `joystick` (love.Joystick): The joystick object.
+--- Parameter `button` (love.GamepadButton): The virtual gamepad button.
+--- See: https://love2d.org/wiki/love.gamepadpressed
+---@field gamepadpressed? (fun(joystick: love.Joystick, button: love.GamepadButton)) Called when a Joystick's virtual gamepad button is pressed.
+--- Called when a Joystick's virtual gamepad button is released.
+--- Parameter `joystick` (love.Joystick): The joystick object.
+--- Parameter `button` (love.GamepadButton): The virtual gamepad button.
+--- See: https://love2d.org/wiki/love.gamepadreleased
+---@field gamepadreleased? (fun(joystick: love.Joystick, button: love.GamepadButton)) Called when a Joystick's virtual gamepad button is released.
+--- Called when a Joystick is connected.
+--- Parameter `joystick` (love.Joystick): The newly connected Joystick object.
+--- See: https://love2d.org/wiki/love.joystickadded
+---@field joystickadded? (fun(joystick: love.Joystick)) Called when a Joystick is connected.
+--- Called when a joystick axis moves.
+--- Parameter `joystick` (love.Joystick): The joystick object.
+--- Parameter `axis` (number): The axis number.
+--- Parameter `value` (number): The new axis value.
+--- See: https://love2d.org/wiki/love.joystickaxis
+---@field joystickaxis? (fun(joystick: love.Joystick, axis: number, value: number)) Called when a joystick axis moves.
+--- Called when a joystick hat direction changes.
+--- Parameter `joystick` (love.Joystick): The joystick object.
+--- Parameter `hat` (number): The hat number.
+--- Parameter `direction` (love.JoystickHat): The new hat direction.
+--- See: https://love2d.org/wiki/love.joystickhat
+---@field joystickhat? (fun(joystick: love.Joystick, hat: number, direction: love.JoystickHat)) Called when a joystick hat direction changes.
+--- Called when a joystick button is pressed.
+--- Parameter `joystick` (love.Joystick): The joystick object.
+--- Parameter `button` (number): The button number.
+--- See: https://love2d.org/wiki/love.joystickpressed
+---@field joystickpressed? (fun(joystick: love.Joystick, button: number)) Called when a joystick button is pressed.
+--- Called when a joystick button is released.
+--- Parameter `joystick` (love.Joystick): The joystick object.
+--- Parameter `button` (number): The button number.
+--- See: https://love2d.org/wiki/love.joystickreleased
+---@field joystickreleased? (fun(joystick: love.Joystick, button: number)) Called when a joystick button is released.
+--- Called when a Joystick is disconnected.
+--- Parameter `joystick` (love.Joystick): The now-disconnected Joystick object.
+--- See: https://love2d.org/wiki/love.joystickremoved
+---@field joystickremoved? (fun(joystick: love.Joystick)) Called when a Joystick is disconnected.
+--- Callback function triggered when a key is pressed.
+--- Parameter `key` (love.KeyConstant): Character of the pressed key.
+--- Parameter `scancode` (love.Scancode): The scancode representing the pressed key.
+--- Parameter `isrepeat` (boolean): Whether this keypress event is a repeat.
+--- See: https://love2d.org/wiki/love.keypressed
+---@field keypressed? (fun(key: love.KeyConstant, scancode: love.Scancode, isrepeat: boolean))|(fun(key: love.KeyConstant, isrepeat: boolean)) Callback function triggered when a key is pressed.
+--- Callback function triggered when a keyboard key is released.
+--- Parameter `key` (love.KeyConstant): Character of the released key.
+--- Parameter `scancode` (love.Scancode): The scancode representing the released key.
+--- See: https://love2d.org/wiki/love.keyreleased
+---@field keyreleased? (fun(key: love.KeyConstant, scancode: love.Scancode)) Callback function triggered when a keyboard key is released.
+--- This function is called exactly once at the beginning of the game.
+--- Parameter `arg` (table): Command-line arguments given to the game.
+--- Parameter `unfilteredArg` (table): Unfiltered command-line arguments given to the executable (see #Notes).
+--- Example: `function love.load() image = love.graphics.newImage("player.png") end`
+--- See: https://love2d.org/wiki/love.load
+---@field load? (fun(arg: table, unfilteredArg: table)) This function is called exactly once at the beginning of the game.
+--- Callback function triggered when the system is running out of memory on mobile devices.
+--- See: https://love2d.org/wiki/love.lowmemory
+---@field lowmemory? (fun()) Callback function triggered when the system is running out of memory on mobile devices.
+--- Callback function triggered when window receives or loses mouse focus.
+--- Parameter `focus` (boolean): Whether the window has mouse focus or not.
+--- See: https://love2d.org/wiki/love.mousefocus
+---@field mousefocus? (fun(focus: boolean)) Callback function triggered when window receives or loses mouse focus.
+--- Callback function triggered when the mouse is moved.
+--- Parameter `x` (number): The mouse position on the x-axis.
+--- Parameter `y` (number): The mouse position on the y-axis.
+--- Parameter `dx` (number): The amount moved along the x-axis since the last time love.mousemoved was called.
+--- Parameter `dy` (number): The amount moved along the y-axis since the last time love.mousemoved was called.
+--- Parameter `istouch` (boolean): True if the mouse button press originated from a touchscreen touch-press.
+--- See: https://love2d.org/wiki/love.mousemoved
+---@field mousemoved? (fun(x: number, y: number, dx: number, dy: number, istouch: boolean)) Callback function triggered when the mouse is moved.
+--- Callback function triggered when a mouse button is pressed.
+--- Parameter `x` (number): Mouse x position, in pixels.
+--- Parameter `y` (number): Mouse y position, in pixels.
+--- Parameter `button` (number): The button index that was pressed.
+--- Parameter `istouch` (boolean): True if the mouse button press originated from a touchscreen touch-press.
+--- Parameter `presses` (number): The number of presses in a short time frame and small area, used to simulate double, triple clicks
+--- See: https://love2d.org/wiki/love.mousepressed
+---@field mousepressed? (fun(x: number, y: number, button: number, istouch: boolean, presses: number)) Callback function triggered when a mouse button is pressed.
+--- Callback function triggered when a mouse button is released.
+--- Parameter `x` (number): Mouse x position, in pixels.
+--- Parameter `y` (number): Mouse y position, in pixels.
+--- Parameter `button` (number): The button index that was released.
+--- Parameter `istouch` (boolean): True if the mouse button release originated from a touchscreen touch-release.
+--- Parameter `presses` (number): The number of presses in a short time frame and small area, used to simulate double, triple clicks
+--- See: https://love2d.org/wiki/love.mousereleased
+---@field mousereleased? (fun(x: number, y: number, button: number, istouch: boolean, presses: number)) Callback function triggered when a mouse button is released.
+--- Callback function triggered when the game is closed.
+--- Returns `r` (boolean): Abort quitting.
+--- See: https://love2d.org/wiki/love.quit
+---@field quit? (fun(): boolean) Callback function triggered when the game is closed.
+--- Called when the window is resized, for example if the user resizes the window, or if love.window.setMode is called with an unsupported width or height in fullscreen and the window chooses the closest appropriate size.
+--- Parameter `w` (number): The new width.
+--- Parameter `h` (number): The new height.
+--- See: https://love2d.org/wiki/love.resize
+---@field resize? (fun(w: number, h: number)) Called when the window is resized, for example if the user resizes the window, or if love.window.setMode is called with an unsupported width or height in fullscreen and the window chooses the closest appropriate size.
+--- The main function, containing the main loop.
+--- Returns `mainLoop` (function): Function which handlers one frame, including events and rendering when called.
+--- See: https://love2d.org/wiki/love.run
+---@field run? (fun(): function) The main function, containing the main loop.
+--- Called when the candidate text for an IME (Input Method Editor) has changed.
+--- Parameter `text` (string): The UTF-8 encoded unicode candidate text.
+--- Parameter `start` (number): The start cursor of the selected candidate text.
+--- Parameter `length` (number): The length of the selected candidate text.
+--- See: https://love2d.org/wiki/love.textedited
+---@field textedited? (fun(text: string, start: number, length: number)) Called when the candidate text for an IME (Input Method Editor) has changed.
+--- Called when text has been entered by the user.
+--- Parameter `text` (string): The UTF-8 encoded unicode text.
+--- See: https://love2d.org/wiki/love.textinput
+---@field textinput? (fun(text: string)) Called when text has been entered by the user.
+--- Callback function triggered when a Thread encounters an error.
+--- Parameter `thread` (love.Thread): The thread which produced the error.
+--- Parameter `errorstr` (string): The error message.
+--- See: https://love2d.org/wiki/love.threaderror
+---@field threaderror? (fun(thread: love.Thread, errorstr: string)) Callback function triggered when a Thread encounters an error.
+--- Callback function triggered when a touch press moves inside the touch screen.
+--- Parameter `id` (userdata): The identifier for the touch press.
+--- Parameter `x` (number): The x-axis position of the touch inside the window, in pixels.
+--- Parameter `y` (number): The y-axis position of the touch inside the window, in pixels.
+--- Parameter `dx` (number): The x-axis movement of the touch inside the window, in pixels.
+--- Parameter `dy` (number): The y-axis movement of the touch inside the window, in pixels.
+--- Parameter `pressure` (number): The amount of pressure being applied.
+--- See: https://love2d.org/wiki/love.touchmoved
+---@field touchmoved? (fun(id: userdata, x: number, y: number, dx: number, dy: number, pressure: number)) Callback function triggered when a touch press moves inside the touch screen.
+--- Callback function triggered when the touch screen is touched.
+--- Parameter `id` (userdata): The identifier for the touch press.
+--- Parameter `x` (number): The x-axis position of the touch press inside the window, in pixels.
+--- Parameter `y` (number): The y-axis position of the touch press inside the window, in pixels.
+--- Parameter `dx` (number): The x-axis movement of the touch press inside the window, in pixels.
+--- Parameter `dy` (number): The y-axis movement of the touch press inside the window, in pixels.
+--- Parameter `pressure` (number): The amount of pressure being applied.
+--- See: https://love2d.org/wiki/love.touchpressed
+---@field touchpressed? (fun(id: userdata, x: number, y: number, dx: number, dy: number, pressure: number)) Callback function triggered when the touch screen is touched.
+--- Callback function triggered when the touch screen stops being touched.
+--- Parameter `id` (userdata): The identifier for the touch press.
+--- Parameter `x` (number): The x-axis position of the touch inside the window, in pixels.
+--- Parameter `y` (number): The y-axis position of the touch inside the window, in pixels.
+--- Parameter `dx` (number): The x-axis movement of the touch inside the window, in pixels.
+--- Parameter `dy` (number): The y-axis movement of the touch inside the window, in pixels.
+--- Parameter `pressure` (number): The amount of pressure being applied.
+--- See: https://love2d.org/wiki/love.touchreleased
+---@field touchreleased? (fun(id: userdata, x: number, y: number, dx: number, dy: number, pressure: number)) Callback function triggered when the touch screen stops being touched.
+--- Callback function used to update the state of the game every frame.
+--- Parameter `dt` (number): Time since the last update in seconds.
+--- Example: `function love.update(dt) x = x + speed * dt end`
+--- Tip: Multiply movement speeds by dt to keep motion independent of frame rate.
+--- See: https://love2d.org/wiki/love.update
+---@field update? (fun(dt: number)) Callback function used to update the state of the game every frame.
+--- Callback function triggered when window is minimized/hidden or unminimized by the user.
+--- Parameter `visible` (boolean): True if the window is visible, false if it isn't.
+--- See: https://love2d.org/wiki/love.visible
+---@field visible? (fun(visible: boolean)) Callback function triggered when window is minimized/hidden or unminimized by the user.
+--- Callback function triggered when the mouse wheel is moved.
+--- Parameter `x` (number): Amount of horizontal mouse wheel movement.
+--- Parameter `y` (number): Amount of vertical mouse wheel movement.
+--- See: https://love2d.org/wiki/love.wheelmoved
+---@field wheelmoved? (fun(x: number, y: number)) Callback function triggered when the mouse wheel is moved.
 love = love or {}
